@@ -277,3 +277,52 @@ footer {
     .auth-buttons { flex-direction: column; width: 100%; }
     .contact-wrapper { grid-template-columns: 1fr; }
     }
+/* --- Social Media Section Fix --- */
+.social-links {
+    display: flex;       /* Ek line mein lane ke liye */
+    gap: 20px;          /* Icons ke beech gap (Space) dene ke liye */
+    margin-top: 25px;   /* Upar se thoda jagah */
+    justify-content: flex-start; /* Icons ko left se shuru karne ke liye */
+}
+
+.social-links a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    background: #334155; /* Default background */
+    transition: all 0.3s ease;
+}
+
+/* --- Original Brand Colors on Hover --- */
+
+/* Facebook Blue */
+.social-links a .fa-facebook-f:parent, 
+.social-links a:has(.fa-facebook-f):hover {
+    background: #1877F2 !important;
+    transform: translateY(-5px);
+}
+
+/* Instagram Gradient */
+.social-links a:has(.fa-instagram):hover {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%) !important;
+    transform: translateY(-5px);
+}
+
+/* LinkedIn Blue */
+.social-links a:has(.fa-linkedin-in):hover {
+    background: #0077b5 !important;
+    transform: translateY(-5px);
+}
+
+/* Twitter/X Black */
+.social-links a:has(.fa-twitter):hover {
+    background: #000000 !important;
+    transform: translateY(-5px);
+}
+
+
