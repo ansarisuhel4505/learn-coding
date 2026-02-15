@@ -19,16 +19,17 @@ body {
 
 /* 3. Form Container (Sabse Zaruri Part) */
 .container {
-    background: white;
+    background: white; /* Agar dark theme hai to ise hata dein ya black karein */
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
     
-    /* 👇 Mobile ke liye Magic Lines 👇 */
-    width: 90%;          /* Mobile par screen ka 90% हिस्सा lega */
-    max-width: 400px;    /* Laptop par 400px se zyada nahi failega */
-    margin: 20px auto;   /* Upar-niche thoda gap rahega */
+    /* 👇 YE CHANGE KIYA HAI (Layout Fix) 👇 */
+    width: 90%;           /* Mobile par screen ka 90% hissa lega */
+    max-width: 800px;     /* Pehle 400 tha, ab 800 kar diya taaki fail sake */
+    
+    margin: 20px auto;    /* Beech mein lane ke liye */
 }
+
 
 /* 4. Headings */
 h2 {
@@ -72,3 +73,4 @@ p {
     text-align: center;
     margin-top: 15px;
 }
+
