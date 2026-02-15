@@ -1,76 +1,137 @@
-/* 1. Sabhi elements ka box-sizing set karein */
+/* RESET */
 * {
-    box-sizing: border-box; /* Isse padding width ko kharab nahi karegi */
-}
-
-/* 2. Body ko Center aur Mobile-friendly banayein */
-body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    
-    /* Center karne ke liye */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Puri screen height lega */
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* 3. Form Container (Sabse Zaruri Part) */
+body {
+    background-color: #0f172a; /* Dark Blue Background */
+    color: white;
+    line-height: 1.6;
+}
+
+/* LINKS */
+a { text-decoration: none; color: white; transition: 0.3s; }
+
+/* HEADER & NAVBAR */
+header {
+    background-color: #1e293b;
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3b82f6; /* Blue Logo */
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-btn {
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.signup-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* HERO SECTION */
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+}
+
 .container {
-    background: white; /* Agar dark theme hai to ise hata dein ya black karein */
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+h1 { font-size: 2.5rem; margin-bottom: 15px; }
+.highlight { color: #3b82f6; }
+p { color: #cbd5e1; margin-bottom: 30px; font-size: 1.1rem; }
+
+/* BUTTONS */
+.buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+.btn {
+    padding: 12px 30px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+}
+.primary-btn { background-color: #3b82f6; color: white; }
+.secondary-btn { border: 2px solid #334155; color: white; }
+.primary-btn:hover { background-color: #2563eb; }
+
+/* FEATURES GRID */
+.features { padding: 50px 20px; background-color: #1e293b; }
+.features h2 { text-align: center; margin-bottom: 40px; }
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Auto Mobile Responsive */
+    gap: 20px;
+}
+
+.card {
+    background: #0f172a;
     padding: 20px;
     border-radius: 10px;
-    
-    /* 👇 YE CHANGE KIYA HAI (Layout Fix) 👇 */
-    width: 90%;           /* Mobile par screen ka 90% hissa lega */
-    max-width: 800px;     /* Pehle 400 tha, ab 800 kar diya taaki fail sake */
-    
-    margin: 20px auto;    /* Beech mein lane ke liye */
+    text-align: center;
+    border: 1px solid #334155;
+}
+.card-icon { font-size: 40px; color: #3b82f6; margin-bottom: 15px; }
+
+/* FOOTER */
+footer {
+    background-color: #020617;
+    padding: 40px 0 10px;
+    margin-top: 50px;
 }
 
-
-/* 4. Headings */
-h2 {
-    text-align: center;
-    color: #333;
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
     margin-bottom: 20px;
 }
 
-/* 5. Inputs aur Buttons */
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px; /* Mobile par text chhota nahi dikhega */
-}
+.footer-section h3, h4 { color: #3b82f6; margin-bottom: 15px; }
+.footer-section a { display: block; color: #94a3b8; margin-bottom: 8px; }
+.socials a { display: inline-block; font-size: 20px; margin-right: 15px; }
 
-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Links */
-a {
-    text-decoration: none;
-    color: #007bff;
-}
-p {
+.footer-bottom {
     text-align: center;
-    margin-top: 15px;
+    border-top: 1px solid #1e293b;
+    padding-top: 20px;
+    color: #64748b;
+    font-size: 0.9rem;
 }
 
+/* MOBILE ADJUSTMENTS */
+@media (max-width: 600px) {
+    .nav-links { display: none; } /* Filhal mobile menu hidden rakha hai simple rakhne ke liye */
+    h1 { font-size: 2rem; }
+    .hero { padding: 50px 20px; }
+    .footer-content { flex-direction: column; text-align: center; }
+}
