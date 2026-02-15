@@ -1,94 +1,235 @@
-                            <<!DOCTYPE html>
+                            <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeMaster - Learn to Code</title>
+    <title>CodeMaster - Learn Coding & Development</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header>
-        <nav class="navbar">
-            <div class="logo">CodeMaster <i class="fas fa-code"></i></div>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/courses">Courses</a></li>
-                <li><a href="/login" class="nav-btn">Login</a></li>
-                <li><a href="/signup" class="nav-btn signup-btn">Sign Up</a></li>
-            </ul>
-        </nav>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-code"></i> CodeMaster
+        </div>
+        
+        <div class="menu-toggle" id="mobile-menu">
+            <i class="fas fa-bars"></i>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="/courses">Courses</a></li>
+            <li><a href="/compiler">Compiler</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="auth-buttons">
+                <a href="/login" class="btn-login">Log In</a>
+                <a href="/signup" class="btn-signup">Sign Up</a>
+            </li>
+        </ul>
+    </nav>
+
+    <header class="hero">
+        <div class="container hero-content">
+            <span class="badge">🚀 Start Your Career Today</span>
+            <h1>Master Coding with <br> <span class="highlight">Real World Logic</span></h1>
+            <p>Learn C++, Java, Python, and MERN Stack. Build professional projects, get certified, and land your dream job.</p>
+            
+            <div class="buttons">
+                <a href="/signup" class="btn primary-btn">Start Learning Free</a>
+                <a href="#courses" class="btn secondary-btn"><i class="fas fa-play"></i> Watch Demo</a>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>Master Coding with <br> <span class="highlight">Real Projects</span></h1>
-                <p>Learn C++, Java, Python, and Web Development with interactive lessons. 
-                   Build your future from your phone or laptop.</p>
-                <div class="buttons">
-                    <a href="/signup" class="btn primary-btn">Start Learning Free</a>
-                    <a href="/courses" class="btn secondary-btn">Explore Courses</a>
-                </div>
-            </div>
-        </section>
+    <section class="stats">
+        <div class="stat-item">
+            <h3>10k+</h3>
+            <p>Active Students</p>
+        </div>
+        <div class="stat-item">
+            <h3>50+</h3>
+            <p>Premium Courses</p>
+        </div>
+        <div class="stat-item">
+            <h3>100+</h3>
+            <p>Projects</p>
+        </div>
+        <div class="stat-item">
+            <h3>4.9 <i class="fas fa-star text-yellow"></i></h3>
+            <p>User Rating</p>
+        </div>
+    </section>
 
-        <section class="features">
-            <div class="container">
-                <h2>What You Will Learn</h2>
-                <div class="cards-grid">
-                    <div class="card">
-                        <i class="fab fa-python card-icon"></i>
-                        <h3>Python</h3>
-                        <p>Best for AI & Data Science.</p>
-                    </div>
-                    <div class="card">
-                        <i class="fab fa-java card-icon"></i>
-                        <h3>Java</h3>
-                        <p>Build robust Android Apps.</p>
-                    </div>
-                    <div class="card">
-                        <i class="fab fa-js card-icon"></i>
-                        <h3>Web Dev</h3>
-                        <p>HTML, CSS, JS & React.</p>
-                    </div>
-                    <div class="card">
-                        <i class="fas fa-c card-icon"></i>
-                        <h3>C++</h3>
-                        <p>Master Data Structures.</p>
-                    </div>
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-title">
+                <h2>About CodeMaster</h2>
+                <p>We are bridging the gap between theory and practical coding.</p>
+            </div>
+            <div class="about-grid">
+                <div class="about-text">
+                    <h3>Why We Started?</h3>
+                    <p>CodeMaster was founded by <strong>Suhel Ansari</strong> with a mission to make high-quality coding education accessible to everyone. We focus on "Logic Building" rather than just syntax.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Live Mentorship</li>
+                        <li><i class="fas fa-check-circle"></i> 24/7 Doubt Support</li>
+                        <li><i class="fas fa-check-circle"></i> Job Assistance</li>
+                    </ul>
                 </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container footer-content">
-            <div class="footer-section">
-                <h3>CodeMaster</h3>
-                <p>Learn coding the right way.</p>
-            </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <a href="/">Home</a>
-                <a href="/courses">Courses</a>
-                <a href="/login">Login</a>
-            </div>
-            <div class="footer-section">
-                <h4>Follow Us</h4>
-                <div class="socials">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                <div class="about-image">
+                    <i class="fas fa-laptop-code big-icon"></i>
                 </div>
             </div>
         </div>
+    </section>
+
+    <section class="features" id="courses">
+        <div class="container">
+            <div class="section-title">
+                <h2>Popular Technologies</h2>
+                <p>Choose your path and become an expert.</p>
+            </div>
+            <div class="cards-grid">
+                <div class="card">
+                    <i class="fab fa-python card-icon" style="color: #FFD43B;"></i>
+                    <h3>Python AI</h3>
+                    <p>Data Science & Machine Learning.</p>
+                </div>
+                <div class="card">
+                    <i class="fab fa-java card-icon" style="color: #e92e2e;"></i>
+                    <h3>Java DSA</h3>
+                    <p>Core Java & System Design.</p>
+                </div>
+                <div class="card">
+                    <i class="fab fa-react card-icon" style="color: #61DAFB;"></i>
+                    <h3>Web Dev</h3>
+                    <p>MERN Stack (MongoDB, Express, React, Node).</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-terminal card-icon" style="color: #2ecc71;"></i>
+                    <h3>C++ Logic</h3>
+                    <p>Competitive Programming Base.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Get In Touch</h2>
+                <p>Have questions? We are here to help.</p>
+            </div>
+
+            <div class="contact-wrapper">
+                
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <div class="info-box">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>
+                            <strong>Our Location:</strong><br>
+                            Varanasi, Uttar Pradesh, India - 221001
+                        </span>
+                    </div>
+                    <div class="info-box">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>
+                            <strong>Call Us:</strong><br>
+                            +91 98765 43210
+                        </span>
+                    </div>
+                    <div class="info-box">
+                        <i class="fas fa-envelope"></i>
+                        <span>
+                            <strong>Email Us:</strong><br>
+                            support@codemaster.com
+                        </span>
+                    </div>
+
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <h3>Send Feedback</h3>
+                    <form action="mailto:ansarisuhel4505@gmail.com" method="post" enctype="text/plain">
+                        <div class="input-group">
+                            <input type="text" placeholder="Your Name" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="input-group">
+                            <textarea rows="5" placeholder="Your Message / Feedback" required></textarea>
+                        </div>
+                        <button type="submit" class="btn primary-btn" style="width: 100%;">Send Message</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115408.24588725838!2d82.90870656041306!3d25.32073934394062!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x398e2db76acaf9c7%3A0x96e7500318741196!2sVaranasi%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+                    width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>CodeMaster <i class="fas fa-code"></i></h3>
+                <p>Empowering students to become world-class developers.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/courses">Courses</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="/compiler">Compiler</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Report a Bug</a></li> <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Stay Updated</h4>
+                <p>Subscribe for latest tutorials.</p>
+                <form action="#" class="newsletter">
+                    <input type="email" placeholder="Email Address">
+                    <button><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+
         <div class="footer-bottom">
-            <p>&copy; 2026 CodeMaster. All Rights Reserved.</p>
+            <p>&copy; 2026 CodeMaster. Designed by <strong>Suhel Ansari</strong>.</p>
         </div>
     </footer>
 
+    <script>
+        document.getElementById('mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
