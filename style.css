@@ -1,0 +1,111 @@
+/* 1. Google Fonts Import (Inter Font for clean look) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+/* 2. Global Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #0f172a; /* Darker than gray-900 for depth */
+    color: #ffffff;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* 3. Custom Scrollbar (Coding Vibe) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1f2937; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6, #2563eb); /* Blue Gradient */
+    border-radius: 5px;
+    border: 2px solid #1f2937;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #60a5fa;
+}
+
+/* 4. Text Selection Color */
+::selection {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* 5. Glassmorphism Header (Blur Effect) */
+header {
+    background-color: rgba(31, 41, 55, 0.85) !important; /* Semi-transparent */
+    backdrop-filter: blur(12px); /* Blur background behind header */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 6. Neon Text Glow Effect */
+.text-blue-500 {
+    text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+/* 7. Hero Section Animation (Fade In Up) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+main section:first-child h1, 
+main section:first-child p, 
+main section:first-child div {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+main section:first-child p { animation-delay: 0.2s; opacity: 0; }
+main section:first-child div { animation-delay: 0.4s; opacity: 0; }
+
+/* 8. Card Hover Effects (3D Lift & Glow) */
+.group {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.group:hover {
+    transform: translateY(-10px); /* Lift up */
+    box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.3); /* Blue Shadow */
+    border-color: #3b82f6;
+}
+
+/* 9. Button Enhancements */
+button, a.bg-blue-600 {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button ripple effect on hover */
+a.bg-blue-600:hover {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+    transform: scale(1.05);
+}
+
+/* 10. Footer Links Hover */
+footer a:hover {
+    color: #60a5fa;
+    text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+    padding-left: 5px; /* Slight movement to right */
+}
+
+/* 11. Mobile Menu Animation */
+#mobile-menu {
+    transition: max-height 0.3s ease-in-out;
+}
