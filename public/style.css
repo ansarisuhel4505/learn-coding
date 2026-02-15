@@ -10,9 +10,15 @@
 }
 
 body {
-    background-color: #0f172a; /* Darker than gray-900 for depth */
-    color: #ffffff;
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* Thoda grey background */
+    display: flex;
+    justify-content: center; /* Horizontally Center */
+    align-items: center;     /* Vertically Center */
+    height: 100vh;           /* Puri screen ki height */
 }
 
 /* 3. Custom Scrollbar (Coding Vibe) */
@@ -109,3 +115,16 @@ footer a:hover {
 #mobile-menu {
     transition: max-height 0.3s ease-in-out;
 }
+/* 2. Form Container ko Mobile ke hisab se set karein */
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    
+    /* 👇 Sabse Zaruri Part 👇 */
+    width: 90%;          /* Mobile par 90% screen lega */
+    max-width: 400px;    /* Laptop par 400px se zyada chouda nahi hoga */
+}
+
+
