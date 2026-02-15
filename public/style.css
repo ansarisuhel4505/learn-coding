@@ -141,3 +141,18 @@ footer { background: #020617; padding-top: 60px; border-top: 1px solid #1e293b; 
     .nav-links.active { display: flex; }
     .stats { flex-direction: column; gap: 30px; }
 }
+/* === TYPEWRITER CURSOR === */
+.cursor {
+    display: inline-block;
+    background-color: #3b82f6; /* Blue Color */
+    width: 3px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+
