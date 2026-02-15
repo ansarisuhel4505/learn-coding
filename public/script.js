@@ -1,54 +1,90 @@
-// 1. Mobile Menu Toggle
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // ==========================================
+    // 1. HAMBURGER MENU (Three Lines) LOGIC
+    // ==========================================
     const menuToggle = document.getElementById('mobile-menu');
     const navLinks = document.querySelector('.nav-links');
 
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
-            // Ye line 'active' class ko lagati aur hatati hai
+            // Navbar ko dikhane/chhupane ke liye 'active' class toggle karein
             navLinks.classList.toggle('active');
+            
+            // Icon badalne ke liye (Optional: Bars se X ban jayega)
+            const icon = menuToggle.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.classList.replace('fa-bars', 'fa-times');
+            } else {
+                icon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    }
+
+    // ==========================================
+    // 2. TYPEWRITER EFFECT (Automatic Typing)
+    // ==========================================
+    const textElement = document.getElementById('typewriter');
+    
+    if (textElement) {
+        const words = [
+            "Python AI", 
+            "Java Core", 
+            "C++ Logic", 
+            "JavaScript", 
+            "HTML & CSS", 
+            "MERN Stack"
+        ];
+        
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function typeEffect() {
+            const currentWord = words[wordIndex];
+            
+            if (isDeleting) {
+                // Akshar mita raha hai
+                charIndex--;
+            } else {
+                // Akshar likh raha hai
+                charIndex++;
+            }
+
+            textElement.textContent = currentWord.substring(0, charIndex);
+
+            // Typing speed control
+            let typeSpeed = isDeleting ? 50 : 150;
+
+            if (!isDeleting && charIndex === currentWord.length) {
+                // Word pura ho gaya, 2 second ruko
+                isDeleting = true;
+                typeSpeed = 2000;
+            } else if (isDeleting && charIndex === 0) {
+                // Word mit gaya, agla word lao
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeEffect, typeSpeed);
+        }
+
+        // Typewriter shuru karein
+        typeEffect();
+    }
+
+    // ==========================================
+    // 3. DASHBOARD & AUTH HELPER (Optional)
+    // ==========================================
+    // Agar logout button par koi confirm box lagana chahte hain
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            const confirmLogout = confirm("Kya aap sach mein logout karna chahte hain?");
+            if (!confirmLogout) {
+                e.preventDefault(); // Logout cancel kar dega
+            }
         });
     }
 });
-
-
-// 2. TYPEWRITER EFFECT (Ye hai wo automatic likhne wala code)
-const textElement = document.getElementById('typewriter');
-const words = ["Python AI", "Java Core", "C++ Logic", "MERN Stack", "App Dev"];
-let wordIndex = 0;
-let charIndex = 0;
-let isDeleting = false;
-
-function typeEffect() {
-    const currentWord = words[wordIndex];
-    
-    if (isDeleting) {
-        // Mita raha hai (Deleting)
-        charIndex--;
-        textElement.textContent = currentWord.substring(0, charIndex);
-    } else {
-        // Likh raha hai (Typing)
-        charIndex++;
-        textElement.textContent = currentWord.substring(0, charIndex);
-    }
-
-    // Speed Control
-    let typeSpeed = isDeleting ? 50 : 150; // Mitana tez, likhna aaram se
-
-    if (!isDeleting && charIndex === currentWord.length) {
-        // Pura word likh liya, ab thoda ruk kar mitana shuru karo
-        isDeleting = true;
-        typeSpeed = 2000; // 2 second ruko
-    } else if (isDeleting && charIndex === 0) {
-        // Pura mita diya, ab agla word shuru karo
-        isDeleting = false;
-        wordIndex = (wordIndex + 1) % words.length;
-        typeSpeed = 500; // Thoda sa ruk kar start karo
-    }
-
-    setTimeout(typeEffect, typeSpeed);
-}
-
-// Effect Start karein (Jab page load ho jaye)
-document.addEventListener('DOMContentLoaded', typeEffect);
-
