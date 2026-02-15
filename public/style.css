@@ -40,7 +40,7 @@ ul { list-style: none; }
 }
 .btn-signup:hover { background: #2563eb; transform: translateY(-2px); }
 
-.menu-toggle { display: none; font-size: 24px; cursor: pointer; color: white; }
+.menu-toggle { display: flex; font-size: 24px; cursor: pointer; color: white; }
 
 /* === HERO SECTION === */
 .hero {
@@ -153,3 +153,4 @@ footer { background: #020617; padding-top: 60px; border-top: 1px solid #1e293b; 
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
+
