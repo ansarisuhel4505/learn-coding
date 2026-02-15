@@ -9,6 +9,14 @@ const PORT = 3000;
 // 1. Middleware (Form data padhne ke liye)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
 
 // 2. MONGODB CONNECTION
 // Note: 'test' ki jagah apna Database naam likhein
@@ -88,3 +96,4 @@ app.get('/compiler', (req, res) => res.send('<h1>Compiler Loading...</h1>'));
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
