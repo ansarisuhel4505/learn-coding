@@ -27,10 +27,17 @@
                 </nav>
 
                 <div class="hidden md:flex items-center space-x-4">
-                    <form action="/search" method="GET" class="relative">
-                        <input type="text" name="q" placeholder="Search topics..." 
-                               class="bg-gray-700 text-sm rounded-full px-4 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 text-white placeholder-gray-400 transition-all focus:w-64">
-                    </form>
+                    <form action="/signup" method="POST">
+                        <input type="text" name="username" placeholder="Username" required>
+                        <input type="email" name="email" placeholder="Email" required>
+                        <input type="password" name="password" placeholder="Password" required>
+                        <button type="submit">Sign Up</button>
+                     </form>
+                     <form action="/login" method="POST">
+                        <input type="email" name="email" placeholder="Email" required>
+                        <input type="password" name="password" placeholder="Password" required>
+                        <button type="submit">Login</button>
+                     </form>
 
                     <a href="/login" class="text-sm px-3 py-2 hover:text-blue-400 transition">Log In</a>
                     <a href="/signup" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-lg hover:shadow-blue-500/50">
@@ -218,4 +225,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
