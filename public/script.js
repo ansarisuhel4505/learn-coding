@@ -1,12 +1,16 @@
 // 1. Mobile Menu Toggle
-const menuToggle = document.getElementById('mobile-menu');
-const navLinks = document.querySelector('.nav-links');
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('mobile-menu');
+    const navLinks = document.querySelector('.nav-links');
 
-if (menuToggle) {
-    menuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-    });
-}
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            // Ye line 'active' class ko lagati aur hatati hai
+            navLinks.classList.toggle('active');
+        });
+    }
+});
+
 
 // 2. TYPEWRITER EFFECT (Ye hai wo automatic likhne wala code)
 const textElement = document.getElementById('typewriter');
@@ -47,3 +51,4 @@ function typeEffect() {
 
 // Effect Start karein (Jab page load ho jaye)
 document.addEventListener('DOMContentLoaded', typeEffect);
+
