@@ -40,7 +40,7 @@ ul { list-style: none; }
 }
 .btn-signup:hover { background: #2563eb; transform: translateY(-2px); }
 
-.menu-toggle { display: flex; font-size: 24px; cursor: pointer; color: white; }
+.menu-toggle { display: none; font-size: 24px; cursor: pointer; color: white; }
 
 /* === HERO SECTION === */
 .hero {
@@ -153,4 +153,32 @@ footer { background: #020617; padding-top: 60px; border-top: 1px solid #1e293b; 
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
+/* Mobile View ke liye */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Shuruat mein chhupa rahega */
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: #1e293b;
+        flex-direction: column;
+        padding: 20px 0;
+        z-index: 1000;
+    }
+
+    /* Jab JavaScript 'active' class add karega, tab ye dikhega */
+    .nav-links.active {
+        display: flex !important;
+    }
+
+    .menu-toggle {
+        display: block; /* Mobile par three lines dikhengi */
+        font-size: 24px;
+        cursor: pointer;
+        color: white;
+    }
+}
+
+
 
