@@ -1,76 +1,90 @@
-// 1. Zaruri Modules Import karein
 const express = require('express');
 const path = require('path');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
 const app = express();
 const PORT = 3000;
 
-// 2. 'public' folder ko static banayein
-// Isse CSS, Images aur JS files load ho payengi
+// 1. Middleware (Form data padhne ke liye)
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ================= ROUTES (RASTE) =================
+// 2. MONGODB CONNECTION
+// Note: 'test' ki jagah apna Database naam likhein
+// Asli project mein ye URL environment variable (.env) mein hona chahiye
+const DB_URI = "mongodb+srv://suhel:password@cluster0.mongodb.net/codingWebsite?retryWrites=true&w=majority";
 
-// A. HOME PAGE
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+mongoose.connect(DB_URI)
+    .then(() => console.log("✅ MongoDB Connected Successfully!"))
+    .catch((err) => console.log("❌ MongoDB Connection Error:", err));
+
+// 3. USER SCHEMA (Data Structure)
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    date: { type: Date, default: Date.now }
 });
 
-// B. HEADER ROUTES (Navigation)
-app.get('/courses', (req, res) => {
-    // Agar courses.html bani hai to wo bhejein, nahi to message
-    // res.sendFile(path.join(__dirname, 'public', 'courses.html')); 
-    res.send('<h1>All Courses Page</h1><p>Java, C++, Python content coming soon...</p>');
-});
+// Model banayein (Collection ka naam 'User' hoga)
+const User = mongoose.model('User', userSchema);
 
-app.get('/compiler', (req, res) => {
-    res.send('<h1>Online Compiler Logic Loading...</h1>');
-});
+// ================= ROUTES =================
 
-app.get('/roadmaps', (req, res) => {
-    res.send('<h1>Learning Roadmaps</h1><p>Step-by-step guide for developers.</p>');
-});
+// A. HTML PAGES SERVE KARNA
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/signup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'signup.html')));
 
-// C. AUTHENTICATION (Login/Signup)
-app.get('/login', (req, res) => {
-    // res.sendFile(path.join(__dirname, 'public', 'login.html'));
-    res.send('<h1>Login Page</h1><form><input type="text" placeholder="Username"><button>Login</button></form>');
-});
+// B. SIGNUP LOGIC (Data Save Karna)
+app.post('/signup', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        
+        // Check karein user pehle se hai ya nahi
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.send('<h1>Email already registered! <a href="/login">Login here</a></h1>');
+        }
 
-app.get('/signup', (req, res) => {
-    res.send('<h1>Sign Up Page</h1><p>Create your account here.</p>');
-});
-
-// D. FOOTER & CONTACT ROUTES
-app.get('/privacy', (req, res) => {
-    res.send('<h1>Privacy Policy</h1><p>Aapka data surakshit hai.</p>');
-});
-
-// WhatsApp Redirect (Smart Feature)
-// Jab user footer me WhatsApp par click karega, server use redirect karega
-app.get('/chat', (req, res) => {
-    res.redirect('https://wa.me/919335067990');
-});
-
-// E. SEARCH LOGIC (Backend)
-app.get('/search', (req, res) => {
-    const query = req.query.q; // URL se search word nikala
-    if (query) {
-        // Asli website me yahan Database search hota hai
-        res.send(`<h1>Search Results for: "${query}"</h1><p>Results found: 0 (Database not connected)</p>`);
-    } else {
-        res.send('Please enter a search term.');
+        // Naya user banayein
+        const newUser = new User({ username, email, password });
+        await newUser.save();
+        
+        console.log("New User Registered:", username);
+        res.redirect('/login'); // Save hone ke baad Login page par bhejein
+    } catch (error) {
+        console.error(error);
+        res.send("Error registering user.");
     }
 });
 
-// ================= ERROR HANDLING =================
-
-// Agar koi galat link dale (404 Page)
-app.use((req, res) => {
-    res.status(404).send('<h1>404 - Page Not Found</h1><p>Galat raaste par aa gaye dost!</p><a href="/">Go Home</a>');
+// C. LOGIN LOGIC (Data Check Karna)
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Database mein user dhundhein
+        const user = await User.findOne({ email });
+        
+        if (user && user.password === password) {
+            // Login Success
+            res.send(`<h1>Welcome back, ${user.username}!</h1><a href="/">Go to Dashboard</a>`);
+        } else {
+            // Login Fail
+            res.send('<h1>Invalid Email or Password</h1><a href="/login">Try Again</a>');
+        }
+    } catch (error) {
+        res.send("Error logging in.");
+    }
 });
 
-// ================= SERVER START =================
+// D. OTHER ROUTES
+app.get('/courses', (req, res) => res.send('<h1>Courses Page</h1>'));
+app.get('/compiler', (req, res) => res.send('<h1>Compiler Loading...</h1>'));
+
+// Server Start
 app.listen(PORT, () => {
-    console.log(`Server chalu ho gaya hai!`);
-    console.log(`Website kholne ke liye yahan click karein: http://localhost:${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
