@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // ==========================================
-    // 1. HAMBURGER MENU (Three Lines) LOGIC
+    // 1. HAMBURGER MENU (Burger Menu) LOGIC
     // ==========================================
     const menuToggle = document.getElementById('mobile-menu');
     const navLinks = document.querySelector('.nav-links');
 
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
-            // Navbar ko dikhane/chhupane ke liye 'active' class toggle karein
+            // Navbar ko open/close karne ke liye 'active' class toggle
             navLinks.classList.toggle('active');
             
-            // Icon badalne ke liye (Optional: Bars se X ban jayega)
+            // Icon animation (Bars se X banana)
             const icon = menuToggle.querySelector('i');
             if (navLinks.classList.contains('active')) {
                 icon.classList.replace('fa-bars', 'fa-times');
@@ -21,8 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Nav links par click karte hi menu ko auto-close karna (Mobile Fix)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    });
+
     // ==========================================
-    // 2. TYPEWRITER EFFECT (Automatic Typing)
+    // 2. TYPEWRITER EFFECT (Auto Typing)
     // ==========================================
     const textElement = document.getElementById('typewriter');
     
@@ -44,47 +55,60 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentWord = words[wordIndex];
             
             if (isDeleting) {
-                // Akshar mita raha hai
-                charIndex--;
+                charIndex--; // Akshar mita raha hai
             } else {
-                // Akshar likh raha hai
-                charIndex++;
+                charIndex++; // Akshar likh raha hai
             }
 
             textElement.textContent = currentWord.substring(0, charIndex);
 
             // Typing speed control
-            let typeSpeed = isDeleting ? 50 : 150;
+            let typeSpeed = isDeleting ? 70 : 150;
 
             if (!isDeleting && charIndex === currentWord.length) {
-                // Word pura ho gaya, 2 second ruko
                 isDeleting = true;
-                typeSpeed = 2000;
+                typeSpeed = 2000; // Word pura hone par rukna
             } else if (isDeleting && charIndex === 0) {
-                // Word mit gaya, agla word lao
                 isDeleting = false;
                 wordIndex = (wordIndex + 1) % words.length;
-                typeSpeed = 500;
+                typeSpeed = 500; // Mitaane ke baad naya word shuru karna
             }
 
             setTimeout(typeEffect, typeSpeed);
         }
 
-        // Typewriter shuru karein
         typeEffect();
     }
 
     // ==========================================
-    // 3. DASHBOARD & AUTH HELPER (Optional)
+    // 3. LOGOUT & AUTH LOGIC
     // ==========================================
-    // Agar logout button par koi confirm box lagana chahte hain
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             const confirmLogout = confirm("Kya aap sach mein logout karna chahte hain?");
             if (!confirmLogout) {
-                e.preventDefault(); // Logout cancel kar dega
+                e.preventDefault(); 
             }
         });
     }
+
+    // ==========================================
+    // 4. SMOOTH SCROLLING (Optional Enhancement)
+    // ==========================================
+    // Agar aap same page par #ID use kar rahe hain
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href');
+            if(targetId !== "#") {
+                e.preventDefault();
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
 });
