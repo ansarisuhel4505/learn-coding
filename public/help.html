@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support & Legal - CodeMaster</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .legal-container { padding: 100px 10%; background: #0f172a; min-height: 100vh; }
+        .legal-card { background: #1e293b; padding: 40px; border-radius: 15px; border: 1px solid #334155; margin-bottom: 30px; }
+        .legal-card h2 { color: #3b82f6; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .legal-card h3 { color: #f8fafc; margin-top: 20px; }
+        .legal-card p, .legal-card li { color: #94a3b8; line-height: 1.8; margin-bottom: 10px; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #3b82f6; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-code"></i> CodeMaster</div>
+        <a href="/" class="btn-signup">Back to Home</a>
+    </nav>
+
+    <div class="legal-container">
+        <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
+
+        <div class="legal-card" id="help">
+            <h2><i class="fas fa-question-circle"></i> Help Center & FAQ</h2>
+            <h3>How do I start learning?</h3>
+            <p>Simply create an account, browse our courses section, and click on "Start Learning". Our roadmap is designed for beginners to pros.</p>
+            
+            <h3>Is the Online Compiler free?</h3>
+            <p>Yes, our Code Runner is free for all students to practice C++, Java, and Python directly in the browser.</p>
+        </div>
+
+        <div class="legal-card" id="privacy">
+            <h2><i class="fas fa-shield-alt"></i> Privacy Policy</h2>
+            <p><strong>Last Updated: Feb 2026</strong></p>
+            <p>At CodeMaster, we prioritize your data security. We collect minimal information (Name & Email) only to personalize your learning experience.</p>
+            <ul>
+                <li>We do not share your personal data with third-party advertisers.</li>
+                <li>All payments (if any) are processed through encrypted secure gateways.</li>
+                <li>You can request data deletion at any time by contacting support.</li>
+            </ul>
+        </div>
+
+        <div class="legal-card" id="terms">
+            <h2><i class="fas fa-file-contract"></i> Terms of Service</h2>
+            <p>By using CodeMaster, you agree to follow our community guidelines:</p>
+            <ul>
+                <li>The content provided is for educational purposes only.</li>
+                <li>Unauthorized scraping or copying of our course material is strictly prohibited.</li>
+                <li>Users are responsible for maintaining the security of their accounts.</li>
+            </ul>
+        </div>
+
+        <div class="legal-card" id="report">
+            <h2><i class="fas fa-bug"></i> Report a Bug</h2>
+            <form action="/report-bug" method="POST">
+                <input type="text" name="bugTitle" placeholder="Issue Title (e.g. Compiler not loading)" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px;">
+                <textarea name="bugDesc" placeholder="Describe the problem in detail..." rows="4" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px;"></textarea>
+                <button type="submit" class="btn primary-btn" style="width: 100%;">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
