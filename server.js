@@ -110,3 +110,16 @@ app.get('/logout', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
+// Footer ki sabhi links ko help.html par redirect karein
+app.get(['/help', '/privacy', '/terms', '/report-bug'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'help.html'));
+});
+
+// Bug Report Submission
+app.post('/report-bug', (req, res) => {
+    const { bugTitle, bugDesc } = req.body;
+    console.log(`Bughunter Suhel: ${bugTitle}`);
+    res.send("<script>alert('Bug Reported Successfully!'); window.location.href='/help';</script>");
+});
+
+
