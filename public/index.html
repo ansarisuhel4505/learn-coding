@@ -218,10 +218,11 @@
             <div class="footer-col">
                 <h4>Stay Updated</h4>
                 <p>Subscribe for latest tutorials.</p>
-                <form action="#" class="newsletter">
-                    <input type="email" placeholder="Email Address">
-                    <button><i class="fas fa-paper-plane"></i></button>
+                <form action="/subscribe" method="POST" class="newsletter">
+                   <input type="email" name="email" placeholder="Enter your email" required>
+                   <button type="submit"><i class="fas fa-paper-plane"></i></button>
                 </form>
+
             </div>
         </div>
 
@@ -237,6 +238,7 @@
   
 </body>
 </html>
+
 
 
 
