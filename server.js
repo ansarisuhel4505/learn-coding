@@ -121,5 +121,68 @@ app.post('/report-bug', (req, res) => {
     console.log(`Bughunter Suhel: ${bugTitle}`);
     res.send("<script>alert('Bug Reported Successfully!'); window.location.href='/help';</script>");
 });
+const nodemailer = require('nodemailer');
+
+// --- Email Transporter Setup ---
+// Note: Aap Gmail ya kisi bhi SMTP service ka use kar sakte hain
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'ansarisuhel4505@gmail.com', // Aapka email
+        pass: 'your-app-password' // Gmail App Password (Normal password nahi)
+    }
+});
+
+// --- Newsletter Subscription Route ---
+app.post('/subscribe', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).send("Email is required");
+    }
+
+    // Professional Welcome Email ka content
+    const mailOptions = {
+        from: '"CodeMaster Support" <ansarisuhel4505@gmail.com>',
+        to: email,
+        subject: 'Welcome to CodeMaster - Let\'s Start Coding! 🚀',
+        html: `
+            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
+                    <h2 style="color: #3b82f6;">Welcome to CodeMaster!</h2>
+                    <p>Hi there,</p>
+                    <p>Thank you for subscribing to our newsletter. You'll now receive the latest tutorials on <b>Python AI, Java, and MERN Stack</b> directly in your inbox.</p>
+                    <p>Ready to write some code? Try our online compiler now!</p>
+                    <a href="https://learn-coding-2.onrender.com/compiler" 
+                       style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">
+                       Open Online Compiler
+                    </a>
+                    <hr style="margin-top: 20px; border: 0; border-top: 1px solid #eee;">
+                    <p style="font-size: 12px; color: #888;">Developed by Suhel Ansari | Kushinagar, UP</p>
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        // Email bhejna
+        await transporter.sendMail(mailOptions);
+        console.log(`Welcome email sent to: ${email}`);
+        
+        // Frontend par success alert dikhana
+        res.send(`
+            <script>
+                alert('Success! Check your inbox for a welcome gift. 🎁');
+                window.location.href = '/';
+            </script>
+        `);
+    } catch (error) {
+        console.error("Email Error:", error);
+        // Agar email fail bhi ho jaye, tab bhi subscriber ko success dikhayein (UX ke liye)
+        res.send("<script>alert('Thanks for subscribing!'); window.location.href='/';</script>");
+    }
+});
+
+
 
 
