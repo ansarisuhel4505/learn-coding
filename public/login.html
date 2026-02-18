@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CodeMaster</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { 
@@ -19,25 +20,35 @@
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 100%;
+            width: 90%;
             max-width: 400px;
             text-align: center;
             border: 1px solid #334155;
         }
         h2 { margin-bottom: 20px; color: #3b82f6; }
+        
+        /* Form Inputs */
+        .input-group { position: relative; margin: 15px 0; }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
         input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 12px 12px 12px 45px; /* Icon ke liye jagah */
             border-radius: 5px;
             border: 1px solid #334155;
             background: #0f172a;
             color: white;
             outline: none;
+            font-size: 15px;
         }
         input:focus { border-color: #3b82f6; }
-        
-        /* Main Login Button */
+
+        /* Login Button */
         .login-btn {
             width: 100%;
             padding: 12px;
@@ -49,10 +60,11 @@
             cursor: pointer;
             margin-top: 10px;
             font-weight: bold;
+            transition: 0.3s;
         }
         .login-btn:hover { background: #2563eb; }
 
-        /* Google Login Button Style */
+        /* Google Login Button */
         .google-btn {
             display: flex;
             align-items: center;
@@ -89,13 +101,21 @@
         <div class="divider">OR LOGIN WITH EMAIL</div>
 
         <form action="/login" method="POST">
-            <input type="email" name="email" placeholder="Enter Email" required>
-            <input type="password" name="password" placeholder="Enter Password" required>
+            <div class="input-group">
+                <i class='bx bxs-envelope'></i>
+                <input type="email" name="email" placeholder="Enter Email" required>
+            </div>
+            
+            <div class="input-group">
+                <i class='bx bxs-lock-alt'></i>
+                <input type="password" name="password" placeholder="Enter Password" required>
+            </div>
             
             <button type="submit" class="login-btn">Login</button>
         </form>
 
         <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+        <p><a href="/">Back to Home</a></p>
     </div>
 
 </body>
