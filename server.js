@@ -1,206 +1,227 @@
+require('dotenv').config();
 const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const session = require('express-session');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// 1. MIDDLEWARE & CONFIGURATION
+// 1. MONGODB DATABASE CONNECTION
 // ==========================================
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
-    secret: 'codemaster_secret_key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Render par HTTP ke liye false rakhein
-}));
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connected Successfully"))
+    .catch(err => console.log("❌ MongoDB Error:", err));
 
-// Dummy Database (Users ko save karne ke liye)
-const users = [];
+// User Schema (Database Design)
+const userSchema = new mongoose.Schema({
+    username: String,
+    email: { type: String, required: true, unique: true },
+    password: { type: String, default: null }, // Manual login ke liye
+    googleId: { type: String, default: null }, // Google login ke liye
+    photo: String,
+    mobile: { type: String, default: null }    // Mobile number popup ke liye
+});
+
+const User = mongoose.model('User', userSchema);
 
 // ==========================================
 // 2. EMAIL CONFIGURATION (Nodemailer)
 // ==========================================
-
-// ⚠️ Yahan apna asli Gmail aur wo 16-digit wala App Password daalein
-const ADMIN_EMAIL = 'ansarisuhel4505@gmail.com'; 
-const APP_PASSWORD = 'bkpf ehbb qlhz axkt'; // Yahan apna Google App Password paste karein
-
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: ADMIN_EMAIL,
-        pass: APP_PASSWORD
+        user: process.env.EMAIL_USER, // Render Env Variable
+        pass: process.env.EMAIL_PASS  // Render Env Variable
     }
 });
 
-// Email Helper Function
 async function sendEmail(to, subject, htmlContent) {
     try {
         await transporter.sendMail({
-            from: `"CodeMaster Security" <${ADMIN_EMAIL}>`,
+            from: `"CodeMaster Team" <${process.env.EMAIL_USER}>`,
             to: to,
             subject: subject,
             html: htmlContent
         });
-        console.log(`Email sent to: ${to}`);
-    } catch (error) {
-        console.error("Email Error:", error);
+        console.log(`📧 Email sent to: ${to}`);
+    } catch (err) {
+        console.error("Email Failed:", err);
     }
 }
 
 // ==========================================
-// 3. PAGE NAVIGATION ROUTES
+// 3. MIDDLEWARE & SESSION
 // ==========================================
-
-// Main Pages
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/about', (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
-app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'public', 'courses.html')));
-app.get('/contact', (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
-app.get('/compiler', (req, res) => res.sendFile(path.join(__dirname, 'public', 'compiler.html')));
-
-// Legal & Support Pages (Unified Help Page)
-app.get(['/help', '/privacy', '/terms'], (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'help.html'));
-});
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'secret_key',
+    resave: false,
+    saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // ==========================================
-// 4. AUTHENTICATION (Signup, Login, Logout)
+// 4. PASSPORT GOOGLE STRATEGY
 // ==========================================
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "https://learn-coding-2.onrender.com/auth/google/callback" // Localhost ke liye ise http://localhost:3000/... karein
+  },
+  async function(accessToken, refreshToken, profile, done) {
+      try {
+          // Check agar user pehle se hai
+          let user = await User.findOne({ googleId: profile.id });
 
-// --- SIGNUP ---
-app.get('/signup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'signup.html')));
+          if (user) {
+              return done(null, user);
+          } else {
+              // Naya User Banayein
+              user = await User.create({
+                  googleId: profile.id,
+                  username: profile.displayName,
+                  email: profile.emails[0].value,
+                  photo: profile.photos[0].value
+              });
 
-app.post('/signup', async (req, res) => {
-    const { username, email, password } = req.body;
-    
-    // User save karein
-    users.push({ username, email, password });
+              // Welcome Email
+              sendEmail(user.email, "Welcome to CodeMaster! 🚀", `<h3>Hello ${user.username},</h3><p>Google Login successful! Complete your profile now.</p>`);
+              
+              // Admin Alert
+              sendEmail(process.env.EMAIL_USER, "🔔 New Google Signup", `<p>User: ${user.username} (${user.email})</p>`);
 
-    // 1. User ko Welcome Email
-    sendEmail(
-        email, 
-        "Welcome to CodeMaster! 🚀", 
-        `<h3>Hello ${username},</h3><p>Thank you for joining CodeMaster. Apni coding journey aaj hi shuru karein!</p>`
-    );
+              return done(null, user);
+          }
+      } catch (err) {
+          return done(err, null);
+      }
+  }
+));
 
-    // 2. Admin (Aapko) Alert
-    sendEmail(
-        ADMIN_EMAIL,
-        "🔔 New User Signup Alert",
-        `<p><strong>New User Registered:</strong></p><ul><li>Name: ${username}</li><li>Email: ${email}</li></ul>`
-    );
-
-    res.redirect('/login');
-});
-
-// --- LOGIN ---
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-        req.session.user = user;
-
-        // 1. User ko Login Alert
-        sendEmail(
-            user.email,
-            "Security Alert: Login Detected",
-            `<p>Hi ${user.username}, aapke account mein abhi login hua hai.</p>`
-        );
-
-        // 2. Admin (Aapko) Alert
-        sendEmail(
-            ADMIN_EMAIL,
-            "🔓 User Login Alert",
-            `<p><strong>User Logged In:</strong> ${user.username} (${user.email})</p>`
-        );
-
-        res.redirect('/dashboard');
-    } else {
-        res.send("Wrong Email or Password! <a href='/login'>Try Again</a>");
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch(err) {
+        done(err, null);
     }
 });
 
-// --- DASHBOARD (Protected) ---
+// ==========================================
+// 5. ROUTES (Pages & Logic)
+// ==========================================
+
+// --- Pages ---
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
+app.get('/contact', (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
+app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'public', 'courses.html')));
+
+// --- Google Auth Routes ---
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+        res.redirect('/dashboard');
+    }
+);
+
+// --- Manual Signup (With MongoDB) ---
+app.get('/signup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'signup.html')));
+
+app.post('/signup', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        // Check if user exists
+        const existingUser = await User.findOne({ email });
+        if(existingUser) return res.send("User already exists. <a href='/login'>Login</a>");
+
+        // Save new user
+        const newUser = await User.create({ username, email, password });
+        
+        sendEmail(email, "Welcome!", "Thanks for signing up manually.");
+        sendEmail(process.env.EMAIL_USER, "New Manual Signup", `User: ${email}`);
+
+        res.redirect('/login');
+    } catch (err) {
+        res.send("Error during signup.");
+    }
+});
+
+// --- Manual Login (With MongoDB) ---
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email, password }); // Note: Real apps mein password hash karna chahiye
+
+        if (user) {
+            // Manual login ko Passport session mein set karein
+            req.login(user, (err) => {
+                if (err) return res.send("Error logging in");
+                sendEmail(process.env.EMAIL_USER, "User Login Alert", `${user.username} just logged in.`);
+                res.redirect('/dashboard');
+            });
+        } else {
+            res.send("Wrong Email or Password. <a href='/login'>Try Again</a>");
+        }
+    } catch (err) {
+        res.send("Login Error");
+    }
+});
+
+// --- Dashboard & Mobile Popup Logic ---
 app.get('/dashboard', (req, res) => {
-    if (req.session.user) {
+    if (req.isAuthenticated()) {
         res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
     } else {
         res.redirect('/login');
     }
 });
 
-// --- LOGOUT ---
-app.get('/logout', (req, res) => {
-    if (req.session.user) {
-        const username = req.session.user.username;
-        const email = req.session.user.email;
-
-        // Admin (Aapko) Alert
-        sendEmail(
-            ADMIN_EMAIL,
-            "🚪 User Logout Alert",
-            `<p><strong>User Logged Out:</strong> ${username} (${email})</p>`
-        );
+// API: Check Mobile Number
+app.get('/user-info', (req, res) => {
+    if(req.isAuthenticated()) {
+        res.json({ 
+            name: req.user.username, 
+            hasMobile: req.user.mobile ? true : false 
+        });
+    } else {
+        res.status(401).json({ error: "Not logged in" });
     }
+});
 
-    req.session.destroy((err) => {
-        if (err) return res.send("Error logging out");
+// API: Save Mobile Number
+app.post('/update-mobile', async (req, res) => {
+    if(req.isAuthenticated()) {
+        await User.findByIdAndUpdate(req.user._id, { mobile: req.body.mobile });
+        console.log(`📱 Mobile saved for ${req.user.username}`);
+        res.json({ success: true });
+    }
+});
+
+// --- Logout ---
+app.get('/logout', (req, res) => {
+    req.logout(() => {
         res.redirect('/');
     });
-});
-
-// ==========================================
-// 5. FEATURES (Newsletter & Bug Report)
-// ==========================================
-
-// Newsletter Subscribe
-app.post('/subscribe', (req, res) => {
-    const { email } = req.body;
-    
-    // User ko Subscribe Confirmation Email
-    sendEmail(
-        email,
-        "Welcome to CodeMaster Newsletter 📰",
-        `<p>Thanks for subscribing! You will receive latest coding tutorials.</p>`
-    );
-
-    // Admin (Aapko) Alert
-    sendEmail(
-        ADMIN_EMAIL,
-        "New Newsletter Subscriber",
-        `<p>New Subscriber Email: ${email}</p>`
-    );
-
-    res.send("<script>alert('Thank you for subscribing!'); window.location.href='/';</script>");
-});
-
-// Bug Report
-app.post('/report-bug', (req, res) => {
-    const { bugTitle, bugDesc } = req.body;
-
-    // Admin (Aapko) Alert
-    sendEmail(
-        ADMIN_EMAIL,
-        `🐛 Bug Report: ${bugTitle}`,
-        `<p><strong>Issue:</strong> ${bugTitle}</p><p><strong>Description:</strong> ${bugDesc}</p>`
-    );
-
-    res.send("<script>alert('Bug Reported Successfully! Thanks for your help.'); window.location.href='/help';</script>");
 });
 
 // ==========================================
 // 6. SERVER START
 // ==========================================
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at port ${PORT}`);
 });
-        
