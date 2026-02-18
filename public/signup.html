@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - CodeMaster</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { 
@@ -19,23 +20,33 @@
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 100%;
+            width: 90%;
             max-width: 400px;
             text-align: center;
             border: 1px solid #334155;
         }
         h2 { margin-bottom: 20px; color: #3b82f6; }
+        
+        .input-group { position: relative; margin: 15px 0; }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
         input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 12px 12px 12px 45px;
             border-radius: 5px;
             border: 1px solid #334155;
             background: #0f172a;
             color: white;
             outline: none;
+            font-size: 15px;
         }
         input:focus { border-color: #3b82f6; }
+
         button {
             width: 100%;
             padding: 12px;
@@ -60,15 +71,26 @@
         <h2>Create Account 🚀</h2>
         
         <form action="/signup" method="POST">
-            
-            <input type="text" name="username" placeholder="Full Name" required>
-            <input type="email" name="email" placeholder="Email Address" required>
-            <input type="password" name="password" placeholder="Create Password" required>
+            <div class="input-group">
+                <i class='bx bxs-user'></i>
+                <input type="text" name="username" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-group">
+                <i class='bx bxs-envelope'></i>
+                <input type="email" name="email" placeholder="Email Address" required>
+            </div>
+
+            <div class="input-group">
+                <i class='bx bxs-lock-alt'></i>
+                <input type="password" name="password" placeholder="Create Password" required>
+            </div>
             
             <button type="submit">Sign Up</button>
         </form>
 
         <p>Already have an account? <a href="/login">Login here</a></p>
+        <p><a href="/">Back to Home</a></p>
     </div>
 
 </body>
