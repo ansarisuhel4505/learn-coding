@@ -1,22 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Login</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Login - CodeMaster</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { 
+            background: #0f172a; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .container {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+        h2 { margin-bottom: 20px; color: #3b82f6; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            outline: none;
+        }
+        input:focus { border-color: #3b82f6; }
+        
+        /* Main Login Button */
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .login-btn:hover { background: #2563eb; }
+
+        /* Google Login Button Style */
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #333;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .google-btn:hover { background: #f1f5f9; }
+        .google-btn img { width: 20px; margin-right: 10px; }
+
+        .divider { margin: 15px 0; color: #64748b; font-size: 14px; }
+        p { margin-top: 15px; font-size: 14px; color: #94a3b8; }
+        a { color: #3b82f6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
+
     <div class="container">
-        <h2>Login Here</h2>
+        <h2>Welcome Back 👋</h2>
+
+        <a href="/auth/google" class="google-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+            Continue with Google
+        </a>
+
+        <div class="divider">OR LOGIN WITH EMAIL</div>
+
         <form action="/login" method="POST">
-            <input type="email" name="email" placeholder="Enter Email" required><br><br>
-            <input type="password" name="password" placeholder="Enter Password" required><br><br>
-            <button type="submit">Login</button>
+            <input type="email" name="email" placeholder="Enter Email" required>
+            <input type="password" name="password" placeholder="Enter Password" required>
+            
+            <button type="submit" class="login-btn">Login</button>
         </form>
-        <p>New user? <a href="/signup">Sign up here</a></p>
-        <p><a href="/">Back to Home</a></p>
+
+        <p>Don't have an account? <a href="/signup">Sign up here</a></p>
     </div>
+
 </body>
 </html>
