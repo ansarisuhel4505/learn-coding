@@ -4,94 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CodeMaster</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { 
-            background: #0f172a; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
         }
-        .container {
-            background: #1e293b;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid #334155;
-        }
-        h2 { margin-bottom: 20px; color: #3b82f6; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        /* Form Inputs */
-        .input-group { position: relative; margin: 15px 0; }
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
+        body { 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent 40%);
         }
-        input {
-            width: 100%;
-            padding: 12px 12px 12px 45px; /* Icon ke liye jagah */
-            border-radius: 5px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-            outline: none;
-            font-size: 15px;
-        }
-        input:focus { border-color: #3b82f6; }
 
-        /* Login Button */
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-weight: bold;
-            transition: 0.3s;
+        .auth-card {
+            background: var(--surface-color);
+            width: 100%; max-width: 420px;
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            text-align: center;
         }
-        .login-btn:hover { background: #2563eb; }
 
-        /* Google Login Button */
+        .logo { font-size: 24px; font-weight: 700; color: var(--text-main); text-decoration: none; display: inline-block; margin-bottom: 25px; }
+        .logo span { color: var(--primary-color); }
+        .logo i { color: var(--primary-color); }
+
+        .auth-card h2 { font-size: 26px; font-weight: 600; margin-bottom: 10px; }
+        .auth-card p.subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+
+        /* Google Button */
         .google-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 12px;
-            background: white;
-            color: #333;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 12px;
+            background: #ffffff; color: #1e293b;
+            border-radius: 8px; font-weight: 600; font-size: 15px;
+            text-decoration: none; transition: 0.3s;
             margin-bottom: 20px;
-            transition: 0.3s;
         }
-        .google-btn:hover { background: #f1f5f9; }
-        .google-btn img { width: 20px; margin-right: 10px; }
+        .google-btn:hover { background: #f1f5f9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
+        .google-btn img { width: 22px; }
 
-        .divider { margin: 15px 0; color: #64748b; font-size: 14px; }
-        p { margin-top: 15px; font-size: 14px; color: #94a3b8; }
-        a { color: #3b82f6; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        .divider {
+            display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 13px; margin-bottom: 20px;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); margin: 0 15px; }
+
+        /* Form Inputs */
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+        .input-group i { position: absolute; left: 15px; top: 40px; color: #64748b; font-size: 20px; }
+        
+        .input-group input {
+            width: 100%; padding: 14px 14px 14px 45px;
+            background: var(--bg-color); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            font-size: 14px; transition: 0.3s; outline: none;
+        }
+        .input-group input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%; padding: 14px;
+            background: var(--primary-color); color: #fff;
+            border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: 0.3s; margin-top: 10px;
+        }
+        .submit-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); }
+
+        .auth-footer { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
+        .auth-footer a { color: var(--primary-color); text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .auth-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="auth-card">
+        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
         <h2>Welcome Back 👋</h2>
+        <p class="subtitle">Log in to your account to continue your learning.</p>
 
         <a href="/auth/google" class="google-btn">
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
@@ -102,20 +107,23 @@
 
         <form action="/login" method="POST">
             <div class="input-group">
-                <i class='bx bxs-envelope'></i>
-                <input type="email" name="email" placeholder="Enter Email" required>
+                <label>Email Address</label>
+                <i class='bx bx-envelope'></i>
+                <input type="email" name="email" placeholder="example@mail.com" required>
             </div>
             
             <div class="input-group">
-                <i class='bx bxs-lock-alt'></i>
-                <input type="password" name="password" placeholder="Enter Password" required>
+                <label>Password</label>
+                <i class='bx bx-lock-alt'></i>
+                <input type="password" name="password" placeholder="Enter your password" required>
             </div>
             
-            <button type="submit" class="login-btn">Login</button>
+            <button type="submit" class="submit-btn">Login to Dashboard</button>
         </form>
 
-        <p>Don't have an account? <a href="/signup">Sign up here</a></p>
-        <p><a href="/">Back to Home</a></p>
+        <div class="auth-footer">
+            Don't have an account? <a href="/signup">Sign up for free</a>
+        </div>
     </div>
 
 </body>
