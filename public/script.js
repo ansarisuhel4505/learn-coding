@@ -168,5 +168,58 @@ window.addEventListener('pageshow', (e) => {
         transitionOverlay.classList.remove('active');
     }
 });
+// ==========================================
+// DYNAMIC COURSE LOADING (Admin to Frontend)
+// ==========================================
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Us khali dabbe ko dhoondho jahan courses dikhane hain
+    const courseContainer = document.getElementById('dynamic-courses');
+    
+    // Agar page par wo dabba nahi hai (jaise login page par), toh aage mat bado
+    if (!courseContainer) return;
+
+    try {
+        // 2. Database se courses mangwao
+        const response = await fetch('/api/courses');
+        const courses = await response.json();
+
+        // 3. Agar admin ne koi course add nahi kiya hai
+        if (courses.length === 0) {
+            courseContainer.innerHTML = '<p style="text-align:center; width: 100%; grid-column: 1 / -1; color: var(--text-muted);">No courses available right now. Please check back later!</p>';
+            return;
+        }
+
+        // 4. Loading text ko hatao
+        courseContainer.innerHTML = '';
+
+        // 5. Har course ke liye ek Card banao aur screen par daal do
+        courses.forEach(course => {
+            // Agar admin ne thumbnail nahi daala, toh ek default photo lag jayegi
+            const imageUrl = course.thumbnail ? course.thumbnail : 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=500&q=80';
+            
+            const courseCard = `
+                <div class="course-card" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 15px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column;">
+                    
+                    <img src="${imageUrl}" alt="${course.title}" style="width: 100%; height: 200px; object-fit: cover;">
+                    
+                    <div style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1;">
+                        <h3 style="margin-bottom: 10px; font-size: 20px; color: var(--text-main);">${course.title}</h3>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; flex-grow: 1;">${course.description}</p>
+                        
+                        <a href="${course.videoLink}" target="_blank" style="text-align: center; background: var(--primary-color); color: #fff; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s;">
+                            Start Learning <i class='bx bx-play-circle' style="vertical-align: middle; font-size: 18px;"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+            courseContainer.innerHTML += courseCard;
+        });
+        
+    } catch (err) {
+        console.error("Failed to load courses:", err);
+        courseContainer.innerHTML = '<p style="text-align:center; width: 100%; grid-column: 1 / -1; color: #ef4444;">Failed to load courses. Please refresh the page.</p>';
+    }
+});
+
 
 
