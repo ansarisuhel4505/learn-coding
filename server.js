@@ -33,6 +33,23 @@ const User = mongoose.model('User', userSchema);
 // 2. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
 // ==========================================
 const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // 465 port ke liye true rakhna zaroori hai
+    auth: {
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS  
+    },
+    // Timeout error rokne ke liye ye extra settings hain
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000
+});
+
+// ==========================================
+// 2. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
+// ==========================================
+const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER, 
@@ -256,4 +273,5 @@ app.post('/update-mobile', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
