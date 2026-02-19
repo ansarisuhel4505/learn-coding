@@ -10,6 +10,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // Jab page thoda bhi niche scroll ho, 'sticky' class lag jayegi
         header.classList.toggle('sticky', window.scrollY > 0);
     });
+    // ==========================================
+// MOBILE MENU TOGGLE LOGIC
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    const menuIcon = document.getElementById('menu-icon');
+    const navbar = document.querySelector('.navbar');
+
+    if(menuIcon && navbar) {
+        menuIcon.addEventListener('click', () => {
+            navbar.classList.toggle('active'); // Menu ko slide-in/slide-out karega
+            menuIcon.classList.toggle('bx-x'); // Burger icon ko 'X' mein badal dega
+        });
+
+        // Agar user menu ke bahar screen par click kare, toh menu band ho jaye
+        document.addEventListener('click', (e) => {
+            if (!menuIcon.contains(e.target) && !navbar.contains(e.target)) {
+                navbar.classList.remove('active');
+                menuIcon.classList.remove('bx-x');
+            }
+        });
+    }
+});
+    
 
     // ==========================================
     // 2. MOBILE HAMBURGER MENU
@@ -220,6 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         courseContainer.innerHTML = '<p style="text-align:center; width: 100%; grid-column: 1 / -1; color: #ef4444;">Failed to load courses. Please refresh the page.</p>';
     }
 });
+
 
 
 
