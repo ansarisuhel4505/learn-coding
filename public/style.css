@@ -87,14 +87,14 @@ body {
 }
 
 /* ==========================================
-   3. HEADER & NAVBAR
+   HEADER & NAVBAR (Desktop View)
    ========================================= */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px 8%;
+    padding: 20px 3%; /* Jagah badhai hai taaki side mein space rahe */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -106,7 +106,7 @@ body {
 }
 
 .header.sticky {
-    padding: 15px 8%;
+    padding: 15px 3%;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-color);
 }
@@ -120,18 +120,13 @@ body {
     gap: 8px;
 }
 
-.logo span {
-    color: var(--primary-color);
-}
-
-.logo i {
-    color: var(--primary-color);
-    font-size: 28px;
-}
+.logo span { color: var(--primary-color); }
+.logo i { color: var(--primary-color); font-size: 28px; }
 
 .nav-links {
     display: flex;
-    gap: 30px;
+    gap: 20px; /* Gap thoda kam kiya hai taaki links chipke nahi */
+    align-items: center;
 }
 
 .nav-links a {
@@ -145,42 +140,74 @@ body {
     color: var(--primary-color);
 }
 
-/* Auth Container (Handled by JS) */
+/* Auth Buttons (Login / Sign Up) */
 .auth-container {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-.btn-login {
-    color: var(--text-main);
-    font-weight: 600;
-    transition: var(--transition);
+.btn-login { 
+    color: var(--text-main); 
+    font-weight: 600; 
+    transition: var(--transition); 
 }
-
-.btn-login:hover {
-    color: var(--primary-color);
-}
+.btn-login:hover { color: var(--primary-color); }
 
 .btn-signup {
-    background: var(--primary-color);
+    background: var(--primary-color); 
     color: #fff;
-    padding: 8px 20px;
-    border-radius: 6px;
+    padding: 8px 20px; 
+    border-radius: 6px; 
     font-weight: 600;
     transition: var(--transition);
 }
-
-.btn-signup:hover {
-    background: var(--primary-hover);
-}
+.btn-signup:hover { background: var(--primary-hover); }
 
 #menu-icon {
     font-size: 32px;
     color: var(--text-main);
     cursor: pointer;
-    display: none;
+    display: none; /* Desktop par hide rahega */
 }
+
+/* ==========================================
+   MOBILE & TABLET VIEW (Responsive Navbar)
+   ========================================= */
+
+/* 1150px par mobile menu activate hoga taaki desktop par items overlap na hon */
+@media (max-width: 1150px) {
+    .header { padding: 15px 5%; }
+    
+    #menu-icon { display: block; } /* Hamburger icon dikhega */
+    
+    .navbar {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--surface-color);
+        padding: 20px 5%;
+        border-top: 1px solid var(--border-color);
+        display: none; /* Default hidden */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Jab menu icon par click hoga toh JS isko block bana dega */
+    .navbar.active { display: block; } 
+
+    .nav-links {
+        display: flex;
+        flex-direction: column; /* ✨ MAIN FIX: Links ko ek ke niche ek karega ✨ */
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+    }
+
+    /* Mobile view mein login/signup button chup jayega taaki menu clean rahe */
+    .auth-container { display: none; } 
+}
+
 
 /* ==========================================
    4. HERO SECTION
@@ -649,5 +676,6 @@ body {
     .hero-buttons { flex-direction: column; }
     .footer-container { grid-template-columns: 1fr; }
 }
+
 
 
