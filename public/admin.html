@@ -7,18 +7,11 @@
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --primary-color: #3b82f6;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-        }
+        :root { --bg-color: #0f172a; --surface-color: #1e293b; --primary-color: #3b82f6; --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: #334155; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg-color); color: var(--text-main); display: flex; }
 
-        /* Sidebar */
+        /* Sidebar & Header */
         .sidebar { width: 250px; background: var(--surface-color); height: 100vh; padding: 20px; border-right: 1px solid var(--border-color); position: fixed; }
         .sidebar .logo { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
         .sidebar .logo span { color: var(--primary-color); }
@@ -26,29 +19,35 @@
         .nav-links li { margin-bottom: 15px; }
         .nav-links a { display: flex; align-items: center; gap: 15px; color: var(--text-muted); text-decoration: none; padding: 12px; border-radius: 8px; transition: 0.3s; }
         .nav-links a:hover, .nav-links a.active { background: var(--primary-color); color: #fff; }
-
-        /* Main Content */
         .main-content { margin-left: 250px; padding: 30px; width: calc(100% - 250px); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
         .header h2 { font-size: 28px; }
         .admin-profile { display: flex; align-items: center; gap: 10px; background: var(--surface-color); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border-color); }
 
-        /* Action Cards */
+        /* Cards & Tables */
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .card { background: var(--surface-color); padding: 25px; border-radius: 15px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
-        .card h3 { font-size: 22px; margin-bottom: 5px; }
-        .card p { color: var(--text-muted); font-size: 14px; }
         .card i { font-size: 40px; color: var(--primary-color); background: rgba(59,130,246,0.1); padding: 15px; border-radius: 10px; }
-
-        /* Section Containers */
         .section-container { background: var(--surface-color); padding: 25px; border-radius: 15px; border: 1px solid var(--border-color); margin-bottom: 30px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn { background: var(--primary-color); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
-        
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { color: var(--text-muted); font-weight: 500; }
-        .action-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .action-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; transition: 0.3s;}
+        .action-btn:hover { background: #ef4444; color: #fff; }
+
+        /* Modal (Popup Form) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-box { background: var(--surface-color); padding: 30px; border-radius: 15px; width: 100%; max-width: 500px; border: 1px solid var(--border-color); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header i { font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
+        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; }
+        .input-group textarea { resize: none; height: 80px; }
+        .submit-btn { width: 100%; background: var(--primary-color); color: #fff; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -59,87 +58,135 @@
             <li><a href="#" class="active"><i class='bx bx-grid-alt'></i> Dashboard</a></li>
             <li><a href="#courses"><i class='bx bx-book-open'></i> Manage Courses</a></li>
             <li><a href="#exams"><i class='bx bx-task'></i> Online Exams</a></li>
-            <li><a href="#results"><i class='bx bx-trophy'></i> Results</a></li>
-            <li><a href="/"><i class='bx bx-log-out'></i> Back to Website</a></li>
+            <li><a href="/"><i class='bx bx-log-out'></i> Live Website</a></li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="header">
             <h2>Admin Dashboard</h2>
-            <div class="admin-profile">
-                <i class='bx bx-user-circle' style="font-size: 24px;"></i>
-                <span>Suhel Ansari (Admin)</span>
-            </div>
-        </div>
-
-        <div class="grid-cards">
-            <div class="card">
-                <div>
-                    <h3>24</h3>
-                    <p>Total Courses</p>
-                </div>
-                <i class='bx bx-book'></i>
-            </div>
-            <div class="card">
-                <div>
-                    <h3>150+</h3>
-                    <p>Registered Students</p>
-                </div>
-                <i class='bx bx-group'></i>
-            </div>
-            <div class="card">
-                <div>
-                    <h3>5</h3>
-                    <p>Active Exams</p>
-                </div>
-                <i class='bx bx-edit-alt'></i>
-            </div>
+            <div class="admin-profile"><i class='bx bx-user-circle' style="font-size: 24px;"></i><span>Admin Portal</span></div>
         </div>
 
         <div class="section-container" id="courses">
             <div class="section-header">
                 <h3><i class='bx bx-book-open'></i> Available Courses</h3>
-                <button class="btn"><i class='bx bx-plus'></i> Add New Course</button>
+                <button class="btn" onclick="openModal()"><i class='bx bx-plus'></i> Add New Course</button>
             </div>
             <table>
-                <tr>
-                    <th>Course Name</th>
-                    <th>Instructor</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-                <tr>
-                    <td>Full-Stack Web Development</td>
-                    <td>Suhel Ansari</td>
-                    <td><span style="color: #22c55e;">Published</span></td>
-                    <td><button class="action-btn"><i class='bx bx-trash'></i> Delete</button></td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Course Name</th>
+                        <th>Video Link</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="courseTableBody">
+                    <tr><td colspan="4">Loading courses...</td></tr>
+                </tbody>
             </table>
         </div>
-
-        <div class="section-container" id="exams">
-            <div class="section-header">
-                <h3><i class='bx bx-task'></i> Recent Exams</h3>
-                <button class="btn"><i class='bx bx-plus'></i> Create Exam</button>
-            </div>
-            <table>
-                <tr>
-                    <th>Exam Title</th>
-                    <th>Total Marks</th>
-                    <th>Participants</th>
-                    <th>Action</th>
-                </tr>
-                <tr>
-                    <td>JavaScript Mastery Test</td>
-                    <td>50</td>
-                    <td>120 Students</td>
-                    <td><button class="btn" style="background: #22c55e;">Release Result</button></td>
-                </tr>
-            </table>
-        </div>
-
     </div>
 
+    <div class="modal-overlay" id="courseModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Add New Course</h3>
+                <i class='bx bx-x' onclick="closeModal()"></i>
+            </div>
+            <form id="addCourseForm">
+                <div class="input-group">
+                    <label>Course Title</label>
+                    <input type="text" id="cTitle" required placeholder="e.g. Master React JS">
+                </div>
+                <div class="input-group">
+                    <label>Description</label>
+                    <textarea id="cDesc" required placeholder="Short description about the course"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Thumbnail Image URL (Optional)</label>
+                    <input type="url" id="cThumb" placeholder="https://image-link.com/img.jpg">
+                </div>
+                <div class="input-group">
+                    <label>Video URL (YouTube/Render)</label>
+                    <input type="url" id="cVideo" required placeholder="https://youtube.com/...">
+                </div>
+                <button type="submit" class="submit-btn">Publish Course</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Open/Close Logic
+        function openModal() { document.getElementById('courseModal').classList.add('active'); }
+        function closeModal() { document.getElementById('courseModal').classList.remove('active'); document.getElementById('addCourseForm').reset(); }
+
+        // 1. Fetch & Show Courses
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/courses');
+                const courses = await response.json();
+                const tbody = document.getElementById('courseTableBody');
+                
+                if(courses.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No courses added yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                courses.forEach(course => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${course.title}</strong></td>
+                            <td><a href="${course.videoLink}" target="_blank" style="color: #3b82f6;">View Video</a></td>
+                            <td><span style="color: #22c55e;">Active</span></td>
+                            <td><button class="action-btn" onclick="deleteCourse('${course._id}')"><i class='bx bx-trash'></i> Delete</button></td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error('Failed to load courses');
+            }
+        }
+
+        // 2. Add New Course
+        document.getElementById('addCourseForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Page refresh roko
+            
+            const newCourse = {
+                title: document.getElementById('cTitle').value,
+                description: document.getElementById('cDesc').value,
+                thumbnail: document.getElementById('cThumb').value,
+                videoLink: document.getElementById('cVideo').value
+            };
+
+            const response = await fetch('/api/courses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newCourse)
+            });
+
+            if(response.ok) {
+                closeModal();
+                loadCourses(); // Table ko turant update karo
+            } else {
+                alert("Error adding course.");
+            }
+        });
+
+        // 3. Delete Course
+        async function deleteCourse(courseId) {
+            if(confirm("Are you sure you want to delete this course?")) {
+                const response = await fetch(`/api/courses/${courseId}`, { method: 'DELETE' });
+                if(response.ok) {
+                    loadCourses(); // Table update karo
+                }
+            }
+        }
+
+        // Page load hote hi courses fetch karo
+        window.onload = loadCourses;
+    </script>
 </body>
 </html>
