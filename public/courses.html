@@ -3,25 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Courses - CodeMaster</title>
+    <title>All Courses - CodeMaster</title>
+    
     <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Specific Styles for Courses Page */
+        .page-header {
+            padding: 150px 8% 80px;
+            text-align: center;
+            background: radial-gradient(circle at bottom, var(--surface-color), var(--bg-color));
+            border-bottom: 1px solid var(--border-color);
+        }
+        .page-header h1 { font-size: 45px; margin-bottom: 15px; }
+        .page-header h1 span { color: var(--primary-color); }
+        .page-header p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
+
+        .courses-grid {
+            padding: 80px 8%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .course-card {
+            background: var(--surface-color);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        .course-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.4); border-color: var(--primary-color); }
+        
+        .course-img {
+            width: 100%; height: 200px;
+            background: #2dd4bf; /* Placeholder color */
+            display: flex; align-items: center; justify-content: center;
+            font-size: 60px; color: white;
+        }
+        .img-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .img-2 { background: linear-gradient(135deg, #10b981, #047857); }
+        .img-3 { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
+
+        .course-content { padding: 25px; }
+        .course-badge {
+            display: inline-block; padding: 5px 12px;
+            background: rgba(59, 130, 246, 0.1); color: var(--primary-color);
+            border-radius: 4px; font-size: 12px; font-weight: 600; margin-bottom: 15px;
+        }
+        .course-content h3 { font-size: 20px; margin-bottom: 10px; color: var(--text-main); }
+        .course-content p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        
+        .course-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid var(--border-color); padding-top: 20px;
+        }
+        .meta-item { display: flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 13px; }
+        .meta-item i { color: var(--primary-color); font-size: 16px; }
+        
+        .btn-start {
+            display: block; width: 100%; text-align: center;
+            padding: 12px; background: var(--primary-color); color: white;
+            border-radius: 8px; font-weight: 600; margin-top: 20px; transition: 0.3s;
+        }
+        .btn-start:hover { background: var(--primary-hover); }
+
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">CodeMaster Courses</div>
-        <a href="index.html" class="btn-signup">Home</a>
-    </nav>
 
-    <section class="features">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 40px;">Explore Our Programs</h2>
-            <div class="cards-grid">
-                <div class="card"><h3>C++ Mastery</h3><p>Basic to Advanced DSA.</p></div>
-                <div class="card"><h3>Python AI</h3><p>Machine Learning & Data Science.</p></div>
-                <div class="card"><h3>Web Development</h3><p>HTML, CSS, JS & React.</p></div>
-                <div class="card"><h3>Java Core</h3><p>Object Oriented Programming.</p></div>
+    <header class="header">
+        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
+
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/courses" class="active">Courses</a></li>
+            </ul>
+        </nav>
+
+        <div class="auth-container" id="auth-buttons">
+            <a href="/login" class="btn-login">Login</a>
+            <a href="/signup" class="btn-signup">Sign Up Free</a>
+        </div>
+
+        <div class="bx bx-menu" id="menu-icon"></div>
+    </header>
+
+    <section class="page-header">
+        <h1>Explore Our <span>Premium Courses</span></h1>
+        <p>Level up your programming skills with our industry-standard curriculum. Designed for beginners and advanced developers alike.</p>
+    </section>
+
+    <section class="courses-grid">
+        
+        <div class="course-card">
+            <div class="course-img img-1"><i class='bx bxl-nodejs'></i></div>
+            <div class="course-content">
+                <span class="course-badge">Bestseller</span>
+                <h3>Full-Stack Web Development</h3>
+                <p>Master the MERN stack. Build complete, scalable web applications from scratch including frontend, backend, and MongoDB database.</p>
+                
+                <div class="course-meta">
+                    <div class="meta-item"><i class='bx bx-time-five'></i> 12 Weeks</div>
+                    <div class="meta-item"><i class='bx bx-bar-chart'></i> Beginner to Pro</div>
+                </div>
+                
+                <a href="/dashboard" class="btn-start">Start Learning</a>
             </div>
         </div>
+
+        <div class="course-card">
+            <div class="course-img img-2"><i class='bx bx-brain'></i></div>
+            <div class="course-content">
+                <span class="course-badge">New</span>
+                <h3>Artificial Intelligence & ML</h3>
+                <p>Learn Python programming, data science basics, and machine learning algorithms to build smart, data-driven software.</p>
+                
+                <div class="course-meta">
+                    <div class="meta-item"><i class='bx bx-time-five'></i> 10 Weeks</div>
+                    <div class="meta-item"><i class='bx bx-bar-chart'></i> Intermediate</div>
+                </div>
+                
+                <a href="/dashboard" class="btn-start">Start Learning</a>
+            </div>
+        </div>
+
+        <div class="course-card">
+            <div class="course-img img-3"><i class='bx bx-mobile'></i></div>
+            <div class="course-content">
+                <span class="course-badge">Trending</span>
+                <h3>Mobile App Creation</h3>
+                <p>Develop cross-platform mobile apps for Android and iOS using modern frameworks. Write code once, deploy everywhere.</p>
+                
+                <div class="course-meta">
+                    <div class="meta-item"><i class='bx bx-time-five'></i> 8 Weeks</div>
+                    <div class="meta-item"><i class='bx bx-bar-chart'></i> Intermediate</div>
+                </div>
+                
+                <a href="/dashboard" class="btn-start">Start Learning</a>
+            </div>
+        </div>
+
     </section>
+
+    <script src="script.js"></script>
 </body>
 </html>
