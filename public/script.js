@@ -1,61 +1,74 @@
-// Jab poora page load ho jaye tab ye chalega
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 CodeMaster Script Loaded");
+    console.log("🚀 CodeMaster Premium Script Loaded");
 
     // ==========================================
-    // 1. GLOBAL VARIABLES & SELECTORS
+    // 1. STICKY HEADER (Scroll karne par background change)
     // ==========================================
-    const header = document.querySelector("header");
-    const menuIcon = document.querySelector("#menu-icon");
-    const navbar = document.querySelector(".navbar");
-    const authContainer = document.querySelector("#auth-buttons"); // Login/Signup buttons wala div
-
-    // ==========================================
-    // 2. STICKY HEADER (Scroll karne par design change)
-    // ==========================================
-    window.addEventListener("scroll", function () {
-        // Jab thoda sa bhi scroll ho, 'sticky' class add kar do
-        header.classList.toggle("sticky", window.scrollY > 0);
-
-        // Scroll karte waqt mobile menu band kar do
-        menuIcon.classList.remove("bx-x");
-        navbar.classList.remove("active");
+    const header = document.querySelector('.header');
+    
+    window.addEventListener('scroll', () => {
+        // Jab page thoda bhi niche scroll ho, 'sticky' class lag jayegi
+        header.classList.toggle('sticky', window.scrollY > 0);
     });
 
     // ==========================================
-    // 3. MOBILE MENU TOGGLE (Hamburger Icon)
+    // 2. MOBILE HAMBURGER MENU
     // ==========================================
+    const menuIcon = document.querySelector('#menu-icon');
+    const navbar = document.querySelector('.navbar');
+
     if (menuIcon) {
         menuIcon.onclick = () => {
-            menuIcon.classList.toggle("bx-x"); // Icon 'X' ban jayega
-            navbar.classList.toggle("active"); // Menu khul jayega
+            menuIcon.classList.toggle('bx-x'); // Icon ko 'X' banao
+            navbar.classList.toggle('active'); // Menu open/close karo
         };
     }
 
+    // Jab user scroll kare to mobile menu apne aap band ho jaye
+    window.onscroll = () => {
+        if (menuIcon) {
+            menuIcon.classList.remove('bx-x');
+            navbar.classList.remove('active');
+        }
+    };
+
     // ==========================================
-    // 4. SMART AUTH CHECK (Backend se pucho: Kaun Login hai?)
+    // 3. TYPEWRITER EFFECT (Typed.js)
+    // ==========================================
+    const typeTarget = document.querySelector('.multiple-text');
+    
+    if (typeTarget) {
+        const typed = new Typed('.multiple-text', {
+            strings: ['Full-Stack Developer', 'AI Engineer', 'Software Expert', 'Tech Leader'],
+            typeSpeed: 80,
+            backSpeed: 50,
+            backDelay: 1500,
+            loop: true
+        });
+    }
+
+    // ==========================================
+    // 4. SMART AUTH CHECK (Login hai ya nahi?)
     // ==========================================
     checkUserLoginStatus();
 
     // ==========================================
-    // 5. PROTECTED LINKS (Courses par click logic)
+    // 5. COURSE ACCESS PROTECTION
     // ==========================================
-    // Koi bhi button jo courses page par le jata ho, use select karein
+    // Jin buttons/links par click karne se courses khulte hain
     const protectedLinks = document.querySelectorAll(".course-btn, a[href='/courses']");
     
     protectedLinks.forEach(link => {
         link.addEventListener("click", async (e) => {
-            // Default link behavior roko
-            e.preventDefault(); 
+            e.preventDefault(); // Link ko direct khulne se roko
             
-            // Check karo user login hai ya nahi
             const isLoggedIn = await isUserLoggedIn();
             
             if (isLoggedIn) {
-                // Agar login hai, to jane do
+                // Agar login hai, to courses page par jane do
                 window.location.href = "/courses";
             } else {
-                // Agar login nahi hai, to alert aur redirect
+                // Agar login nahi hai, to alert do aur login par bhejo
                 alert("🔒 Please Login first to access Premium Courses!");
                 window.location.href = "/login";
             }
@@ -64,36 +77,35 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 🛠️ HELPER FUNCTIONS
+// 🛠️ HELPER FUNCTIONS (Backend API Calls)
 // ==========================================
 
-// Function 1: Server se user ka data lao aur buttons update karo
+// Function 1: Server se user ka naam lao aur Header buttons update karo
 async function checkUserLoginStatus() {
     try {
         const authContainer = document.querySelector("#auth-buttons");
-        if (!authContainer) return; // Agar HTML mein ye div nahi mila to ruk jao
+        if (!authContainer) return;
 
-        // Backend API call (/user-info humne server.js mein banayi thi)
+        // /user-info route aapke server.js mein bana hua hai
         const response = await fetch('/user-info');
         const data = await response.json();
 
         if (data.name) {
             // ✅ USER LOGGED IN HAI
-            // Login/Register hata kar -> Dashboard/Logout dikhao
-            // data.name.split(' ')[0] ka matlab sirf First Name dikhao
+            // Login/Signup hata kar -> "Hi Suhel" + Dashboard + Logout lagao
             authContainer.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <span style="color: white; font-weight: 600; font-size: 14px;">Hi, ${data.name.split(' ')[0]}</span>
-                    <a href="/dashboard" class="user" style="background: #3b82f6; border: none;">Dashboard</a>
-                    <a href="/logout" class="user" style="background: #ef4444; border: none;">Logout</a>
+                    <span style="color: var(--text-main); font-weight: 600; font-size: 15px;">Hi, ${data.name.split(' ')[0]}</span>
+                    <a href="/dashboard" class="btn-secondary" style="padding: 8px 15px; border-color: var(--primary-color); color: var(--primary-color);">Dashboard</a>
+                    <a href="/logout" class="btn-primary" style="padding: 8px 15px; background: #ef4444; border: none;">Logout</a>
                 </div>
             `;
         } else {
-            // ❌ USER LOGGED IN NAHI HAI (Default)
-            // Wapas Login/Register dikhao
+            // ❌ USER LOGGED IN NAHI HAI
+            // Default Login / Sign Up buttons dikhao (CSS design ke hisaab se)
             authContainer.innerHTML = `
-                <a href="/login" class="user">Login</a>
-                <a href="/signup" class="user" style="background: transparent; border: 1px solid #3b82f6; margin-left: 10px;">Register</a>
+                <a href="/login" class="btn-login">Login</a>
+                <a href="/signup" class="btn-signup">Sign Up Free</a>
             `;
         }
 
@@ -102,12 +114,12 @@ async function checkUserLoginStatus() {
     }
 }
 
-// Function 2: Sirf True/False return karega (Logic ke liye)
+// Function 2: Sirf True/False return karega (Course Protection logic ke liye)
 async function isUserLoggedIn() {
     try {
         const response = await fetch('/user-info');
         const data = await response.json();
-        return !!data.name; // Agar naam hai to True, nahi to False
+        return !!data.name; // Agar 'name' hai to True, warna False
     } catch (error) {
         return false;
     }
