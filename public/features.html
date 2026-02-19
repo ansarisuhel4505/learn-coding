@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features - CodeMaster</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Specific Styles for Features Section */
+        .features-section {
+            padding: 120px 5% 80px; /* Upar Navbar ke liye jagah chhodi hai */
+            background: radial-gradient(circle at center, var(--surface-color), var(--bg-color));
+            min-height: 100vh;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 40px;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .section-title h2 span {
+            color: var(--primary-color);
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Features Grid - Responsive layout */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        /* Feature Card Design */
+        .feature-card {
+            background: var(--surface-color);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Magic Hover Effect */
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-color);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Icon styling inside the card */
+        .feature-card .icon-box {
+            width: 70px;
+            height: 70px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 35px;
+            color: var(--primary-color);
+            transition: 0.4s ease;
+        }
+
+        /* Icon color changes on card hover */
+        .feature-card:hover .icon-box {
+            background: var(--primary-color);
+            color: #fff;
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* A subtle glow in the background of each card */
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
+            z-index: -1;
+            opacity: 0;
+            transition: 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/features.html" class="active" style="color: var(--primary-color);">Features</a></li>
+                <li><a href="/courses.html">Courses</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="auth-container">
+            <a href="/login.html" class="btn-login">Login</a>
+            <a href="/signup.html" class="btn-signup">Sign Up Free</a>
+        </div>
+        <div class="bx bx-menu" id="menu-icon"></div>
+    </header>
+
+    <section class="features-section">
+        <div class="section-title">
+            <h2>Why Choose <span>CodeMaster?</span></h2>
+            <p>Experience a next-generation learning platform equipped with powerful tools designed to turn absolute beginners into pro developers.</p>
+        </div>
+
+        <div class="features-grid">
+            
+            <div class="feature-card">
+                <div class="icon-box"><i class='bx bx-code-alt'></i></div>
+                <h3>Live Web Compiler</h3>
+                <p>No need to install heavy software. Write, run, and test HTML, CSS, JavaScript, and Python directly in your browser with real-time output.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box"><i class='bx bx-briefcase-alt-2'></i></div>
+                <h3>Real-World Projects</h3>
+                <p>Don't just watch tutorials. Build clones of popular apps like Netflix, Spotify, and Amazon to make your portfolio stand out to top tech recruiters.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box"><i class='bx bx-user-voice'></i></div>
+                <h3>1-on-1 Mentorship</h3>
+                <p>Stuck on a bug? Get instant guidance from industry experts and senior developers who review your code and guide your tech career.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box"><i class='bx bx-certification'></i></div>
+                <h3>Verified Certificates</h3>
+                <p>Earn industry-recognized certificates upon completing courses and passing online exams. Share them directly on your LinkedIn profile.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box"><i class='bx bx-support'></i></div>
+                <h3>24/7 Community Support</h3>
+                <p>Join our exclusive Discord community. Discuss logic, participate in hackathons, and network with thousands of coders around the globe.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box"><i class='bx bx-infinite'></i></div>
+                <h3>Lifetime Access</h3>
+                <p>Once you enroll, the course material is yours forever. Get all future updates, new modules, and advanced lessons at absolutely zero extra cost.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
