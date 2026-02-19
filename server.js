@@ -15,8 +15,8 @@ const PORT = process.env.PORT || 10000;
 // ==========================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
+// Session (Login memory) hamesha pehle start hona chahiye
 app.use(session({
     secret: process.env.SESSION_SECRET || 'codemaster_super_secret_key_2026',
     resave: false,
@@ -25,6 +25,60 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// ==========================================
+// 🔴 ADMIN SECURITY LOCK (Password System)
+// ==========================================
+app.use('/admin.html', (req, res, next) => {
+    // Agar session me admin login hai, toh page khol do
+    if (req.session && req.session.isAdmin) {
+        next(); 
+    } else {
+        // Agar login nahi hai, toh yeh Password Screen dikhao
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Admin Area Restricted</title>
+                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+            </head>
+            <body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f172a; margin:0; font-family:'Poppins', sans-serif;">
+                <div style="background:#1e293b; padding:40px; border-radius:15px; text-align:center; width:100%; max-width:350px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+                    <h2 style="color:#f8fafc; margin-bottom:5px;">Admin Access</h2>
+                    <p style="color:#94a3b8; font-size:14px; margin-bottom:25px;">Please enter the master password</p>
+                    
+                    <form action="/admin-login" method="POST">
+                        <input type="password" name="password" placeholder="Enter Password" required style="width:100%; box-sizing:border-box; padding:12px 15px; margin-bottom:20px; border-radius:8px; border:1px solid #334155; background:#0f172a; color:#fff; outline:none; font-size:15px;">
+                        <button type="submit" style="width:100%; background:#3b82f6; color:#fff; padding:12px; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:16px; transition:0.3s;">Unlock Panel</button>
+                    </form>
+                    
+                    <a href="/" style="display:block; margin-top:20px; color:#3b82f6; text-decoration:none; font-size:14px;">&larr; Back to Website</a>
+                </div>
+            </body>
+            </html>
+        `);
+    }
+});
+
+// Password Check Karne ka API
+app.post('/admin-login', (req, res) => {
+    const enteredPassword = req.body.password;
+    const adminPassword = "Suhel@123"; // Aapka set kiya hua password
+
+    if (enteredPassword === adminPassword) {
+        req.session.isAdmin = true; // Server ko yaad dila diya ki ye admin hai
+        res.redirect('/admin.html');
+    } else {
+        // Galat password par wapas form dikha kar alert do
+        res.send('<script>alert("❌ Incorrect Password! Access Denied."); window.location.href="/admin.html";</script>');
+    }
+});
+
+// Static files (public folder) ki line HAMESHA in sabke baad aani chahiye
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ==========================================
 // 2. MONGODB DATABASE SETUP & SCHEMA
@@ -347,6 +401,7 @@ app.delete('/api/courses/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
