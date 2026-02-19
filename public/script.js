@@ -32,28 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-    
-
-    // ==========================================
-    // 2. MOBILE HAMBURGER MENU
-    // ==========================================
-    const menuIcon = document.querySelector('#menu-icon');
-    const navbar = document.querySelector('.navbar');
-
-    if (menuIcon) {
-        menuIcon.onclick = () => {
-            menuIcon.classList.toggle('bx-x'); // Icon ko 'X' banao
-            navbar.classList.toggle('active'); // Menu open/close karo
-        };
-    }
-
-    // Jab user scroll kare to mobile menu apne aap band ho jaye
-    window.onscroll = () => {
-        if (menuIcon) {
-            menuIcon.classList.remove('bx-x');
-            navbar.classList.remove('active');
-        }
-    };
 
     // ==========================================
     // 3. TYPEWRITER EFFECT (Typed.js)
@@ -243,6 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         courseContainer.innerHTML = '<p style="text-align:center; width: 100%; grid-column: 1 / -1; color: #ef4444;">Failed to load courses. Please refresh the page.</p>';
     }
 });
+
 
 
 
