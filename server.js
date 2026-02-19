@@ -257,6 +257,24 @@ app.post('/update-mobile', async (req, res) => {
         res.status(401).json({ success: false, message: "Unauthorized" });
     }
 });
+// ==========================================
+// ADMIN ROUTE: Saare users dekhne ke liye
+// ==========================================
+app.get('/admin/users', async (req, res) => {
+    try {
+        // Database se saare users nikal lo
+        const allUsers = await User.find({});
+        
+        // Unhe browser par dikha do
+        res.json({
+            total_students: allUsers.length,
+            students: allUsers
+        });
+    } catch (err) {
+        res.send("Error fetching users");
+    }
+});
+
 
 // ==========================================
 // 8. START THE SERVER
@@ -264,6 +282,8 @@ app.post('/update-mobile', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
+
 
 
 
