@@ -4,31 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - CodeMaster</title>
+    
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .about-hero {
+            padding: 150px 8% 80px;
+            text-align: center;
+            background: radial-gradient(circle at top, var(--surface-color), var(--bg-color));
+            border-bottom: 1px solid var(--border-color);
+        }
+        .about-hero h1 { font-size: 45px; margin-bottom: 15px; }
+        .about-hero h1 span { color: var(--primary-color); }
+        .about-hero p { color: var(--text-muted); font-size: 16px; max-width: 700px; margin: 0 auto; line-height: 1.8; }
+
+        /* Mission & Vision Grid */
+        .mission-vision {
+            padding: 80px 8%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        .mv-card {
+            background: var(--surface-color);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+        }
+        .mv-card:hover { transform: translateY(-5px); border-color: var(--primary-color); }
+        .mv-card i { font-size: 45px; color: var(--primary-color); margin-bottom: 20px; }
+        .mv-card h3 { font-size: 24px; margin-bottom: 15px; }
+        .mv-card p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+
+        /* Founder Section */
+        .founder-section {
+            padding: 80px 8%;
+            background: var(--surface-color);
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            border-top: 1px solid var(--border-color);
+        }
+        .founder-img {
+            flex: 1;
+            text-align: center;
+        }
+        /* Yahan apni photo ka link lagayein */
+        .founder-img img {
+            width: 100%;
+            max-width: 350px;
+            border-radius: 20px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        }
+        .founder-text { flex: 1.5; }
+        .founder-text h2 { font-size: 35px; margin-bottom: 5px; }
+        .founder-text .title { color: var(--primary-color); font-size: 18px; font-weight: 500; margin-bottom: 20px; }
+        .founder-text p { color: var(--text-muted); font-size: 16px; line-height: 1.8; margin-bottom: 20px; }
+        
+        .skills-container { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+        .skill-tag { background: rgba(59,130,246,0.1); color: var(--primary-color); padding: 8px 15px; border-radius: 5px; font-size: 14px; font-weight: 500; }
+
+        @media (max-width: 850px) {
+            .founder-section { flex-direction: column; text-align: center; }
+            .skills-container { justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo"><i class="fas fa-code"></i> CodeMaster</div>
-        <a href="index.html" class="btn-signup">Back to Home</a>
-    </nav>
 
-    <section class="about-page" style="padding: 100px 5%; text-align: center;">
-        <h1>About Our Mission</h1>
-        <p style="color: #94a3b8; margin: 20px 0;">CodeMaster was founded by <strong>Suhel Ansari</strong> to provide logical coding education.</p>
-        
-        <div class="about-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px;">
-            <div class="card">
-                <i class="fas fa-bullseye card-icon"></i>
-                <h3>Our Vision</h3>
-                <p>To make every student a logical thinker and a pro developer.</p>
-            </div>
-            <div class="card">
-                <i class="fas fa-user-graduate card-icon"></i>
-                <h3>Our Success</h3>
-                <p>Helping 10k+ students in their coding journey.</p>
-            </div>
+    <header class="header">
+        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/about" class="active">About</a></li>
+                <li><a href="/courses">Courses</a></li>
+            </ul>
+        </nav>
+        <div class="auth-container" id="auth-buttons">
+            <a href="/login" class="btn-login">Login</a>
+            <a href="/signup" class="btn-signup">Sign Up Free</a>
+        </div>
+        <div class="bx bx-menu" id="menu-icon"></div>
+    </header>
+
+    <section class="about-hero">
+        <h1>Empowering the Next Generation of <span>Developers</span></h1>
+        <p>CodeMaster is not just an e-learning platform; it's a community dedicated to transforming passionate learners into industry-ready software engineers.</p>
+    </section>
+
+    <section class="mission-vision">
+        <div class="mv-card">
+            <i class='bx bx-target-lock'></i>
+            <h3>Our Mission</h3>
+            <p>To bridge the gap between academic theory and practical industry requirements by providing high-quality, project-based education in Web Development, Artificial Intelligence, and Mobile App Development.</p>
+        </div>
+        <div class="mv-card">
+            <i class='bx bx-bulb'></i>
+            <h3>Our Vision</h3>
+            <p>To create a world where anyone, regardless of their background, can access premium technical education and build a successful career in the fast-paced tech industry.</p>
         </div>
     </section>
+
+    <section class="founder-section">
+        <div class="founder-img">
+            <img src="https://via.placeholder.com/400x500.png?text=Suhel+Ansari" alt="Suhel Ansari - Founder">
+        </div>
+        <div class="founder-text">
+            <h2>Suhel Ansari</h2>
+            <div class="title">Founder & Lead Instructor | B.Tech CSE Student</div>
+            <p>Hello! I am Suhel, a passionate Computer Science Engineering student and full-stack developer. During my B.Tech journey, I realized that while college teaches us the fundamentals, the tech industry demands practical, hands-on experience with modern tools.</p>
+            <p>I built CodeMaster to solve this exact problem. My goal is to simplify complex programming concepts and help students build real-world applications that stand out on their resumes.</p>
+            
+            <div class="skills-container">
+                <span class="skill-tag">Full-Stack Web Dev</span>
+                <span class="skill-tag">Artificial Intelligence</span>
+                <span class="skill-tag">Mobile App Creation</span>
+                <span class="skill-tag">MongoDB & Node.js</span>
+            </div>
+
+            <a href="/contact" class="btn-primary">Get in Touch <i class='bx bx-right-arrow-alt'></i></a>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
 </body>
 </html>
