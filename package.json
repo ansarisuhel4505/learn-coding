@@ -12,9 +12,10 @@
     "express",
     "mongodb",
     "passport",
-    "authentication"
+    "authentication",
+    "fullstack"
   ],
-  "author": "Suhel",
+  "author": "Suhel Ansari",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
