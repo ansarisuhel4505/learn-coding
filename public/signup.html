@@ -5,115 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - CodeMaster</title>
     
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --primary-color: #3b82f6;
-            --primary-hover: #2563eb;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
-        body { 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; padding: 20px;
-            background-image: radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 40%);
-        }
-
-        .auth-card {
-            background: var(--surface-color);
-            width: 100%; max-width: 450px;
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            text-align: center;
-        }
-
-        .logo { font-size: 24px; font-weight: 700; color: var(--text-main); text-decoration: none; display: inline-block; margin-bottom: 20px; }
-        .logo span { color: var(--primary-color); }
-        .logo i { color: var(--primary-color); }
-
-        .auth-card h2 { font-size: 26px; font-weight: 600; margin-bottom: 10px; }
-        .auth-card p.subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
-
-        /* Form Inputs */
-        .input-group { position: relative; margin-bottom: 18px; text-align: left; }
-        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
-        .input-group i { position: absolute; left: 15px; top: 40px; color: #64748b; font-size: 20px; }
-        
-        .input-group input {
-            width: 100%; padding: 14px 14px 14px 45px;
-            background: var(--bg-color); color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 8px;
-            font-size: 14px; transition: 0.3s; outline: none;
-        }
-        .input-group input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-
-        /* Submit Button */
-        .submit-btn {
-            width: 100%; padding: 14px;
-            background: var(--primary-color); color: #fff;
-            border: none; border-radius: 8px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            transition: 0.3s; margin-top: 15px;
-        }
-        .submit-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); }
-
+        /* CSS exact wahi hai jo login page ki thi taaki design same rahe */
+        .auth-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 120px 5% 50px; background: radial-gradient(circle at top, var(--surface-color), var(--bg-color)); }
+        .auth-box { background: var(--surface-color); padding: 40px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 450px; text-align: center; }
+        .auth-box h2 { font-size: 28px; margin-bottom: 10px; color: var(--text-main); }
+        .auth-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+        .google-btn { display: flex; align-items: center; justify-content: center; gap: 15px; background: #fff; color: #000; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 16px; transition: 0.3s; margin-bottom: 25px; }
+        .google-btn:hover { background: #f1f5f9; transform: translateY(-2px); }
+        .google-btn img { width: 25px; }
+        .divider { display: flex; align-items: center; color: var(--text-muted); font-size: 12px; margin-bottom: 25px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border-color); margin: 0 10px; }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .input-box { position: relative; display: flex; align-items: center; }
+        .input-box i { position: absolute; left: 15px; color: var(--text-muted); font-size: 20px; }
+        .input-box input { width: 100%; padding: 15px 15px 15px 45px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s; }
+        .input-box input:focus { border-color: var(--primary-color); }
+        .btn-submit { width: 100%; background: var(--primary-color); color: white; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-submit:hover { background: var(--primary-hover); }
         .auth-footer { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
-        .auth-footer a { color: var(--primary-color); text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .auth-footer a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
         .auth-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="auth-card">
+    <header class="header">
         <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
-        <h2>Create an Account 🚀</h2>
-        <p class="subtitle">Join thousands of students and start coding today.</p>
-
-        <form action="/signup" method="POST">
-            <div class="input-group">
-                <label>Full Name</label>
-                <i class='bx bx-user'></i>
-                <input type="text" name="username" placeholder="John Doe" required>
-            </div>
-            <div class="input-group">
-                <label>Mobile Number</label>
-                <i class='bx bx-mobile-alt'></i>
-                
-    <input type="tel" name="mobile" placeholder="Enter Mobile Number" required pattern="[0-9]{10}" title="10 digit mobile number">
-            </div>
-            
-
-            <div class="input-group">
-                <label>Email Address</label>
-                <i class='bx bx-envelope'></i>
-                <input type="email" name="email" placeholder="example@mail.com" required>
-            </div>
-            
-            <div class="input-group">
-                <label>Create Password</label>
-                <i class='bx bx-lock-alt'></i>
-                <input type="password" name="password" placeholder="Create a strong password" required>
-            </div>
-            
-            <button type="submit" class="submit-btn">Sign Up Free</button>
-        </form>
-
-        <div class="auth-footer">
-            Already have an account? <a href="/login">Log in here</a>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/courses.html">Courses</a></li>
+                <li><a href="/compiler.html">Compiler</a></li>
+                <li><a href="/contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="auth-container" id="auth-buttons">
+            <a href="/login.html" class="btn-login">Login</a>
+            <a href="/signup.html" class="btn-signup">Sign Up Free</a>
         </div>
-    </div>
+        <div class="bx bx-menu" id="menu-icon"></div>
+    </header>
 
+    <section class="auth-section">
+        <div class="auth-box">
+            <h2>Create an Account 🚀</h2>
+            <p>Join CodeMaster and start your coding journey today.</p>
+
+            <a href="/auth/google" class="google-btn">
+                <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google">
+                Sign up with Google
+            </a>
+
+            <div class="divider">OR SIGN UP WITH EMAIL</div>
+
+            <form action="/signup" method="POST">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-box">
+                        <i class='bx bx-user'></i>
+                        <input type="text" name="username" placeholder="Suhel Ansari" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-box">
+                        <i class='bx bx-envelope'></i>
+                        <input type="email" name="email" placeholder="example@mail.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Mobile Number</label>
+                    <div class="input-box">
+                        <i class='bx bx-mobile-alt'></i>
+                        <input type="tel" name="mobile" placeholder="Enter 10-digit number" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Create Password</label>
+                    <div class="input-box">
+                        <i class='bx bx-lock-alt'></i>
+                        <input type="password" name="password" placeholder="Create a strong password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="/login.html">Login here</a>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
 </body>
 </html>
