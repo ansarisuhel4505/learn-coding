@@ -578,6 +578,15 @@ body {
     font-size: 14px;
 }
 
+
+}
+
+@media (max-width: 500px) {
+    .hero h1 { font-size: 32px; }
+    .hero h2 { font-size: 22px; }
+    .hero-buttons { flex-direction: column; }
+    .footer-container { grid-template-columns: 1fr; }
+}
 /* ==========================================
    10. MOBILE RESPONSIVE (MEDIA QUERIES)
    ========================================= */
@@ -598,15 +607,24 @@ body {
         background: var(--surface-color);
         padding: 20px 8%;
         border-top: 1px solid var(--border-color);
-        display: none; /* Hidden by default, toggled by JS */
-        flex-direction: column;
-        gap: 20px;
+        display: none; /* Hidden by default */
         box-shadow: 0 10px 20px rgba(0,0,0,0.5);
     }
 
-    .navbar.active { display: flex; }
+    .navbar.active { 
+        display: block; 
+    }
     
-    .auth-container { display: none; } /* Hide auth buttons in header on mobile if needed, or move to menu */
+    /* ✨ MAIN FIX YAHAN HAI: Links ko ek ke niche ek karna ✨ */
+    .nav-links {
+        display: flex;
+        flex-direction: column; /* Line ko column banayega */
+        align-items: center;    /* Center mein set karega */
+        gap: 20px;
+        width: 100%;
+    }
+    
+    .auth-container { display: none; } 
 
     .hero {
         flex-direction: column;
@@ -615,40 +633,14 @@ body {
         gap: 50px;
     }
 
-    .hero-text-content {
-        max-width: 100%;
-    }
-
-    .hero-buttons {
-        justify-content: center;
-    }
-
-    .hero-stats {
-        justify-content: center;
-    }
-
-    .features-content {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .features-list li {
-        text-align: left;
-    }
-
-    .instructor-container {
-        flex-direction: column;
-        text-align: center;
-        padding: 30px;
-    }
-
-    .social-links {
-        justify-content: center;
-    }
-
-    .footer-container {
-        grid-template-columns: 1fr 1fr;
-    }
+    .hero-text-content { max-width: 100%; }
+    .hero-buttons { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .features-content { flex-direction: column; text-align: center; }
+    .features-list li { text-align: left; }
+    .instructor-container { flex-direction: column; text-align: center; padding: 30px; }
+    .social-links { justify-content: center; }
+    .footer-container { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 500px) {
@@ -657,3 +649,5 @@ body {
     .hero-buttons { flex-direction: column; }
     .footer-container { grid-template-columns: 1fr; }
 }
+
+
