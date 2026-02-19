@@ -172,27 +172,25 @@ app.get('/courses', (req, res) => res.sendFile(path.join(__dirname, 'public', 'c
 // --- Manual Signup ---
 app.post('/signup', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        // req.body mein mobile add kiya
+        const { username, email, password, mobile } = req.body; 
         
-        // Check karo ki user pehle se to nahi hai
         const existingUser = await User.findOne({ email });
         if(existingUser) {
             return res.send("User already exists. <a href='/login'>Login here</a>");
         }
 
-        // Naya user database mein save karo
-        const newUser = await User.create({ username, email, password });
+        // Database mein mobile save karein
+        const newUser = await User.create({ username, email, password, mobile });
         
-        // 🔥 YAHAN NAYA PROFESSIONAL WELCOME EMAIL BHEJA JA RAHA HAI 🔥
         sendWelcomeEmail(email, username);
-        
-        // Email bhejne ke baad user ko login page par bhej do
         res.redirect('/login');
     } catch (err) {
         console.error("Signup Error:", err);
         res.send("Error during signup.");
     }
 });
+
 
 
 // --- Manual Login ---
@@ -282,6 +280,7 @@ app.get('/admin/users', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
