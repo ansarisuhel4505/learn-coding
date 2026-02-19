@@ -82,35 +82,17 @@
         </div>
     </section>
 
-    <section class="learning-paths" id="paths">
-        <div class="section-heading">
-            <h2>Choose Your <span>Learning Path</span></h2>
-            <p>We focus on the most demanded technologies in the IT industry today.</p>
-        </div>
-
-        <div class="paths-grid">
-            <div class="path-card">
-                <div class="path-icon"><i class='bx bx-globe'></i></div>
-                <h3>Full-Stack Web Development</h3>
-                <p>Master both frontend and backend. Build scalable web applications using MERN stack (MongoDB, Express, React, Node.js).</p>
-                <a href="/courses" class="path-link">View Track <i class='bx bx-chevron-right'></i></a>
-            </div>
-
-            <div class="path-card">
-                <div class="path-icon"><i class='bx bx-brain'></i></div>
-                <h3>Artificial Intelligence</h3>
-                <p>Dive deep into AI concepts. Learn Python, machine learning algorithms, and how to build intelligent, data-driven systems.</p>
-                <a href="/courses" class="path-link">View Track <i class='bx bx-chevron-right'></i></a>
-            </div>
-
-            <div class="path-card">
-                <div class="path-icon"><i class='bx bx-mobile-alt'></i></div>
-                <h3>Mobile App Creation</h3>
-                <p>Create stunning cross-platform mobile applications for iOS and Android using modern frameworks like React Native or Flutter.</p>
-                <a href="/courses" class="path-link">View Track <i class='bx bx-chevron-right'></i></a>
-            </div>
-        </div>
+    <section class="learning-path" style="padding: 60px 5%;">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h2 style="font-size: 32px; color: var(--text-main);">Choose Your Learning Path</h2>
+        <p style="color: var(--text-muted);">Explore our latest courses added by the Admin.</p>
+    </div>
+    
+    <div class="course-grid" id="dynamic-courses" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
+        <p style="text-align: center; width: 100%; grid-column: 1 / -1; color: var(--text-muted);">Loading amazing courses for you...</p>
+    </div>
     </section>
+    
 
     <section class="features" id="features">
         <div class="features-content">
@@ -231,6 +213,7 @@
 </body>
   </html>
   
+
 
 
 
