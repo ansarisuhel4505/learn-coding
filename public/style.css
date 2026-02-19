@@ -85,30 +85,22 @@ body {
     margin-top: 10px;
     font-size: 16px;
 }
-
 /* ==========================================
-   HEADER & NAVBAR (Desktop View)
+   HEADER & NAVBAR (Desktop Par Perfect Dikhega)
    ========================================= */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px 3%; /* Jagah badhai hai taaki side mein space rahe */
+    padding: 20px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-    transition: var(--transition);
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid transparent;
-}
-
-.header.sticky {
-    padding: 15px 3%;
     border-bottom: 1px solid var(--border-color);
-    background: var(--bg-color);
 }
 
 .logo {
@@ -118,58 +110,91 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    text-decoration: none;
 }
-
 .logo span { color: var(--primary-color); }
-.logo i { color: var(--primary-color); font-size: 28px; }
+
+/* Desktop View: Navbar hamesha dikhegi */
+.navbar { display: block; }
 
 .nav-links {
     display: flex;
-    gap: 20px; /* Gap thoda kam kiya hai taaki links chipke nahi */
-    align-items: center;
+    gap: 25px;
+    list-style: none;
 }
-
 .nav-links a {
     color: var(--text-main);
     font-weight: 500;
     font-size: 15px;
-    transition: var(--transition);
+    text-decoration: none;
+    transition: 0.3s;
 }
+.nav-links a:hover { color: var(--primary-color); }
 
-.nav-links a:hover, .nav-links a.active {
-    color: var(--primary-color);
-}
-
-/* Auth Buttons (Login / Sign Up) */
+/* Login/Signup Buttons */
 .auth-container {
     display: flex;
     align-items: center;
     gap: 15px;
 }
-
-.btn-login { 
-    color: var(--text-main); 
-    font-weight: 600; 
-    transition: var(--transition); 
-}
+.btn-login, .btn-signup { font-weight: 600; font-size: 15px; text-decoration: none; transition: 0.3s;}
+.btn-login { color: var(--text-main); }
 .btn-login:hover { color: var(--primary-color); }
+.btn-signup { background: var(--primary-color); color: #fff; padding: 8px 20px; border-radius: 6px; }
+.btn-signup:hover { background: #2563eb; }
 
-.btn-signup {
-    background: var(--primary-color); 
-    color: #fff;
-    padding: 8px 20px; 
-    border-radius: 6px; 
-    font-weight: 600;
-    transition: var(--transition);
-}
-.btn-signup:hover { background: var(--primary-hover); }
-
+/* Hamburger Icon (Desktop pe hide rahega) */
 #menu-icon {
     font-size: 32px;
     color: var(--text-main);
     cursor: pointer;
-    display: none; /* Desktop par hide rahega */
+    display: none; 
+    z-index: 1001; /* Menu ke upar dikhne ke liye */
 }
+
+/* ==========================================
+   MOBILE VIEW (Professional Half-Screen Drawer)
+   ========================================= */
+@media (max-width: 1150px) {
+    #menu-icon { 
+        display: block; /* Mobile pe burger icon dikhega */
+    }
+
+    .auth-container { 
+        display: none; /* Mobile header ko clean rakhne ke liye buttons chupaye */
+    }
+
+    .navbar {
+        position: fixed;
+        top: 0;
+        right: -100%; /* Shuru mein screen ke bahar (Right side) chhupa rahega */
+        width: 60%; /* 🔥 SIRF 60% SCREEN LEGA (Aadha Screen) 🔥 */
+        max-width: 300px;
+        height: 100vh;
+        background: var(--surface-color);
+        padding: 80px 30px 30px 30px;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        transition: right 0.4s ease; /* Ekdum smooth sliding effect */
+        z-index: 999;
+    }
+
+    /* Jab JS se 'active' class add hogi, tab menu andar aayega */
+    .navbar.active { right: 0; }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        align-items: flex-start; /* Links side mein align honge */
+    }
+
+    .nav-links a {
+        font-size: 18px; /* Mobile par thoda bada font */
+        display: block;
+        width: 100%;
+    }
+}
+
 
 /* ==========================================
    MOBILE & TABLET VIEW (Responsive Navbar)
@@ -715,6 +740,7 @@ body {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
+
 
 
 
