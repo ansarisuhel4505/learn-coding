@@ -47,62 +47,6 @@ const transporter = nodemailer.createTransport({
 });
 
 // ==========================================
-// 2. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
-// ==========================================
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS  
-    }
-});
-
-// Khoobsurat HTML Welcome Email Template
-async function sendWelcomeEmail(toEmail, userName) {
-    const mailOptions = {
-        from: `"CodeMaster Team" <${process.env.EMAIL_USER}>`,
-        to: toEmail,
-        subject: "Welcome to CodeMaster! 🚀 Start Your Coding Journey",
-        html: `
-            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 15px; background-color: #f8fafc;">
-                
-                <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
-                    <h1 style="color: #3b82f6; margin: 0; font-size: 32px;">Code<span style="color: #0f172a;">Master</span></h1>
-                </div>
-                
-                <div style="background-color: #ffffff; padding: 30px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                    <h2 style="color: #0f172a; margin-top: 0;">Welcome to the community, ${userName.split(' ')[0]}! 👋</h2>
-                    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                        We are thrilled to have you on board. CodeMaster is your ultimate platform to master Full-Stack Development, Artificial Intelligence, and Mobile Apps.
-                    </p>
-                    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                        Get ready to build real-world projects, learn industry-standard tools, and elevate your coding skills to the next level. Let's build something amazing together!
-                    </p>
-                    
-                    <div style="text-align: center; margin-top: 35px; margin-bottom: 15px;">
-                        <a href="https://codemaster-app.onrender.com/dashboard" style="background-color: #3b82f6; color: #ffffff; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Go to Your Dashboard</a>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; padding-top: 25px; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                    <p style="margin: 5px 0;">&copy; 2026 CodeMaster by Suhel Ansari. All rights reserved.</p>
-                    <p style="margin: 5px 0;">If you didn't create an account, please safely ignore this email.</p>
-                </div>
-                
-            </div>
-        `
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`📧 Professional Welcome Email sent to: ${toEmail}`);
-    } catch (err) {
-        console.error("❌ Email Sending Failed:", err);
-    }
-}
-
-
-// ==========================================
 // 3. MIDDLEWARE & SESSION SETUP
 // ==========================================
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -273,5 +217,6 @@ app.post('/update-mobile', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
