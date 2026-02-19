@@ -304,6 +304,42 @@ app.get('/logout', (req, res) => {
         res.redirect('/login.html');
     });
 });
+// ==========================================
+// 🔴 ADMIN APIs: COURSE MANAGEMENT
+// ==========================================
+
+// 1. Saare Courses Dekhne ke liye (Fetch Courses)
+app.get('/api/courses', async (req, res) => {
+    try {
+        const courses = await Course.find().sort({ createdAt: -1 }); // Naye courses upar dikhenge
+        res.json(courses);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch courses" });
+    }
+});
+
+// 2. Naya Course Add Karne ke liye
+app.post('/api/courses', async (req, res) => {
+    try {
+        const { title, description, thumbnail, videoLink } = req.body;
+        const newCourse = await Course.create({ title, description, thumbnail, videoLink });
+        res.json({ success: true, message: "Course added successfully!", course: newCourse });
+    } catch (err) {
+        console.error("Course Add Error:", err);
+        res.status(500).json({ error: "Failed to add course" });
+    }
+});
+
+// 3. Course Delete Karne ke liye
+app.delete('/api/courses/:id', async (req, res) => {
+    try {
+        await Course.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "Course deleted!" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete course" });
+    }
+});
+
 
 // ==========================================
 // 6. START SERVER
@@ -311,5 +347,6 @@ app.get('/logout', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
