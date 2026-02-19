@@ -42,6 +42,43 @@ const UserSchema = new mongoose.Schema({
     photo: String
 });
 const User = mongoose.model('User', UserSchema);
+// ==========================================
+// COURSE & EXAM DATABASE SCHEMAS (Naya Code)
+// ==========================================
+
+// 1. Course Ka Schema
+const CourseSchema = new mongoose.Schema({
+    title: String,
+    description: String,
+    thumbnail: String,
+    videoLink: String, // YouTube ya Render ka video link
+    createdAt: { type: Date, default: Date.now }
+});
+const Course = mongoose.model('Course', CourseSchema);
+
+// 2. Exam Ka Schema
+const ExamSchema = new mongoose.Schema({
+    title: String,
+    totalMarks: Number,
+    questions: [{ 
+        questionText: String, 
+        options: [String], 
+        correctAnswer: String 
+    }],
+    isActive: { type: Boolean, default: true }
+});
+const Exam = mongoose.model('Exam', ExamSchema);
+
+// 3. Result Ka Schema
+const ResultSchema = new mongoose.Schema({
+    studentId: String,
+    studentName: String,
+    examTitle: String,
+    score: Number,
+    isReleased: { type: Boolean, default: false } // Jab admin release karega tab true hoga
+});
+const Result = mongoose.model('Result', ResultSchema);
+
 
 // ==========================================
 // 3. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
@@ -274,4 +311,5 @@ app.get('/logout', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
