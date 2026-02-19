@@ -166,6 +166,21 @@ passport.deserializeUser(async (id, done) => {
 // ==========================================
 
 // --- Manual Signup Route ---
+// ==========================================
+// 5. ROUTES (Signup, Login, API, Admin)
+// ==========================================
+
+// --- Pages Dikhane Ke Liye (GET Routes) ---
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+// Iske neeche aapka purana app.post('/signup'...) code rahega...
+
 app.post('/signup', async (req, res) => {
     try {
         const { username, email, password, mobile } = req.body; 
@@ -259,3 +274,4 @@ app.get('/logout', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
