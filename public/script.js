@@ -124,3 +124,49 @@ async function isUserLoggedIn() {
         return false;
     }
 }
+// ==========================================
+// PAGE TRANSITION LOGIC (2 Second Logo Display)
+// ==========================================
+
+// 1. Screen par dikhne wala Overlay HTML se JS ke through banaya
+const transitionHTML = `
+    <div class="page-transition" id="pageTransition">
+        <div class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></div>
+    </div>
+`;
+document.body.insertAdjacentHTML('beforeend', transitionHTML);
+const transitionOverlay = document.getElementById('pageTransition');
+
+// 2. Saare links (<a> tags) ko dhoondho
+const allLinks = document.querySelectorAll('a');
+
+allLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        const targetUrl = this.getAttribute('href');
+
+        // Agar link khali hai, ya usi page ka hai (jaise #about), toh mat roko
+        if (!targetUrl || targetUrl.startsWith('#') || this.getAttribute('target') === '_blank') {
+            return; 
+        }
+
+        // Normal link par click hone par turant page load hone se roko
+        e.preventDefault(); 
+
+        // Logo wali screen dikhao
+        transitionOverlay.classList.add('active');
+
+        // Theek 2 second (2000 milliseconds) baad naya page open karo
+        setTimeout(() => {
+            window.location.href = targetUrl;
+        }, 2000); 
+    });
+});
+
+// 3. Agar user browser ka "Back" button dabaye, toh loading screen hata do
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+        transitionOverlay.classList.remove('active');
+    }
+});
+
+
