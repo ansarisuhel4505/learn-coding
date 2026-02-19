@@ -32,6 +32,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+    // ==========================================
+// MOBILE MENU TOGGLE LOGIC (Fix)
+// ==========================================
+const menuIcon = document.querySelector('#menu-icon');
+const navbar = document.querySelector('.navbar');
+
+if (menuIcon && navbar) {
+    // Burger icon par click karne ka function
+    menuIcon.onclick = () => {
+        menuIcon.classList.toggle('bx-x'); // Icon ko 'X' banayega
+        navbar.classList.toggle('active'); // Menu ko bahar layega
+    };
+
+    // Agar menu ke bahar kahin bhi click ho, toh menu band ho jaye
+    document.onclick = (e) => {
+        if (!menuIcon.contains(e.target) && !navbar.contains(e.target)) {
+            menuIcon.classList.remove('bx-x');
+            navbar.classList.remove('active');
+        }
+    };
+}
+    
 
     // ==========================================
     // 3. TYPEWRITER EFFECT (Typed.js)
@@ -221,6 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         courseContainer.innerHTML = '<p style="text-align:center; width: 100%; grid-column: 1 / -1; color: #ef4444;">Failed to load courses. Please refresh the page.</p>';
     }
 });
+
 
 
 
