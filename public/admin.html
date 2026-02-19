@@ -229,13 +229,11 @@
             e.preventDefault();
             const data = { title: document.getElementById('eTitle').value, totalMarks: document.getElementById('eMarks').value };
             const res = await fetch('/api/exams', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
-            if(res.ok) { closeExamModal(); loadExams(); loadSubmissions(); } // Submissions me update ke liye
+            if(res.ok) { closeExamModal(); loadExams(); loadSubmissions(); } 
         });
-        async function deleteExam(id) { if(confirm("Delete Exam?")) { await fetch(`/api/exams/${id}`, {method:'DELETE'}); loadExams(); } }
+        async function deleteExam(id) { if(confirm("Delete Exam?")) { await fetch(`/api/exams/${id}`, {method:'DELETE'}); loadExams(); loadSubmissions(); } }
 
-        // --- 3. 🌟 RESULTS & COPY CHECKING LOGIC 🌟 ---
-        
-        // Yeh function abhi dummy students dikhayega jinhone exam submit kiya hai (kyunki abhi students ne portal se exam nahi diya hai)
+        // --- 3. RESULTS & COPY CHECKING LOGIC ---
         async function loadSubmissions() {
             try {
                 const res = await fetch('/api/exams'); 
@@ -248,151 +246,11 @@
                 }
 
                 tbody.innerHTML = '';
-                // Har exam ke liye ek dummy student submission dikha rahe hain testing ke liye
                 exams.forEach((exam, index) => {
                     let studentName = index % 2 === 0 ? "Aman Kumar" : "Priya Singh";
                     let status = "<span style='color: #ef4444;'>Pending Review</span>";
-                    
-    <script>
-        // --- Modal Controls (Popups ko open/close karne ke liye) ---
-        function openCourseModal() { document.getElementById('courseModal').classList.add('active'); }
-        function closeCourseModal() { document.getElementById('courseModal').classList.remove('active'); document.getElementById('addCourseForm').reset(); }
-        
-        function openExamModal() { document.getElementById('examModal').classList.add('active'); }
-        function closeExamModal() { document.getElementById('examModal').classList.remove('active'); document.getElementById('addExamForm').reset(); }
-        
-        function closeResultModal() { document.getElementById('resultModal').classList.remove('active'); document.getElementById('uploadResultForm').reset(); }
-
-        // ==========================================
-        // 1. COURSE MANAGEMENT LOGIC
-        // ==========================================
-        async function loadCourses() {
-            try {
-                const res = await fetch('/api/courses'); 
-                const courses = await res.json();
-                const tbody = document.getElementById('courseTableBody');
-                
-                tbody.innerHTML = courses.length ? '' : '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No courses found.</td></tr>';
-                
-                courses.forEach(c => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${c.title}</strong></td>
-                            <td><a href="${c.videoLink}" target="_blank" style="color:#3b82f6; text-decoration: none;">View Video</a></td>
-                            <td><button class="action-btn" onclick="deleteCourse('${c._id}')"><i class='bx bx-trash'></i> Delete</button></td>
-                        </tr>`;
-                });
-            } catch(e) { console.error("Error loading courses:", e); }
-        }
-
-        document.getElementById('addCourseForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = { 
-                title: document.getElementById('cTitle').value, 
-                description: document.getElementById('cDesc').value, 
-                thumbnail: document.getElementById('cThumb').value, 
-                videoLink: document.getElementById('cVideo').value 
-            };
-            
-            const res = await fetch('/api/courses', { 
-                method: 'POST', 
-                headers: {'Content-Type':'application/json'}, 
-                body: JSON.stringify(data) 
-            });
-            
-            if(res.ok) { 
-                closeCourseModal(); 
-                loadCourses(); 
-            } else {
-                alert("Error adding course!");
-            }
-        });
-
-        async function deleteCourse(id) { 
-            if(confirm("Are you sure you want to delete this course?")) { 
-                await fetch(`/api/courses/${id}`, { method: 'DELETE' }); 
-                loadCourses(); 
-            } 
-        }
-
-        // ==========================================
-        // 2. EXAM MANAGEMENT LOGIC
-        // ==========================================
-        async function loadExams() {
-            try {
-                const res = await fetch('/api/exams'); 
-                const exams = await res.json();
-                const tbody = document.getElementById('examTableBody');
-                
-                tbody.innerHTML = exams.length ? '' : '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No exams created yet.</td></tr>';
-                
-                exams.forEach(ex => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${ex.title}</strong></td>
-                            <td>${ex.totalMarks}</td>
-                            <td><button class="action-btn" onclick="deleteExam('${ex._id}')"><i class='bx bx-trash'></i> Delete</button></td>
-                        </tr>`;
-                });
-            } catch(e) { console.error("Error loading exams:", e); }
-        }
-
-        document.getElementById('addExamForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = { 
-                title: document.getElementById('eTitle').value, 
-                totalMarks: document.getElementById('eMarks').value 
-            };
-            
-            const res = await fetch('/api/exams', { 
-                method: 'POST', 
-                headers: {'Content-Type':'application/json'}, 
-                body: JSON.stringify(data) 
-            });
-            
-            if(res.ok) { 
-                closeExamModal(); 
-                loadExams(); 
-                loadSubmissions(); // Exam create hone par dummy submission bhi update ho jayega
-            } else {
-                alert("Error creating exam!");
-            }
-        });
-
-        async function deleteExam(id) { 
-            if(confirm("Are you sure you want to delete this exam?")) { 
-                await fetch(`/api/exams/${id}`, { method: 'DELETE' }); 
-                loadExams(); 
-                loadSubmissions(); // Submissions table ko bhi refresh karo
-            } 
-        }
-
-        // ==========================================
-        // 3. RESULTS & COPY CHECKING LOGIC
-        // ==========================================
-        
-        // Dummy submissions dikhane ka code (Jab tak actual students exam na dein)
-        async function loadSubmissions() {
-            try {
-                const res = await fetch('/api/exams'); 
-                const exams = await res.json();
-                const tbody = document.getElementById('resultTableBody');
-                
-                if(exams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No pending submissions.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = '';
-                
-                // Har exam ke liye ek testing student dikhayenge
-                exams.forEach((exam, index) => {
-                    let studentName = index % 2 === 0 ? "Aman Kumar" : "Priya Singh";
-                    let status = "<span style='color: #ef4444; font-weight: 500;'>Pending Review</span>";
-                    
-                    // Button ko ek unique ID di hai taaki marks upload hone par iska color change kar sakein
                     let btnId = `checkBtn_${exam._id}`; 
-
+                    
                     tbody.innerHTML += `
                         <tr>
                             <td><strong>${studentName}</strong></td>
@@ -406,18 +264,16 @@
                         </tr>
                     `;
                 });
-            } catch(e) { console.error("Error loading submissions:", e); }
+            } catch(e) { console.error(e); }
         }
 
-        // Result Modal Open karna
         function openResultModal(submissionId, studentName, examTitle) {
             document.getElementById('resultModal').classList.add('active');
-            document.getElementById('rSubmissionId').value = submissionId; // Exam ka ID store kar liya
+            document.getElementById('rSubmissionId').value = submissionId;
             document.getElementById('rStudentName').innerText = studentName;
             document.getElementById('rExamTitle').innerText = examTitle;
         }
 
-        // Real API Call: Result Database mein bhejkar save karna
         document.getElementById('uploadResultForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -441,16 +297,13 @@
                     alert(`✅ Result Successfully Uploaded!\nStudent: ${student}\nMarks Awarded: ${marks}`);
                     closeResultModal();
                     
-                    // Magic UI Update: "Check Copy" button ko "Result Released" (Green) mein badal do
                     const submitBtn = document.getElementById(`checkBtn_${submissionId}`);
                     if(submitBtn) {
                         submitBtn.innerHTML = "<i class='bx bx-check-circle'></i> Result Released";
-                        submitBtn.style.background = "#22c55e"; // Green color
+                        submitBtn.style.background = "#22c55e"; 
                         submitBtn.style.color = "#fff";
                         submitBtn.style.border = "none";
-                        submitBtn.disabled = true; // Button ko disable kar diya
-                        
-                        // Status Text ko update karna
+                        submitBtn.disabled = true; 
                         submitBtn.parentElement.previousElementSibling.innerHTML = "<span style='color: #22c55e; font-weight: 500;'>Checked</span>";
                     }
                 } else {
@@ -462,15 +315,8 @@
             }
         });
 
-        // ==========================================
-        // Initialize (Page load hone par saare function chalao)
-        // ==========================================
-        window.onload = () => { 
-            loadCourses(); 
-            loadExams(); 
-            loadSubmissions(); 
-        };
+        // Initialize Everything
+        window.onload = () => { loadCourses(); loadExams(); loadSubmissions(); };
     </script>
-    
 </body>
 </html>
