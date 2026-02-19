@@ -49,40 +49,33 @@ const transporter = nodemailer.createTransport({
 });
 
 // 2. Khoobsurat HTML Welcome Email Template ka Function
-async function sendWelcomeEmail(toEmail, userName) {
+// Khoobsurat Login Alert Email Template
+async function sendLoginAlertEmail(toEmail, userName) {
     const mailOptions = {
-        from: `"CodeMaster Team" <${process.env.EMAIL_USER}>`,
+        from: `"CodeMaster Security" <${process.env.EMAIL_USER}>`,
         to: toEmail,
-        subject: "Welcome to CodeMaster! 🚀 Start Your Coding Journey",
+        subject: "Security Alert: New Login Detected 🚨",
         html: `
-            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 15px; background-color: #f8fafc;">
-                
-                <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
-                    <h1 style="color: #3b82f6; margin: 0; font-size: 32px;">Code<span style="color: #0f172a;">Master</span></h1>
-                </div>
-                
-                <div style="background-color: #ffffff; padding: 30px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                    <h2 style="color: #0f172a; margin-top: 0;">Welcome to the community, ${userName.split(' ')[0]}! 👋</h2>
-                    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                        We are thrilled to have you on board. CodeMaster is your ultimate platform to master Full-Stack Development, Artificial Intelligence, and Mobile Apps.
-                    </p>
-                    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                        Get ready to build real-world projects, learn industry-standard tools, and elevate your coding skills to the next level. Let's build something amazing together!
-                    </p>
-                    
-                    <div style="text-align: center; margin-top: 35px; margin-bottom: 15px;">
-                        <a href="https://learn-coding-2.onrender.com/dashboard" style="background-color: #3b82f6; color: #ffffff; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Go to Your Dashboard</a>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; padding-top: 25px; color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                    <p style="margin: 5px 0;">&copy; 2026 CodeMaster by Suhel Ansari. All rights reserved.</p>
-                    <p style="margin: 5px 0;">If you didn't create an account, please safely ignore this email.</p>
-                </div>
-                
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 500px; margin: auto;">
+                <h2 style="color: #d9534f;">New Login Detected</h2>
+                <p>Hello <b>${userName}</b>,</p>
+                <p>We noticed a new login to your CodeMaster Student Account just now.</p>
+                <p><b>Time:</b> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+                <p style="color: #555;">If this was you, you don't need to do anything. If you didn't log in, please reply to this email immediately to secure your account.</p>
+                <hr>
+                <p style="font-size: 12px; color: #888;">CodeMaster Security Team</p>
             </div>
         `
     };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Login Alert Email sent to: ${toEmail}`);
+    } catch (err) {
+        console.error("❌ Login Alert Email Failed:", err);
+    }
+}
+
 
     try {
         await transporter.sendMail(mailOptions);
@@ -192,25 +185,31 @@ app.post('/signup', async (req, res) => {
 });
 
 
-
-// --- Manual Login ---
+// --- Student Login Portal ---
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email, password });
-
-        if (user) {
-            req.login(user, (err) => {
-                if (err) return res.send("Error logging in");
-                res.redirect('/dashboard');
-            });
-        } else {
-            res.send("Wrong Email or Password. <a href='/login'>Try Again</a>");
+        
+        // User dhoondho
+        const user = await User.findOne({ email });
+        
+        // Agar user nahi mila ya password galat hai
+        if (!user || user.password !== password) {
+            return res.send("Invalid Email or Password. <a href='/login'>Try Again</a>");
         }
+
+        // Agar login SUCCESS hai, toh Login Alert Email bhej do!
+        sendLoginAlertEmail(user.email, user.username);
+        
+        // User ko dashboard par bhej do
+        res.redirect('/dashboard.html');
     } catch (err) {
-        res.send("Login Error");
+        console.error("Login Error:", err);
+        res.send("An error occurred during login.");
     }
 });
+
+
 
 // --- Google Auth ---
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -280,6 +279,7 @@ app.get('/admin/users', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
