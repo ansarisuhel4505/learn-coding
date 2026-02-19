@@ -393,6 +393,52 @@ app.delete('/api/courses/:id', async (req, res) => {
         res.status(500).json({ error: "Failed to delete course" });
     }
 });
+// ==========================================
+// 🔴 ADMIN APIs: EXAM MANAGEMENT
+// ==========================================
+
+// 1. Saare Exams Dekhne ke liye
+app.get('/api/exams', async (req, res) => {
+    try {
+        const exams = await Exam.find().sort({ _id: -1 }); // Naye exams upar
+        res.json(exams);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch exams" });
+    }
+});
+
+// 2. Naya Exam Create Karne ke liye
+app.post('/api/exams', async (req, res) => {
+    try {
+        const { title, totalMarks } = req.body;
+        
+        // Abhi ke liye hum ek dummy question automatically daal rahe hain.
+        // (Advance level par hum iska ek lamba form banayenge jahan admin questions type karega)
+        const questions = [
+            { 
+                questionText: "What is the full form of HTML?", 
+                options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup Language", "Hyper Tool Multi Language"], 
+                correctAnswer: "Hyper Text Markup Language" 
+            }
+        ];
+
+        const newExam = await Exam.create({ title, totalMarks, questions });
+        res.json({ success: true, message: "Exam created successfully!", exam: newExam });
+    } catch (err) {
+        console.error("Exam Create Error:", err);
+        res.status(500).json({ error: "Failed to create exam" });
+    }
+});
+
+// 3. Exam Delete Karne ke liye
+app.delete('/api/exams/:id', async (req, res) => {
+    try {
+        await Exam.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "Exam deleted!" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete exam" });
+    }
+});
 
 
 // ==========================================
@@ -401,6 +447,7 @@ app.delete('/api/courses/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
