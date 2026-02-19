@@ -439,6 +439,39 @@ app.delete('/api/exams/:id', async (req, res) => {
         res.status(500).json({ error: "Failed to delete exam" });
     }
 });
+// ==========================================
+// 🔴 ADMIN APIs: RESULTS & COPY CHECKING
+// ==========================================
+
+// 1. Result Upload karna (Jab admin copy check karke marks de)
+app.post('/api/results', async (req, res) => {
+    try {
+        const { studentName, examTitle, score } = req.body;
+        
+        // Database mein Result save karein
+        const newResult = await Result.create({
+            studentName: studentName,
+            examTitle: examTitle,
+            score: score,
+            isReleased: true // Marks ab officially release ho gaye hain
+        });
+
+        res.json({ success: true, message: "Result uploaded successfully!", result: newResult });
+    } catch (err) {
+        console.error("Result Upload Error:", err);
+        res.status(500).json({ error: "Failed to upload result" });
+    }
+});
+
+// 2. Saare Checked Results Dekhne ke liye (Admin record ke liye)
+app.get('/api/results', async (req, res) => {
+    try {
+        const results = await Result.find().sort({ _id: -1 }); // Naye result upar
+        res.json(results);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch results" });
+    }
+});
 
 
 // ==========================================
@@ -447,6 +480,7 @@ app.delete('/api/exams/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
