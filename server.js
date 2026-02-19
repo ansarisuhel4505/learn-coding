@@ -29,9 +29,8 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', userSchema);
-
 // ==========================================
-// 2. EMAIL ALERT SYSTEM (Nodemailer)
+// 2. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
 // ==========================================
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -41,20 +40,50 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Email bhejne ka function
-async function sendEmail(to, subject, htmlContent) {
+// Khoobsurat HTML Welcome Email Template
+async function sendWelcomeEmail(toEmail, userName) {
+    const mailOptions = {
+        from: `"CodeMaster Team" <${process.env.EMAIL_USER}>`,
+        to: toEmail,
+        subject: "Welcome to CodeMaster! 🚀 Start Your Coding Journey",
+        html: `
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 15px; background-color: #f8fafc;">
+                
+                <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
+                    <h1 style="color: #3b82f6; margin: 0; font-size: 32px;">Code<span style="color: #0f172a;">Master</span></h1>
+                </div>
+                
+                <div style="background-color: #ffffff; padding: 30px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <h2 style="color: #0f172a; margin-top: 0;">Welcome to the community, ${userName.split(' ')[0]}! 👋</h2>
+                    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                        We are thrilled to have you on board. CodeMaster is your ultimate platform to master Full-Stack Development, Artificial Intelligence, and Mobile Apps.
+                    </p>
+                    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                        Get ready to build real-world projects, learn industry-standard tools, and elevate your coding skills to the next level. Let's build something amazing together!
+                    </p>
+                    
+                    <div style="text-align: center; margin-top: 35px; margin-bottom: 15px;">
+                        <a href="https://codemaster-app.onrender.com/dashboard" style="background-color: #3b82f6; color: #ffffff; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Go to Your Dashboard</a>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; padding-top: 25px; color: #94a3b8; font-size: 13px; line-height: 1.5;">
+                    <p style="margin: 5px 0;">&copy; 2026 CodeMaster by Suhel Ansari. All rights reserved.</p>
+                    <p style="margin: 5px 0;">If you didn't create an account, please safely ignore this email.</p>
+                </div>
+                
+            </div>
+        `
+    };
+
     try {
-        await transporter.sendMail({
-            from: `"CodeMaster Team" <${process.env.EMAIL_USER}>`,
-            to: to,
-            subject: subject,
-            html: htmlContent
-        });
-        console.log(`📧 Email sent successfully to: ${to}`);
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Professional Welcome Email sent to: ${toEmail}`);
     } catch (err) {
         console.error("❌ Email Sending Failed:", err);
     }
 }
+
 
 // ==========================================
 // 3. MIDDLEWARE & SESSION SETUP
@@ -80,9 +109,8 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    // Dhyan dein: Agar Render par live hai to Render ka link daalein, warna localhost
-    callbackURL: "https://learn-coding-2.onrender.com/auth/google/callback"
-    
+    // Dhyan dein: Yahan apna asli Render wala link hi rakhein (.com tak)
+    callbackURL: "https://codemaster-app.onrender.com/auth/google/callback" 
   },
   async function(accessToken, refreshToken, profile, done) {
       try {
@@ -90,9 +118,10 @@ passport.use(new GoogleStrategy({
           let user = await User.findOne({ googleId: profile.id });
 
           if (user) {
-              return done(null, user); // User mil gaya, login kara do
+              // Agar purana user hai, toh bas chup-chaap login kara do (No Email)
+              return done(null, user); 
           } else {
-              // Naya user banayein
+              // Agar NAYA user hai, toh uska data save karo
               user = await User.create({
                   googleId: profile.id,
                   username: profile.displayName,
@@ -100,12 +129,8 @@ passport.use(new GoogleStrategy({
                   photo: profile.photos[0].value
               });
 
-              // Welcome Email bhejein
-              sendEmail(
-                  user.email, 
-                  "Welcome to CodeMaster! 🚀", 
-                  `<h3>Hi ${user.username},</h3><p>Your Google Login was successful. Start your learning journey today!</p>`
-              );
+              // 🔥 YAHAN NAYA PROFESSIONAL WELCOME EMAIL BHEJA JA RAHA HAI 🔥
+              sendWelcomeEmail(user.email, user.username);
 
               return done(null, user);
           }
@@ -115,15 +140,6 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser(async (id, done) => {
-    try {
-        const user = await User.findById(id);
-        done(null, user);
-    } catch(err) {
-        done(err, null);
-    }
-});
 
 // ==========================================
 // 5. ROUTES (Website Pages)
@@ -150,18 +166,26 @@ app.post('/signup', async (req, res) => {
     try {
         const { username, email, password } = req.body;
         
+        // Check karo ki user pehle se to nahi hai
         const existingUser = await User.findOne({ email });
-        if(existingUser) return res.send("User already exists. <a href='/login'>Login here</a>");
+        if(existingUser) {
+            return res.send("User already exists. <a href='/login'>Login here</a>");
+        }
 
+        // Naya user database mein save karo
         const newUser = await User.create({ username, email, password });
         
-        sendEmail(email, "Welcome to CodeMaster!", `Hi ${username}, thanks for registering manually.`);
+        // 🔥 YAHAN NAYA PROFESSIONAL WELCOME EMAIL BHEJA JA RAHA HAI 🔥
+        sendWelcomeEmail(email, username);
+        
+        // Email bhejne ke baad user ko login page par bhej do
         res.redirect('/login');
     } catch (err) {
-        console.error(err);
+        console.error("Signup Error:", err);
         res.send("Error during signup.");
     }
 });
+
 
 // --- Manual Login ---
 app.post('/login', async (req, res) => {
@@ -232,3 +256,4 @@ app.post('/update-mobile', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
