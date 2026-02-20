@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Support - CodeMaster</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <style>
+        .contact-container { display: flex; flex-wrap: wrap; padding: 120px 5% 80px; gap: 40px; justify-content: space-between; max-width: 1200px; margin: auto; }
+        .contact-info { flex: 1; min-width: 300px; }
+        .contact-info h2 { font-size: 35px; color: var(--text-main); margin-bottom: 15px; }
+        .info-box { display: flex; align-items: center; gap: 15px; margin-top: 30px; background: var(--surface-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .info-box i { font-size: 30px; color: var(--primary-color); }
+        
+        .contact-form { flex: 1; min-width: 300px; background: var(--surface-color); padding: 40px; border-radius: 15px; border: 1px solid var(--border-color); }
+        .input-group { margin-bottom: 20px; }
+        .input-group input, .input-group textarea { width: 100%; padding: 15px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: 'Poppins', sans-serif;}
+        .input-group textarea { height: 120px; resize: none; }
+        .btn-submit { background: var(--primary-color); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;}
+        .btn-submit:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+  <a href="/" class="back-to-home-btn">
+    <i class='bx bx-home-alt'></i> Back to Home
+  </a>
+  
+    <div class="contact-container">
+        <div class="contact-info">
+            <h2>Get in <span>Touch</span></h2>
+            <p style="color: var(--text-muted); line-height: 1.6;">Have a question about our courses, pricing, or your account? Our team is here to help you 24/7.</p>
+            
+            <div class="info-box">
+                <i class='bx bx-envelope'></i>
+                <div><h4 style="color:#fff;">Email Us</h4><p style="color:var(--text-muted); font-size:14px;">support@codemaster.com</p></div>
+            </div>
+            <div class="info-box">
+                <i class='bx bx-map'></i>
+                <div><h4 style="color:#fff;">Location</h4><p style="color:var(--text-muted); font-size:14px;">Uttar Pradesh, India</p></div>
+            </div>
+        </div>
+
+        <form class="contact-form">
+            <h3 style="color:#fff; margin-bottom: 25px;">Send a Message</h3>
+            <div class="input-group"><input type="text" placeholder="Your Full Name" required></div>
+            <div class="input-group"><input type="email" placeholder="Your Email Address" required></div>
+            <div class="input-group"><textarea placeholder="How can we help you?" required></textarea></div>
+            <button type="submit" class="btn-submit">Send Message</button>
+        </form>
+    </div>
+</body>
+</html>
 
