@@ -510,11 +510,10 @@ app.post('/api/submit-exam', async (req, res) => {
 // ==========================================
 // SERVER START LOGIC (Cloud Ready)
 // ==========================================
-const SERVER_PORT = process.env.PORT || 3000;
-
 app.listen(SERVER_PORT, "0.0.0.0", () => {
     console.log(`🚀 Server is running beautifully on port ${SERVER_PORT}`);
 });
+
 
 
 
