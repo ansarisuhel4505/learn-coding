@@ -508,11 +508,15 @@ app.post('/api/submit-exam', async (req, res) => {
 
 
 // ==========================================
-// 6. START SERVER
+// SERVER START LOGIC (Cloud Ready)
 // ==========================================
-app.listen(PORT, () => {
-    console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server is running beautifully on port ${PORT}`);
 });
+
+
 
 
 
