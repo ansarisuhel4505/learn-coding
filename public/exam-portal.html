@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Exam Environment</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; user-select: none; /* Text copy karna ban hai */ }
+        body { background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Header */
+        .exam-header { background: #1e293b; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; }
+        .exam-header h2 { color: #3b82f6; font-size: 22px; }
+        .timer { font-size: 24px; font-weight: 600; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Main Layout */
+        .exam-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Left: Questions Area */
+        .question-area { flex: 3; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
+        .question-text { font-size: 20px; margin-bottom: 30px; line-height: 1.6; }
+        .options-list { display: flex; flex-direction: column; gap: 15px; }
+        .option-label { background: #1e293b; padding: 15px 20px; border-radius: 10px; border: 2px solid #334155; cursor: pointer; transition: 0.2s; font-size: 16px; display: flex; align-items: center; gap: 15px; }
+        .option-label:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .option-label input[type="radio"] { transform: scale(1.5); cursor: pointer; }
+        
+        /* Right: Palette Area */
+        .palette-area { flex: 1; background: #1e293b; border-left: 2px solid #334155; padding: 20px; display: flex; flex-direction: column; }
+        .student-info { text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #334155; }
+        .palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .q-btn { background: #334155; color: #fff; border: none; padding: 15px 0; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; }
+        .q-btn.answered { background: #22c55e; } /* Green */
+        .q-btn.active { border: 2px solid #3b82f6; transform: scale(1.05); }
+        
+        /* Bottom Controls */
+        .controls { margin-top: auto; display: flex; justify-content: space-between; padding-top: 20px; border-top: 1px solid #334155; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; color: #fff; transition: 0.3s;}
+        .btn-prev { background: #475569; }
+        .btn-next { background: #3b82f6; }
+        .btn-submit { background: #22c55e; width: 100%; margin-top: 20px; padding: 15px; font-size: 18px; }
+
+        /* Full Screen Warning */
+        #warningOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(220, 38, 38, 0.95); z-index: 10000; display: none; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="warningOverlay">
+        <i class='bx bx-error' style="font-size: 80px; color: #fff; margin-bottom: 20px;"></i>
+        <h1 style="color: #fff; margin-bottom: 10px;">WARNING: TAB SWITCH DETECTED</h1>
+        <p style="color: #fff; font-size: 18px; max-width: 600px;">You are not allowed to change tabs or minimize the browser during the exam. Your exam will be auto-submitted if this repeats.</p>
+        <button onclick="dismissWarning()" style="margin-top: 30px; padding: 10px 30px; font-size: 18px; cursor: pointer;">Return to Exam</button>
+    </div>
+
+    <div class="exam-header">
+        <h2 id="examTitleUI">Loading Exam...</h2>
+        <div class="timer"><i class='bx bx-time-five'></i> <span id="timeDisplay">00:00</span></div>
+    </div>
+
+    <div class="exam-container">
+        <div class="question-area">
+            <h3 style="color: #94a3b8; margin-bottom: 10px;">Question <span id="qNumDisplay">1</span></h3>
+            <div class="question-text" id="qText">Please wait while questions are loading...</div>
+            
+            <div class="options-list" id="optionsContainer">
+                </div>
+
+            <div class="controls">
+                <button class="btn btn-prev" onclick="prevQuestion()"><i class='bx bx-left-arrow-alt'></i> Previous</button>
+                <button class="btn btn-next" onclick="saveAndNext()">Save & Next <i class='bx bx-right-arrow-alt'></i></button>
+            </div>
+        </div>
+
+        <div class="palette-area">
+            <div class="student-info">
+                <i class='bx bx-user-circle' style="font-size: 50px; color: #94a3b8;"></i>
+                <h3 id="studentNameUI" style="margin-top: 10px;">Student</h3>
+            </div>
+            <h4 style="margin-bottom: 15px; color: #94a3b8; text-align: center;">Question Palette</h4>
+            <div class="palette-grid" id="paletteGrid">
+                </div>
+            
+            <button class="btn btn-submit" onclick="submitExamManually()"><i class='bx bx-check-shield'></i> Final Submit Exam</button>
+        </div>
+    </div>
+
+    <script>
+        let examData = null;
+        let currentQIndex = 0;
+        let studentAnswers = {}; // Store answers: { 0: "Option A", 1: "Option C" }
+        let timerInterval;
+        let warnings = 0;
+        let studentName = "Student";
+
+        // 1. Get Exam ID from URL (e.g., ?id=12345)
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('id');
+
+        // 2. Fetch User Info & Exam Data
+        window.onload = async () => {
+            if(!examId) { alert("Invalid Exam URL!"); window.location.href="/dashboard.html"; return; }
+            
+            // Get Username
+            try {
+                const userRes = await fetch('/user-info');
+                const userData = await userRes.json();
+                if(userData.loggedIn) { studentName = userData.username; document.getElementById('studentNameUI').innerText = studentName; }
+            } catch(e) {}
+
+            // Get Exam Data
+            try {
+                const res = await fetch(`/api/exams/${examId}`);
+                examData = await res.json();
+                
+                if(!examData || !examData.questions || examData.questions.length === 0) {
+                    alert("This exam has no questions!"); window.location.href="/dashboard.html"; return;
+                }
+
+                document.getElementById('examTitleUI').innerText = examData.title;
+                startTimer(examData.duration * 60); // Convert minutes to seconds
+                buildPalette();
+                loadQuestion(0);
+                requestFullScreen(); // Ask for full screen
+            } catch(e) { alert("Error loading exam!"); }
+        };
+
+        // 3. Render Question & Options
+        function loadQuestion(index) {
+            currentQIndex = index;
+            const q = examData.questions[index];
+            
+            document.getElementById('qNumDisplay').innerText = index + 1;
+            document.getElementById('qText').innerText = q.questionText;
+            
+            const optContainer = document.getElementById('optionsContainer');
+            optContainer.innerHTML = '';
+            
+            q.options.forEach((opt, i) => {
+                const isChecked = studentAnswers[index] === opt ? "checked" : "";
+                optContainer.innerHTML += `
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="${opt}" ${isChecked}>
+                        ${opt}
+                    </label>
+                `;
+            });
+
+            updatePaletteUI();
+        }
+
+        // 4. Save & Next Logic
+        function saveAndNext() {
+            // Check if user selected an option
+            const selectedOpt = document.querySelector('input[name="answer"]:checked');
+            if(selectedOpt) {
+                studentAnswers[currentQIndex] = selectedOpt.value; // Save answer
+            }
+            
+            if(currentQIndex < examData.questions.length - 1) {
+                loadQuestion(currentQIndex + 1);
+            } else {
+                updatePaletteUI();
+                alert("You have reached the last question! You can review or click Final Submit.");
+            }
+        }
+
+        function prevQuestion() {
+            if(currentQIndex > 0) loadQuestion(currentQIndex - 1);
+        }
+
+        // 5. Palette Builder & Updater
+        function buildPalette() {
+            const grid = document.getElementById('paletteGrid');
+            grid.innerHTML = '';
+            for(let i=0; i < examData.questions.length; i++) {
+                grid.innerHTML += `<button class="q-btn" id="pal_${i}" onclick="loadQuestion(${i})">${i+1}</button>`;
+            }
+        }
+
+        function updatePaletteUI() {
+            for(let i=0; i < examData.questions.length; i++) {
+                const btn = document.getElementById(`pal_${i}`);
+                btn.className = 'q-btn'; // reset
+                if(studentAnswers[i]) btn.classList.add('answered'); // Green if answered
+                if(i === currentQIndex) btn.classList.add('active'); // Highlight current
+            }
+        }
+
+        // 6. Final Submit & Auto Check Logic
+        async function submitExamManually() {
+            if(confirm("Are you sure you want to final submit? You cannot change answers after this.")) {
+                finishExam();
+            }
+        }
+
+        async function finishExam() {
+            clearInterval(timerInterval); // Stop timer
+            
+            // Auto calculate score
+            let score = 0;
+            examData.questions.forEach((q, index) => {
+                if(studentAnswers[index] === q.correctAnswer) {
+                    score += q.marks;
+                }
+            });
+
+            try {
+                const res = await fetch('/api/submit-exam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentName: studentName, examTitle: examData.title, score: score })
+                });
+                
+                if(res.ok) {
+                    alert(`Exam Submitted Successfully!\nYour Score is auto-calculated and released in your Dashboard.`);
+                    window.location.href = "/dashboard.html";
+                }
+            } catch(e) { alert("Server error during submission."); }
+        }
+
+        // 7. Live Timer Logic
+        function startTimer(totalSeconds) {
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                let m = Math.floor(totalSeconds / 60);
+                let s = totalSeconds % 60;
+                document.getElementById('timeDisplay').innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                
+                if(totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time is UP! Your exam is being auto-submitted.");
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        // 8. ANTI-CHEAT: Tab Switch Detection
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                warnings++;
+                document.getElementById('warningOverlay').style.display = 'flex';
+                if(warnings >= 3) {
+                    alert("Exam Cancelled due to multiple cheating attempts!");
+                    finishExam();
+                }
+            }
+        });
+        function dismissWarning() { document.getElementById('warningOverlay').style.display = 'none'; }
+        
+        // Full screen request
+        function requestFullScreen() {
+            let el = document.documentElement;
+            if(el.requestFullscreen) el.requestFullscreen();
+        }
+    </script>
+</body>
+</html>
