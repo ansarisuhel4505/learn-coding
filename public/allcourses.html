@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Courses - CodeMaster</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .page-header { padding: 150px 5% 50px; text-align: center; }
+        .page-header h1 { font-size: 40px; color: var(--text-main); margin-bottom: 15px; }
+        
+        .search-filter { display: flex; justify-content: center; gap: 15px; margin-bottom: 50px; padding: 0 5%; flex-wrap: wrap;}
+        .search-box { display: flex; align-items: center; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 20px; width: 100%; max-width: 400px; }
+        .search-box input { background: transparent; border: none; color: #fff; width: 100%; outline: none; margin-left: 10px; font-size: 15px;}
+        .filter-btn { background: var(--primary-color); color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>Explore Our <span>Courses</span></h1>
+        <p style="color: var(--text-muted);">Find the perfect course to level up your skills.</p>
+    </div>
+
+    <div class="search-filter">
+        <div class="search-box">
+            <i class='bx bx-search' style="color: var(--text-muted); font-size: 20px;"></i>
+            <input type="text" placeholder="Search for Web Dev, AI, Python...">
+        </div>
+        <button class="filter-btn">Search</button>
+    </div>
+
+    <section class="learning-path" style="padding: 0 5% 80px;">
+        <div class="course-grid" id="dynamic-courses" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
+            <p style="text-align: center; width: 100%; color: var(--text-muted);">Loading courses from database...</p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
