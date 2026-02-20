@@ -4,177 +4,319 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - CodeMaster</title>
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg-color: #0f172a; --surface-color: #1e293b; --primary-color: #3b82f6; --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: #334155; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg-color); color: var(--text-main); display: flex; scroll-behavior: smooth; }
-
+        body { display: flex; background: #f0f4f8; height: 100vh; overflow: hidden; }
+        
         /* Sidebar */
-        .sidebar { width: 250px; background: var(--surface-color); height: 100vh; padding: 20px; border-right: 1px solid var(--border-color); position: fixed; }
-        .sidebar .logo { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
-        .sidebar .logo span { color: var(--primary-color); }
-        .nav-links { list-style: none; }
-        .nav-links li { margin-bottom: 12px; }
-        .nav-links a { display: flex; align-items: center; gap: 15px; color: var(--text-muted); text-decoration: none; padding: 12px; border-radius: 8px; transition: 0.3s; font-weight: 500;}
-        .nav-links a:hover, .nav-links a.active { background: var(--primary-color); color: #fff; }
+        .sidebar { width: 250px; background: #ffffff; box-shadow: 2px 0 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; z-index: 10; }
+        .sidebar h2 { padding: 25px 20px; color: #3b82f6; font-weight: 700; font-size: 24px; border-bottom: 1px solid #e2e8f0; }
+        .sidebar h2 span { color: #0f172a; }
+        .nav-links { list-style: none; padding: 20px 0; flex-grow: 1; }
+        .nav-links li { padding: 15px 25px; cursor: pointer; color: #64748b; font-weight: 500; transition: 0.3s; border-right: 4px solid transparent; }
+        .nav-links li:hover, .nav-links li.active { background: #f8fafc; color: #3b82f6; border-right: 4px solid #3b82f6; }
+        .nav-links li i { margin-right: 12px; width: 20px; text-align: center; }
+        .logout-btn { padding: 15px; text-align: center; color: #ef4444; text-decoration: none; font-weight: 600; border-top: 1px solid #e2e8f0; transition: 0.3s; }
+        .logout-btn:hover { background: #fee2e2; }
 
         /* Main Content */
-        .main-content { margin-left: 250px; padding: 30px; width: calc(100% - 250px); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .user-profile { display: flex; align-items: center; gap: 10px; background: var(--surface-color); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border-color); }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .section { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .section-container { background: var(--surface-color); padding: 25px; border-radius: 15px; border: 1px solid var(--border-color); margin-bottom: 30px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { color: #1e293b; margin-bottom: 30px; font-size: 28px; }
+
+        /* Cards & Grids */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: 0.3s; border: 1px solid #e2e8f0; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .card img { width: 100%; height: 180px; object-fit: cover; }
+        .card-body { padding: 20px; }
+        .card-title { font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 10px; }
+        .card-text { color: #64748b; font-size: 14px; margin-bottom: 15px; }
+        .btn { display: inline-block; width: 100%; padding: 12px; text-align: center; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #2563eb; }
+        .btn-success { background: #10b981; } .btn-success:hover { background: #059669; }
+
+        /* Result Form */
+        .result-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto; text-align: center; }
+        .result-box input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; }
+        .result-card { background: #f8fafc; border: 2px dashed #3b82f6; padding: 20px; border-radius: 10px; margin-top: 20px; display: none; text-align: left; }
         
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { color: var(--text-muted); font-weight: 500; }
-        
-        .btn { background: var(--primary-color); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; text-decoration: none;}
-        .btn:hover { background: #2563eb; transform: translateY(-2px); }
+        /* Exam Engine Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.9); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 800px; max-width: 95%; max-height: 90vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { background: #f8fafc; padding: 20px 30px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 30px; overflow-y: auto; flex-grow: 1; }
+        .exam-setup-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        .question-block { margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .question-block h4 { color: #0f172a; margin-bottom: 15px; }
+        .option-label { display: block; padding: 10px 15px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .option-label:hover { background: #f1f5f9; }
+        input[type="radio"] { margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></div>
+        <h2>Code<span>Master</span></h2>
         <ul class="nav-links">
-            <li><a href="#" class="active"><i class='bx bx-grid-alt'></i> My Dashboard</a></li>
-            <li><a href="#active-exams"><i class='bx bx-laptop'></i> Active Exams</a></li>
-            <li><a href="#my-results"><i class='bx bx-trophy'></i> My Results</a></li>
-            <li><a href="/"><i class='bx bx-home'></i> Back to Website</a></li>
-            <li><a href="/logout" style="color: #ef4444;"><i class='bx bx-log-out'></i> Logout</a></li>
+            <li class="active" onclick="switchTab('courses')"><i class="fas fa-laptop-code"></i> My Courses</li>
+            <li onclick="switchTab('exams')"><i class="fas fa-stopwatch"></i> Live Exams</li>
+            <li onclick="switchTab('results')"><i class="fas fa-trophy"></i> Check Result</li>
         </ul>
+        <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
     <div class="main-content">
-        <div class="header">
-            <div>
-                <h2 id="welcomeText">Welcome Student! 👋</h2>
-                <p style="color: var(--text-muted); font-size: 14px;">Ready to test your skills today?</p>
-            </div>
-            <div class="user-profile">
-                <i class='bx bx-user-circle' style="font-size: 24px;"></i>
-                <span id="displayUsername">Loading...</span>
+        
+        <div id="courses-sec" class="section active">
+            <h1>📚 Available Courses</h1>
+            <div class="grid-container" id="coursesGrid">
+                <p>Loading courses...</p>
             </div>
         </div>
 
-        <div class="section-container" id="active-exams">
-            <div class="section-header">
-                <h3><i class='bx bx-laptop'></i> Available Exams</h3>
-                <p style="font-size: 14px; color: var(--text-muted);">Click on 'Take Exam' to start your live test.</p>
+        <div id="exams-sec" class="section">
+            <h1>📝 Live Exams Portal</h1>
+            <div class="grid-container" id="examsGrid">
+                <p>Loading exams...</p>
             </div>
-            <table>
-                <thead>
-                    <tr><th>Exam Title</th><th>Details</th><th>Action</th></tr>
-                </thead>
-                <tbody id="studentExamTableBody">
-                    <tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Loading active exams...</td></tr>
-                </tbody>
-            </table>
         </div>
 
-        <div class="section-container" id="my-results">
-            <div class="section-header">
-                <h3><i class='bx bx-trophy'></i> My Marksheet</h3>
-                <p style="font-size: 14px; color: var(--text-muted);">Your auto-calculated scores.</p>
+        <div id="results-sec" class="section">
+            <h1 style="text-align: center;">🏆 CodeMaster Result Portal</h1>
+            <div class="result-box">
+                <i class="fas fa-user-graduate" style="font-size: 50px; color: #3b82f6; margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 20px; color: #0f172a;">Check Your Board Result</h3>
+                <input type="text" id="resRollNo" placeholder="Enter Your Roll Number" required>
+                <input type="password" id="resPass" placeholder="Enter Your Password" required>
+                <button onclick="checkMyResult()" class="btn">View Result</button>
+
+                <div id="resultDisplay" class="result-card">
+                    <h3 id="rStudentName" style="color: #3b82f6; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 15px;"></h3>
+                    <div id="marksList"></div>
+                </div>
             </div>
-            <table>
-                <thead>
-                    <tr><th>Exam Title</th><th>Status</th><th>Score Obtained</th></tr>
-                </thead>
-                <tbody id="studentResultTableBody">
-                    <tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Loading your results...</td></tr>
-                </tbody>
-            </table>
+        </div>
+
+    </div>
+
+    <div id="examModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalExamTitle" style="color: #0f172a;">Exam Starting...</h2>
+                <span onclick="closeExam()" style="cursor: pointer; font-size: 24px; color: #ef4444;">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div id="examSetupForm" class="exam-setup-form">
+                    <h3 style="margin-bottom: 20px; color: #3b82f6;">Enter Details to Start Exam</h3>
+                    <input type="text" id="exName" placeholder="Full Name" required>
+                    <input type="text" id="exRoll" placeholder="Roll Number" required>
+                    <input type="number" id="exMobile" placeholder="Mobile Number" required>
+                    <input type="hidden" id="exId">
+                    <input type="hidden" id="exTitleName">
+                    <button onclick="loadQuestions()" class="btn btn-success" style="font-size: 18px;">Start Exam Now</button>
+                </div>
+
+                <div id="examQuestionsArea" style="display: none;">
+                    <p style="color: #ef4444; font-weight: bold; margin-bottom: 20px;"><i class="fas fa-clock"></i> Do not refresh the page!</p>
+                    <div id="questionsList"></div>
+                    <button onclick="submitExamFinal()" class="btn btn-success" style="margin-top: 20px;">Submit Exam & Send to Admin</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // 1. Get User Info (Aapka naam dikhane ke liye)
-        async function fetchUserInfo() {
-            try {
-                const res = await fetch('/user-info');
-                const data = await res.json();
-                if(data.loggedIn) {
-                    document.getElementById('welcomeText').innerText = `Welcome ${data.username}! 👋`;
-                    document.getElementById('displayUsername').innerText = data.username;
-                    return data.username;
-                } else {
-                    // Agar login nahi hai toh wapas login page par bhej do
-                    window.location.href = '/login.html';
-                }
-            } catch(e) { 
-                document.getElementById('displayUsername').innerText = "Student"; 
-            }
+        // --- 1. TAB SWITCHING LOGIC ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+            document.getElementById(tabId + '-sec').classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        // 2. Load Available Exams from Database
-        async function loadStudentExams() {
+        // --- 2. FETCH COURSES ---
+        async function loadCourses() {
+            try {
+                const res = await fetch('/api/courses');
+                const courses = await res.json();
+                const grid = document.getElementById('coursesGrid');
+                grid.innerHTML = '';
+                if(courses.length === 0) return grid.innerHTML = '<p>No courses available right now.</p>';
+                
+                courses.forEach(c => {
+                    grid.innerHTML += `
+                        <div class="card">
+                            <img src="${c.thumbnail}" alt="Course Image">
+                            <div class="card-body">
+                                <h3 class="card-title">${c.title}</h3>
+                                <p class="card-text">${c.description.substring(0, 80)}...</p>
+                                <a href="${c.videoLink}" target="_blank" class="btn"><i class="fas fa-play"></i> Watch Now</a>
+                            </div>
+                        </div>`;
+                });
+            } catch(e) { console.log(e); }
+        }
+
+        // --- 3. FETCH EXAMS ---
+        async function loadExams() {
             try {
                 const res = await fetch('/api/exams');
                 const exams = await res.json();
-                const tbody = document.getElementById('studentExamTableBody');
+                const grid = document.getElementById('examsGrid');
+                grid.innerHTML = '';
+                if(exams.length === 0) return grid.innerHTML = '<p>No active exams right now.</p>';
                 
-                if(exams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No active exams scheduled right now.</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = '';
-                exams.forEach(ex => {
-                    // 🚀 YAHAN MAIN CHANGE HUA HAI: Ab ye link direct exam-portal par bhejega ID ke sath
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${ex.title}</strong></td>
-                            <td><span style="color: #3b82f6;">${ex.duration} Mins</span> • ${ex.totalMarks} Marks</td>
-                            <td>
-                                <a href="/exam-portal.html?id=${ex._id}" class="btn">
-                                    Take Exam <i class='bx bx-right-arrow-alt'></i>
-                                </a>
-                            </td>
-                        </tr>
-                    `;
+                exams.forEach(e => {
+                    grid.innerHTML += `
+                        <div class="card" style="border-top: 5px solid #ef4444;">
+                            <div class="card-body">
+                                <h3 class="card-title">${e.title}</h3>
+                                <p class="card-text"><b>Marks:</b> ${e.totalMarks} | <b>Time:</b> ${e.duration} Mins</p>
+                                <button onclick="openExamSetup('${e._id}', '${e.title}')" class="btn btn-success"><i class="fas fa-pen-nib"></i> Attempt Exam</button>
+                            </div>
+                        </div>`;
                 });
-            } catch(e) { console.error("Failed to load exams:", e); }
+            } catch(e) { console.log(e); }
         }
 
-        // 3. Load Auto-Checked Results
-        async function loadStudentResults() {
+        // --- 4. EXAM ENGINE LOGIC ---
+        let currentExamData = null;
+
+        function openExamSetup(examId, examTitle) {
+            document.getElementById('modalExamTitle').innerText = "Exam: " + examTitle;
+            document.getElementById('exId').value = examId;
+            document.getElementById('exTitleName').value = examTitle;
+            document.getElementById('examSetupForm').style.display = "block";
+            document.getElementById('examQuestionsArea').style.display = "none";
+            document.getElementById('examModal').style.display = "flex";
+        }
+
+        function closeExam() {
+            if(confirm("Are you sure you want to exit? Your progress will be lost.")) {
+                document.getElementById('examModal').style.display = "none";
+            }
+        }
+
+        async function loadQuestions() {
+            const name = document.getElementById('exName').value;
+            const roll = document.getElementById('exRoll').value;
+            const mobile = document.getElementById('exMobile').value;
+            const examId = document.getElementById('exId').value;
+
+            if(!name || !roll || !mobile) return alert("Please fill all details to enter the exam hall!");
+
             try {
-                const res = await fetch('/api/my-results');
-                const results = await res.json();
-                const tbody = document.getElementById('studentResultTableBody');
+                const res = await fetch(`/api/exams/${examId}`);
+                currentExamData = await res.json();
                 
-                // Hum sirf current logged-in student ke results filter karenge
-                const currentStudentName = document.getElementById('displayUsername').innerText;
-                const myResults = results.filter(r => r.studentName === currentStudentName);
-                
-                if(myResults.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No results declared yet. Take an exam first!</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = '';
-                myResults.forEach(r => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${r.examTitle}</strong></td>
-                            <td><span style="color: #22c55e; background: rgba(34,197,94,0.1); padding: 5px 12px; border-radius: 5px; font-size: 13px; font-weight: 600;">Checked & Released</span></td>
-                            <td><strong style="font-size: 18px; color: #f59e0b;">${r.score} Marks</strong></td>
-                        </tr>
+                let qHTML = '';
+                currentExamData.questions.forEach((q, index) => {
+                    qHTML += `
+                        <div class="question-block" id="qBlock_${index}">
+                            <h4>Q${index + 1}: ${q.questionText} <span style="float:right; color:#64748b; font-size:14px;">[${q.marks} Marks]</span></h4>
                     `;
+                    q.options.forEach(opt => {
+                        qHTML += `
+                            <label class="option-label">
+                                <input type="radio" name="ans_${index}" value="${opt}"> ${opt}
+                            </label>
+                        `;
+                    });
+                    qHTML += `</div>`;
                 });
-            } catch(e) { console.error("Failed to load results:", e); }
+
+                document.getElementById('questionsList').innerHTML = qHTML;
+                document.getElementById('examSetupForm').style.display = "none";
+                document.getElementById('examQuestionsArea').style.display = "block";
+                
+            } catch(e) { alert("Error loading question paper."); }
         }
 
-        // Initialize Page
-        window.onload = async () => {
-            await fetchUserInfo(); // Pehle naam laao
-            await loadStudentExams(); // Fir exams laao
-            await loadStudentResults(); // Fir results laao
+        async function submitExamFinal() {
+            if(!confirm("Submit final answers? You cannot change them later.")) return;
+
+            // Collect Answers
+            let studentAnswers = {};
+            currentExamData.questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="ans_${index}"]:checked`);
+                studentAnswers[`Q${index + 1}`] = selected ? selected.value : "Not Attempted";
+            });
+
+            const data = {
+                studentName: document.getElementById('exName').value,
+                rollNo: document.getElementById('exRoll').value,
+                mobile: document.getElementById('exMobile').value,
+                examTitle: document.getElementById('exTitleName').value,
+                answers: studentAnswers
+            };
+
+            try {
+                const res = await fetch('/api/submit-exam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if(result.success) {
+                    alert("🎉 Exam Submitted Successfully! Admin will check your copy.");
+                    document.getElementById('examModal').style.display = "none";
+                }
+            } catch(e) { alert("Error submitting exam!"); }
+        }
+
+        // --- 5. RESULT CHECKER LOGIC ---
+        async function checkMyResult() {
+            const rollNo = document.getElementById('resRollNo').value;
+            const pass = document.getElementById('resPass').value;
+
+            if(!rollNo || !pass) return alert("Please enter Roll No and Password");
+
+            try {
+                const res = await fetch('/api/check-result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNo: rollNo, password: pass })
+                });
+                const data = await res.json();
+
+                if(!data.success) {
+                    alert("❌ " + data.message);
+                    return;
+                }
+
+                document.getElementById('rStudentName').innerText = "Student: " + data.studentName;
+                let marksHTML = "";
+
+                if(data.results.length === 0) {
+                    marksHTML = "<p style='color:#ef4444; font-weight:bold;'>No Results Released Yet! Your copies might be pending for checking.</p>";
+                } else {
+                    data.results.forEach(r => {
+                        marksHTML += `
+                            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; display:flex; justify-content:space-between;">
+                                <b>${r.examTitle}</b>
+                                <span style="color:#10b981; font-weight:bold; font-size:18px;">${r.score} Marks</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                document.getElementById('marksList').innerHTML = marksHTML;
+                document.getElementById('resultDisplay').style.display = "block";
+
+            } catch(e) { alert("Server Error. Try again."); }
+        }
+
+        // On Load
+        window.onload = () => {
+            loadCourses();
+            loadExams();
         };
     </script>
 </body>
