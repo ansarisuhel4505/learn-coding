@@ -3,79 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Code Compiler - CodeMaster</title>
-    
+    <title>Live Web Compiler - CodeMaster</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
     <style>
-        .compiler-section {
-            padding: 100px 5% 40px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .compiler-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .compiler-header h2 { font-size: 30px; color: var(--text-main); }
-        .compiler-header span { color: var(--primary-color); }
-        .compiler-header p { color: var(--text-muted); font-size: 14px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f172a; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .compiler-container {
-            flex-grow: 1;
-            width: 100%;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            background: var(--surface-color);
+        /* Compiler Header */
+        .compiler-header { background: #1e293b; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; }
+        .compiler-header .logo { font-size: 24px; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;}
+        .compiler-header .logo span { color: #3b82f6; }
+        
+        .action-btns { display: flex; gap: 15px; }
+        .btn { background: #3b82f6; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; font-family: 'Poppins'; font-weight: 500; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px;}
+        .btn:hover { background: #2563eb; }
+        .btn-clear { background: #ef4444; }
+        .btn-clear:hover { background: #dc2626; }
+
+        /* Main Workspace */
+        .workspace { display: flex; flex: 1; height: calc(100vh - 65px); }
+        
+        /* Left: Code Editors */
+        .editors-container { flex: 1; display: flex; flex-direction: column; border-right: 5px solid #334155; background: #0f172a; }
+        
+        .editor-box { flex: 1; display: flex; flex-direction: column; border-bottom: 2px solid #334155; position: relative; }
+        .editor-box:last-child { border-bottom: none; }
+        
+        .editor-label { position: absolute; top: 10px; right: 20px; background: rgba(51, 65, 85, 0.8); padding: 4px 12px; border-radius: 4px; font-family: 'Poppins'; font-size: 12px; font-weight: 600; color: #94a3b8; pointer-events: none; }
+        .html-label { color: #f97316; } /* Orange */
+        .css-label { color: #3b82f6; }  /* Blue */
+        .js-label { color: #eab308; }   /* Yellow */
+
+        textarea { 
+            flex: 1; 
+            width: 100%; 
+            background: transparent; 
+            color: #e2e8f0; 
+            padding: 40px 20px 20px 20px; 
+            font-family: 'Fira Code', monospace; 
+            font-size: 15px; 
+            border: none; 
+            outline: none; 
+            resize: none; 
+            line-height: 1.5;
         }
         
-        /* IFRAME ko full size dene ke liye */
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        /* Custom Scrollbar for Textareas */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        /* Right: Live Output */
+        .output-container { flex: 1; background: #fff; display: flex; flex-direction: column; }
+        .output-header { background: #1e293b; color: #94a3b8; padding: 10px 20px; font-family: 'Poppins'; font-size: 14px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px;}
+        iframe { flex: 1; width: 100%; border: none; background: #fff; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 900px) {
+            .workspace { flex-direction: column; }
+            .editors-container { border-right: none; border-bottom: 5px solid #334155; height: 50vh; flex: none; }
+            .output-container { height: 50vh; flex: none; }
+            .editor-box { border-bottom: 1px solid #334155; }
         }
     </style>
 </head>
 <body>
-    
-<a href="/" class="back-to-home-btn">
-    <i class='bx bx-home-alt'></i> Back to Home
-</a>
 
-    <header class="header">
+    <div class="compiler-header">
         <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
-        <nav class="navbar">
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/courses">Courses</a></li>
-                <li><a href="/compiler.html" class="active">Compiler</a></li>
-            </ul>
-        </nav>
-        <div class="auth-container" id="auth-buttons">
-            <a href="/login" class="btn-login">Login</a>
-            <a href="/signup" class="btn-signup">Sign Up Free</a>
+        <div class="action-btns">
+            <button class="btn btn-clear" onclick="clearCode()"><i class='bx bx-trash'></i> Clear Code</button>
+            <button class="btn" onclick="runCode()"><i class='bx bx-play'></i> Run Code</button>
         </div>
-        <div class="bx bx-menu" id="menu-icon"></div>
-    </header>
+    </div>
 
-    <section class="compiler-section">
-        <div class="compiler-header">
-            <h2>CodeMaster <span>Live IDE</span></h2>
-            <p>Run C, C++, Java, Python, JS, and 50+ other languages instantly right from your browser.</p>
+    <div class="workspace">
+        
+        <div class="editors-container">
+            <div class="editor-box">
+                <div class="editor-label html-label"><i class='bx bxl-html5'></i> HTML</div>
+                <textarea id="html-code" spellcheck="false" placeholder="<h1>Hello World</h1>"></textarea>
+            </div>
+            
+            <div class="editor-box">
+                <div class="editor-label css-label"><i class='bx bxl-css3'></i> CSS</div>
+                <textarea id="css-code" spellcheck="false" placeholder="h1 { color: red; }"></textarea>
+            </div>
+            
+            <div class="editor-box">
+                <div class="editor-label js-label"><i class='bx bxl-javascript'></i> JS</div>
+                <textarea id="js-code" spellcheck="false" placeholder="console.log('Running...');"></textarea>
+            </div>
+        </div>
+
+        <div class="output-container">
+            <div class="output-header"><i class='bx bx-laptop'></i> Live Output Preview</div>
+            <iframe id="output-frame"></iframe>
         </div>
         
-        <div class="compiler-container">
-            <iframe src="https://onecompiler.com/embed/?theme=dark&hideLanguageSelection=false&hideNew=true&hideTitle=true" 
-                    title="Live Code Compiler"></iframe>
-        </div>
-    </section>
+    </div>
 
-    <script src="script.js"></script>
+    <script>
+        function runCode() {
+            // Teeno boxes se code uthao
+            let html = document.getElementById("html-code").value;
+            let css = document.getElementById("css-code").value;
+            let js = document.getElementById("js-code").value;
+            
+            // Iframe (Output screen) ko select karo
+            let output = document.getElementById("output-frame");
+
+            // Iframe ke andar ka document open karke usme HTML, CSS (<style>), aur JS (<script>) daal do
+            output.contentDocument.body.innerHTML = html + "<style>" + css + "</style>";
+            
+            try {
+                // JS ko safely run karne ke liye
+                output.contentWindow.eval(js);
+            } catch(err) {
+                console.error("JavaScript Error: " + err);
+            }
+        }
+
+        function clearCode() {
+            if(confirm("Are you sure you want to clear all code?")) {
+                document.getElementById("html-code").value = "";
+                document.getElementById("css-code").value = "";
+                document.getElementById("js-code").value = "";
+                runCode(); // Output screen ko bhi blank karne ke liye
+            }
+        }
+
+        // Auto-Run Feature: Jaise hi user kuch type kare, turant output dikhe
+        document.getElementById("html-code").addEventListener("keyup", runCode);
+        document.getElementById("css-code").addEventListener("keyup", runCode);
+        document.getElementById("js-code").addEventListener("keyup", runCode);
+        
+        // Page load hote hi ek basic template run ho jaye
+        window.onload = () => {
+            document.getElementById("html-code").value = "<div class='box'>\n  <h2>Welcome to CodeMaster</h2>\n  <p>Start typing your code on the left!</p>\n</div>";
+            document.getElementById("css-code").value = "body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8fafc; font-family: sans-serif; }\n.box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #3b82f6; }\nh2 { color: #0f172a; margin-top: 0; }\np { color: #64748b; }";
+            runCode();
+        };
+    </script>
 </body>
 </html>
