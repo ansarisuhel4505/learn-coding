@@ -4,113 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - CodeMaster</title>
-    
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* CSS exact wahi hai jo login page ki thi taaki design same rahe */
-        .auth-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 120px 5% 50px; background: radial-gradient(circle at top, var(--surface-color), var(--bg-color)); }
-        .auth-box { background: var(--surface-color); padding: 40px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 450px; text-align: center; }
-        .auth-box h2 { font-size: 28px; margin-bottom: 10px; color: var(--text-main); }
-        .auth-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
-        .google-btn { display: flex; align-items: center; justify-content: center; gap: 15px; background: #fff; color: #000; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 16px; transition: 0.3s; margin-bottom: 25px; }
-        .google-btn:hover { background: #f1f5f9; transform: translateY(-2px); }
-        .google-btn img { width: 25px; }
-        .divider { display: flex; align-items: center; color: var(--text-muted); font-size: 12px; margin-bottom: 25px; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border-color); margin: 0 10px; }
-        .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-        .input-box { position: relative; display: flex; align-items: center; }
-        .input-box i { position: absolute; left: 15px; color: var(--text-muted); font-size: 20px; }
-        .input-box input { width: 100%; padding: 15px 15px 15px 45px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s; }
-        .input-box input:focus { border-color: var(--primary-color); }
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-submit:hover { background: var(--primary-hover); }
-        .auth-footer { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
-        .auth-footer a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
-        .auth-footer a:hover { text-decoration: underline; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f4f8; }
+        
+        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; text-align: center; }
+        .container h2 { color: #0f172a; font-size: 28px; margin-bottom: 5px; }
+        .container h2 span { color: #3b82f6; }
+        .container p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        
+        .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn:hover { background: #2563eb; }
+        
+        .divider { margin: 20px 0; color: #94a3b8; font-size: 14px; position: relative; }
+        .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #e2e8f0; }
+        .divider::before { left: 0; } .divider::after { right: 0; }
+        
+        .btn-google { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-weight: 500; text-decoration: none; transition: 0.3s; }
+        .btn-google img { width: 20px; margin-right: 10px; }
+        .btn-google:hover { background: #f8fafc; }
+        
+        .bottom-text { margin-top: 20px; font-size: 14px; color: #64748b; }
+        .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        .bottom-text a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-    
-<a href="/" class="back-to-home-btn">
-    <i class='bx bx-home-alt'></i> Back to Home
-</a>
 
-    <header class="header">
-        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
-        <nav class="navbar">
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/about.html">About</a></li>
-                <li><a href="/courses.html">Courses</a></li>
-                <li><a href="/compiler.html">Compiler</a></li>
-                <li><a href="/contact.html">Contact</a></li>
-            </ul>
-        </nav>
-        <div class="auth-container" id="auth-buttons">
-            <a href="/login.html" class="btn-login">Login</a>
-            <a href="/signup.html" class="btn-signup">Sign Up Free</a>
-        </div>
-        <div class="bx bx-menu" id="menu-icon"></div>
-    </header>
-
-    <section class="auth-section">
-        <div class="auth-box">
-            <h2>Create an Account 🚀</h2>
-            <p>Join CodeMaster and start your coding journey today.</p>
-
-            <a href="/auth/google" class="google-btn">
-                <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google">
-                Sign up with Google
-            </a>
-
-            <div class="divider">OR SIGN UP WITH EMAIL</div>
-
-            <form action="/signup" method="POST">
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <div class="input-box">
-                        <i class='bx bx-user'></i>
-                        <input type="text" name="username" placeholder="Suhel Ansari" required>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Email Address</label>
-                    <div class="input-box">
-                        <i class='bx bx-envelope'></i>
-                        <input type="email" name="email" placeholder="example@mail.com" required>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Mobile Number</label>
-                    <div class="input-box">
-                        <i class='bx bx-mobile-alt'></i>
-                        <input type="tel" name="mobile" placeholder="Enter 10-digit number" pattern="[0-9]{10}" required>
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <label>Create Password</label>
-                    <div class="input-box">
-                        <i class='bx bx-lock-alt'></i>
-                        <input type="password" name="password" placeholder="Create a strong password" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-submit">Create Account</button>
-            </form>
-
-            <div class="auth-footer">
-                Already have an account? <a href="/login.html">Login here</a>
+    <div class="container">
+        <h2>Join <span>CodeMaster</span> 🚀</h2>
+        <p>Create your student account to start learning!</p>
+        
+        <form action="/signup" method="POST">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" placeholder="Full Name" required>
             </div>
-        </div>
-    </section>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" placeholder="Email Address" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-phone"></i>
+                <input type="number" name="mobile" placeholder="Mobile Number" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-id-badge"></i>
+                <input type="text" name="rollNo" placeholder="Create Roll Number (e.g., CS2026)" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Create Password" required>
+            </div>
+            
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
 
-    <script src="script.js"></script>
+        <div class="divider">OR</div>
+        
+        <a href="/auth/google" class="btn-google">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+            Sign up with Google
+        </a>
+        
+        <p class="bottom-text">Already have an account? <a href="/login.html">Login here</a></p>
+    </div>
+
 </body>
 </html>
