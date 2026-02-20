@@ -785,6 +785,44 @@ body {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
+/* ==========================================
+   FLOATING "BACK TO HOME" BUTTON
+   ========================================= */
+.back-to-home-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    z-index: 10000; /* Sabse upar dikhne ke liye */
+    transition: 0.3s ease;
+}
+
+.back-to-home-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    background: #2563eb;
+    box-shadow: 0 15px 30px rgba(59, 130, 246, 0.6);
+}
+
+/* Mobile screen par thoda chota dikhega */
+@media (max-width: 768px) {
+    .back-to-home-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
+
 
 
 
