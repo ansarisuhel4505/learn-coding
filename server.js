@@ -513,9 +513,19 @@ app.post('/api/submit-exam', async (req, res) => {
 // ==========================================
 // SERVER START LOGIC (Cloud Ready)
 // ==========================================
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port " + PORT);
-});
+// ==========================================
+// SERVER START LOGIC (Vercel Ready)
+// ==========================================
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, "0.0.0.0", () => {
+        console.log(`🚀 Server is running beautifully on port ${PORT}`);
+    });
+}
+
+// VERCEL KE LIYE SABSE ZAROORI LINE 👇
+module.exports = app;
+
+
 
 
 
