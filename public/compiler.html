@@ -21,7 +21,7 @@
         .controls { display: flex; gap: 10px; align-items: center; }
         .btn { background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 14px; }
         .btn:hover { background: #059669; }
-        select { background: #0f172a; color: #10b981; border: 1px solid #3b82f6; padding: 8px; border-radius: 5px; outline: none;}
+        select { background: #0f172a; color: #10b981; border: 1px solid #3b82f6; padding: 8px; border-radius: 5px; outline: none; max-width: 250px;}
 
         /* Workspaces */
         .workspace { display: flex; flex-grow: 1; height: calc(100vh - 60px); }
@@ -33,21 +33,22 @@
         .web-workspace { flex-direction: column; width: 100%; height: 100%; }
         .editors-grid { display: flex; height: 50%; border-bottom: 2px solid #334155; }
         .editor-box { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #334155; }
-        .editor-header { background: #1e293b; padding: 5px 15px; font-size: 13px; font-weight: bold; color: #94a3b8; border-bottom: 1px solid #334155; }
-        .editor-box textarea { flex-grow: 1; background: #0f172a; color: #e2e8f0; font-family: monospace; padding: 15px; border: none; outline: none; resize: none; }
+        .editor-header { background: #1e293b; padding: 5px 15px; font-size: 13px; font-weight: bold; color: #94a3b8; border-bottom: 1px solid #334155; display: flex; justify-content: space-between;}
+        .editor-box textarea { flex-grow: 1; background: #0f172a; color: #e2e8f0; font-family: monospace; padding: 15px; border: none; outline: none; resize: none; font-size: 14px; }
         .web-output { height: 50%; background: white; width: 100%; border: none; }
 
         /* =========================================
            MODE 2: BACKEND MULTI-FILE IDE
         ========================================= */
-        .sidebar { width: 200px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #94a3b8;}
+        .sidebar { width: 220px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #334155; font-size: 14px; color: #94a3b8; font-weight: bold;}
         .file-list { list-style: none; overflow-y: auto; flex-grow: 1; }
-        .file-item { padding: 8px 15px; font-size: 13px; cursor: pointer; color: #cbd5e1; border-bottom: 1px solid #0f172a; display: flex; justify-content: space-between;}
-        .file-item:hover, .file-item.active { background: #334155; color: white; }
-        .add-file-btn { width: 100%; padding: 10px; background: #0f172a; color: #3b82f6; border: none; cursor: pointer; font-weight: bold; border-top: 1px solid #334155;}
+        .file-item { padding: 10px 15px; font-size: 14px; cursor: pointer; color: #cbd5e1; border-bottom: 1px solid #0f172a; display: flex; justify-content: space-between; align-items: center;}
+        .file-item:hover, .file-item.active { background: #3b82f6; color: white; }
+        .add-file-btn { width: 100%; padding: 15px; background: #0f172a; color: #10b981; border: none; cursor: pointer; font-weight: bold; border-top: 1px solid #334155; transition: 0.3s;}
+        .add-file-btn:hover { background: #10b981; color: white;}
         
-        .backend-editor-area { flex-grow: 1; display: flex; flex-direction: column; width: calc(100% - 200px); }
+        .backend-editor-area { flex-grow: 1; display: flex; flex-direction: column; width: calc(100% - 220px); }
         .code-area { flex-grow: 1; display: flex; flex-direction: column; height: 60%; border-bottom: 2px solid #334155;}
         .code-area textarea { flex-grow: 1; background: #0f172a; color: #f8fafc; font-family: monospace; padding: 20px; border: none; outline: none; font-size: 15px; resize: none; }
         .terminal-area { height: 40%; background: #000; color: #e2e8f0; font-family: monospace; padding: 15px; overflow-y: auto; }
@@ -64,14 +65,14 @@
         <h2><i class="fas fa-laptop-code"></i> Code<span>Master</span></h2>
         
         <div class="mode-tabs">
-            <div class="mode-tab active" onclick="switchMode('web')"><i class="fab fa-html5"></i> Frontend (Web)</div>
-            <div class="mode-tab" onclick="switchMode('backend')"><i class="fas fa-folder-open"></i> Backend (Multi-File)</div>
-            <div class="mode-tab" onclick="switchMode('modules')" style="color: #fbbf24;"><i class="fab fa-node-js"></i> Node/React (Modules)</div>
+            <div class="mode-tab active" onclick="switchMode('web')" id="tab-web"><i class="fab fa-html5"></i> Web Frontend</div>
+            <div class="mode-tab" onclick="switchMode('backend')" id="tab-backend"><i class="fas fa-folder-open"></i> Backend (Multi-File)</div>
+            <div class="mode-tab" onclick="switchMode('modules')" id="tab-modules" style="color: #fbbf24;"><i class="fab fa-node-js"></i> Full Workspace</div>
         </div>
 
         <div class="controls">
             <div id="backendControls" class="hidden" style="display: flex; gap: 10px;">
-                <select id="langSelect" onchange="initBackend()"><option disabled>Loading...</option></select>
+                <select id="langSelect" onchange="initBackend()"><option value="python">PYTHON (v3.10.0)</option></select>
                 <button class="btn" onclick="runBackendCode()"><i class="fas fa-play"></i> Run Code</button>
             </div>
             <a href="/dashboard.html" style="color: #ef4444; font-weight: bold; text-decoration: none; padding-left: 10px;"><i class="fas fa-sign-out-alt"></i> Exit</a>
@@ -81,16 +82,25 @@
     <div class="workspace web-workspace" id="webWorkspace">
         <div class="editors-grid">
             <div class="editor-box">
-                <div class="editor-header"><i class="fab fa-html5" style="color:#ef4444;"></i> HTML</div>
-                <textarea id="htmlCode" onkeyup="runWeb()"><h1>Hello Web!</h1></textarea>
+                <div class="editor-header"><span><i class="fab fa-html5" style="color:#ef4444;"></i> HTML</span></div>
+                <textarea id="htmlCode" onkeyup="runWeb()">
+<div class="box">
+    <h1>Hello World!</h1>
+    <p>CodeMaster Web Compiler is working perfectly.</p>
+</div>
+                </textarea>
             </div>
             <div class="editor-box">
-                <div class="editor-header"><i class="fab fa-css3-alt" style="color:#3b82f6;"></i> CSS</div>
-                <textarea id="cssCode" onkeyup="runWeb()">h1 { color: blue; text-align: center; }</textarea>
+                <div class="editor-header"><span><i class="fab fa-css3-alt" style="color:#3b82f6;"></i> CSS</span></div>
+                <textarea id="cssCode" onkeyup="runWeb()">
+body { font-family: sans-serif; display: flex; justify-content: center; margin-top: 50px; background: #f0f4f8;}
+.box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;}
+h1 { color: #ef4444; }
+                </textarea>
             </div>
             <div class="editor-box" style="border-right: none;">
-                <div class="editor-header"><i class="fab fa-js" style="color:#eab308;"></i> JS</div>
-                <textarea id="jsCode" onkeyup="runWeb()">console.log("Web Loaded!");</textarea>
+                <div class="editor-header"><span><i class="fab fa-js" style="color:#eab308;"></i> JS</span></div>
+                <textarea id="jsCode" onkeyup="runWeb()">console.log("Web execution started!");</textarea>
             </div>
         </div>
         <iframe id="webOutput" class="web-output"></iframe>
@@ -98,18 +108,18 @@
 
     <div class="workspace hidden" id="backendWorkspace">
         <div class="sidebar">
-            <div class="sidebar-header"><span>FILES</span></div>
+            <div class="sidebar-header"><i class="fas fa-folder"></i> FILES EXPLORER</div>
             <ul class="file-list" id="fileList"></ul>
-            <button class="add-file-btn" onclick="addNewFile()">+ Add New File</button>
+            <button class="add-file-btn" onclick="addNewFile()"><i class="fas fa-plus"></i> New File</button>
         </div>
         
         <div class="backend-editor-area">
             <div class="code-area">
-                <div class="editor-header" id="currentFileName">main.py</div>
+                <div class="editor-header" id="currentFileName" style="background: #1e293b; padding: 10px 20px; color: #10b981; font-weight: bold;">main.py</div>
                 <textarea id="backendEditor" onkeyup="saveCurrentFile()"></textarea>
             </div>
             <div class="terminal-area" id="terminal">
-                <span style="color: #10b981;">CodeMaster Terminal</span><br>Click 'Run Code' to execute your files...
+                <span style="color: #3b82f6;">➜ CodeMaster Terminal</span><br>Click 'Run Code' to execute your files...
             </div>
         </div>
     </div>
@@ -120,11 +130,28 @@
 
     <script>
         // ==========================================
-        // UI MODE SWITCHING
+        // DEFAULT LANGUAGES (No API Dependency)
         // ==========================================
+        const defaultLangs = {
+            "python": "3.10.0", "javascript": "18.15.0", "java": "15.0.2", 
+            "cpp": "10.2.0", "c": "10.2.0", "csharp": "6.12.0", "go": "1.16.2", 
+            "rust": "1.68.2", "php": "8.2.3", "ruby": "3.0.1"
+        };
+        let languageVersions = { ...defaultLangs };
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        window.onload = () => {
+            populateDropdown();
+            switchMode('web'); // Load Web UI first instantly
+            fetchMoreLanguages(); // Load remaining 60+ languages in background
+        };
+
+        // UI MODE SWITCHING
         function switchMode(mode) {
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.getElementById(`tab-${mode}`).classList.add('active');
 
             document.getElementById('webWorkspace').classList.add('hidden');
             document.getElementById('backendWorkspace').classList.add('hidden');
@@ -137,6 +164,7 @@
             } else if (mode === 'backend') {
                 document.getElementById('backendWorkspace').classList.remove('hidden');
                 document.getElementById('backendControls').classList.remove('hidden');
+                if(Object.keys(backendFiles).length === 0) initBackend(); // Load default files
             } else if (mode === 'modules') {
                 document.getElementById('modulesWorkspace').classList.remove('hidden');
             }
@@ -149,8 +177,7 @@
             const html = document.getElementById('htmlCode').value;
             const css = `<style>${document.getElementById('cssCode').value}</style>`;
             const js = `<script>${document.getElementById('jsCode').value}<\/script>`;
-            const output = document.getElementById('webOutput');
-            output.srcdoc = html + css + js;
+            document.getElementById('webOutput').srcdoc = html + css + js;
         }
 
         // ==========================================
@@ -158,49 +185,48 @@
         // ==========================================
         let backendFiles = {};
         let currentFile = "";
-        let runtimesCache = [];
 
-        // Fetch Languages from Piston
-        window.onload = async () => {
+        async function fetchMoreLanguages() {
             try {
                 const res = await fetch('https://emkc.org/api/v2/piston/runtimes');
-                runtimesCache = await res.json();
-                const select = document.getElementById('langSelect');
-                select.innerHTML = '';
-                
-                let langs = {};
-                runtimesCache.forEach(rt => langs[rt.language] = rt.version);
-                Object.keys(langs).sort().forEach(lang => {
-                    select.innerHTML += `<option value="${lang}">${lang.toUpperCase()} (v${langs[lang]})</option>`;
-                });
-                select.value = 'python'; // Default
-                initBackend();
-                runWeb();
-            } catch (e) { console.error("API Error", e); }
-        };
+                const data = await res.json();
+                data.forEach(rt => languageVersions[rt.language] = rt.version);
+                populateDropdown();
+            } catch (e) { console.log("Using default 10 languages."); }
+        }
 
-        // Initialize Files based on Language
+        function populateDropdown() {
+            const select = document.getElementById('langSelect');
+            const currentVal = select.value || 'python';
+            select.innerHTML = '';
+            Object.keys(languageVersions).sort().forEach(lang => {
+                select.innerHTML += `<option value="${lang}">${lang.toUpperCase()} (v${languageVersions[lang]})</option>`;
+            });
+            select.value = currentVal;
+        }
+
+        // Setup Files based on Language
         function initBackend() {
             const lang = document.getElementById('langSelect').value;
-            backendFiles = {}; // Clear old files
+            backendFiles = {}; 
             
             if (lang === 'python') {
-                backendFiles['main.py'] = "import helper\n\nprint('Hello from Main!')\nhelper.greet()";
-                backendFiles['helper.py'] = "def greet():\n    print('Hello from Helper Module!')";
+                backendFiles['main.py'] = "import helper\n\nprint('Hello from Main.py!')\nhelper.greet()";
+                backendFiles['helper.py'] = "def greet():\n    print('Hello from Helper Module! Code is successfully linked.')";
                 currentFile = 'main.py';
             } else if (lang === 'javascript') {
-                backendFiles['index.js'] = "const math = require('./math.js');\nconsole.log('2 + 3 =', math.add(2, 3));";
+                backendFiles['index.js'] = "const math = require('./math.js');\nconsole.log('Math logic 5 + 5 =', math.add(5, 5));";
                 backendFiles['math.js'] = "module.exports.add = (a, b) => a + b;";
                 currentFile = 'index.js';
             } else {
-                backendFiles[`main.${lang}`] = `// Write your ${lang} code here\n`;
+                backendFiles[`main.${lang}`] = `// Start your ${lang.toUpperCase()} programming here\n`;
                 currentFile = `main.${lang}`;
             }
             renderFileList();
             loadFile(currentFile);
         }
 
-        // Render Sidebar
+        // Render Sidebar Files
         function renderFileList() {
             const list = document.getElementById('fileList');
             list.innerHTML = '';
@@ -209,7 +235,7 @@
                 list.innerHTML += `
                     <li class="file-item ${activeClass}" onclick="loadFile('${fileName}')">
                         <span><i class="fas fa-file-code"></i> ${fileName}</span>
-                        ${Object.keys(backendFiles).length > 1 ? `<i class="fas fa-times" style="color:#ef4444;" onclick="deleteFile(event, '${fileName}')"></i>` : ''}
+                        ${Object.keys(backendFiles).length > 1 ? `<i class="fas fa-trash-alt" style="color:#ef4444;" onclick="deleteFile(event, '${fileName}')"></i>` : ''}
                     </li>
                 `;
             }
@@ -227,50 +253,56 @@
         }
 
         function addNewFile() {
-            const name = prompt("Enter new file name with extension (e.g., utils.py, style.css):");
-            if (name && !backendFiles[name]) {
+            const name = prompt("Enter new file name (e.g., config.py, app.js):");
+            if (name && name.trim() !== "" && !backendFiles[name]) {
                 backendFiles[name] = "";
+                saveCurrentFile(); // Save active file before switching
                 loadFile(name);
+            } else if (backendFiles[name]) {
+                alert("File already exists!");
             }
         }
 
         function deleteFile(event, fileName) {
             event.stopPropagation();
-            if(confirm(`Delete ${fileName}?`)) {
+            if(confirm(`Are you sure you want to delete ${fileName}?`)) {
                 delete backendFiles[fileName];
-                currentFile = Object.keys(backendFiles)[0];
+                currentFile = Object.keys(backendFiles)[0]; // Switch to first available file
                 loadFile(currentFile);
             }
         }
 
         // Send All Files to Cloud Execution
         async function runBackendCode() {
-            saveCurrentFile();
+            saveCurrentFile(); // Save last typed code
             const lang = document.getElementById('langSelect').value;
             const terminal = document.getElementById('terminal');
-            terminal.innerHTML = "Uploading multiple files to Cloud...\nExecuting...\n\n";
+            const runBtn = document.querySelector('.btn');
             
-            // Format files for Piston API
+            runBtn.disabled = true;
+            terminal.innerHTML = `<span style="color:#eab308;">➜ Compiling and executing files on cloud...</span>\n\n`;
+            
             let filesArray = Object.keys(backendFiles).map(name => {
                 return { name: name, content: backendFiles[name] };
             });
-
-            // Find correct version
-            const version = runtimesCache.find(r => r.language === lang).version;
 
             try {
                 const response = await fetch('https://emkc.org/api/v2/piston/execute', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ language: lang, version: version, files: filesArray })
+                    body: JSON.stringify({ language: lang, version: languageVersions[lang], files: filesArray })
                 });
                 
                 const data = await response.json();
-                if (data.run.stderr) terminal.innerHTML += `<span style="color:#ef4444;">${data.run.stderr}</span>`;
-                else terminal.innerHTML += `<span style="color:#10b981;">Program Finished:</span>\n${data.run.stdout}`;
+                if (data.run.stderr) {
+                    terminal.innerHTML += `<span style="color:#ef4444;">${data.run.stderr}</span>`;
+                } else {
+                    terminal.innerHTML += `<span style="color:#10b981;">Execution Output:</span>\n${data.run.stdout}`;
+                }
             } catch (error) {
-                terminal.innerHTML = "<span style="color:#ef4444;">Connection Failed!</span>";
+                terminal.innerHTML = "<span style="color:#ef4444;">Error: Failed to connect to execution server.</span>";
             }
+            runBtn.disabled = false;
         }
     </script>
 </body>
