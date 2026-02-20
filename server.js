@@ -8,7 +8,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 8080;
 
 // ==========================================
 // 1. MIDDLEWARE & STATIC FILES
@@ -513,6 +513,7 @@ app.post('/api/submit-exam', async (req, res) => {
 app.listen(SERVER_PORT, "0.0.0.0", () => {
     console.log(`🚀 Server is running beautifully on port ${SERVER_PORT}`);
 });
+
 
 
 
