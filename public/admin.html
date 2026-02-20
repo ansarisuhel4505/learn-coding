@@ -364,80 +364,65 @@
         // ==========================================
         // 3. RESULTS LOGIC
         // ==========================================
-        async function loadSubmissions() {
-            try {
-                const res = await fetch('/api/exams'); 
-                const exams = await res.json();
-                const tbody = document.getElementById('resultTableBody');
-                
-                if(exams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No pending submissions.</td></tr>';
-                    return;
-                }
+        // Admin panel mein students ki copy load karna
+async function loadResults() {
+    try {
+        const res = await fetch('/api/results');
+        const results = await res.json();
+        const tbody = document.getElementById('resultsTableBody'); // Apne table body ka ID check kar lein
+        tbody.innerHTML = '';
 
-                tbody.innerHTML = '';
-                exams.forEach((exam, index) => {
-                    let studentName = index % 2 === 0 ? "Aman Kumar" : "Priya Singh";
-                    let status = "<span style='color: #ef4444;'>Pending Review</span>";
-                    let btnId = `checkBtn_${exam._id}`; 
-                    
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${studentName}</strong></td>
-                            <td>${exam.title}</td>
-                            <td>${status}</td>
-                            <td>
-                                <button id="${btnId}" class="check-btn" onclick="openResultModal('${exam._id}', '${studentName}', '${exam.title}')">
-                                    <i class='bx bx-edit'></i> Check Copy
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } catch(e) { console.error(e); }
-        }
+        results.forEach(r => {
+            // Agar check ho gaya hai toh 'Released' dikhao, warna Input box dikhao marks dene ke liye
+            let actionHTML = '';
+            let statusHTML = '';
 
-        function openResultModal(submissionId, studentName, examTitle) {
-            document.getElementById('resultModal').classList.add('active');
-            document.getElementById('rSubmissionId').value = submissionId;
-            document.getElementById('rStudentName').innerText = studentName;
-            document.getElementById('rExamTitle').innerText = examTitle;
-        }
+            if (r.isReleased) {
+                statusHTML = `<span style="color: green; font-weight: bold;">Checked ✅</span>`;
+                actionHTML = `<span>Marks: ${r.score}</span>`;
+            } else {
+                statusHTML = `<span style="color: red; font-weight: bold;">Pending ⏳</span>`;
+                actionHTML = `
+                    <input type="number" id="marks-${r._id}" value="${r.score}" style="width: 60px; padding: 5px;">
+                    <button onclick="checkCopy('${r._id}')" style="background: #3b82f6; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 5px;">Upload Result</button>
+                `;
+            }
 
-        document.getElementById('uploadResultForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submissionId = document.getElementById('rSubmissionId').value;
-            const student = document.getElementById('rStudentName').innerText;
-            const examTitle = document.getElementById('rExamTitle').innerText;
-            const marks = document.getElementById('rMarks').value;
-            
-            try {
-                const response = await fetch('/api/results', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ studentName: student, examTitle: examTitle, score: marks })
-                });
-
-                if (response.ok) {
-                    alert(`✅ Result Successfully Uploaded!\nStudent: ${student}\nMarks Awarded: ${marks}`);
-                    closeResultModal();
-                    
-                    const submitBtn = document.getElementById(`checkBtn_${submissionId}`);
-                    if(submitBtn) {
-                        submitBtn.innerHTML = "<i class='bx bx-check-circle'></i> Result Released";
-                        submitBtn.style.background = "#22c55e"; 
-                        submitBtn.style.color = "#fff";
-                        submitBtn.style.border = "none";
-                        submitBtn.disabled = true; 
-                        submitBtn.parentElement.previousElementSibling.innerHTML = "<span style='color: #22c55e; font-weight: 500;'>Checked</span>";
-                    }
-                } else { alert("❌ Failed to upload result."); }
-            } catch (err) { alert("❌ Server Error! Try again."); }
+            tbody.innerHTML += `
+                <tr>
+                    <td>${r.studentName}</td>
+                    <td>${r.examTitle}</td>
+                    <td>${statusHTML}</td>
+                    <td>${actionHTML}</td>
+                </tr>
+            `;
         });
+    } catch (e) { console.error("Error loading results:", e); }
+}
 
-        // Initialize Everything
-        window.onload = () => { loadCourses(); loadExams(); loadSubmissions(); };
-        </script>
+// Copy check karke marks database mein bhejna
+async function checkCopy(resultId) {
+    const finalMarks = document.getElementById(`marks-${resultId}`).value;
     
+    try {
+        const res = await fetch(`/api/check-copy/${resultId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ finalScore: finalMarks })
+        });
+        
+        const data = await res.json();
+        if(data.success) {
+            alert("✅ Result Uploaded & Released to Student!");
+            loadResults(); // Table ko refresh kar do
+        }
+    } catch (e) {
+        alert("Error checking copy");
+    }
+}
+
+// Page load hote hi result function chalao
+window.onload = loadResults;
+
 </body>
 </html>
