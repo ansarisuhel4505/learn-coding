@@ -489,20 +489,46 @@ app.get('/api/exams/:id', async (req, res) => {
         res.status(500).json({ error: "Exam not found" });
     }
 });
-
-// 2. Exam Submit karna aur Auto-Check karke Result save karna
+// ==========================================
+// 1. STUDENT SUBMIT KAREGA (Pending Check)
+// ==========================================
 app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, examTitle, score } = req.body;
         
-        // Asli exam mein MCQ auto-check ho jate hain, toh hum isReleased true kar rahe hain
+        // Database mein Result save hoga par abhi Release nahi hoga
         const submission = await Result.create({
-            studentName: studentName,
-            examTitle: examTitle,
-            score: score,
-            isReleased: true // Student apna result turant dekh payega!
+            studentName: studentName || "Unknown Student",
+            examTitle: examTitle || "Unknown Exam",
+            score: score || 0,
+            isReleased: false // 🔴 Yeh false hai, yani Admin check karega
         });
 
+        res.json({ success: true, message: "Exam submitted! Pending admin review." });
+    } catch (err) {
+        console.error("Exam Submit Error:", err);
+        res.status(500).json({ error: "Failed to submit exam" });
+    }
+});
+
+// ==========================================
+// 2. ADMIN COPY CHECK KARKE UPDATE KAREGA
+// ==========================================
+app.put('/api/check-copy/:id', async (req, res) => {
+    try {
+        const { finalScore } = req.body;
+        
+        // Admin dwara diye gaye marks save honge aur result Release ho jayega
+        await Result.findByIdAndUpdate(req.params.id, { 
+            score: finalScore, 
+            isReleased: true 
+        });
+
+        res.json({ success: true, message: "Copy Checked & Result Released!" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to release result" });
+    }
+});
         res.json({ success: true, message: "Exam submitted & checked successfully!" });
     } catch (err) {
         console.error("Exam Submit Error:", err);
@@ -525,6 +551,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // VERCEL KE LIYE SABSE ZAROORI LINE 👇
 module.exports = app;
+
 
 
 
