@@ -79,6 +79,9 @@ app.post('/admin-login', (req, res) => {
 
 // Static files (public folder) ki line HAMESHA in sabke baad aani chahiye
 app.use(express.static(path.join(__dirname, 'public')));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // ==========================================
 // 2. MONGODB DATABASE SETUP & SCHEMA
@@ -513,6 +516,7 @@ app.post('/api/submit-exam', async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port " + PORT);
 });
+
 
 
 
