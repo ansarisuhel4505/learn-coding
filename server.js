@@ -1,17 +1,5 @@
 require('dotenv').config();
-const express = require("express");
-const app = express();
-
-app.get("/health", (req, res) => {
-  res.send("SERVER WORKING");
-});
-
-const PORT = process.env.PORT || 8080;
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Test server running on " + PORT);
-});
-/*const express = require('express');
+const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
@@ -528,7 +516,7 @@ app.post('/api/submit-exam', async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port " + PORT);
 });
-*/
+
 
 
 
