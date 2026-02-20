@@ -4,212 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - CodeMaster</title>
-    
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --primary-color: #3b82f6;
-            --primary-hover: #2563eb;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-        }
+        :root { --bg-color: #0f172a; --surface-color: #1e293b; --primary-color: #3b82f6; --text-main: #f8fafc; --text-muted: #94a3b8; --border-color: #334155; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg-color); color: var(--text-main); display: flex; scroll-behavior: smooth; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; text-decoration: none; }
-        
-        body { background: var(--bg-color); color: var(--text-main); }
+        /* Sidebar */
+        .sidebar { width: 250px; background: var(--surface-color); height: 100vh; padding: 20px; border-right: 1px solid var(--border-color); position: fixed; }
+        .sidebar .logo { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar .logo span { color: var(--primary-color); }
+        .nav-links { list-style: none; }
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a { display: flex; align-items: center; gap: 15px; color: var(--text-muted); text-decoration: none; padding: 12px; border-radius: 8px; transition: 0.3s; font-weight: 500;}
+        .nav-links a:hover, .nav-links a.active { background: var(--primary-color); color: #fff; }
 
-        /* Dashboard Header */
-        .dash-header {
-            background: rgba(15, 23, 42, 0.95);
-            padding: 20px 8%;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-        .logo { font-size: 24px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-        .logo span { color: var(--primary-color); }
-        .logo i { color: var(--primary-color); font-size: 28px; }
+        /* Main Content */
+        .main-content { margin-left: 250px; padding: 30px; width: calc(100% - 250px); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: var(--surface-color); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border-color); }
         
-        .btn-logout {
-            background: #ef4444; color: white; padding: 8px 20px;
-            border-radius: 6px; font-weight: 600; transition: 0.3s;
-        }
-        .btn-logout:hover { background: #dc2626; transform: translateY(-2px); }
-
-        /* Dashboard Content */
-        .container { padding: 40px 8%; max-width: 1400px; margin: 0 auto; }
+        .section-container { background: var(--surface-color); padding: 25px; border-radius: 15px; border: 1px solid var(--border-color); margin-bottom: 30px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        .welcome-banner {
-            background: linear-gradient(135deg, var(--surface-color), var(--bg-color));
-            padding: 40px; border-radius: 20px; border: 1px solid var(--border-color);
-            margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .welcome-text h1 { font-size: 32px; margin-bottom: 10px; }
-        .welcome-text h1 span { color: var(--primary-color); }
-        .welcome-text p { color: var(--text-muted); font-size: 16px; }
-
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
-        }
-        .stat-card {
-            background: var(--surface-color); padding: 30px; border-radius: 15px;
-            border: 1px solid var(--border-color); transition: 0.3s;
-            display: flex; align-items: center; gap: 20px;
-        }
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary-color); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .stat-icon {
-            width: 70px; height: 70px; border-radius: 15px;
-            display: flex; align-items: center; justify-content: center; font-size: 35px;
-        }
-        .icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-        .icon-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-        .icon-orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-weight: 500; }
         
-        .stat-info h3 { font-size: 24px; margin-bottom: 5px; }
-        .stat-info p { color: var(--text-muted); font-size: 14px; }
-
-        /* Premium Modal (Popup) */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            z-index: 1000; justify-content: center; align-items: center;
-        }
-        .modal-box {
-            background: var(--surface-color); padding: 40px; border-radius: 20px;
-            width: 90%; max-width: 400px; text-align: center;
-            border: 1px solid var(--primary-color); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-        .modal-box i { font-size: 50px; color: var(--primary-color); margin-bottom: 15px; }
-        .modal-box h2 { margin-bottom: 10px; font-size: 24px; }
-        .modal-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
-        
-        .modal-box input {
-            width: 100%; padding: 14px; background: var(--bg-color); color: white;
-            border: 1px solid var(--border-color); border-radius: 8px;
-            font-size: 15px; margin-bottom: 20px; outline: none; transition: 0.3s;
-        }
-        .modal-box input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-        
-        .btn-submit {
-            width: 100%; padding: 14px; background: var(--primary-color); color: white;
-            border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: 0.3s;
-        }
-        .btn-submit:hover { background: var(--primary-hover); transform: translateY(-2px); }
-
-        @media (max-width: 768px) {
-            .welcome-banner { flex-direction: column; text-align: center; gap: 20px; }
-        }
+        .btn { background: var(--primary-color); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; text-decoration: none;}
+        .btn:hover { background: #2563eb; transform: translateY(-2px); }
     </style>
 </head>
 <body>
-    
-<a href="/" class="back-to-home-btn">
-    <i class='bx bx-home-alt'></i> Back to Home
-</a>
 
-    <header class="dash-header">
-        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
-        <a href="/logout" class="btn-logout"><i class='bx bx-log-out'></i> Logout</a>
-    </header>
-
-    <div class="container">
-        <div class="welcome-banner">
-            <div class="welcome-text">
-                <h1>Welcome back, <span id="studentName">Student</span>! 🎓</h1>
-                <p>Track your progress and dive back into your learning journey.</p>
-            </div>
-            <div>
-                <a href="/courses" class="btn-submit" style="display: inline-block; padding: 12px 25px; text-decoration: none;">Browse Courses</a>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon icon-blue"><i class='bx bx-book-open'></i></div>
-                <div class="stat-info">
-                    <h3>0</h3>
-                    <p>Enrolled Courses</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon icon-green"><i class='bx bx-check-circle'></i></div>
-                <div class="stat-info">
-                    <h3>0%</h3>
-                    <p>Overall Progress</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon icon-orange"><i class='bx bx-award'></i></div>
-                <div class="stat-info">
-                    <h3>0</h3>
-                    <p>Certificates Earned</p>
-                </div>
-            </div>
-        </div>
+    <div class="sidebar">
+        <div class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></div>
+        <ul class="nav-links">
+            <li><a href="#" class="active"><i class='bx bx-grid-alt'></i> My Dashboard</a></li>
+            <li><a href="#active-exams"><i class='bx bx-laptop'></i> Active Exams</a></li>
+            <li><a href="#my-results"><i class='bx bx-trophy'></i> My Results</a></li>
+            <li><a href="/"><i class='bx bx-home'></i> Back to Website</a></li>
+            <li><a href="/logout" style="color: #ef4444;"><i class='bx bx-log-out'></i> Logout</a></li>
+        </ul>
     </div>
 
-    <div class="modal-overlay" id="mobileModal">
-        <div class="modal-box">
-            <i class='bx bx-mobile-vibration'></i>
-            <h2>Secure Your Account</h2>
-            <p>Please provide your active WhatsApp or Mobile number to receive important course updates and verify your student profile.</p>
-            
-            <input type="number" id="userMobile" placeholder="Enter 10-digit Mobile Number">
-            <button class="btn-submit" onclick="saveMobile()">Save & Continue</button>
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h2 id="welcomeText">Welcome Student! 👋</h2>
+                <p style="color: var(--text-muted); font-size: 14px;">Ready to test your skills today?</p>
+            </div>
+            <div class="user-profile">
+                <i class='bx bx-user-circle' style="font-size: 24px;"></i>
+                <span id="displayUsername">Loading...</span>
+            </div>
+        </div>
+
+        <div class="section-container" id="active-exams">
+            <div class="section-header">
+                <h3><i class='bx bx-laptop'></i> Available Exams</h3>
+                <p style="font-size: 14px; color: var(--text-muted);">Click on 'Take Exam' to start your live test.</p>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Exam Title</th><th>Details</th><th>Action</th></tr>
+                </thead>
+                <tbody id="studentExamTableBody">
+                    <tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Loading active exams...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-container" id="my-results">
+            <div class="section-header">
+                <h3><i class='bx bx-trophy'></i> My Marksheet</h3>
+                <p style="font-size: 14px; color: var(--text-muted);">Your auto-calculated scores.</p>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Exam Title</th><th>Status</th><th>Score Obtained</th></tr>
+                </thead>
+                <tbody id="studentResultTableBody">
+                    <tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Loading your results...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Fetch User Data from Server
-            fetch('/user-info')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.name) {
-                        // Update UI with actual name
-                        document.getElementById('studentName').innerText = data.name.split(' ')[0];
-                        
-                        // Check if mobile number is missing
-                        if (data.hasMobile === false) {
-                            document.getElementById('mobileModal').style.display = 'flex';
-                        }
-                    } else {
-                        window.location.href = '/login'; // Security redirect
-                    }
-                })
-                .catch(err => console.error("Error fetching user info:", err));
-        });
-
-        // Save Mobile API Call
-        function saveMobile() {
-            const mobile = document.getElementById('userMobile').value;
-            if(mobile.length < 10) {
-                alert("⚠️ Please enter a valid 10-digit number.");
-                return;
-            }
-
-            fetch('/update-mobile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mobile: mobile })
-            })
-            .then(res => res.json())
-            .then(response => {
-                if(response.success) {
-                    document.getElementById('mobileModal').style.display = 'none';
-                    alert("✅ Profile Completed Successfully!");
+        // 1. Get User Info (Aapka naam dikhane ke liye)
+        async function fetchUserInfo() {
+            try {
+                const res = await fetch('/user-info');
+                const data = await res.json();
+                if(data.loggedIn) {
+                    document.getElementById('welcomeText').innerText = `Welcome ${data.username}! 👋`;
+                    document.getElementById('displayUsername').innerText = data.username;
+                    return data.username;
+                } else {
+                    // Agar login nahi hai toh wapas login page par bhej do
+                    window.location.href = '/login.html';
                 }
-            })
-            .catch(err => alert("Error saving number. Please try again."));
+            } catch(e) { 
+                document.getElementById('displayUsername').innerText = "Student"; 
+            }
         }
-    </script>
 
+        // 2. Load Available Exams from Database
+        async function loadStudentExams() {
+            try {
+                const res = await fetch('/api/exams');
+                const exams = await res.json();
+                const tbody = document.getElementById('studentExamTableBody');
+                
+                if(exams.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No active exams scheduled right now.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                exams.forEach(ex => {
+                    // 🚀 YAHAN MAIN CHANGE HUA HAI: Ab ye link direct exam-portal par bhejega ID ke sath
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${ex.title}</strong></td>
+                            <td><span style="color: #3b82f6;">${ex.duration} Mins</span> • ${ex.totalMarks} Marks</td>
+                            <td>
+                                <a href="/exam-portal.html?id=${ex._id}" class="btn">
+                                    Take Exam <i class='bx bx-right-arrow-alt'></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch(e) { console.error("Failed to load exams:", e); }
+        }
+
+        // 3. Load Auto-Checked Results
+        async function loadStudentResults() {
+            try {
+                const res = await fetch('/api/my-results');
+                const results = await res.json();
+                const tbody = document.getElementById('studentResultTableBody');
+                
+                // Hum sirf current logged-in student ke results filter karenge
+                const currentStudentName = document.getElementById('displayUsername').innerText;
+                const myResults = results.filter(r => r.studentName === currentStudentName);
+                
+                if(myResults.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No results declared yet. Take an exam first!</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                myResults.forEach(r => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${r.examTitle}</strong></td>
+                            <td><span style="color: #22c55e; background: rgba(34,197,94,0.1); padding: 5px 12px; border-radius: 5px; font-size: 13px; font-weight: 600;">Checked & Released</span></td>
+                            <td><strong style="font-size: 18px; color: #f59e0b;">${r.score} Marks</strong></td>
+                        </tr>
+                    `;
+                });
+            } catch(e) { console.error("Failed to load results:", e); }
+        }
+
+        // Initialize Page
+        window.onload = async () => {
+            await fetchUserInfo(); // Pehle naam laao
+            await loadStudentExams(); // Fir exams laao
+            await loadStudentResults(); // Fir results laao
+        };
+    </script>
 </body>
 </html>
