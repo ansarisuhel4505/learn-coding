@@ -109,19 +109,21 @@ const CourseSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Course = mongoose.model('Course', CourseSchema);
-
-// 2. Exam Ka Schema
 const ExamSchema = new mongoose.Schema({
     title: String,
     totalMarks: Number,
+    duration: Number, // ⏳ NAYA: Exam ka time limit (minutes me)
     questions: [{ 
         questionText: String, 
         options: [String], 
-        correctAnswer: String 
+        correctAnswer: String,
+        marks: Number // 💯 NAYA: Har question ke alag marks
     }],
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    createdAt: { type: Date, default: Date.now }
 });
 const Exam = mongoose.model('Exam', ExamSchema);
+
 
 // 3. Result Ka Schema
 const ResultSchema = new mongoose.Schema({
@@ -407,28 +409,26 @@ app.get('/api/exams', async (req, res) => {
     }
 });
 
-// 2. Naya Exam Create Karne ke liye
+// 2. Naya Exam Create Karne ke liye (Asli Dynamic Exam)
 app.post('/api/exams', async (req, res) => {
     try {
-        const { title, totalMarks } = req.body;
+        // Ab admin panel se title, marks, time aur questions sab aayega
+        const { title, totalMarks, duration, questions } = req.body;
         
-        // Abhi ke liye hum ek dummy question automatically daal rahe hain.
-        // (Advance level par hum iska ek lamba form banayenge jahan admin questions type karega)
-        const questions = [
-            { 
-                questionText: "What is the full form of HTML?", 
-                options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup Language", "Hyper Tool Multi Language"], 
-                correctAnswer: "Hyper Text Markup Language" 
-            }
-        ];
+        const newExam = await Exam.create({ 
+            title, 
+            totalMarks, 
+            duration, 
+            questions 
+        });
 
-        const newExam = await Exam.create({ title, totalMarks, questions });
-        res.json({ success: true, message: "Exam created successfully!", exam: newExam });
+        res.json({ success: true, message: "Real Exam created successfully!", exam: newExam });
     } catch (err) {
         console.error("Exam Create Error:", err);
         res.status(500).json({ error: "Failed to create exam" });
     }
 });
+
 
 // 3. Exam Delete Karne ke liye
 app.delete('/api/exams/:id', async (req, res) => {
@@ -480,6 +480,7 @@ app.get('/api/results', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
