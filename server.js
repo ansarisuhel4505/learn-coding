@@ -510,9 +510,10 @@ app.post('/api/submit-exam', async (req, res) => {
 // ==========================================
 // SERVER START LOGIC (Cloud Ready)
 // ==========================================
-app.listen(SERVER_PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server is running beautifully on port ${SERVER_PORT}`);
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
+
 
 
 
