@@ -447,40 +447,21 @@ app.delete('/api/exams/:id', async (req, res) => {
 // 🔴 ADMIN APIs: RESULTS & COPY CHECKING
 // ==========================================
 
-// 1. Result Upload karna (Jab admin copy check karke marks de)
-app.post('/api/results', async (req, res) => {
-    try {
-        const { studentName, examTitle, score } = req.body;
-        
-        // Database mein Result save karein
-        const newResult = await Result.create({
-            studentName: studentName,
-            examTitle: examTitle,
-            score: score,
-            isReleased: true // Marks ab officially release ho gaye hain
-        });
-
-        res.json({ success: true, message: "Result uploaded successfully!", result: newResult });
-    } catch (err) {
-        console.error("Result Upload Error:", err);
-        res.status(500).json({ error: "Failed to upload result" });
-    }
-});
-
-// 2. Saare Checked Results Dekhne ke liye (Admin record ke liye)
+// Saare Results Dekhne ke liye (Admin record ke liye)
 app.get('/api/results', async (req, res) => {
     try {
-        const results = await Result.find().sort({ _id: -1 }); // Naye result upar
+        const results = await Result.find().sort({ _id: -1 }); 
         res.json(results);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch results" });
     }
 });
+
 // ==========================================
 // 🔴 STUDENT APIs: EXAM ENGINE & SUBMISSION
 // ==========================================
 
-// 1. Ek Single Exam ka poora paper mangwane ke liye (Exam Portal ke liye)
+// 1. Ek Single Exam ka poora paper mangwane ke liye
 app.get('/api/exams/:id', async (req, res) => {
     try {
         const exam = await Exam.findById(req.params.id);
@@ -489,19 +470,17 @@ app.get('/api/exams/:id', async (req, res) => {
         res.status(500).json({ error: "Exam not found" });
     }
 });
-// ==========================================
-// 1. STUDENT SUBMIT KAREGA (Pending Check)
-// ==========================================
+
+// 2. STUDENT SUBMIT KAREGA (Pending Check)
 app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, examTitle, score } = req.body;
         
-        // Database mein Result save hoga par abhi Release nahi hoga
         const submission = await Result.create({
             studentName: studentName || "Unknown Student",
             examTitle: examTitle || "Unknown Exam",
             score: score || 0,
-            isReleased: false // 🔴 Yeh false hai, yani Admin check karega
+            isReleased: false // 🔴 Pending status
         });
 
         res.json({ success: true, message: "Exam submitted! Pending admin review." });
@@ -511,17 +490,14 @@ app.post('/api/submit-exam', async (req, res) => {
     }
 });
 
-// ==========================================
-// 2. ADMIN COPY CHECK KARKE UPDATE KAREGA
-// ==========================================
+// 3. ADMIN COPY CHECK KARKE UPDATE KAREGA
 app.put('/api/check-copy/:id', async (req, res) => {
     try {
         const { finalScore } = req.body;
         
-        // Admin dwara diye gaye marks save honge aur result Release ho jayega
         await Result.findByIdAndUpdate(req.params.id, { 
             score: finalScore, 
-            isReleased: true 
+            isReleased: true // ✅ Checked & Released
         });
 
         res.json({ success: true, message: "Copy Checked & Result Released!" });
@@ -529,17 +505,6 @@ app.put('/api/check-copy/:id', async (req, res) => {
         res.status(500).json({ error: "Failed to release result" });
     }
 });
-        res.json({ success: true, message: "Exam submitted & checked successfully!" });
-    } catch (err) {
-        console.error("Exam Submit Error:", err);
-        res.status(500).json({ error: "Failed to submit exam" });
-    }
-});
-
-
-// ==========================================
-// SERVER START LOGIC (Cloud Ready)
-// ==========================================
 // ==========================================
 // SERVER START LOGIC (Vercel Ready)
 // ==========================================
@@ -551,6 +516,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // VERCEL KE LIYE SABSE ZAROORI LINE 👇
 module.exports = app;
+
 
 
 
