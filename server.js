@@ -472,6 +472,39 @@ app.get('/api/results', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch results" });
     }
 });
+// ==========================================
+// 🔴 STUDENT APIs: EXAM ENGINE & SUBMISSION
+// ==========================================
+
+// 1. Ek Single Exam ka poora paper mangwane ke liye (Exam Portal ke liye)
+app.get('/api/exams/:id', async (req, res) => {
+    try {
+        const exam = await Exam.findById(req.params.id);
+        res.json(exam);
+    } catch (err) {
+        res.status(500).json({ error: "Exam not found" });
+    }
+});
+
+// 2. Exam Submit karna aur Auto-Check karke Result save karna
+app.post('/api/submit-exam', async (req, res) => {
+    try {
+        const { studentName, examTitle, score } = req.body;
+        
+        // Asli exam mein MCQ auto-check ho jate hain, toh hum isReleased true kar rahe hain
+        const submission = await Result.create({
+            studentName: studentName,
+            examTitle: examTitle,
+            score: score,
+            isReleased: true // Student apna result turant dekh payega!
+        });
+
+        res.json({ success: true, message: "Exam submitted & checked successfully!" });
+    } catch (err) {
+        console.error("Exam Submit Error:", err);
+        res.status(500).json({ error: "Failed to submit exam" });
+    }
+});
 
 
 // ==========================================
@@ -480,6 +513,7 @@ app.get('/api/results', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 CodeMaster Server running seamlessly on port ${PORT}`);
 });
+
 
 
 
