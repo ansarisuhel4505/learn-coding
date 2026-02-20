@@ -221,7 +221,8 @@ async function sendLoginAlertEmail(toEmail, userName) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://learn-coding-2.onrender.com/auth/google/callback"
+    callbackURL: "https://learn-coding-jade.vercel.app/auth/google/callback"
+    
   },
   async function(accessToken, refreshToken, profile, done) {
       try {
@@ -524,6 +525,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // VERCEL KE LIYE SABSE ZAROORI LINE 👇
 module.exports = app;
+
 
 
 
