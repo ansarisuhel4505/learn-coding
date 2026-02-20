@@ -243,6 +243,71 @@ document.addEventListener("DOMContentLoaded", async () => {
         courseContainer.innerHTML = '<p style="text-align:center; width: 100%; grid-column: 1 / -1; color: #ef4444;">Failed to load courses. Please refresh the page.</p>';
     }
 });
+// ==========================================
+// LOAD EXAMS ON HOME PAGE & CONNECT EXAM PORTAL
+// ==========================================
+document.addEventListener("DOMContentLoaded", async () => {
+    const publicExamContainer = document.getElementById('public-exams');
+    
+    // Agar hum home page par hain tabhi ye chalega
+    if (publicExamContainer) {
+        try {
+            const res = await fetch('/api/exams');
+            const exams = await res.json();
+
+            if (exams.length === 0) {
+                publicExamContainer.innerHTML = '<p style="text-align:center; width: 100%; color: var(--text-muted);">No live exams available right now. Stay tuned!</p>';
+                return;
+            }
+
+            publicExamContainer.innerHTML = '';
+            
+            // Har exam ka ek stylish card banayenge
+            exams.forEach(exam => {
+                publicExamContainer.innerHTML += `
+                    <div style="background: var(--bg-color); border: 1px solid var(--border-color); padding: 30px; border-radius: 15px; text-align: center; transition: transform 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-10px)'; this.style.borderColor='var(--primary-color)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border-color)';">
+                        
+                        <div style="font-size: 50px; color: #ef4444; margin-bottom: 15px;">
+                            <i class='bx bx-laptop'></i>
+                        </div>
+                        <h3 style="color: var(--text-main); margin-bottom: 10px; font-size: 22px;">${exam.title}</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 15px;">
+                            <i class='bx bx-time-five'></i> ${exam.duration} Mins &nbsp; | &nbsp; 
+                            <i class='bx bx-target-lock'></i> ${exam.totalMarks} Marks
+                        </p>
+                        
+                        <button onclick="checkLoginAndStartExam('${exam._id}')" style="background: var(--primary-color); color: #fff; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 16px; transition: 0.3s;">
+                            Start Mock Test <i class='bx bx-right-arrow-alt'></i>
+                        </button>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            publicExamContainer.innerHTML = '<p style="text-align:center; width: 100%; color: #ef4444;">Failed to load exams. Refresh the page.</p>';
+        }
+    }
+});
+
+// Button click hone par Login Check aur Redirect ka Logic
+async function checkLoginAndStartExam(examId) {
+    try {
+        const res = await fetch('/user-info');
+        const data = await res.json();
+        
+        if (data.loggedIn) {
+            // Agar bachha logged in hai, seedha Exam Portal par bhejo!
+            window.location.href = `/exam-portal.html?id=${examId}`;
+        } else {
+            // Agar login nahi hai, toh alert dikhakar login page par bhejo!
+            alert("⚠️ Please Login or Sign Up first to take the Live Exam!");
+            window.location.href = '/login.html';
+        }
+    } catch (err) {
+        window.location.href = '/login.html';
+    }
+}
+
+
 
 
 
