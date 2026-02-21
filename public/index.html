@@ -4,286 +4,167 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeMaster | Master Software Development</title>
-    
     <meta name="description" content="Learn Full-Stack Development, Artificial Intelligence, and Mobile App Creation with CodeMaster.">
-    <meta name="keywords" content="Coding, Web Development, AI, Mobile Apps, Programming">
     
     <link rel="stylesheet" href="style.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Essential Professional Layout Fixes */
+        :root { --primary-color: #3b82f6; --text-main: #0f172a; --text-muted: #64748b; --surface-color: #ffffff; --border-color: #e2e8f0; --bg-color: #f8fafc; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; overflow-x: hidden; }
+        
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header h2 { font-size: 36px; color: var(--text-main); margin-bottom: 10px; }
+        .section-header p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
+        
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 0 5%; }
+        
+        .premium-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 15px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .premium-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .premium-card img { width: 100%; height: 220px; object-fit: cover; }
+        .premium-card .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .premium-card .tags { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .premium-card .tag-badge { background: rgba(59,130,246,0.1); color: var(--primary-color); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .premium-card h3 { font-size: 22px; margin-bottom: 10px; }
+        .premium-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.6; flex-grow: 1; }
+        .premium-card .btn-link { display: block; text-align: center; background: var(--primary-color); color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; margin-top: auto; }
+        .premium-card .btn-link:hover { background: #2563eb; }
+    </style>
 </head>
 <body>
 
     <header class="header">
-        <a href="/" class="logo">
-            <i class='bx bx-code-block'></i> Code<span>Master</span>
-        </a>
-
+        <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
         <nav class="navbar">
             <ul class="nav-links">
                 <li><a href="/" class="active">Home</a></li>
-                <li><a href="/about.html">About</a></li>
-                <li><a href="/courses.html">Courses</a></li>
-                <li><a href="/features.html">Features</a></li>
-                <li><a href="/contact.html">Contact</a></li>
+                <li><a href="#courses">Courses</a></li>
+                <li><a href="#mock-tests">Live Exams</a></li>
                 <li><a href="/compiler.html">Compiler</a></li>
-                <li><a href="/dashboard.html">Dashboard</a></li>
-                <li><a href="/admin.html">Admin Pannel</a></li>
-            </ul>
+                <li><a href="/dashboard.html">Dashboard</a></li> </ul>
         </nav>
-
         <div class="auth-container" id="auth-buttons">
-            <a href="/login" class="btn-login">Login</a>
-            <a href="/signup" class="btn-signup">Sign Up Free</a>
+            <a href="/login.html" class="btn-login">Login</a>
+            <a href="/signup.html" class="btn-signup">Sign Up Free</a>
         </div>
-
-        <div class="bx bx-menu" id="menu-icon"></div>
     </header>
 
     <section class="hero" id="home">
         <div class="hero-text-content">
             <span class="badge">🚀 100% Practical Learning</span>
             <h1>Build Your Future With<br> Next-Gen Tech Skills</h1>
-            
-            <h2>Become a <span class="multiple-text"></span></h2>
-            
-            <p>
-                From foundational coding principles to advanced software engineering. 
-                Join our comprehensive programs and transform your career with hands-on projects, 
-                expert mentorship, and a thriving developer community.
-            </p>
-            
+            <h2>Become a <span class="multiple-text" id="typed-text">Software Engineer</span></h2>
+            <p>From foundational coding principles to advanced software engineering. Join our comprehensive programs and transform your career.</p>
             <div class="hero-buttons">
-                <a href="/courses" class="btn-primary course-btn">Explore Courses <i class='bx bx-right-arrow-alt'></i></a>
-                <a href="#about" class="btn-secondary">Learn More</a>
-            </div>
-            
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <h3>50+</h3>
-                    <p>Projects</p>
-                </div>
-                <div class="stat-item">
-                    <h3>10k+</h3>
-                    <p>Students</p>
-                </div>
-                <div class="stat-item">
-                    <h3>4.9/5</h3>
-                    <p>Rating</p>
-                </div>
+                <a href="/login.html" class="btn-primary course-btn">Get Started <i class='bx bx-right-arrow-alt'></i></a>
             </div>
         </div>
-
         <div class="hero-image-content">
-            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" alt="Coding Dashboard UI" class="hero-img" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);">
-
+            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" alt="Coding Dashboard UI" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);">
         </div>
     </section>
 
-    <section class="learning-path" style="padding: 60px 5%;">
-            <section class="learning-path" id="courses" style="padding: 80px 5%; background: var(--bg-color);">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h2 style="font-size: 36px; color: var(--text-main); margin-bottom: 10px;">Choose Your Learning Path 🚀</h2>
-            <p style="color: var(--text-muted); font-size: 16px;">Master the most in-demand tech skills with our expert-led courses.</p>
+    <section id="courses" style="padding: 80px 0; background: var(--bg-color);">
+        <div class="section-header">
+            <h2>Choose Your Learning Path 🚀</h2>
+            <p>Master the most in-demand tech skills with our expert-led courses added directly by the Admin.</p>
         </div>
-
-        <div class="course-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
-            
-            <div class="course-card" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 15px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80" alt="Full Stack Dev" style="width: 100%; height: 220px; object-fit: cover;">
-                <div style="padding: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span style="background: rgba(59,130,246,0.1); color: var(--primary-color); padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 600;">Web Dev</span>
-                        <span style="color: #f59e0b; font-size: 14px;"><i class='bx bxs-star'></i> 4.9</span>
-                    </div>
-                    <h3 style="font-size: 22px; color: var(--text-main); margin-bottom: 10px;">Full-Stack Web Development</h3>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.6;">Master HTML, CSS, JavaScript, React, Node.js, and MongoDB. Build real-world projects from scratch.</p>
-                    <a href="/login.html" style="display: block; text-align: center; background: var(--primary-color); color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s;">Start Learning <i class='bx bx-right-arrow-alt' style="vertical-align: middle;"></i></a>
-                </div>
-            </div>
-
-            <div class="course-card" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 15px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=80" alt="AI Course" style="width: 100%; height: 220px; object-fit: cover;">
-                <div style="padding: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span style="background: rgba(168,85,247,0.1); color: #a855f7; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 600;">AI & ML</span>
-                        <span style="color: #f59e0b; font-size: 14px;"><i class='bx bxs-star'></i> 4.8</span>
-                    </div>
-                    <h3 style="font-size: 22px; color: var(--text-main); margin-bottom: 10px;">Artificial Intelligence Mastery</h3>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.6;">Dive deep into Machine Learning, Neural Networks, Python, and build your own smart AI models.</p>
-                    <a href="/login.html" style="display: block; text-align: center; background: var(--primary-color); color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s;">Start Learning <i class='bx bx-right-arrow-alt' style="vertical-align: middle;"></i></a>
-                </div>
-            </div>
-
-            <div class="course-card" style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 15px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-                <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80" alt="App Dev" style="width: 100%; height: 220px; object-fit: cover;">
-                <div style="padding: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span style="background: rgba(34,197,94,0.1); color: #22c55e; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: 600;">Mobile Apps</span>
-                        <span style="color: #f59e0b; font-size: 14px;"><i class='bx bxs-star'></i> 4.9</span>
-                    </div>
-                    <h3 style="font-size: 22px; color: var(--text-main); margin-bottom: 10px;">Mobile App Development</h3>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.6;">Create stunning Android and iOS applications using modern frameworks. Build apps that scale globally.</p>
-                    <a href="/login.html" style="display: block; text-align: center; background: var(--primary-color); color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s;">Start Learning <i class='bx bx-right-arrow-alt' style="vertical-align: middle;"></i></a>
-                </div>
-            </div>
-
+        <div class="card-grid" id="dynamic-courses">
+            <p style="text-align: center; width: 100%; color: var(--text-muted);">Loading amazing courses...</p>
         </div>
-            </section>
-        
-    <section class="learning-path" style="padding: 60px 5%;">
-        l
-    <div style="text-align: center; margin-bottom: 40px;">
-        <h2 style="font-size: 32px; color: var(--text-main);">Choose Your Learning Path</h2>
-        <p style="color: var(--text-muted);">Explore our latest courses added by the Admin.</p>
-    </div>
-    
-    <div class="course-grid" id="dynamic-courses" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
-        <p style="text-align: center; width: 100%; grid-column: 1 / -1; color: var(--text-muted);">Loading amazing courses for you...</p>
-    </div>
     </section>
-    <section class="features" id="features">
-        <div class="features-content">
-            <div class="features-text">
-                <h2>Why Learn With <span>CodeMaster?</span></h2>
-                <p>We don't just teach syntax; we teach software engineering. Here is what makes our platform stand out.</p>
-                
-                <ul class="features-list">
-                    <li>
-                        <i class='bx bxs-check-circle'></i>
-                        <div>
-                            <h4>Project-Based Learning</h4>
-                            <p>Build real-world applications instead of just watching theoretical videos.</p>
-                        </div>
-                    </li>
-                    <li>
-                        <i class='bx bxs-check-circle'></i>
-                        <div>
-                            <h4>Database & Backend Focus</h4>
-                            <p>Deep dive into architecture, APIs, and secure database management.</p>
-                        </div>
-                    </li>
-                    <li>
-                        <i class='bx bxs-check-circle'></i>
-                        <div>
-                            <h4>Industry-Standard Tools</h4>
-                            <p>Learn Git, GitHub, Docker, and deployment workflows used by top tech companies.</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="features-image">
-                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=500&q=80" alt="Developer at work" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
 
+    <section id="mock-tests" style="padding: 80px 0; background: var(--surface-color);">
+        <div class="section-header">
+            <h2>Live <span>Mock Tests</span> ⏱️</h2>
+            <p>Test your logic and coding skills with our real-time proctored exams.</p>
+        </div>
+        <div class="card-grid" id="public-exams">
+            <p style="text-align: center; width: 100%; color: var(--text-muted);">Loading active exams...</p>
+        </div>
+    </section>
+
+    <section class="instructor" id="about" style="padding: 80px 5%; background: var(--bg-color);">
+        <div class="instructor-container" style="display: flex; gap: 40px; align-items: center; max-width: 1000px; margin: 0 auto;">
+            <div class="instructor-image" style="flex: 1;">
+                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=400&q=80" alt="Suhel Ansari - Instructor" style="width: 100%; border-radius: 20px;">
+            </div>
+            <div class="instructor-info" style="flex: 1;">
+                <span style="background: rgba(59,130,246,0.1); color: var(--primary-color); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">Meet Your Mentor</span>
+                <h2 style="font-size: 32px; margin: 15px 0 5px 0;">Suhel Ansari</h2>
+                <h4 style="color: var(--text-muted); font-weight: 500; margin-bottom: 20px;">B.Tech Computer Science & Engineering</h4>
+                <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;">Hi, I'm Suhel. I built CodeMaster to bridge the gap between academic theory and industry-required practical skills.</p>
+                <p style="color: var(--text-muted); line-height: 1.6;">My goal is to simplify complex programming concepts across Web Development, AI, and Mobile Apps. Let's code the future together!</p>
             </div>
         </div>
     </section>
 
-    <section class="instructor" id="about">
-        <div class="instructor-container">
-            <div class="instructor-image">
-                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=400&q=80" alt="Suhel Ansari - Instructor">
-                
-            </div>
-            <div class="instructor-info">
-                <span class="badge">Meet Your Mentor</span>
-                <h2>Suhel Ansari</h2>
-                <h4 class="title">B.Tech Computer Science & Engineering | Software Developer</h4>
-                <p>
-                    Hi, I'm Suhel. As a dedicated Computer Science student and developer, I built CodeMaster to bridge the gap between academic theory and industry-required practical skills. 
-                </p>
-                <p>
-                    My goal is to simplify complex programming concepts across Web Development, AI, and Mobile Apps, empowering you to build logic and write production-ready code. Let's code the future together!
-                </p>
-                <div class="social-links">
-                    <a href="#"><i class='bx bxl-github'></i></a>
-                    <a href="#"><i class='bx bxl-linkedin-square'></i></a>
-                    <a href="#"><i class='bx bxl-twitter'></i></a>
-                </div>
-            </div>
+    <footer class="footer" style="background: #0f172a; color: white; padding: 40px 5%; text-align: center;">
+        <h2><i class='bx bx-code-block'></i> CodeMaster</h2>
+        <p style="color: #94a3b8; margin: 10px 0 20px 0;">Your ultimate destination for mastering modern software engineering.</p>
+        <div style="margin-bottom: 20px;">
+            <a href="/admin.html" style="color: #3b82f6; text-decoration: none; margin: 0 10px;">Admin Access</a> | 
+            <a href="/login.html" style="color: #3b82f6; text-decoration: none; margin: 0 10px;">Student Login</a>
         </div>
-    </section>
-
-    <section class="cta-section">
-        <div class="cta-box">
-            <h2>Ready to start your coding journey?</h2>
-            <p>Join our community of developers today and get instant access to our premium dashboard.</p>
-            <a href="/signup" class="btn-primary">Create Free Account</a>
-        </div>
-    </section>
-        <section class="live-exams" id="mock-tests" style="padding: 80px 5%; background: var(--surface-color);">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h2 style="font-size: 36px; color: var(--text-main); margin-bottom: 10px;">Live <span>Mock Tests</span> ⏱️</h2>
-            <p style="color: var(--text-muted); font-size: 16px;">Test your coding skills with our real-time proctored exams.</p>
-        </div>
-        
-        <div class="exam-grid" id="public-exams" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
-            <p style="text-align: center; width: 100%; color: var(--text-muted);">Loading active exams for you...</p>
-        </div>
-        </section>
-
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-col brand-col">
-                <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
-                <p>Your ultimate destination for mastering modern software engineering, from full-stack web to AI.</p>
-            </div>
-            
-            <div class="footer-col links-col">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/aboutus.html">About Us</a></li>
-                    <li><a href="/allcourses.html">All Courses</a></li>
-                    <li><a href="/contactus.html">Contact Support</a></li>
-                    <li><a href="/help.html">HELP DESKBOARD</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col links-col">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="/privacy.html">Privacy Policy</a></li>
-                    <li><a href="terms.html">Terms Of Services</a></li>
-                    <li><a href="refund.html">Refund Policy</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col newsletter-col">
-                <h4>Newsletter</h4>
-                <p>Subscribe to get the latest tech news and course updates.</p>
-                <form action="#" class="newsletter-form">
-                    <input type="email" placeholder="Enter your email" required>
-                    <button type="submit"><i class='bx bx-send'></i></button>
-                </form>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2026 CodeMaster by Suhel Ansari. All Rights Reserved.</p>
-        </div>
+        <p style="color: #64748b; font-size: 14px;">&copy; 2026 CodeMaster by Suhel Ansari. All Rights Reserved.</p>
     </footer>
 
-    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
-    
-    <script src="/script.js"></script>
+    <script>
+        window.onload = () => {
+            fetchPublicCourses();
+            fetchPublicExams();
+        };
 
+        async function fetchPublicCourses() {
+            try {
+                const res = await fetch('/api/courses');
+                const courses = await res.json();
+                const container = document.getElementById('dynamic-courses');
+                
+                if(courses.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; width:100%;">New courses dropping soon!</p>';
+                    return;
+                }
+
+                container.innerHTML = courses.slice(0, 3).map(c => `
+                    <div class="premium-card">
+                        <img src="${c.thumbnail}" alt="Course">
+                        <div class="content">
+                            <div class="tags"><span class="tag-badge">Premium Course</span></div>
+                            <h3>${c.title}</h3>
+                            <p>${c.description.substring(0, 80)}...</p>
+                            <a href="/login.html" class="btn-link">Enroll Now <i class='bx bx-right-arrow-alt'></i></a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) { console.log("Course fetch error"); }
+        }
+
+        async function fetchPublicExams() {
+            try {
+                const res = await fetch('/api/exams');
+                const exams = await res.json();
+                const container = document.getElementById('public-exams');
+
+                if(exams.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; width:100%;">No live exams right now.</p>';
+                    return;
+                }
+
+                container.innerHTML = exams.slice(0, 3).map(e => `
+                    <div class="premium-card" style="border-top: 5px solid #ef4444;">
+                        <div class="content" style="padding-top: 30px;">
+                            <h3 style="color: #ef4444;"><i class='bx bx-stopwatch'></i> ${e.title}</h3>
+                            <p style="margin-top: 15px;"><b>Total Marks:</b> ${e.totalMarks}</p>
+                            <p><b>Duration:</b> ${e.duration} Minutes</p>
+                            <a href="/login.html" class="btn-link" style="background: #ef4444;">Login to Attempt</a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) { console.log("Exam fetch error"); }
+        }
+    </script>
 </body>
-  </html>
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
+</html>
