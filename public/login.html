@@ -15,7 +15,7 @@
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .input-group input:focus { border-color: #3b82f6; }
         .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn:hover { background: #2563eb; }
         .divider { margin: 20px 0; color: #94a3b8; font-size: 14px; position: relative; }
@@ -23,38 +23,20 @@
         .divider::before { left: 0; } .divider::after { right: 0; }
         .btn-google { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-weight: 500; text-decoration: none; transition: 0.3s; }
         .btn-google img { width: 20px; margin-right: 10px; }
-        .btn-google:hover { background: #f8fafc; }
         .bottom-text { margin-top: 20px; font-size: 14px; color: #64748b; }
         .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 500; }
-        .admin-link { display: inline-block; margin-top: 15px; font-size: 13px; color: #94a3b8; text-decoration: none; transition: 0.3s; }
-        .admin-link:hover { color: #ef4444; }
-
-        /* 🌟 Toast Notification */
-        .toast-popup { position: fixed; top: 30px; right: -400px; background: white; border-left: 6px solid #10b981; padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; z-index: 1000; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast-popup.show { right: 30px; }
-        .toast-icon { font-size: 28px; color: #10b981; }
-        .toast-text h4 { color: #0f172a; margin-bottom: 3px; font-size: 16px; }
-        .toast-text p { color: #64748b; font-size: 13px; margin: 0; }
+        .admin-link { display: inline-block; margin-top: 15px; font-size: 13px; color: #94a3b8; text-decoration: none; }
     </style>
 </head>
 <body>
-
-    <div id="actionToast" class="toast-popup">
-        <i class="fas fa-check-circle toast-icon"></i>
-        <div class="toast-text">
-            <h4>Success!</h4>
-            <p>Account created. Please login.</p>
-        </div>
-    </div>
-
     <div class="container">
         <h2>Welcome Back! 👋</h2>
         <p>Login to your CodeMaster Student Portal.</p>
         
         <form action="/login" method="POST">
             <div class="input-group">
-                <i class="fas fa-id-badge"></i>
-                <input type="text" name="rollNo" placeholder="Enter Your Roll Number" required>
+                <i class="fas fa-user"></i>
+                <input type="text" name="loginId" placeholder="Enter Email OR Roll Number" required>
             </div>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
@@ -73,21 +55,5 @@
         <p class="bottom-text">Don't have an account? <a href="/signup.html">Sign up here</a></p>
         <a href="/admin.html" class="admin-link"><i class="fas fa-user-shield"></i> Teacher / Admin Access</a>
     </div>
-
-    <script>
-        // Check URL for Signup Success Signal
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.get('signup') === 'success') {
-                const toast = document.getElementById('actionToast');
-                toast.classList.add('show');
-                // Clean the URL link after showing toast
-                window.history.replaceState({}, document.title, "/login.html");
-                
-                // Hide toast after 4 seconds
-                setTimeout(() => { toast.classList.remove('show'); }, 4000);
-            }
-        };
-    </script>
 </body>
 </html>
