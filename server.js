@@ -35,11 +35,7 @@ app.use('/admin.html', (req, res, next) => {
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
-            <head>
-                <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Admin Area Restricted</title>
-                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-            </head>
+            <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Area Restricted</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"></head>
             <body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f172a; margin:0; font-family:'Poppins', sans-serif;">
                 <div style="background:#1e293b; padding:40px; border-radius:15px; text-align:center; width:100%; max-width:350px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155;">
                     <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
@@ -77,46 +73,34 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected Successfully'))
     .catch(err => console.log('❌ MongoDB Connection Error:', err));
 
-// Schema 1: User
-const UserSchema = new mongoose.Schema({
+const User = mongoose.model('User', new mongoose.Schema({
     username: String, email: String, password: String,
     mobile: String, rollNo: { type: String, unique: true },
     googleId: String, photo: String
-});
-const User = mongoose.model('User', UserSchema);
+}));
 
-// Schema 2: Course
-const CourseSchema = new mongoose.Schema({
+const Course = mongoose.model('Course', new mongoose.Schema({
     title: String, description: String, thumbnail: String, videoLink: String,
     createdAt: { type: Date, default: Date.now }
-});
-const Course = mongoose.model('Course', CourseSchema);
+}));
 
-// Schema 3: Exam
-const ExamSchema = new mongoose.Schema({
+const Exam = mongoose.model('Exam', new mongoose.Schema({
     title: String, totalMarks: Number, duration: Number,
     questions: [{ questionText: String, options: [String], correctAnswer: String, marks: Number }],
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now }
-});
-const Exam = mongoose.model('Exam', ExamSchema);
+}));
 
-// Schema 4: Result 
-const ResultSchema = new mongoose.Schema({
+const Result = mongoose.model('Result', new mongoose.Schema({
     studentId: String, studentName: String, rollNo: String, mobile: String,
-    examTitle: String,
-    studentAnswers: Object, 
-    score: { type: Number, default: 0 },
+    examTitle: String, studentAnswers: Object, score: { type: Number, default: 0 },
     isReleased: { type: Boolean, default: false } 
-});
-const Result = mongoose.model('Result', ResultSchema);
+}));
 
-// 🌟 NAYA: Schema 5: Feedback (Admin ke liye)
-const FeedbackSchema = new mongoose.Schema({
+const Feedback = mongoose.model('Feedback', new mongoose.Schema({
     studentName: String, rollNo: String, examTitle: String, message: String,
     date: { type: Date, default: Date.now }
-});
-const Feedback = mongoose.model('Feedback', FeedbackSchema);
+}));
 
 // ==========================================
 // 3. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
@@ -147,7 +131,7 @@ async function sendLoginAlertEmail(toEmail, userName) {
 }
 
 // ==========================================
-// 4. GOOGLE OAUTH CONFIGURATION
+// 4. GOOGLE OAUTH CONFIGURATION (Fixed for Roll No)
 // ==========================================
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -161,7 +145,15 @@ passport.use(new GoogleStrategy({
               sendLoginAlertEmail(user.email, user.username);
               return done(null, user); 
           } else {
-              user = await User.create({ googleId: profile.id, username: profile.displayName, email: profile.emails[0].value, photo: profile.photos[0].value });
+              // 🌟 NAYA: Generate a VIP Roll Number for Google users to prevent DB crash
+              const generatedRollNo = "GL-" + Math.floor(1000 + Math.random() * 9000);
+              user = await User.create({ 
+                  googleId: profile.id, 
+                  username: profile.displayName, 
+                  email: profile.emails[0].value, 
+                  photo: profile.photos[0].value,
+                  rollNo: generatedRollNo
+              });
               sendWelcomeEmail(user.email, user.username);
               return done(null, user);
           }
@@ -184,7 +176,8 @@ app.post('/signup', async (req, res) => {
         
         const newUser = await User.create({ username, email, password, mobile, rollNo });
         sendWelcomeEmail(email, username); 
-        res.redirect('/login.html');
+        // 🌟 Redirect to login with success message
+        res.redirect('/login.html?signup=success');
     } catch (err) { res.send("Error during signup."); }
 });
 
@@ -197,8 +190,10 @@ app.post('/login', async (req, res) => {
         sendLoginAlertEmail(user.email, user.username); 
         req.session.userId = user._id; 
         req.session.username = user.username;
-        req.session.rollNo = user.rollNo; // 🌟 NAYA: Roll No session mein save kiya one-time exam ke liye
-        res.redirect('/dashboard.html');
+        req.session.rollNo = user.rollNo; 
+        
+        // 🌟 Redirect to dashboard with success signal
+        res.redirect('/dashboard.html?login=success');
     } catch (err) { res.send("Login Error"); }
 });
 
@@ -206,8 +201,10 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
     req.session.userId = req.user._id; 
     req.session.username = req.user.username; 
-    req.session.rollNo = req.user.rollNo; // 🌟 NAYA: Google login mein bhi roll no save kiya
-    res.redirect('/dashboard.html');
+    req.session.rollNo = req.user.rollNo; 
+    
+    // 🌟 Redirect to dashboard with success signal
+    res.redirect('/dashboard.html?login=success');
 });
 
 app.get('/logout', (req, res) => {
@@ -222,25 +219,34 @@ app.get('/logout', (req, res) => {
 // 6. ADMIN & STUDENT APIs
 // ==========================================
 
+// 🌟 NAYA API: Dashboard ko student ka naam batane ke liye
+app.get('/api/current-user', (req, res) => {
+    if(req.session.userId) {
+        res.json({ loggedIn: true, username: req.session.username, rollNo: req.session.rollNo });
+    } else {
+        res.json({ loggedIn: false });
+    }
+});
+
 // Courses
 app.get('/api/courses', async (req, res) => { res.json(await Course.find().sort({ createdAt: -1 })); });
 app.post('/api/courses', async (req, res) => { res.json(await Course.create(req.body)); });
 app.delete('/api/courses/:id', async (req, res) => { await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
 // Exams
-app.get('/api/exams', async (req, res) => { res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })); });
+app.get('/api/exams', async (req, res) => { res.json(await Exam.find().sort({ _id: -1 })); }); // Sabhi exams fetch karega
 app.get('/api/exams/:id', async (req, res) => { res.json(await Exam.findById(req.params.id)); });
 app.post('/api/exams', async (req, res) => { res.json(await Exam.create(req.body)); });
 app.delete('/api/exams/:id', async (req, res) => { await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
-// 🌟 NAYA: One-Time Exam logic ke liye check
+// One-Time Exam Tracker
 app.get('/api/my-submissions', async (req, res) => {
     if (!req.session.rollNo) return res.json([]);
     const results = await Result.find({ rollNo: req.session.rollNo });
-    res.json(results.map(r => r.examTitle)); // Sirf wo exam bhejo jo baccha de chuka hai
+    res.json(results.map(r => r.examTitle)); 
 });
 
-// 📌 Student Exam Submit Karega
+// Submit Exam
 app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, rollNo, mobile, examTitle, answers } = req.body;
@@ -249,7 +255,7 @@ app.post('/api/submit-exam', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to submit exam" }); }
 });
 
-// 🌟 NAYA: Student Feedback Submit Karega
+// Feedback Submit
 app.post('/api/feedback', async (req, res) => {
     try {
         await Feedback.create(req.body);
@@ -257,13 +263,13 @@ app.post('/api/feedback', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Feedback failed" }); }
 });
 
-// 📌 Admin: Saari Pending/Checked Copies Dekhega
+// Admin Checks Results
 app.get('/api/admin/results', async (req, res) => {
     try { res.json(await Result.find().sort({ _id: -1 })); } 
     catch (err) { res.status(500).json({ error: "Failed to fetch copies" }); }
 });
 
-// 📌 Admin: Copy Check Karke Result Upload Karega
+// Admin Check Copy
 app.put('/api/admin/check-copy/:id', async (req, res) => {
     try {
         await Result.findByIdAndUpdate(req.params.id, { score: req.body.adminMarks, isReleased: true });
@@ -271,7 +277,7 @@ app.put('/api/admin/check-copy/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to upload result" }); }
 });
 
-// 📌 Student Apna Result Check Karega
+// Student Check Result
 app.post('/api/check-result', async (req, res) => {
     try {
         const { rollNo, password } = req.body;
@@ -290,4 +296,3 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
-        
