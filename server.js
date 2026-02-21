@@ -288,6 +288,12 @@ app.post('/api/check-result', async (req, res) => {
         res.json({ success: true, results: myResults, studentName: student.username });
     } catch (err) { res.status(500).json({ error: "Server Error" }); }
 });
+// 🌟 NAYA: Admin Feedback Dekhega
+app.get('/api/admin/feedback', async (req, res) => {
+    try { res.json(await Feedback.find().sort({ date: -1 })); } 
+    catch (err) { res.status(500).json({ error: "Failed to fetch feedback" }); }
+});
+
 
 // ==========================================
 // VERCEL EXPORT (Server Start)
@@ -296,3 +302,4 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
