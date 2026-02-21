@@ -77,7 +77,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected Successfully'))
     .catch(err => console.log('❌ MongoDB Connection Error:', err));
 
-// Schema 1: User (With Roll No & Mobile)
+// Schema 1: User
 const UserSchema = new mongoose.Schema({
     username: String, email: String, password: String,
     mobile: String, rollNo: { type: String, unique: true },
@@ -101,16 +101,22 @@ const ExamSchema = new mongoose.Schema({
 });
 const Exam = mongoose.model('Exam', ExamSchema);
 
-// Schema 4: Result (With Admin Copy Checking Data)
+// Schema 4: Result 
 const ResultSchema = new mongoose.Schema({
     studentId: String, studentName: String, rollNo: String, mobile: String,
     examTitle: String,
-    studentAnswers: Object, // Student ke submit kiye answers
+    studentAnswers: Object, 
     score: { type: Number, default: 0 },
-    isReleased: { type: Boolean, default: false } // Admin release karega
+    isReleased: { type: Boolean, default: false } 
 });
 const Result = mongoose.model('Result', ResultSchema);
 
+// 🌟 NAYA: Schema 5: Feedback (Admin ke liye)
+const FeedbackSchema = new mongoose.Schema({
+    studentName: String, rollNo: String, examTitle: String, message: String,
+    date: { type: Date, default: Date.now }
+});
+const Feedback = mongoose.model('Feedback', FeedbackSchema);
 
 // ==========================================
 // 3. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
@@ -177,26 +183,31 @@ app.post('/signup', async (req, res) => {
         if(existingUser) return res.send("Email or Roll No already registered. <a href='/login.html'>Login here</a>");
         
         const newUser = await User.create({ username, email, password, mobile, rollNo });
-        sendWelcomeEmail(email, username); // ✅ Email wapas aa gaya
+        sendWelcomeEmail(email, username); 
         res.redirect('/login.html');
     } catch (err) { res.send("Error during signup."); }
 });
 
 app.post('/login', async (req, res) => {
     try {
-        const { rollNo, password } = req.body; // 📌 Login by Roll No
+        const { rollNo, password } = req.body; 
         const user = await User.findOne({ rollNo, password });
         if (!user) return res.send("Invalid Roll No or Password. <a href='/login.html'>Try Again</a>");
         
-        sendLoginAlertEmail(user.email, user.username); // ✅ Email alert wapas aa gaya
-        req.session.userId = user._id; req.session.username = user.username;
+        sendLoginAlertEmail(user.email, user.username); 
+        req.session.userId = user._id; 
+        req.session.username = user.username;
+        req.session.rollNo = user.rollNo; // 🌟 NAYA: Roll No session mein save kiya one-time exam ke liye
         res.redirect('/dashboard.html');
     } catch (err) { res.send("Login Error"); }
 });
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
-    req.session.userId = req.user._id; req.session.username = req.user.username; res.redirect('/dashboard.html');
+    req.session.userId = req.user._id; 
+    req.session.username = req.user.username; 
+    req.session.rollNo = req.user.rollNo; // 🌟 NAYA: Google login mein bhi roll no save kiya
+    res.redirect('/dashboard.html');
 });
 
 app.get('/logout', (req, res) => {
@@ -208,7 +219,7 @@ app.get('/logout', (req, res) => {
 });
 
 // ==========================================
-// 6. ADMIN & STUDENT APIs (Course, Exam, Copy Checking)
+// 6. ADMIN & STUDENT APIs
 // ==========================================
 
 // Courses
@@ -217,18 +228,33 @@ app.post('/api/courses', async (req, res) => { res.json(await Course.create(req.
 app.delete('/api/courses/:id', async (req, res) => { await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
 // Exams
-app.get('/api/exams', async (req, res) => { res.json(await Exam.find().sort({ _id: -1 })); });
+app.get('/api/exams', async (req, res) => { res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })); });
 app.get('/api/exams/:id', async (req, res) => { res.json(await Exam.findById(req.params.id)); });
 app.post('/api/exams', async (req, res) => { res.json(await Exam.create(req.body)); });
 app.delete('/api/exams/:id', async (req, res) => { await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
-// 📌 Student: Exam Submit Karega (Answers ke sath)
+// 🌟 NAYA: One-Time Exam logic ke liye check
+app.get('/api/my-submissions', async (req, res) => {
+    if (!req.session.rollNo) return res.json([]);
+    const results = await Result.find({ rollNo: req.session.rollNo });
+    res.json(results.map(r => r.examTitle)); // Sirf wo exam bhejo jo baccha de chuka hai
+});
+
+// 📌 Student Exam Submit Karega
 app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, rollNo, mobile, examTitle, answers } = req.body;
         await Result.create({ studentName, rollNo, mobile, examTitle, studentAnswers: answers, isReleased: false });
         res.json({ success: true, message: "Exam submitted! Admin will check your copy soon." });
     } catch (err) { res.status(500).json({ error: "Failed to submit exam" }); }
+});
+
+// 🌟 NAYA: Student Feedback Submit Karega
+app.post('/api/feedback', async (req, res) => {
+    try {
+        await Feedback.create(req.body);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: "Feedback failed" }); }
 });
 
 // 📌 Admin: Saari Pending/Checked Copies Dekhega
@@ -245,7 +271,7 @@ app.put('/api/admin/check-copy/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to upload result" }); }
 });
 
-// 📌 Student: Apna Result Check Karega
+// 📌 Student Apna Result Check Karega
 app.post('/api/check-result', async (req, res) => {
     try {
         const { rollNo, password } = req.body;
@@ -264,4 +290,4 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
-                                    
+        
