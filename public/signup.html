@@ -9,62 +9,38 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f4f8; }
-        
         .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; text-align: center; }
         .container h2 { color: #0f172a; font-size: 28px; margin-bottom: 5px; }
         .container h2 span { color: #3b82f6; }
         .container p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
-        
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
         .input-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-        
         .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn:hover { background: #2563eb; }
-        
         .divider { margin: 20px 0; color: #94a3b8; font-size: 14px; position: relative; }
         .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #e2e8f0; }
         .divider::before { left: 0; } .divider::after { right: 0; }
-        
         .btn-google { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-weight: 500; text-decoration: none; transition: 0.3s; }
         .btn-google img { width: 20px; margin-right: 10px; }
         .btn-google:hover { background: #f8fafc; }
-        
         .bottom-text { margin-top: 20px; font-size: 14px; color: #64748b; }
         .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 500; }
-        .bottom-text a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2>Join <span>CodeMaster</span> 🚀</h2>
         <p>Create your student account to start learning!</p>
         
         <form action="/signup" method="POST">
-            <div class="input-group">
-                <i class="fas fa-user"></i>
-                <input type="text" name="username" placeholder="Full Name" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" name="email" placeholder="Email Address" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-phone"></i>
-                <input type="number" name="mobile" placeholder="Mobile Number" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-id-badge"></i>
-                <input type="text" name="rollNo" placeholder="Create Roll Number (e.g., CS2026)" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password" placeholder="Create Password" required>
-            </div>
-            
-            <button type="submit" class="btn">Sign Up</button>
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" name="username" placeholder="Full Name" required></div>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" name="email" placeholder="Email Address" required></div>
+            <div class="input-group"><i class="fas fa-phone"></i><input type="number" name="mobile" placeholder="Mobile Number" required></div>
+            <div class="input-group"><i class="fas fa-id-badge"></i><input type="text" name="rollNo" placeholder="Create Roll Number (e.g., CS2026)" required></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" name="password" placeholder="Create Password" required></div>
+            <button type="submit" class="btn">Create Account</button>
         </form>
 
         <div class="divider">OR</div>
@@ -76,6 +52,5 @@
         
         <p class="bottom-text">Already have an account? <a href="/login.html">Login here</a></p>
     </div>
-
 </body>
 </html>
