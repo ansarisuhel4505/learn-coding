@@ -16,7 +16,7 @@
         .nav-links { list-style: none; padding: 20px 0; flex-grow: 1; }
         .nav-links li { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; }
         .nav-links li:hover, .nav-links li.active { background: #1e293b; border-left: 4px solid #3b82f6; }
-        .nav-links li i { margin-right: 10px; width: 20px; }
+        .nav-links li i { margin-right: 10px; width: 20px; text-align: center;}
         .logout-btn { padding: 15px; text-align: center; background: #ef4444; color: white; text-decoration: none; display: block; }
         
         /* Main Content */
@@ -25,10 +25,10 @@
         .section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        h1 { color: #1e293b; margin-bottom: 20px; }
+        h1 { color: #1e293b; margin-bottom: 20px; font-size: 26px;}
         
         /* Forms & Cards */
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0;}
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #475569; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; outline: none; }
@@ -38,7 +38,7 @@
         .btn-success { background: #10b981; } .btn-success:hover { background: #059669; }
 
         /* Tables */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 10px; overflow: hidden; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; color: #475569; font-weight: 600; }
         tr:hover { background: #f1f5f9; }
@@ -53,6 +53,13 @@
         .close-modal { cursor: pointer; font-size: 20px; color: #ef4444; }
         .student-answers-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .student-answers-box p { margin-bottom: 10px; font-size: 14px; }
+        
+        /* Feedback Cards */
+        .feedback-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .feedback-card { background: white; padding: 20px; border-radius: 10px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .feedback-card h4 { color: #0f172a; margin-bottom: 5px; }
+        .feedback-card small { color: #64748b; font-weight: 600; }
+        .feedback-card p { margin-top: 15px; color: #334155; font-size: 14px; font-style: italic; background: #f8fafc; padding: 10px; border-radius: 5px;}
     </style>
 </head>
 <body>
@@ -63,8 +70,9 @@
             <li class="active" onclick="switchTab('courses')"><i class="fas fa-video"></i> Manage Courses</li>
             <li onclick="switchTab('exams')"><i class="fas fa-file-alt"></i> Manage Exams</li>
             <li onclick="switchTab('results')"><i class="fas fa-check-circle"></i> Check Copies</li>
+            <li onclick="switchTab('feedback')"><i class="fas fa-comments"></i> Student Feedback</li>
         </ul>
-        <a href="/" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Back to Site</a>
+        <a href="/" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit Panel</a>
     </div>
 
     <div class="main-content">
@@ -101,8 +109,7 @@
                     </div>
                     
                     <h4 style="margin: 15px 0; color: #3b82f6;">Questions Setup</h4>
-                    <div id="questionsContainer">
-                        </div>
+                    <div id="questionsContainer"></div>
                     <button type="button" class="btn btn-success" onclick="addQuestionField()" style="margin-bottom: 20px;">+ Add Question</button>
                     <br>
                     <button type="submit" class="btn" style="width: 100%;">Publish Exam</button>
@@ -129,10 +136,15 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="resultsTableBody">
-                        </tbody>
+                    <tbody id="resultsTableBody"></tbody>
                 </table>
             </div>
+        </div>
+
+        <div id="feedback-sec" class="section">
+            <h1>💬 Student Feedback & Reviews</h1>
+            <div class="feedback-grid" id="feedbackContainer">
+                </div>
         </div>
 
     </div>
@@ -146,8 +158,7 @@
             <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;" id="modalExamTitle"></p>
             
             <h4 style="margin-bottom: 10px;">Student's Answers:</h4>
-            <div class="student-answers-box" id="modalAnswersBox">
-                </div>
+            <div class="student-answers-box" id="modalAnswersBox"></div>
 
             <div class="form-group">
                 <label style="color: #3b82f6; font-weight: bold;">Enter Marks Obtained:</label>
@@ -166,6 +177,8 @@
             document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
             document.getElementById(tabId + '-sec').classList.add('active');
             event.currentTarget.classList.add('active');
+            
+            if(tabId === 'feedback') loadFeedback(); // Load feedback when tab clicked
         }
 
         // --- 2. COURSE MANAGEMENT ---
@@ -194,9 +207,7 @@
             alert('Course Added!'); document.getElementById('courseForm').reset(); loadCourses();
         }
         async function deleteCourse(id) {
-            if(confirm("Delete this course?")) {
-                await fetch(`/api/courses/${id}`, { method: 'DELETE' }); loadCourses();
-            }
+            if(confirm("Delete this course?")) { await fetch(`/api/courses/${id}`, { method: 'DELETE' }); loadCourses(); }
         }
 
         // --- 3. EXAM MANAGEMENT ---
@@ -220,6 +231,7 @@
             `;
             document.getElementById('questionsContainer').appendChild(div);
         }
+        
         async function createExam(e) {
             e.preventDefault();
             const questions = [];
@@ -239,6 +251,7 @@
             await fetch('/api/exams', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
             alert('Exam Published!'); document.getElementById('examForm').reset(); document.getElementById('questionsContainer').innerHTML = ''; loadExams();
         }
+        
         async function loadExams() {
             const res = await fetch('/api/exams');
             const exams = await res.json();
@@ -256,7 +269,7 @@
         }
 
         // --- 4. COPY CHECKING & RESULTS MANAGEMENT ---
-        let allResultsData = []; // Store data temporarily for the modal
+        let allResultsData = []; 
 
         async function loadResults() {
             const res = await fetch('/api/admin/results');
@@ -265,20 +278,14 @@
             tbody.innerHTML = '';
 
             allResultsData.forEach(r => {
-                let statusBadge = r.isReleased 
-                    ? `<span class="badge badge-checked">Checked ✅</span>` 
-                    : `<span class="badge badge-pending">Pending ⏳</span>`;
-                
+                let statusBadge = r.isReleased ? `<span class="badge badge-checked">Checked ✅</span>` : `<span class="badge badge-pending">Pending ⏳</span>`;
                 let actionBtn = r.isReleased
                     ? `<span style="font-weight:bold; color:#10b981;">Marks: ${r.score}</span>`
                     : `<button onclick="openCheckModal('${r._id}')" class="btn"><i class="fas fa-edit"></i> Check Copy</button>`;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td>
-                            <b>${r.studentName}</b><br>
-                            <small style="color:#64748b;">Roll No: ${r.rollNo || 'N/A'} | Mob: ${r.mobile || 'N/A'}</small>
-                        </td>
+                        <td><b>${r.studentName}</b><br><small style="color:#64748b;">Roll No: ${r.rollNo || 'N/A'}</small></td>
                         <td>${r.examTitle}</td>
                         <td>${statusBadge}</td>
                         <td>${actionBtn}</td>
@@ -293,44 +300,64 @@
             document.getElementById('modalExamTitle').innerText = "Exam: " + result.examTitle;
             document.getElementById('currentResultId').value = id;
             
-            // Format Student Answers
             let answersHtml = '';
             if(result.studentAnswers && Object.keys(result.studentAnswers).length > 0) {
                 for(let key in result.studentAnswers) {
                     answersHtml += `<p><b>${key}:</b> <span style="color:#334155;">${result.studentAnswers[key]}</span></p>`;
                 }
             } else {
-                answersHtml = `<p style="color:#ef4444;">No answers submitted or Objective auto-check used.</p>`;
+                answersHtml = `<p style="color:#ef4444;">No answers submitted.</p>`;
             }
             document.getElementById('modalAnswersBox').innerHTML = answersHtml;
-            document.getElementById('finalMarksInput').value = result.score || ''; // Agar pehle se kuch marks hain
-            
+            document.getElementById('finalMarksInput').value = result.score || ''; 
             document.getElementById('checkModal').style.display = "flex";
         }
 
-        function closeModal() {
-            document.getElementById('checkModal').style.display = "none";
-        }
+        function closeModal() { document.getElementById('checkModal').style.display = "none"; }
 
         async function submitCheckedCopy() {
             const id = document.getElementById('currentResultId').value;
             const marks = document.getElementById('finalMarksInput').value;
-
             if(!marks) return alert("Please enter marks!");
 
             try {
                 const res = await fetch(`/api/admin/check-copy/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ adminMarks: marks })
                 });
                 const data = await res.json();
                 if(data.success) {
                     alert("✅ Result Uploaded Successfully!");
-                    closeModal();
-                    loadResults(); // Refresh table
+                    closeModal(); loadResults(); 
                 }
             } catch(e) { alert("Error uploading result"); }
+        }
+
+        // 🌟 NAYA: 5. LOAD FEEDBACKS ---
+        async function loadFeedback() {
+            try {
+                const res = await fetch('/api/admin/feedback');
+                const feedbacks = await res.json();
+                const container = document.getElementById('feedbackContainer');
+                container.innerHTML = '';
+                
+                if(feedbacks.length === 0) {
+                    container.innerHTML = '<p>No feedback received yet.</p>';
+                    return;
+                }
+
+                feedbacks.forEach(f => {
+                    const date = new Date(f.date).toLocaleDateString();
+                    container.innerHTML += `
+                        <div class="feedback-card">
+                            <h4>${f.studentName}</h4>
+                            <small>Roll No: ${f.rollNo} | Exam: ${f.examTitle}</small><br>
+                            <small style="color: #94a3b8;">${date}</small>
+                            <p>"${f.message}"</p>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
         }
 
         // Initialize Data on Load
@@ -338,7 +365,7 @@
             loadCourses();
             loadExams();
             loadResults();
-            addQuestionField(); // Pehle se 1 question ka dabba open rahe
+            addQuestionField(); // Initialize 1 blank question
         };
     </script>
 </body>
