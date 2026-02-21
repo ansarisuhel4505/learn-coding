@@ -18,11 +18,11 @@
         .nav-links li { padding: 15px 25px; cursor: pointer; color: #64748b; font-weight: 500; transition: 0.3s; border-right: 4px solid transparent; }
         .nav-links li:hover, .nav-links li.active { background: #f8fafc; color: #3b82f6; border-right: 4px solid #3b82f6; }
         .nav-links li i { margin-right: 12px; width: 20px; text-align: center; }
-        .logout-btn { padding: 15px; text-align: center; color: #ef4444; text-decoration: none; font-weight: 600; border-top: 1px solid #e2e8f0; transition: 0.3s; }
+        .logout-btn { padding: 15px; text-align: center; color: #ef4444; text-decoration: none; font-weight: 600; border-top: 1px solid #e2e8f0; transition: 0.3s; display: block; }
         .logout-btn:hover { background: #fee2e2; }
 
         /* Main Content */
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; position: relative; }
         .section { display: none; animation: fadeIn 0.4s ease-in-out; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -47,28 +47,42 @@
         .result-box input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; }
         .result-card { background: #f8fafc; border: 2px dashed #3b82f6; padding: 20px; border-radius: 10px; margin-top: 20px; display: none; text-align: left; }
         
-        /* Exam Engine Modal */
+        /* Modals & Popups */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.9); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 800px; max-width: 95%; max-height: 90vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; }
         .modal-header { background: #f8fafc; padding: 20px 30px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 30px; overflow-y: auto; flex-grow: 1; }
-        .exam-setup-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        .exam-setup-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #f8fafc;}
         .question-block { margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; }
-        .question-block h4 { color: #0f172a; margin-bottom: 15px; }
         .option-label { display: block; padding: 10px 15px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-        .option-label:hover { background: #f1f5f9; }
-        input[type="radio"] { margin-right: 10px; }
-
-        /* 🌟 NAYA: Timer & Popups CSS */
+        
+        /* Timer UI */
         .timer-box { background: #fee2e2; color: #ef4444; font-size: 20px; font-weight: bold; padding: 10px 20px; border-radius: 8px; display: inline-block; border: 2px solid #fca5a5; margin-bottom: 20px;}
+        
+        /* Small Popup Modals */
         .popup-modal { background: white; padding: 30px; border-radius: 15px; width: 400px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
         .popup-modal h3 { color: #0f172a; margin-bottom: 10px; }
         .popup-modal p { color: #64748b; margin-bottom: 20px; font-size: 14px; }
         .popup-modal textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 15px; resize: none;}
         .flex-btns { display: flex; gap: 10px; }
+
+        /* 🌟 NAYA: Professional Toast Notification */
+        .toast-popup { position: fixed; top: 30px; right: -400px; background: white; border-left: 6px solid #10b981; padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; z-index: 1000; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast-popup.show { right: 30px; }
+        .toast-icon { font-size: 28px; color: #10b981; }
+        .toast-text h4 { color: #0f172a; margin-bottom: 3px; font-size: 16px; }
+        .toast-text p { color: #64748b; font-size: 13px; margin: 0; }
     </style>
 </head>
 <body>
+
+    <div id="loginToast" class="toast-popup">
+        <i class="fas fa-check-circle toast-icon"></i>
+        <div class="toast-text">
+            <h4 id="toastTitle">Welcome!</h4>
+            <p id="toastMessage">You are successfully logged in.</p>
+        </div>
+    </div>
 
     <div class="sidebar">
         <h2>Code<span>Master</span></h2>
@@ -81,19 +95,14 @@
     </div>
 
     <div class="main-content">
-        
         <div id="courses-sec" class="section active">
             <h1>📚 Available Courses</h1>
-            <div class="grid-container" id="coursesGrid">
-                <p>Loading courses...</p>
-            </div>
+            <div class="grid-container" id="coursesGrid">Loading courses...</div>
         </div>
 
         <div id="exams-sec" class="section">
             <h1>📝 Live Exams Portal</h1>
-            <div class="grid-container" id="examsGrid">
-                <p>Loading exams...</p>
-            </div>
+            <div class="grid-container" id="examsGrid">Loading exams...</div>
         </div>
 
         <div id="results-sec" class="section">
@@ -111,7 +120,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div id="examModal" class="modal">
@@ -123,10 +131,10 @@
             
             <div class="modal-body">
                 <div id="examSetupForm" class="exam-setup-form">
-                    <h3 style="margin-bottom: 20px; color: #3b82f6;">Enter Details to Start Exam</h3>
-                    <input type="text" id="exName" placeholder="Full Name" required>
-                    <input type="text" id="exRoll" placeholder="Roll Number" required>
-                    <input type="number" id="exMobile" placeholder="Mobile Number" required>
+                    <h3 style="margin-bottom: 20px; color: #3b82f6;">Confirm Details to Start Exam</h3>
+                    <input type="text" id="exName" placeholder="Full Name" readonly>
+                    <input type="text" id="exRoll" placeholder="Roll Number" readonly>
+                    <input type="number" id="exMobile" placeholder="Mobile Number (Optional)">
                     <input type="hidden" id="exId">
                     <input type="hidden" id="exTitleName">
                     <button onclick="loadQuestions()" class="btn btn-success" style="font-size: 18px;">Start Exam Now</button>
@@ -134,10 +142,8 @@
 
                 <div id="examQuestionsArea" style="display: none;">
                     <div id="timerDisplay" class="timer-box">⏳ Time Left: 00:00</div>
-                    
                     <p style="color: #ef4444; font-weight: bold; margin-bottom: 20px;"><i class="fas fa-clock"></i> Do not refresh the page!</p>
                     <div id="questionsList"></div>
-                    
                     <button onclick="showConfirmPopup()" class="btn btn-success" style="margin-top: 20px; font-size: 18px;">Submit Exam & Send to Admin</button>
                 </div>
             </div>
@@ -167,6 +173,59 @@
     </div>
 
     <script>
+        let currentUser = null;
+        let submittedExams = [];
+        let timerInterval;
+        let examDurationGlobal = 0;
+        let currentExamData = null;
+
+        // ==========================================
+        // 🌟 NAYA: SECURITY & AUTO-LOGIN NOTIFICATION
+        // ==========================================
+        window.onload = async () => {
+            try {
+                // 1. Check user login status
+                const userRes = await fetch('/api/current-user');
+                currentUser = await userRes.json();
+                
+                // 2. Redirect to login if not logged in (Security Guard)
+                if(!currentUser.loggedIn) {
+                    window.location.href = '/login.html';
+                    return; 
+                }
+
+                // 3. Show Professional Login Popup if coming from Login/Signup page
+                const urlParams = new URLSearchParams(window.location.search);
+                if(urlParams.get('login') === 'success') {
+                    showToast(`Welcome back, ${currentUser.username}! 👋`, "You are successfully logged in to Dashboard.");
+                    window.history.replaceState({}, document.title, "/dashboard.html"); // Clean URL link
+                } else if(urlParams.get('signup') === 'success') {
+                    showToast(`Welcome, ${currentUser.username}! 🎉`, "Your CodeMaster account is created.");
+                    window.history.replaceState({}, document.title, "/dashboard.html");
+                }
+
+                // 4. Pre-fill Roll No in Result Checker
+                document.getElementById('resRollNo').value = currentUser.rollNo || '';
+
+                // 5. Fetch Exams already submitted by this student
+                const subRes = await fetch('/api/my-submissions');
+                submittedExams = await subRes.json();
+
+                // 6. Load rest of the data
+                loadCourses();
+                loadExams();
+            } catch(e) { console.error("Initialization Error:", e); }
+        };
+
+        // Toast Notification Function
+        function showToast(title, message) {
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+            const toast = document.getElementById('loginToast');
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 4000); // 4 sec baad gayab
+        }
+
         // --- TAB SWITCHING LOGIC ---
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
@@ -175,86 +234,63 @@
             event.currentTarget.classList.add('active');
         }
 
-        // 🌟 NAYA: Track Submitted Exams & Timer Variables
-        let submittedExams = [];
-        let timerInterval;
-        let examDurationGlobal = 0;
-
-        // On Load
-        window.onload = async () => {
-            // Fetch exams already submitted by this student
-            try {
-                const subRes = await fetch('/api/my-submissions');
-                submittedExams = await subRes.json();
-            } catch(e) { console.log(e); }
-
-            loadCourses();
-            loadExams();
-        };
-
         // --- FETCH COURSES ---
         async function loadCourses() {
-            try {
-                const res = await fetch('/api/courses');
-                const courses = await res.json();
-                const grid = document.getElementById('coursesGrid');
-                grid.innerHTML = '';
-                if(courses.length === 0) return grid.innerHTML = '<p>No courses available right now.</p>';
-                
-                courses.forEach(c => {
-                    grid.innerHTML += `
-                        <div class="card">
-                            <img src="${c.thumbnail}" alt="Course Image">
-                            <div class="card-body">
-                                <h3 class="card-title">${c.title}</h3>
-                                <p class="card-text">${c.description.substring(0, 80)}...</p>
-                                <a href="${c.videoLink}" target="_blank" class="btn"><i class="fas fa-play"></i> Watch Now</a>
-                            </div>
-                        </div>`;
-                });
-            } catch(e) { console.log(e); }
+            const res = await fetch('/api/courses');
+            const courses = await res.json();
+            const grid = document.getElementById('coursesGrid');
+            grid.innerHTML = '';
+            if(courses.length === 0) return grid.innerHTML = '<p>No courses available right now.</p>';
+            
+            courses.forEach(c => {
+                grid.innerHTML += `
+                    <div class="card">
+                        <img src="${c.thumbnail}" alt="Course Image">
+                        <div class="card-body">
+                            <h3 class="card-title">${c.title}</h3>
+                            <p class="card-text">${c.description.substring(0, 80)}...</p>
+                            <a href="${c.videoLink}" target="_blank" class="btn"><i class="fas fa-play"></i> Watch Now</a>
+                        </div>
+                    </div>`;
+            });
         }
 
         // --- FETCH EXAMS ---
         async function loadExams() {
-            try {
-                const res = await fetch('/api/exams');
-                const exams = await res.json();
-                const grid = document.getElementById('examsGrid');
-                grid.innerHTML = '';
-                
-                let activeCount = 0;
-                
-                exams.forEach(e => {
-                    // 🌟 NAYA: Agar exam pehle se de diya hai toh usko UI mein mat dikhao
-                    if(submittedExams.includes(e.title)) return;
-                    
-                    activeCount++;
-                    grid.innerHTML += `
-                        <div class="card" style="border-top: 5px solid #ef4444;">
-                            <div class="card-body">
-                                <h3 class="card-title">${e.title}</h3>
-                                <p class="card-text"><b>Marks:</b> ${e.totalMarks} | <b>Time:</b> ${e.duration} Mins</p>
-                                <button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-success"><i class="fas fa-pen-nib"></i> Attempt Exam</button>
-                            </div>
-                        </div>`;
-                });
-
-                if(activeCount === 0) {
-                    grid.innerHTML = '<p style="color:#10b981; font-weight:bold;">🎉 You have completed all available exams!</p>';
-                }
-            } catch(e) { console.log(e); }
+            const res = await fetch('/api/exams');
+            const exams = await res.json();
+            const grid = document.getElementById('examsGrid');
+            grid.innerHTML = '';
+            
+            let activeCount = 0;
+            exams.forEach(e => {
+                if(submittedExams.includes(e.title)) return; // Hide submitted exams
+                activeCount++;
+                grid.innerHTML += `
+                    <div class="card" style="border-top: 5px solid #ef4444;">
+                        <div class="card-body">
+                            <h3 class="card-title">${e.title}</h3>
+                            <p class="card-text"><b>Marks:</b> ${e.totalMarks} | <b>Time:</b> ${e.duration} Mins</p>
+                            <button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-success"><i class="fas fa-pen-nib"></i> Attempt Exam</button>
+                        </div>
+                    </div>`;
+            });
+            if(activeCount === 0) grid.innerHTML = '<p style="color:#10b981; font-weight:bold;">🎉 You have completed all available exams!</p>';
         }
 
         // --- EXAM ENGINE LOGIC ---
-        let currentExamData = null;
-
         function openExamSetup(examId, examTitle, duration) {
             document.getElementById('modalExamTitle').innerText = "Exam: " + examTitle;
             document.getElementById('exId').value = examId;
             document.getElementById('exTitleName').value = examTitle;
-            examDurationGlobal = duration; // 🌟 NAYA: Save duration for timer
+            examDurationGlobal = duration; 
             
+            // 🌟 NAYA: Auto-fill details from session
+            if(currentUser) {
+                document.getElementById('exName').value = currentUser.username;
+                document.getElementById('exRoll').value = currentUser.rollNo || '';
+            }
+
             document.getElementById('examSetupForm').style.display = "block";
             document.getElementById('examQuestionsArea').style.display = "none";
             document.getElementById('examModal').style.display = "flex";
@@ -262,7 +298,7 @@
 
         function closeExam() {
             if(confirm("Are you sure you want to exit? Your progress will be lost.")) {
-                clearInterval(timerInterval); // Stop timer if running
+                clearInterval(timerInterval); 
                 document.getElementById('examModal').style.display = "none";
             }
         }
@@ -270,51 +306,38 @@
         async function loadQuestions() {
             const name = document.getElementById('exName').value;
             const roll = document.getElementById('exRoll').value;
-            const mobile = document.getElementById('exMobile').value;
             const examId = document.getElementById('exId').value;
+            if(!name || !roll) return alert("System error: Missing details!");
 
-            if(!name || !roll || !mobile) return alert("Please fill all details to enter the exam hall!");
-
-            try {
-                const res = await fetch(`/api/exams/${examId}`);
-                currentExamData = await res.json();
-                
-                let qHTML = '';
-                currentExamData.questions.forEach((q, index) => {
-                    qHTML += `
-                        <div class="question-block" id="qBlock_${index}">
-                            <h4>Q${index + 1}: ${q.questionText} <span style="float:right; color:#64748b; font-size:14px;">[${q.marks} Marks]</span></h4>
-                    `;
-                    q.options.forEach(opt => {
-                        qHTML += `
-                            <label class="option-label">
-                                <input type="radio" name="ans_${index}" value="${opt}"> ${opt}
-                            </label>
-                        `;
-                    });
-                    qHTML += `</div>`;
+            const res = await fetch(`/api/exams/${examId}`);
+            currentExamData = await res.json();
+            
+            let qHTML = '';
+            currentExamData.questions.forEach((q, index) => {
+                qHTML += `<div class="question-block"><h4>Q${index + 1}: ${q.questionText} <span style="float:right; color:#64748b; font-size:14px;">[${q.marks} Marks]</span></h4>`;
+                q.options.forEach(opt => {
+                    qHTML += `<label class="option-label"><input type="radio" name="ans_${index}" value="${opt}"> ${opt}</label>`;
                 });
+                qHTML += `</div>`;
+            });
 
-                document.getElementById('questionsList').innerHTML = qHTML;
-                document.getElementById('examSetupForm').style.display = "none";
-                document.getElementById('examQuestionsArea').style.display = "block";
-                
-                // 🌟 NAYA: Start Timer
-                let timeRemaining = examDurationGlobal * 60; // Minutes to seconds
+            document.getElementById('questionsList').innerHTML = qHTML;
+            document.getElementById('examSetupForm').style.display = "none";
+            document.getElementById('examQuestionsArea').style.display = "block";
+            
+            // Timer Logic
+            let timeRemaining = examDurationGlobal * 60; 
+            updateTimerUI(timeRemaining);
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
                 updateTimerUI(timeRemaining);
-                
-                timerInterval = setInterval(() => {
-                    timeRemaining--;
-                    updateTimerUI(timeRemaining);
-                    
-                    if(timeRemaining <= 0) {
-                        clearInterval(timerInterval);
-                        alert("⏳ Time is up! Your exam is being automatically submitted.");
-                        submitExamFinal(true); // true means Auto-Submit
-                    }
-                }, 1000);
-                
-            } catch(e) { alert("Error loading question paper."); }
+                if(timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏳ Time is up! Your exam is being automatically submitted.");
+                    submitExamFinal(true); 
+                }
+            }, 1000);
         }
 
         function updateTimerUI(seconds) {
@@ -323,54 +346,13 @@
             document.getElementById('timerDisplay').innerText = `⏳ Time Left: ${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // 🌟 NAYA: Popups Logic
+        // --- POPUPS & SUBMISSION ---
         function showConfirmPopup() { document.getElementById('confirmPopup').style.display = "flex"; }
         function closeConfirmPopup() { document.getElementById('confirmPopup').style.display = "none"; }
 
-        // Updated Submission Logic
         async function submitExamFinal(isAutoSubmit = false) {
-            if(!isAutoSubmit) {
-                closeConfirmPopup();
-            } else {
-                closeConfirmPopup(); // Hide if open
-            }
-            clearInterval(timerInterval); // Stop timer
+            closeConfirmPopup(); 
+            clearInterval(timerInterval); 
 
-            // Collect Answers
             let studentAnswers = {};
-            currentExamData.questions.forEach((q, index) => {
-                const selected = document.querySelector(`input[name="ans_${index}"]:checked`);
-                studentAnswers[`Q${index + 1}`] = selected ? selected.value : "Not Attempted";
-            });
-
-            const data = {
-                studentName: document.getElementById('exName').value,
-                rollNo: document.getElementById('exRoll').value,
-                mobile: document.getElementById('exMobile').value,
-                examTitle: document.getElementById('exTitleName').value,
-                answers: studentAnswers
-            };
-
-            try {
-                const res = await fetch('/api/submit-exam', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if(result.success) {
-                    document.getElementById('examModal').style.display = "none";
-                    
-                    // 🌟 NAYA: Update local tracking & refresh exams UI
-                    submittedExams.push(data.examTitle); 
-                    loadExams(); // This will remove the completed exam from screen
-                    
-                    // 🌟 NAYA: Show feedback popup
-                    document.getElementById('feedbackPopup').style.display = "flex";
-                }
-            } catch(e) { alert("Error submitting exam!"); }
-        }
-
-        async function sendFeedback() {
-            const msg = document.getElementById('feedbackMsg').value;
-            await fetch
+            currentExamData.q
