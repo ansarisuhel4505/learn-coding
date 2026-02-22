@@ -29,7 +29,7 @@
                 <li><a href="#features">Features</a></li>
                 <li><a href="/contact.html">Contact</a></li>
                 <li><a href="/compiler.html">Compiler</a></li>
-                <li><a href="/dashboard.html">Dashboard</a></li>
+                <li><a href="#" onclick="checkLogin(event)">Student Dashboard</a></li>
                 <li><a href="/admin.html">Admin Pannel</a></li>
             </ul>
         </nav>
@@ -325,6 +325,21 @@
                 `).join('');
             } catch (err) { console.log(err); }
         }
+        // 🌟 SMART DASHBOARD LINK LOGIC
+function checkLogin(event) {
+    event.preventDefault(); // Default link click ko roko
+    
+    // Check karo kya browser ki memory mein Roll No save hai
+    if(localStorage.getItem('cm_roll')) {
+        // Agar save hai (Logged In), toh Dashboard kholo
+        window.location.href = "/dashboard.html";
+    } else {
+        // Agar save nahi hai (Logged Out), toh Login Page par bhejo
+        window.location.href = "/login.html";
+    }
+}
+        
     </script>
 </body>
 </html>
+
