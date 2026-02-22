@@ -120,6 +120,15 @@
             #printPaperArea { position: absolute; left: 0; top: 0; width: 100%; background: white;}
             .no-print { display: none !important; }
         }
+                /* 🏆 LEADERBOARD TABLE STYLES */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
+        .leaderboard-table th, .leaderboard-table td { padding: 12px 15px; border: 1px solid #cbd5e1; }
+        .leaderboard-table th { background: #3b82f6; color: white; font-weight: 600; position: sticky; top: 0; }
+        .leaderboard-table tr:nth-child(even) { background: #f8fafc; }
+        .leaderboard-table tr:hover { background: #f1f5f9; }
+        .rank-1 { color: #d97706; font-weight: bold; font-size: 18px; } /* Gold */
+        .rank-2 { color: #64748b; font-weight: bold; font-size: 17px; } /* Silver */
+        .rank-3 { color: #b45309; font-weight: bold; font-size: 16px; } /* Bronze */
         
         
     </style>
@@ -249,6 +258,31 @@
             </div>
         </div>
         </div>
+        <div id="leaderboardModal" class="modal" style="z-index: 500;">
+        <div class="modal-content" style="width: 800px; max-height: 85vh;">
+            <div class="modal-header">
+                <h2>🏆 <span id="lbExamTitle"></span> - Rank List</h2>
+                <div>
+                    <button onclick="downloadLeaderboardCSV()" class="btn btn-success" style="width: auto; padding: 8px 15px; margin-right: 10px;"><i class="fas fa-file-excel"></i> Download Excel</button>
+                    <span onclick="document.getElementById('leaderboardModal').style.display='none'" style="cursor:pointer; color:red; font-size:24px;">✖</span>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 20px; overflow-y: auto;">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student Name</th>
+                            <th>Roll No</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
     
 
     <script>
@@ -298,7 +332,8 @@
             ).join('');
         }
 
-                async function loadExams() {
+                // YAHAN SE SHURU KAREIN
+        async function loadExams() {
             try {
                 const res = await fetch('/api/exams');
                 const exams = await res.json();
@@ -312,20 +347,21 @@
                 exams.forEach(e => {
                     // Check if exam is already in submitted list
                     if(submittedExams.includes(e.title)) {
-                        // 🟢 IF ATTEMPTED: Show Answer Key Button
+                        // 🟢 IF ATTEMPTED: Show Key & Leaderboard Buttons
                         html += `
                         <div class="card" style="border-top:4px solid #10b981; background: #f8fafc;">
                             <div class="card-body">
                                 <h3 class="card-title" style="color: #475569;">${e.title}</h3>
                                 <p class="card-text" style="color: #94a3b8;">Marks: ${e.totalMarks} | Time: ${e.duration}m</p>
-                                <div style="display:flex; gap:10px;">
-                                    <button class="btn" style="background: #10b981; cursor: not-allowed; flex:1;" disabled>✅ Attempted</button>
-                                    <button onclick="viewAnswerKey('${e.title}')" class="btn btn-warning" style="flex:1; color:white;"><i class="fas fa-key"></i> Key & Rank</button>
+                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                    <button class="btn" style="background: #10b981; cursor: not-allowed; flex:1; min-width:100%; margin-bottom: 5px;" disabled>✅ Attempted</button>
+                                    <button onclick="viewAnswerKey('${e.title}')" class="btn btn-warning" style="flex:1; color:white; padding: 8px;"><i class="fas fa-key"></i> Key</button>
+                                    <button onclick="viewLeaderboard('${e.title}')" class="btn btn-success" style="flex:1; padding: 8px;"><i class="fas fa-trophy"></i> Rank List</button>
                                 </div>
                             </div>
                         </div>`;
                     } else {
-                        // 🔴 IF NOT ATTEMPTED: Show Active Exam
+                        // 🔴 IF NOT ATTEMPTED: Show Active Exam Button
                         html += `
                         <div class="card" style="border-top:4px solid #ef4444;">
                             <div class="card-body">
@@ -341,7 +377,9 @@
             } catch (error) {
                 console.error("Error loading exams:", error);
             }
-                }
+        }
+        // YAHAN TAK COPY KARKE PASTE KAREIN
+
         
         // ==========================================
         // EXAM ENGINE LOGIC (Pagination & Palette)
@@ -600,8 +638,62 @@
             // PDF download karne ka sabse solid browser native tarika
             window.print(); 
         }
+                // ==========================================
+        // 🏆 LEADERBOARD & EXCEL DOWNLOAD LOGIC
+        // ==========================================
+        let currentLeaderboardData = []; // CSV download ke liye save rakhega
 
-        
+        async function viewLeaderboard(examTitle) {
+            const res = await fetch('/api/leaderboard', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ examTitle })
+            });
+            const data = await res.json();
+            
+            if(!data.success || data.leaderboard.length === 0) return alert("Rank list not available yet!");
+
+            currentLeaderboardData = data.leaderboard;
+            document.getElementById('lbExamTitle').innerText = examTitle;
+
+            let tbodyHtml = '';
+            data.leaderboard.forEach(student => {
+                let rankClass = '';
+                let medal = '';
+                if(student.rank === 1) { rankClass = 'rank-1'; medal = '🥇'; }
+                else if(student.rank === 2) { rankClass = 'rank-2'; medal = '🥈'; }
+                else if(student.rank === 3) { rankClass = 'rank-3'; medal = '🥉'; }
+
+                tbodyHtml += `
+                <tr>
+                    <td class="${rankClass}">#${student.rank} ${medal}</td>
+                    <td><b>${student.studentName}</b></td>
+                    <td>${student.rollNo}</td>
+                    <td style="color: #10b981; font-weight: bold; font-size: 16px;">${student.score} Marks</td>
+                </tr>`;
+            });
+
+            document.getElementById('leaderboardBody').innerHTML = tbodyHtml;
+            document.getElementById('leaderboardModal').style.display = 'flex';
+        }
+
+        function downloadLeaderboardCSV() {
+            // Excel/CSV file banayein
+            let csvContent = "data:text/csv;charset=utf-8,Rank,Student Name,Roll No,Score\n";
+            
+            currentLeaderboardData.forEach(row => {
+                csvContent += `${row.rank},"${row.studentName}",${row.rollNo},${row.score}\n`;
+            });
+            
+            // File Download karwayein
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${document.getElementById('lbExamTitle').innerText}_RankList.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+         
     </script>
 </body>
 </html>
