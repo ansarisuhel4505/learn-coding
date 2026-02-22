@@ -137,11 +137,18 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // ==========================================
-// 6. ROUTES: SIGNUP & LOGIN (Email + RollNo Logic)
+// 6. ROUTES: SIGNUP & LOGIN (With 1000-2000 Roll No Limit)
 // ==========================================
 app.post('/signup', async (req, res) => {
     try {
         const { username, email, password, mobile, rollNo } = req.body; 
+        
+        // 🚨 NAYA RULE: Roll Number Limit Check (1000 to 2000)
+        const rNum = parseInt(rollNo);
+        if (isNaN(rNum) || rNum < 1000 || rNum > 2000) {
+            return res.send("<script>alert('❌ Invalid Roll No! Only Roll Numbers between 1000 and 2000 are allowed.'); window.location.href='/signup.html';</script>");
+        }
+
         const existingUser = await User.findOne({ $or: [{ email }, { rollNo }] });
         if(existingUser) return res.send("<script>alert('Email or Roll No already registered!'); window.location.href='/signup.html';</script>");
         
@@ -154,6 +161,15 @@ app.post('/signup', async (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         const { loginId, password } = req.body; 
+        
+        // 🚨 NAYA RULE: Check if loginId is a Roll No (not email & not Google ID)
+        if (!loginId.includes('@') && !loginId.startsWith('GL-')) {
+            const rNum = parseInt(loginId);
+            if (isNaN(rNum) || rNum < 1000 || rNum > 2000) {
+                return res.send("<script>alert('❌ Invalid Roll No! Must be between 1000 and 2000.'); window.location.href='/login.html';</script>");
+            }
+        }
+
         const user = await User.findOne({ $or: [{ email: loginId }, { rollNo: loginId }], password: password });
         
         if (!user) return res.send("<script>alert('❌ Invalid Email/Roll No or Password.'); window.location.href='/login.html';</script>");
@@ -163,18 +179,6 @@ app.post('/login', async (req, res) => {
     } catch (err) { res.send("Login Error"); }
 });
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
-    res.redirect(`/dashboard.html?login=success&name=${encodeURIComponent(req.user.username)}&roll=${req.user.rollNo}`);
-});
-
-app.get('/logout', (req, res) => {
-    req.logout((err) => {
-        if (err) return next(err);
-        req.session.destroy();
-        res.redirect('/login.html');
-    });
-});
 
 // ==========================================
 // 7. ADMIN & STUDENT APIs
@@ -284,4 +288,5 @@ if (process.env.NODE_ENV !== 'production') {
 }
 module.exports = app;
                                      
+
 
