@@ -407,6 +407,21 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 // 👆 🚨 NAYA ANTI-CHEAT CODE YAHAN KHATAM 👆
+        // 👇 💾 NAYA FEATURE: AUTO-SAVE PROGRESS 👇
+function autoSaveExam(timeRemaining) {
+    const rollNo = localStorage.getItem('cm_roll');
+    const examId = document.getElementById('exId').value;
+    const saveKey = `cm_save_${rollNo}_${examId}`; // Har exam ka alag save
+    
+    const saveData = {
+        answers: userAnswers,
+        time: timeRemaining,
+        questionIndex: currentQIndex,
+        status: questionStatus
+    };
+    localStorage.setItem(saveKey, JSON.stringify(saveData));
+}
+        
         
         
         let examTimer;
@@ -436,42 +451,62 @@ document.addEventListener('visibilitychange', function() {
         }
 
         async function startExam() {
-            isExamActive = true;
-            warningCount = 0;
-            let elem = document.documentElement;
+    isExamActive = true;
+    warningCount = 0;
+
+    let elem = document.documentElement;
     if (elem.requestFullscreen) { elem.requestFullscreen(); }
-    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } // Mobile/Safari ke liye
-            const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
-            examData = await res.json();
-            
-            examData.questions.forEach(q => {
-        // Yeh line har question ke options ko random order mein mix kar degi
+    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+
+    const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
+    examData = await res.json();
+
+    examData.questions.forEach(q => {
         q.options = q.options.sort(() => Math.random() - 0.5);
     });
-            
-            
-            currentQIndex = 0;
-            userAnswers = {};
-            questionStatus = Array(examData.questions.length).fill('unvisited');
-            
-            document.getElementById('examSetupForm').style.display = "none";
-            document.getElementById('examQuestionsArea').style.display = "flex";
 
-            renderQuestionUI();
+    // 👇 💾 PROGRESS RESTORE LOGIC 👇
+    const rollNo = localStorage.getItem('cm_roll');
+    const examId = document.getElementById('exId').value;
+    const saveKey = `cm_save_${rollNo}_${examId}`;
+    const savedData = JSON.parse(localStorage.getItem(saveKey));
 
-            let time = currentExamDuration * 60;
-            examTimer = setInterval(() => {
-                time--;
-                let mins = Math.floor(time/60);
-                let secs = time%60;
-                document.getElementById('timerDisplay').innerText = `⏳ ${mins}:${secs < 10 ? '0':''}${secs}`;
-                if(time <= 0) { 
-                    clearInterval(examTimer); 
-                    alert("⏳ Time Up! Auto Submitting..."); 
-                    confirmSubmission(); 
-                }
-            }, 1000);
+    let time = currentExamDuration * 60; // Default total time
+
+    if(savedData) {
+        console.log("Restoring previous session...");
+        userAnswers = savedData.answers || {};
+        currentQIndex = savedData.questionIndex || 0;
+        questionStatus = savedData.status || Array(examData.questions.length).fill('unvisited');
+        time = savedData.time || time; // Bacha hua time lagao
+    } else {
+        currentQIndex = 0;
+        userAnswers = {};
+        questionStatus = Array(examData.questions.length).fill('unvisited');
+    }
+    // 👆 PROGRESS RESTORE KHATAM 👆
+
+    document.getElementById('examSetupForm').style.display = "none";
+    document.getElementById('examQuestionsArea').style.display = "flex";
+    renderQuestionUI();
+
+    examTimer = setInterval(() => {
+        time--;
+        let mins = Math.floor(time/60);
+        let secs = time%60;
+        document.getElementById('timerDisplay').innerText = `⏳ ${mins}:${secs < 10 ? '0':''}${secs}`;
+        
+        // Har 1 second mein progress Auto-Save hogi
+        autoSaveExam(time);
+
+        if(time <= 0) {
+            clearInterval(examTimer);
+            alert("⏳ Time Up! Auto Submitting...");
+            confirmSubmission();
         }
+    }, 1000);
+        }
+        
 
         function renderQuestionUI() {
             const q = examData.questions[currentQIndex];
@@ -574,6 +609,11 @@ document.addEventListener('visibilitychange', function() {
                 document.getElementById('examModal').style.display = "none"; 
                 return; 
             }
+            // 👇 💾 SUBMIT HONE PAR SAVE DATA DELETE KAREIN 👇
+const rollNo = localStorage.getItem('cm_roll');
+const examId = document.getElementById('exId').value;
+localStorage.removeItem(`cm_save_${rollNo}_${examId}`);
+// 👆 ------------------------------------------
 
             // Success: Hide Exam, Show Feedback
             document.getElementById('examModal').style.display = "none";
