@@ -392,6 +392,8 @@
         let questionStatus = []; 
 
         function openExamSetup(id, title, duration) {
+            isExamActive = true; 
+            warningCount = 0;
             document.getElementById('modalExamTitle').innerText = title;
             document.getElementById('exId').value = id;
             document.getElementById('exTitleName').value = title;
@@ -693,7 +695,45 @@
             link.click();
             document.body.removeChild(link);
         }
-         
+        
+                 // ==========================================
+        // 🚨 PRO-LEVEL ANTI-CHEAT SYSTEM
+        // ==========================================
+
+        let warningCount = 0;
+        const maxWarnings = 3;
+        let isExamActive = false; // Isko tab true karna jab exam shuru ho
+
+        // 1. Right-Click (Context Menu) Disable karein
+        document.addEventListener('contextmenu', function(e) {
+            if(isExamActive) {
+                e.preventDefault();
+                alert("⚠️ Right-click is disabled during the exam!");
+            }
+        });
+
+        // 2. Copy, Cut, aur Paste Disable karein
+        document.addEventListener('copy', function(e) { if(isExamActive) e.preventDefault(); });
+        document.addEventListener('cut', function(e) { if(isExamActive) e.preventDefault(); });
+        document.addEventListener('paste', function(e) { if(isExamActive) e.preventDefault(); });
+
+        // 3. Tab Switch / Window Minimize Detection
+        document.addEventListener('visibilitychange', function() {
+            if (isExamActive && document.visibilityState === 'hidden') {
+                warningCount++;
+                
+                if (warningCount >= maxWarnings) {
+                    alert("❌ You have crossed the maximum warning limit. Your exam is auto-submitting!");
+                    
+                    // Yahan par apne "Submit Exam" wale function ka naam daalein
+                    // Jaise ki: submitMyExam(); 
+                    
+                } else {
+                    alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease do not switch tabs or minimize the browser. If you do this ${maxWarnings - warningCount} more time(s), your exam will be auto-submitted!`);
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
