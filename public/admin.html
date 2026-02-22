@@ -61,6 +61,22 @@
         .feedback-card small { color: #64748b; font-weight: 600; }
         .feedback-card p { margin-top: 15px; color: #334155; font-size: 14px; font-style: italic; background: #f8fafc; padding: 10px; border-radius: 5px;}
     </style>
+    <head>
+    <title>Admin Dashboard</title>
+    
+    <script>
+        if (sessionStorage.getItem('admin_auth') !== 'verified') {
+            let pass = prompt("🔒 SECURE AREA:\nEnter Master Password to access Admin Panel:");
+            if (pass === "Suhel@123") {
+                sessionStorage.setItem('admin_auth', 'verified');
+            } else {
+                alert("❌ Access Denied! Redirecting to Home...");
+                window.location.href = '/'; // Kick back to homepage
+            }
+        }
+    </script>
+    </head>
+
 </head>
 <body>
 
