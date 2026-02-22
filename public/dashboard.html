@@ -106,6 +106,21 @@
             .main-content { padding: 20px 15px; overflow-y: visible; }
             .grid-container { grid-template-columns: 1fr; }
         }
+                /* 🌟 ANSWER KEY MODAL & PRINT STYLES */
+        .ans-block { border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f8fafc;}
+        .ans-correct { color: #10b981; font-weight: bold; }
+        .ans-wrong { color: #ef4444; font-weight: bold; }
+        .ans-skipped { color: #f59e0b; font-weight: bold; }
+        .rank-card { background: linear-gradient(135deg, #1e293b, #3b82f6); color: white; padding: 20px; border-radius: 10px; display: flex; justify-content: space-around; text-align: center; margin-bottom: 20px;}
+        
+        /* Jab PDF Download ho toh baaki cheezein hide ho jayein */
+        @media print {
+            body * { visibility: hidden; }
+            #printPaperArea, #printPaperArea * { visibility: visible; }
+            #printPaperArea { position: absolute; left: 0; top: 0; width: 100%; background: white;}
+            .no-print { display: none !important; }
+        }
+        
         
     </style>
 </head>
