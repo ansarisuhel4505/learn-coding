@@ -438,6 +438,9 @@ document.addEventListener('visibilitychange', function() {
         async function startExam() {
             isExamActive = true;
             warningCount = 0;
+            let elem = document.documentElement;
+    if (elem.requestFullscreen) { elem.requestFullscreen(); }
+    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } // Mobile/Safari ke liye
             const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
             examData = await res.json();
             
@@ -544,6 +547,8 @@ document.addEventListener('visibilitychange', function() {
 
         async function confirmSubmission() {
             isExamActive = false;
+            if (document.exitFullscreen) { document.exitFullscreen(); }
+    else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
             closeConfirmPopup();
             clearInterval(examTimer);
             
