@@ -178,13 +178,39 @@
                 <span onclick="closeExam()" style="cursor:pointer; color:red; font-size:24px;">✖</span>
             </div>
             
-            <div id="examSetupForm" class="exam-setup-form">
-                <h3 style="margin-bottom: 20px; color: #3b82f6;">Confirm Details</h3>
-                <input type="text" id="exName" placeholder="Full Name" readonly>
-                <input type="text" id="exRoll" placeholder="Roll Number" readonly>
-                <input type="hidden" id="exId"><input type="hidden" id="exTitleName">
-                <button onclick="startExam()" class="btn btn-success" style="font-size: 18px;">Start Exam Now</button>
+            <div id="examSetupForm" class="exam-setup-form" style="padding: 0; display: flex; flex-direction: column; height: 100%;">
+    <input type="hidden" id="exId"><input type="hidden" id="exTitleName">
+    <input type="hidden" id="exName"><input type="hidden" id="exRoll">
+    <input type="hidden" id="exDurationHidden">
+
+    <div style="padding: 15px 25px; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; flex-wrap: wrap; gap: 10px;">
+        <h3 style="color: #1e293b; margin: 0;">General Instructions</h3>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div>
+                <label style="font-weight: 600; color: #475569;">Instructions In: </label>
+                <select id="examLangSelect" onchange="changeInstructionLanguage()" style="padding: 5px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; cursor: pointer;">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi (हिंदी)</option>
+                </select>
             </div>
+            <div id="google_translate_element"></div>
+        </div>
+    </div>
+    
+    <div style="flex-grow: 1; overflow-y: auto; padding: 25px; background: white;" id="instructionsContent">
+        </div>
+
+    <div style="padding: 20px 25px; background: #f8fafc; border-top: 2px solid #e2e8f0;">
+        <label style="display: flex; gap: 15px; align-items: flex-start; cursor: pointer; font-size: 15px; font-weight: 500; color: #0f172a; margin-bottom: 15px;">
+            <input type="checkbox" id="declarationCheck" onchange="toggleReadyBtn()" style="width: 25px; height: 25px; cursor: pointer; flex-shrink: 0; margin-top: 2px;">
+            <span id="declText">I have read and understood the instructions. All computer hardware allotted to me are in proper working condition. I agree that in case of not adhering to the instructions, I will be disqualified.</span>
+        </label>
+        <div style="text-align: right;">
+            <button id="readyToBeginBtn" onclick="startExam()" class="btn btn-success" style="width: auto; padding: 12px 40px; font-size: 18px; opacity: 0.5; cursor: not-allowed;" disabled>I am ready to begin</button>
+        </div>
+    </div>
+            </div>
+            
 
             <div id="examQuestionsArea" class="exam-layout" style="display:none;">
                 <div class="exam-left">
@@ -436,16 +462,30 @@ function autoSaveExam(timeRemaining) {
         let questionStatus = []; 
 
         function openExamSetup(id, title, duration) {
-            document.getElementById('modalExamTitle').innerText = title;
-            document.getElementById('exId').value = id;
-            document.getElementById('exTitleName').value = title;
-            document.getElementById('exName').value = localStorage.getItem('cm_name') || '';
-            document.getElementById('exRoll').value = localStorage.getItem('cm_roll') || '';
-            currentExamDuration = duration;
-            document.getElementById('examSetupForm').style.display = "block";
-            document.getElementById('examQuestionsArea').style.display = "none";
-            document.getElementById('examModal').style.display = "flex";
+    document.getElementById('modalExamTitle').innerText = title;
+    document.getElementById('exId').value = id;
+    document.getElementById('exTitleName').value = title;
+    document.getElementById('exName').value = localStorage.getItem('cm_name') || '';
+    document.getElementById('exRoll').value = localStorage.getItem('cm_roll') || '';
+    
+    // Duration set karna
+    document.getElementById('exDurationHidden').value = duration;
+    currentExamDuration = duration; 
+    
+    // Checkbox Reset karna aur button band rakhna
+    document.getElementById('declarationCheck').checked = false;
+    toggleReadyBtn();
+    
+    // Default English set karna
+    document.getElementById('examLangSelect').value = 'en';
+    changeInstructionLanguage();
+
+    // Screens Handle karna
+    document.getElementById('examSetupForm').style.display = "flex";
+    document.getElementById('examQuestionsArea').style.display = "none";
+    document.getElementById('examModal').style.display = "flex";
         }
+        
 
         function closeExam() {
             if(confirm("Exit exam? Progress will be lost.")) {
@@ -807,7 +847,79 @@ localStorage.removeItem(`cm_save_${rollNo}_${examId}`);
             link.click();
             document.body.removeChild(link);
         }
+        // ==========================================
+// 📄 NTA INSTRUCTIONS & CHECKBOX LOGIC
+// ==========================================
+
+const instructionsText = {
+    en: `
+        <h4 style="margin-bottom: 15px; font-size: 18px;">Please read the following instructions carefully:</h4>
+        <ol style="margin-left: 20px; color: #334155; line-height: 1.8; font-size: 15px;">
+            <li>The total duration of the examination is <b style="color:#ef4444;"><span id="insDurEN"></span> minutes</b>.</li>
+            <li>The clock will be set at the server. The countdown timer in the top right corner will display the remaining time.</li>
+            <li>When the timer reaches zero, the exam will end and auto-submit by itself.</li>
+            <li>The Question Palette displayed on the right side of screen will show the status of each question (Answered, Skipped, Mark for Review).</li>
+            <li>⚠️ <b>STRICT WARNING:</b> Do not minimize the browser or switch tabs. Doing so will trigger the Anti-Cheat system!</li>
+            <li style="color: #3b82f6; font-weight: bold;">💡 Tip: Use the "Select Language" (Google Translate) button at the top to translate exam questions into Hindi.</li>
+        </ol>
+    `,
+    hi: `
+        <h4 style="margin-bottom: 15px; font-size: 18px;">कृपया निम्नलिखित निर्देशों को ध्यान से पढ़ें:</h4>
+        <ol style="margin-left: 20px; color: #334155; line-height: 1.8; font-size: 16px;">
+            <li>परीक्षा की कुल अवधि <b style="color:#ef4444;"><span id="insDurHI"></span> मिनट</b> है।</li>
+            <li>घड़ी सर्वर पर सेट की जाएगी। स्क्रीन के शीर्ष दाएं कोने में टाइमर शेष समय दिखाएगा।</li>
+            <li>टाइमर शून्य पर पहुंचने पर, परीक्षा स्वतः समाप्त और सबमिट हो जाएगी।</li>
+            <li>स्क्रीन के दाईं ओर प्रश्न पैलेट प्रत्येक प्रश्न की स्थिति दिखाएगा।</li>
+            <li>⚠️ <b>सख्त चेतावनी:</b> ब्राउज़र को छोटा न करें या टैब न बदलें। ऐसा करने पर एंटी-चीट सिस्टम चालू हो जाएगा!</li>
+            <li style="color: #3b82f6; font-weight: bold;">💡 सुझाव: परीक्षा के प्रश्नों को हिंदी में अनुवाद करने के लिए ऊपर दिए गए "Select Language" (Google Translate) बटन का उपयोग करें।</li>
+        </ol>
+    `
+};
+
+function changeInstructionLanguage() {
+    const lang = document.getElementById('examLangSelect').value;
+    document.getElementById('instructionsContent').innerHTML = instructionsText[lang];
+    
+    // Declaration Text update karna
+    const declText = document.getElementById('declText');
+    if(lang === 'hi') {
+        declText.innerText = "मैंने निर्देशों को पढ़ और समझ लिया है। मैं सहमत हूं कि नियमों का पालन न करने पर मुझे अयोग्य घोषित कर दिया जाएगा।";
+    } else {
+        declText.innerText = "I have read and understood the instructions. All computer hardware allotted to me are in proper working condition. I agree that in case of not adhering to the instructions, I will be disqualified.";
+    }
+
+    // Timer Duration Update karna
+    const duration = document.getElementById('exDurationHidden').value;
+    if(document.getElementById('insDurEN')) document.getElementById('insDurEN').innerText = duration;
+    if(document.getElementById('insDurHI')) document.getElementById('insDurHI').innerText = duration;
+}
+
+// Checkbox Logic (Tick karne par button on hoga)
+function toggleReadyBtn() {
+    const btn = document.getElementById('readyToBeginBtn');
+    if(document.getElementById('declarationCheck').checked) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    }
+}
+        
         
     </script>
+    <script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+      pageLanguage: 'en', 
+      includedLanguages: 'en,hi', 
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    
 </body>
 </html>
