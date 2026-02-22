@@ -221,6 +221,35 @@
             <button onclick="sendFeedback()" class="btn btn-success">Send Feedback</button>
         </div>
     </div>
+        <div id="answerKeyModal" class="modal" style="z-index: 400;">
+        <div class="modal-content" style="width: 900px; height: 90vh;">
+            <div class="modal-header">
+                <h2>📊 Result & Answer Key</h2>
+                <div>
+                    <button onclick="downloadPaper()" class="btn btn-warning no-print" style="width: auto; padding: 8px 15px; margin-right: 10px;"><i class="fas fa-file-pdf"></i> Download Paper</button>
+                    <span onclick="document.getElementById('answerKeyModal').style.display='none'" style="cursor:pointer; color:red; font-size:24px;" class="no-print">✖</span>
+                </div>
+            </div>
+            
+            <div class="modal-body" style="padding: 30px; overflow-y: auto;" id="printPaperArea">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 id="akExamTitle" style="color: #0f172a;">Exam Title</h2>
+                    <p>Student: <b><span id="akStudentName"></span></b> | Roll No: <b><span id="akRollNo"></span></b></p>
+                </div>
+
+                <div class="rank-card">
+                    <div><h3 style="font-size: 30px;" id="akScore">0</h3><p>Your Score</p></div>
+                    <div><h3 style="font-size: 30px; color: #fbbf24;" id="akRank">#0</h3><p>Your Rank</p></div>
+                    <div><h3 style="font-size: 30px;" id="akTotal">0</h3><p>Total Students</p></div>
+                </div>
+
+                <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">Question Paper & Solutions</h3>
+                <div id="answerKeyList">
+                    </div>
+            </div>
+        </div>
+        </div>
+    
 
     <script>
         let submittedExams = [];
@@ -269,16 +298,51 @@
             ).join('');
         }
 
-        async function loadExams() {
-            const res = await fetch('/api/exams');
-            const exams = await res.json();
-            let html = '';
-            exams.forEach(e => {
-                if(submittedExams.includes(e.title)) return; // Double attempt hide logic
-                html += `<div class="card" style="border-top:4px solid red;"><div class="card-body"><h3 class="card-title">${e.title}</h3><p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p><button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button></div></div>`;
-            });
-            document.getElementById('examsGrid').innerHTML = html === '' ? '<p style="color:#10b981; font-weight:bold; font-size:18px;">🎉 You have completed all exams!</p>' : html;
-        }
+                async function loadExams() {
+            try {
+                const res = await fetch('/api/exams');
+                const exams = await res.json();
+                let html = '';
+                
+                if(exams.length === 0) {
+                    document.getElementById('examsGrid').innerHTML = '<p style="color:#64748b; font-weight:bold;">No live exams published by Admin yet.</p>';
+                    return;
+                }
+
+                exams.forEach(e => {
+                    // Check if exam is already in submitted list
+                    if(submittedExams.includes(e.title)) {
+                        // 🟢 IF ATTEMPTED: Show Answer Key Button
+                        html += `
+                        <div class="card" style="border-top:4px solid #10b981; background: #f8fafc;">
+                            <div class="card-body">
+                                <h3 class="card-title" style="color: #475569;">${e.title}</h3>
+                                <p class="card-text" style="color: #94a3b8;">Marks: ${e.totalMarks} | Time: ${e.duration}m</p>
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn" style="background: #10b981; cursor: not-allowed; flex:1;" disabled>✅ Attempted</button>
+                                    <button onclick="viewAnswerKey('${e.title}')" class="btn btn-warning" style="flex:1; color:white;"><i class="fas fa-key"></i> Key & Rank</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    } else {
+                        // 🔴 IF NOT ATTEMPTED: Show Active Exam
+                        html += `
+                        <div class="card" style="border-top:4px solid #ef4444;">
+                            <div class="card-body">
+                                <h3 class="card-title">${e.title}</h3>
+                                <p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p>
+                                <button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+                
+                document.getElementById('examsGrid').innerHTML = html;
+            } catch (error) {
+                console.error("Error loading exams:", error);
+            }
+                }
+        
         // ==========================================
         // EXAM ENGINE LOGIC (Pagination & Palette)
         // ==========================================
@@ -485,6 +549,58 @@
     localStorage.clear(); // Browser ki memory se Roll No delete karo
     window.location.href = "/login.html"; // Seedha Login page par bhejo
         }
+                // ==========================================
+        // 🌟 ANSWER KEY, RANK & DOWNLOAD LOGIC
+        // ==========================================
+        async function viewAnswerKey(examTitle) {
+            const rollNo = localStorage.getItem('cm_roll');
+            const res = await fetch('/api/answer-key', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ rollNo, examTitle })
+            });
+            const data = await res.json();
+            
+            if(!data.success) return alert("Answer Key not generated yet!");
+
+            // Top Details Bharo
+            document.getElementById('akExamTitle').innerText = examTitle;
+            document.getElementById('akStudentName').innerText = localStorage.getItem('cm_name');
+            document.getElementById('akRollNo').innerText = rollNo;
+            document.getElementById('akScore').innerText = data.result.score + " / " + data.exam.totalMarks;
+            document.getElementById('akRank').innerText = "#" + data.rank;
+            document.getElementById('akTotal').innerText = data.totalStudents;
+
+            // Questions aur Answers Generate karo
+            let akHtml = '';
+            data.exam.questions.forEach((q, i) => {
+                let qKey = `Q${i+1}`;
+                let studentAns = data.result.studentAnswers[qKey] || "Skipped";
+                let correctAns = q.correctAnswer;
+                
+                let statusMsg = "";
+                if(studentAns === "Skipped") statusMsg = `<span class="ans-skipped">⚠️ Skipped</span>`;
+                else if(studentAns === correctAns) statusMsg = `<span class="ans-correct">✅ Correct (+${q.marks || 1} Marks)</span>`;
+                else statusMsg = `<span class="ans-wrong">❌ Wrong</span>`;
+
+                akHtml += `
+                <div class="ans-block">
+                    <h4 style="margin-bottom: 10px; color:#1e293b;">Q${i+1}. ${q.questionText}</h4>
+                    <p style="margin-bottom: 5px;">Your Answer: <b>${studentAns}</b> ${statusMsg}</p>
+                    <p style="background: #ecfdf5; padding: 5px 10px; border-radius: 5px; color: #065f46; display: inline-block;">
+                        <i class="fas fa-check-circle"></i> Correct Answer: <b>${correctAns}</b>
+                    </p>
+                </div>`;
+            });
+
+            document.getElementById('answerKeyList').innerHTML = akHtml;
+            document.getElementById('answerKeyModal').style.display = 'flex';
+        }
+
+        function downloadPaper() {
+            // PDF download karne ka sabse solid browser native tarika
+            window.print(); 
+        }
+
         
     </script>
 </body>
