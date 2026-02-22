@@ -15,7 +15,7 @@
         .navbar h2 { color: #3b82f6; font-size: 22px; display: flex; align-items: center; gap: 10px; font-weight: 700;}
         .navbar h2 span { color: white; }
         
-        /* MODE SWITCHER (WEB VS CODING) */
+        /* MODE SWITCHER */
         .mode-toggle { display: flex; background: #0f172a; border-radius: 8px; border: 1px solid #334155; overflow: hidden; }
         .mode-btn { padding: 10px 20px; cursor: pointer; font-weight: 600; font-size: 14px; color: #94a3b8; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .mode-btn.active { background: #3b82f6; color: white; }
@@ -27,13 +27,10 @@
         .workspace { display: flex; flex-grow: 1; height: calc(100vh - 70px); width: 100%; }
         .hidden { display: none !important; }
 
-        /* ==========================================
-           1. WEB DEVELOPMENT WORKSPACE (HTML/CSS/JS)
-           ========================================== */
+        /* 1. WEB DEVELOPMENT WORKSPACE */
         .web-workspace { flex-direction: column; }
         .web-editors { display: flex; height: 50%; border-bottom: 2px solid #334155; }
         .editor-box { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #334155; background: #1e293b;}
-        .editor-box:last-child { border-right: none; }
         .editor-header { padding: 8px 15px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; background: #0f172a; border-bottom: 1px solid #334155;}
         .editor-box textarea { flex-grow: 1; background: #1e293b; color: #f8fafc; font-family: 'Courier New', monospace; padding: 15px; border: none; outline: none; resize: none; font-size: 15px; line-height: 1.5;}
         
@@ -41,12 +38,8 @@
         .preview-header { background: #cbd5e1; color: #0f172a; padding: 5px 15px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px;}
         iframe { flex-grow: 1; border: none; width: 100%; height: 100%; }
 
-        /* ==========================================
-           2. UNIVERSAL CODING WORKSPACE (70+ Langs)
-           ========================================== */
+        /* 2. UNIVERSAL CODING WORKSPACE */
         .code-workspace { display: flex; width: 100%; }
-        
-        /* Code Editor Side */
         .coding-left { width: 55%; display: flex; flex-direction: column; border-right: 2px solid #334155; }
         .coding-controls { padding: 12px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;}
         
@@ -65,22 +58,17 @@
         .text-success { color: #10b981; }
         .text-error { color: #ef4444; }
         .text-warning { color: #f59e0b; }
+        .text-info { color: #3b82f6; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
         <h2><i class="fas fa-laptop-code"></i> Code<span>Master</span></h2>
-        
         <div class="mode-toggle">
-            <div class="mode-btn active" id="btn-web" onclick="switchMode('web')">
-                <i class="fab fa-html5"></i> Web Developer
-            </div>
-            <div class="mode-btn" id="btn-code" onclick="switchMode('code')">
-                <i class="fas fa-terminal"></i> 70+ Languages
-            </div>
+            <div class="mode-btn active" id="btn-web" onclick="switchMode('web')"><i class="fab fa-html5"></i> Web Developer</div>
+            <div class="mode-btn" id="btn-code" onclick="switchMode('code')"><i class="fas fa-terminal"></i> Pro Languages</div>
         </div>
-
         <a href="/dashboard.html" class="exit-btn"><i class="fas fa-sign-out-alt"></i> Exit IDE</a>
     </div>
 
@@ -108,9 +96,7 @@
     <div class="workspace code-workspace hidden" id="codeWorkspace">
         <div class="coding-left">
             <div class="coding-controls">
-                <select id="langSelect" onchange="changeLanguage()">
-                    <option disabled selected>Loading 70+ Languages...</option>
-                </select>
+                <select id="langSelect" onchange="changeLanguage()"></select>
                 <button class="run-btn" id="runBtn" onclick="executeCode()"><i class="fas fa-play"></i> Run Code</button>
             </div>
             <textarea id="backendEditor" spellcheck="false"></textarea>
@@ -119,48 +105,47 @@
         <div class="coding-right">
             <div class="terminal-header"><i class="fas fa-terminal"></i> Cloud Execution Terminal</div>
             <div class="terminal-output" id="terminalOutput">
-<span class="text-success">CodeMaster Secure Cloud Terminal [Version 2.0]</span>
+<span class="text-success">CodeMaster Private Server [JDoodle Engine]</span>
 Ready to execute code. Select a language and click Run.
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // 1. INITIALIZATION & DATA
-        // ==========================================
-        let globalVersions = {}; // Stores all language versions fetched from cloud
-        
-        // Standard Boilerplates for Popular Languages
-        const boilerplates = {
-            "python": "print('Hello, CodeMaster Hacker! 🚀')\n\n# Write your Python logic here\na = 10\nb = 20\nprint('Sum is:', a + b)",
-            "java": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, Java Master! ☕\");\n    }\n}",
-            "cpp": "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello, C++ Ninja! ⚙️\" << endl;\n    return 0;\n}",
-            "c": "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, C Programmer! 🛠️\\n\");\n    return 0;\n}",
-            "javascript": "console.log('Hello from Node.js Backend! ⚡');\n\nconst arr = [1, 2, 3, 4];\nconsole.log('Array:', arr);"
+        // JDoodle Language Mapping & Versions
+        const jdoodleLangs = {
+            "python3": { name: "🐍 PYTHON", version: "4", boiler: "print('Hello CodeMaster! 🚀')\n\na = 10\nb = 20\nprint('Sum:', a + b)" },
+            "java": { name: "☕ JAVA", version: "4", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java Master! ☕\");\n    }\n}" },
+            "cpp17": { name: "⚙️ C++ (C++17)", version: "0", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++ Ninja! ⚙️\" << endl;\n    return 0;\n}" },
+            "c": { name: "🛠️ C", version: "5", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C Programmer! 🛠️\\n\");\n    return 0;\n}" },
+            "nodejs": { name: "⚡ JAVASCRIPT (Node)", version: "4", boiler: "console.log('Hello from Node.js! ⚡');\nconst arr = [1, 2, 3];\nconsole.log(arr);" },
+            "php": { name: "🐘 PHP", version: "4", boiler: "<?php\n  echo \"Hello PHP Developer! 🐘\";\n?>" },
+            "csharp": { name: "🎯 C#", version: "4", boiler: "using System;\nclass Program {\n  static void Main() {\n    Console.WriteLine(\"Hello C# World! 🎯\");\n  }\n}" },
+            "go": { name: "🐹 GO", version: "4", boiler: "package main\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello Go Developer! 🐹\")\n}" }
         };
 
-        // Initialize App securely on load
         document.addEventListener("DOMContentLoaded", () => {
             // Setup Web Code
             document.getElementById('htmlCode').value = `<div class="card">\n  <h1>Hello Developer! 🚀</h1>\n  <p>Start editing HTML, CSS, and JS to see changes instantly.</p>\n</div>`;
-            document.getElementById('cssCode').value = `body {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n  background: #f0f4f8;\n  font-family: sans-serif;\n  margin: 0;\n}\n\n.card {\n  background: white;\n  padding: 40px;\n  border-radius: 15px;\n  box-shadow: 0 10px 30px rgba(0,0,0,0.1);\n  text-align: center;\n}\n\nh1 { color: #3b82f6; }`;
+            document.getElementById('cssCode').value = `body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f4f8; font-family: sans-serif; margin: 0; }\n.card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }\nh1 { color: #3b82f6; }`;
             document.getElementById('jsCode').value = `console.log("Web Engine Active!");`;
-            
-            compileWeb(); // Run web preview once
-            fetch70PlusLangs(); // Fetch backend languages in background
+            compileWeb(); 
+
+            // Setup JDoodle Dropdown
+            const select = document.getElementById('langSelect');
+            select.innerHTML = '';
+            for(let key in jdoodleLangs) {
+                select.innerHTML += `<option value="${key}">${jdoodleLangs[key].name}</option>`;
+            }
+            select.value = 'python3';
+            changeLanguage();
         });
 
-        // ==========================================
-        // 2. WORKSPACE SWITCHER LOGIC
-        // ==========================================
         function switchMode(mode) {
-            // Update Buttons
             document.getElementById('btn-web').classList.remove('active');
             document.getElementById('btn-code').classList.remove('active');
             document.getElementById(`btn-${mode}`).classList.add('active');
 
-            // Switch Workspaces
             if (mode === 'web') {
                 document.getElementById('codeWorkspace').classList.add('hidden');
                 document.getElementById('webWorkspace').classList.remove('hidden');
@@ -170,112 +155,62 @@ Ready to execute code. Select a language and click Run.
             }
         }
 
-        // ==========================================
-        // 3. WEB COMPILER LOGIC (Live Preview)
-        // ==========================================
         function compileWeb() {
             try {
                 const html = document.getElementById('htmlCode').value;
                 const css = `<style>${document.getElementById('cssCode').value}</style>`;
-                // Use a safe script tag creation
                 const js = "<scr" + "ipt>" + document.getElementById('jsCode').value + "</scr" + "ipt>";
-                
-                const iframe = document.getElementById('webOutput');
-                iframe.srcdoc = html + css + js;
-            } catch(e) { console.error("Web compile error"); }
-        }
-
-        // ==========================================
-        // 4. CLOUD COMPILER LOGIC (70+ Languages)
-        // ==========================================
-        async function fetch70PlusLangs() {
-            try {
-                const res = await fetch('https://emkc.org/api/v2/piston/runtimes');
-                const data = await res.json();
-                
-                const select = document.getElementById('langSelect');
-                select.innerHTML = ''; 
-                
-                // Sort languages alphabetically
-                data.sort((a, b) => a.language.localeCompare(b.language)).forEach(rt => {
-                    globalVersions[rt.language] = rt.version;
-                    
-                    // Highlight popular languages with Emojis
-                    let emoji = "💻";
-                    if(rt.language === "python") emoji = "🐍";
-                    else if(rt.language === "java") emoji = "☕";
-                    else if(rt.language === "cpp") emoji = "⚙️";
-                    else if(rt.language === "javascript") emoji = "⚡";
-                    else if(rt.language === "c") emoji = "🛠️";
-                    
-                    select.innerHTML += `<option value="${rt.language}">${emoji} ${rt.language.toUpperCase()} (v${rt.version})</option>`;
-                });
-                
-                select.value = 'python'; // Set Python as default
-                changeLanguage(); // Load boilerplate
-            } catch (err) {
-                document.getElementById('langSelect').innerHTML = '<option disabled>Failed to load languages. Check Internet.</option>';
-            }
+                document.getElementById('webOutput').srcdoc = html + css + js;
+            } catch(e) {}
         }
 
         function changeLanguage() {
-            const lang = document.getElementById('langSelect').value;
-            const editor = document.getElementById('backendEditor');
-            
-            // Set boilerplate if available, else blank comment
-            if (boilerplates[lang]) {
-                editor.value = boilerplates[lang];
-            } else {
-                editor.value = `// Start writing your ${lang.toUpperCase()} code here...\n`;
-            }
-            
-            document.getElementById('terminalOutput').innerHTML = `<span class="text-success">System Ready.</span> Selected ${lang.toUpperCase()} v${globalVersions[lang]}.\nClick 'Run Code' to execute.`;
+            const langCode = document.getElementById('langSelect').value;
+            document.getElementById('backendEditor').value = jdoodleLangs[langCode].boiler;
+            document.getElementById('terminalOutput').innerHTML = `<span class="text-info">System Ready.</span> Selected ${jdoodleLangs[langCode].name}.\nClick 'Run Code' to execute.`;
         }
 
         async function executeCode() {
-            const lang = document.getElementById('langSelect').value;
+            const langCode = document.getElementById('langSelect').value;
             const code = document.getElementById('backendEditor').value;
+            const version = jdoodleLangs[langCode].version;
+            
             const terminal = document.getElementById('terminalOutput');
             const runBtn = document.getElementById('runBtn');
 
             if (!code.trim()) {
-                terminal.innerHTML = `<span class="text-error">Error: Code editor is empty! Please write some code.</span>`;
+                terminal.innerHTML = `<span class="text-error">Error: Code editor is empty!</span>`;
                 return;
             }
 
-            // Loading UI
             runBtn.disabled = true;
             runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
-            terminal.innerHTML = `<span class="text-warning">➜ Uploading code to Secure Cloud Server...\n➜ Compiling...</span>\n\n`;
+            terminal.innerHTML = `<span class="text-warning">➜ Authenticating via CodeMaster Secure API...\n➜ Executing on JDoodle Cloud...</span>\n\n`;
 
             try {
-                const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+                const response = await fetch('/api/compile-code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        language: lang, 
-                        version: globalVersions[lang], 
-                        files: [{ content: code }] 
+                        script: code, 
+                        language: langCode, 
+                        versionIndex: version 
                     })
                 });
                 
                 const data = await response.json();
                 
-                if (data.message) {
-                    // API Level Error (e.g., rate limit)
-                    terminal.innerHTML += `<span class="text-error">Server Error: ${data.message}</span>`;
-                } else if (data.run.stderr) {
-                    // Syntax Error in Student's Code
-                    terminal.innerHTML += `<span class="text-error">Syntax Error:\n${data.run.stderr}</span>`;
+                if (data.error) {
+                    terminal.innerHTML += `<span class="text-error">Server Error: ${data.error}</span>`;
+                } else if (data.statusCode !== 200) {
+                    terminal.innerHTML += `<span class="text-error">Compilation Error:\n${data.output}</span>`;
                 } else {
-                    // Success
-                    terminal.innerHTML += `<span class="text-success">Program Executed Successfully:</span>\n\n${data.run.stdout}`;
+                    terminal.innerHTML += `<span class="text-success">Output:</span>\n${data.output}\n<span class="text-info">Memory: ${data.memory} KB | CPU Time: ${data.cpuTime} Sec</span>`;
                 }
             } catch (error) {
-                terminal.innerHTML = `<span class="text-error">Connection Failed: Unable to reach Cloud Execution Server. Please check your internet.</span>`;
+                terminal.innerHTML = `<span class="text-error">Connection Failed! Ensure Vercel Environment Variables are set.</span>`;
             }
 
-            // Reset Button
             runBtn.disabled = false;
             runBtn.innerHTML = '<i class="fas fa-play"></i> Run Code';
         }
