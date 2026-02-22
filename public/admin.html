@@ -123,6 +123,15 @@
                         <div class="form-group" style="flex: 1;"><label>Total Marks</label><input type="number" id="eMarks" required></div>
                         <div class="form-group" style="flex: 1;"><label>Duration (Mins)</label><input type="number" id="eDuration" required></div>
                     </div>
+                    <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #3b82f6;">
+                      <h4 style="color: #1e3a8a; margin-bottom: 10px;"><i class="fas fa-file-excel"></i> Bulk Upload Questions (CSV)</h4>
+                      <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
+                      Excel me 7 columns banayein: <b>Question, OptA, OptB, OptC, OptD, Correct Answer, Marks</b> aur file ko <b>.csv</b> format me save karein.
+                      </p>
+                      <input type="file" id="csvFileInput" accept=".csv" style="margin-bottom: 10px;">
+                      <button type="button" class="btn btn-warning" onclick="processCSV()"><i class="fas fa-upload"></i> Load from File</button>
+                    </div>
+                    
                     
                     <h4 style="margin: 15px 0; color: #3b82f6;">Questions Setup</h4>
                     <div id="questionsContainer"></div>
@@ -227,26 +236,68 @@
         }
 
         // --- 3. EXAM MANAGEMENT ---
-        let qCount = 0;
-        function addQuestionField() {
-            qCount++;
-            const div = document.createElement('div');
-            div.style.background = "#f8fafc"; div.style.padding = "15px"; div.style.marginBottom = "15px"; div.style.borderRadius = "8px"; div.style.border = "1px solid #e2e8f0";
-            div.innerHTML = `
-                <div class="form-group"><label>Question ${qCount}</label><input type="text" class="qText" required></div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" class="qOpt1" placeholder="Option A" required>
-                    <input type="text" class="qOpt2" placeholder="Option B" required>
-                    <input type="text" class="qOpt3" placeholder="Option C" required>
-                    <input type="text" class="qOpt4" placeholder="Option D" required>
-                </div>
-                <div style="display: flex; gap: 15px; margin-top: 10px;">
-                    <div class="form-group" style="flex: 1;"><label>Correct Answer (Exact Text)</label><input type="text" class="qAns" required></div>
-                    <div class="form-group" style="flex: 1;"><label>Marks for this Question</label><input type="number" class="qMarks" required></div>
-                </div>
-            `;
-            document.getElementById('questionsContainer').appendChild(div);
+let qCount = 0;
+
+// 👇 SMART QUESTION FIELD 👇
+function addQuestionField(q = '', o1 = '', o2 = '', o3 = '', o4 = '', ans = '', marks = '') {
+    qCount++;
+    const div = document.createElement('div');
+    div.style.background = "#f8fafc";
+    div.style.padding = "15px"; div.style.marginBottom = "15px";
+    div.style.borderRadius = "8px"; div.style.border = "1px solid #e2e8f0";
+    
+    div.innerHTML = `
+        <div class="form-group"><label>Question ${qCount}</label><input type="text" class="qText" value="${q}" required></div>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" class="qOpt1" placeholder="Option A" value="${o1}" required>
+            <input type="text" class="qOpt2" placeholder="Option B" value="${o2}" required>
+            <input type="text" class="qOpt3" placeholder="Option C" value="${o3}" required>
+            <input type="text" class="qOpt4" placeholder="Option D" value="${o4}" required>
+        </div>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <div class="form-group" style="flex: 1;"><label>Correct Answer (Exact Text)</label><input type="text" class="qAns" value="${ans}" required></div>
+            <div class="form-group" style="flex: 1;"><label>Marks</label><input type="number" class="qMarks" value="${marks}" required></div>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger" style="padding: 5px 10px; margin-top: 10px; font-size: 12px;">✖ Remove Question</button>
+    `;
+    document.getElementById('questionsContainer').appendChild(div);
+}
+
+// 👇 EXCEL/CSV READER LOGIC 👇
+function processCSV() {
+    const fileInput = document.getElementById('csvFileInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return alert("Please select a .csv file first!");
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const rows = text.split('\n'); 
+        
+        document.getElementById('questionsContainer').innerHTML = '';
+        qCount = 0;
+        let addedCount = 0;
+
+        for (let i = 1; i < rows.length; i++) {
+            let row = rows[i].trim();
+            if (!row) continue;
+
+            let cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, '').trim());
+
+            if (cols.length >= 7) {
+                addQuestionField(cols[0], cols[1], cols[2], cols[3], cols[4], cols[5], cols[6]);
+                addedCount++;
+            }
         }
+        
+        alert(`✅ Success! ${addedCount} questions loaded from CSV.`);
+        fileInput.value = ''; 
+    };
+    
+    reader.readAsText(file);
+}
+        
         
         async function createExam(e) {
             e.preventDefault();
