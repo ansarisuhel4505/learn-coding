@@ -203,7 +203,7 @@
                     <h4 style="margin-bottom:10px; color:#0f172a; text-align:center;">Question Palette</h4>
                     <div class="palette-grid" id="questionPalette"></div>
                     
-                    <button onclick="showSubmitConfirm()" class="btn btn-danger" style="margin-top:auto; font-size:18px;">Submit Final Exam</button>
+                    <button onclick="submitMyExam()" class="btn btn-danger" style="margin-top:auto; font-size:18px;">Submit Final Exam</button>
                 </div>
             </div>
         </div>
@@ -392,8 +392,6 @@
         let questionStatus = []; 
 
         function openExamSetup(id, title, duration) {
-            isExamActive = true; 
-            warningCount = 0;
             document.getElementById('modalExamTitle').innerText = title;
             document.getElementById('exId').value = id;
             document.getElementById('exTitleName').value = title;
@@ -696,43 +694,92 @@
             document.body.removeChild(link);
         }
         
-                 // ==========================================
-        // 🚨 PRO-LEVEL ANTI-CHEAT SYSTEM
-        // ==========================================
+                // ==============================================================
+        // 🚨 PRO-LEVEL EXAM SECTION: ANTI-CHEAT + START + SUBMIT LOGIC
+        // ==============================================================
 
+        // 🟢 1. ANTI-CHEAT VARIABLES
+        let isExamActive = false; 
         let warningCount = 0;
         const maxWarnings = 3;
-        let isExamActive = false; // Isko tab true karna jab exam shuru ho
 
-        // 1. Right-Click (Context Menu) Disable karein
+        // 🚫 2. RIGHT-CLICK & COPY-PASTE DISABLE
         document.addEventListener('contextmenu', function(e) {
-            if(isExamActive) {
-                e.preventDefault();
-                alert("⚠️ Right-click is disabled during the exam!");
-            }
+            if(isExamActive) { e.preventDefault(); alert("⚠️ Right-click is disabled during the exam!"); }
         });
-
-        // 2. Copy, Cut, aur Paste Disable karein
         document.addEventListener('copy', function(e) { if(isExamActive) e.preventDefault(); });
         document.addEventListener('cut', function(e) { if(isExamActive) e.preventDefault(); });
         document.addEventListener('paste', function(e) { if(isExamActive) e.preventDefault(); });
 
-        // 3. Tab Switch / Window Minimize Detection
+        // 👁️ 3. TAB SWITCH DETECTION (Screen change warning)
         document.addEventListener('visibilitychange', function() {
             if (isExamActive && document.visibilityState === 'hidden') {
                 warningCount++;
-                
                 if (warningCount >= maxWarnings) {
-                    alert("❌ You have crossed the maximum warning limit. Your exam is auto-submitting!");
-                    
-                    // Yahan par apne "Submit Exam" wale function ka naam daalein
-                    // Jaise ki: submitMyExam(); 
-                    
+                    alert("❌ You crossed the warning limit! Your exam is auto-submitting.");
+                    submitMyExam(); // Yahan auto-submit function call ho raha hai
                 } else {
-                    alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease do not switch tabs or minimize the browser. If you do this ${maxWarnings - warningCount} more time(s), your exam will be auto-submitted!`);
+                    alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease do not switch tabs or minimize the browser! Next time your exam will be auto-submitted.`);
                 }
             }
         });
+
+        // 🚀 4. EXAM START FUNCTION (Jab "Attempt Exam" button dabta hai)
+        async function openExamSetup(id, title, duration) {
+            // Anti-cheat chalu karein
+            isExamActive = true; 
+            warningCount = 0;
+            
+            // Exam ki details set karein (Aapke UI ke hisaab se id ho sakti hain)
+            document.getElementById('examTitleDisplay').innerText = title;
+            // document.getElementById('examModal').style.display = 'block'; 
+            // (Apne modal ko open karne ka code yahan rakhne de agar pehle se hai)
+            
+            console.log("Exam Started: ", title);
+        }
+
+        // 🎯 5. EXAM SUBMIT FUNCTION (Jab baccha "Submit" dabata hai ya anti-cheat pakadta hai)
+        async function submitMyExam() {
+            // Anti-cheat band karein taaki submit hone ke baad right-click wapas chalne lage
+            isExamActive = false; 
+            
+            // 1. Data collect karein
+            const studentName = localStorage.getItem('cm_name');
+            const rollNo = localStorage.getItem('cm_roll');
+            const examTitle = document.getElementById('examTitleDisplay').innerText;
+            
+            // (Yahan aapke code mein jo answers collect karne ka logic tha, wo aayega)
+            // Example ke liye main ek khali answers object bhej raha hoon
+            const studentAnswers = {}; 
+
+            try {
+                // 2. Backend (server.js) par submit karein
+                const res = await fetch('/api/submit-exam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        studentName, 
+                        rollNo, 
+                        examTitle, 
+                        answers: studentAnswers 
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert("✅ Exam Submitted Successfully!");
+                    // Modal band kijiye aur page reload kijiye taaki Answer Key wala hara button aa jaye
+                    // document.getElementById('examModal').style.display = 'none';
+                    window.location.reload(); 
+                } else {
+                    alert(data.message); // Agar double attempt ka error aaya
+                }
+            } catch (error) {
+                console.error("Submission Error:", error);
+            }
+        }
+            
 
     </script>
 </body>
