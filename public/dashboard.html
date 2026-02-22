@@ -244,9 +244,8 @@
             });
             document.getElementById('examsGrid').innerHTML = html === '' ? '<p style="color:#10b981; font-weight:bold; font-size:18px;">🎉 You have completed all exams!</p>' : html;
         }
-
         // ==========================================
-        // EXAM ENGINE LOGIC
+        // EXAM ENGINE LOGIC (Pagination & Palette)
         // ==========================================
         let examTimer;
         let currentExamDuration = 0;
@@ -290,7 +289,9 @@
             let time = currentExamDuration * 60;
             examTimer = setInterval(() => {
                 time--;
-                document.getElementById('timerDisplay').innerText = `⏳ ${Math.floor(time/60)}:${time%60 < 10 ? '0':''}${time%60}`;
+                let mins = Math.floor(time/60);
+                let secs = time%60;
+                document.getElementById('timerDisplay').innerText = `⏳ ${mins}:${secs < 10 ? '0':''}${secs}`;
                 if(time <= 0) { 
                     clearInterval(examTimer); 
                     alert("⏳ Time Up! Auto Submitting..."); 
@@ -332,4 +333,121 @@
 
         function saveCurrentAnswer() {
             let selectedOpt = document.querySelector('input[name="currentQ"]:checked');
-            if(selecte
+            if(selectedOpt) {
+                userAnswers[currentQIndex] = selectedOpt.value;
+                questionStatus[currentQIndex] = 'answered';
+            } else {
+                if(!userAnswers[currentQIndex]) questionStatus[currentQIndex] = 'skipped';
+            }
+        }
+
+        function handleNext() {
+            saveCurrentAnswer();
+            if (currentQIndex < examData.questions.length - 1) {
+                currentQIndex++;
+                renderQuestionUI();
+            } else {
+                showSubmitConfirm(); 
+            }
+        }
+
+        function handlePrev() {
+            saveCurrentAnswer();
+            if (currentQIndex > 0) { currentQIndex--; renderQuestionUI(); }
+        }
+
+        function jumpToQuestion(index) {
+            saveCurrentAnswer(); currentQIndex = index; renderQuestionUI();
+        }
+
+        // ==========================================
+        // POPUPS LOGIC & SUBMISSION
+        // ==========================================
+        function showSubmitConfirm() {
+            saveCurrentAnswer(); 
+            document.getElementById('confirmPopup').style.display = "flex";
+        }
+        
+        function closeConfirmPopup() { 
+            document.getElementById('confirmPopup').style.display = "none"; 
+        }
+
+        async function confirmSubmission() {
+            closeConfirmPopup();
+            clearInterval(examTimer);
+            
+            let formattedAnswers = {};
+            examData.questions.forEach((q, i) => {
+                formattedAnswers[`Q${i+1}`] = userAnswers[i] || "Skipped";
+            });
+
+            const res = await fetch('/api/submit-exam', { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({
+                    studentName: document.getElementById('exName').value, 
+                    rollNo: document.getElementById('exRoll').value,
+                    examTitle: document.getElementById('exTitleName').value, 
+                    answers: formattedAnswers
+                })
+            });
+            
+            const resultData = await res.json();
+            
+            if(!resultData.success) { 
+                alert(resultData.message); 
+                document.getElementById('examModal').style.display = "none"; 
+                return; 
+            }
+
+            // Success: Hide Exam, Show Feedback
+            document.getElementById('examModal').style.display = "none";
+            document.getElementById('feedbackPopup').style.display = "flex";
+            
+            submittedExams.push(document.getElementById('exTitleName').value);
+            loadExams(); 
+        }
+
+        async function sendFeedback() {
+            const msg = document.getElementById('feedbackMsg').value;
+            await fetch('/api/feedback', { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({
+                    studentName: document.getElementById('exName').value,
+                    rollNo: document.getElementById('exRoll').value,
+                    examTitle: document.getElementById('exTitleName').value,
+                    message: msg || "No comment."
+                })
+            });
+            document.getElementById('feedbackPopup').style.display = "none";
+        }
+
+        // ==========================================
+        // RESULT CHECKER
+        // ==========================================
+        async function checkMyResult() {
+            const roll = document.getElementById('resRollNo').value;
+            const pass = document.getElementById('resPass').value;
+            
+            if(!roll || !pass) return alert("Please enter Roll No and Password");
+
+            const res = await fetch('/api/check-result', { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ rollNo: roll, password: pass }) 
+            });
+            const data = await res.json();
+            
+            if(!data.success) return alert(data.message);
+            
+            if(data.results.length === 0) {
+                document.getElementById('resultDisplay').innerHTML = "<p style='color:red;'>No checked copies found yet.</p>";
+            } else {
+                document.getElementById('resultDisplay').innerHTML = data.results.map(r => `<div style="padding:15px; border:1px solid #ccc; margin-top:10px; border-radius:8px;"><b>${r.examTitle}</b> <span style="color:green; font-weight:bold; float:right;">${r.score} Marks</span></div>`).join('');
+            }
+        }
+
+        function logoutUser() { 
+            localStorage.clear(); 
+        }
+    </script>
+</body>
+</html>
