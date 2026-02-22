@@ -137,13 +137,12 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // ==========================================
-// 6. ROUTES: SIGNUP & LOGIN (With 1000-2000 Roll No Limit)
+// 6. ROUTES: SIGNUP & LOGIN (1000-2000 Limit)
 // ==========================================
 app.post('/signup', async (req, res) => {
     try {
         const { username, email, password, mobile, rollNo } = req.body; 
         
-        // 🚨 NAYA RULE: Roll Number Limit Check (1000 to 2000)
         const rNum = parseInt(rollNo);
         if (isNaN(rNum) || rNum < 1000 || rNum > 2000) {
             return res.send("<script>alert('❌ Invalid Roll No! Only Roll Numbers between 1000 and 2000 are allowed.'); window.location.href='/signup.html';</script>");
@@ -162,7 +161,6 @@ app.post('/login', async (req, res) => {
     try {
         const { loginId, password } = req.body; 
         
-        // 🚨 NAYA RULE: Check if loginId is a Roll No (not email & not Google ID)
         if (!loginId.includes('@') && !loginId.startsWith('GL-')) {
             const rNum = parseInt(loginId);
             if (isNaN(rNum) || rNum < 1000 || rNum > 2000) {
@@ -171,7 +169,6 @@ app.post('/login', async (req, res) => {
         }
 
         const user = await User.findOne({ $or: [{ email: loginId }, { rollNo: loginId }], password: password });
-        
         if (!user) return res.send("<script>alert('❌ Invalid Email/Roll No or Password.'); window.location.href='/login.html';</script>");
         
         sendLoginAlertEmail(user.email, user.username); 
@@ -179,23 +176,53 @@ app.post('/login', async (req, res) => {
     } catch (err) { res.send("Login Error"); }
 });
 
+app.get('/logout', (req, res) => {
+    req.logout((err) => {
+        if (err) return next(err);
+        req.session.destroy();
+        res.redirect('/login.html');
+    });
+});
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
+    res.redirect(`/dashboard.html?login=success&name=${encodeURIComponent(req.user.username)}&roll=${req.user.rollNo}`);
+});
 
 // ==========================================
-// 7. ADMIN & STUDENT APIs
+// 7. COMPILER API (JDoodle)
+// ==========================================
+app.post('/api/compile-code', async (req, res) => {
+    try {
+        const { script, language, versionIndex } = req.body;
+        const response = await fetch('https://api.jdoodle.com/v1/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                clientId: process.env.JDOODLE_CLIENT_ID, 
+                clientSecret: process.env.JDOODLE_CLIENT_SECRET, 
+                script: script, language: language, versionIndex: versionIndex
+            })
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch (error) { res.status(500).json({ error: "Compiler connection failed!" }); }
+});
+
+// ==========================================
+// 8. ADMIN & STUDENT APIs
 // ==========================================
 
-// Courses
-app.get('/api/courses', async (req, res) => { res.json(await Course.find().sort({ createdAt: -1 })); });
-app.post('/api/courses', async (req, res) => { res.json(await Course.create(req.body)); });
+// Courses & Exams
+app.get('/api/courses', async (req, res) => res.json(await Course.find().sort({ createdAt: -1 })));
+app.post('/api/courses', async (req, res) => res.json(await Course.create(req.body)));
 app.delete('/api/courses/:id', async (req, res) => { await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
-// Exams
-app.get('/api/exams', async (req, res) => { res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })); });
-app.get('/api/exams/:id', async (req, res) => { res.json(await Exam.findById(req.params.id)); });
-app.post('/api/exams', async (req, res) => { res.json(await Exam.create(req.body)); });
+app.get('/api/exams', async (req, res) => res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })));
+app.get('/api/exams/:id', async (req, res) => res.json(await Exam.findById(req.params.id)));
+app.post('/api/exams', async (req, res) => res.json(await Exam.create(req.body)));
 app.delete('/api/exams/:id', async (req, res) => { await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
-// One-Time Exam Tracker
 app.post('/api/my-submissions', async (req, res) => {
     const { rollNo } = req.body;
     if (!rollNo) return res.json([]);
@@ -203,45 +230,63 @@ app.post('/api/my-submissions', async (req, res) => {
     res.json(results.map(r => r.examTitle)); 
 });
 
-// Submit Exam (With Double Attempt Security Lock)
+// ==========================================
+// 🌟 9. AUTO-CHECKING & ANSWER KEY ENGINE
+// ==========================================
+
+// Auto-Submit & Check
 app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, rollNo, mobile, examTitle, answers } = req.body;
         
-        // Security Lock: Check if already submitted
+        // Security Check: Lock double attempt
         const alreadySubmitted = await Result.findOne({ rollNo: rollNo, examTitle: examTitle });
-        if (alreadySubmitted) {
-            return res.json({ success: false, message: "❌ You have already submitted this exam! Double attempts are not allowed." });
+        if (alreadySubmitted) return res.json({ success: false, message: "❌ You have already submitted this exam! Double attempts are not allowed." });
+
+        // 🟢 AUTO-GRADING LOGIC
+        const exam = await Exam.findOne({ title: examTitle });
+        let autoScore = 0;
+
+        if (exam) {
+            exam.questions.forEach((q, index) => {
+                let qKey = `Q${index + 1}`;
+                // Compare student answer with Correct Answer
+                if (answers[qKey] === q.correctAnswer) {
+                    autoScore += (q.marks || 1); // Har sahi jawab par marks do
+                }
+            });
         }
 
-        await Result.create({ studentName, rollNo, mobile, examTitle, studentAnswers: answers, isReleased: false });
-        res.json({ success: true, message: "Exam submitted! Admin will check your copy soon." });
+        // isReleased: true kar diya taaki marks turant bacche ko dikhein!
+        await Result.create({ 
+            studentName, rollNo, mobile, examTitle, 
+            studentAnswers: answers, score: autoScore, isReleased: true 
+        });
+        
+        res.json({ success: true, message: "Exam submitted & Auto-Checked successfully!" });
     } catch (err) { res.status(500).json({ success: false, message: "Failed to submit exam" }); }
 });
 
-// Feedback APIs
-app.post('/api/feedback', async (req, res) => {
-    try { await Feedback.create(req.body); res.json({ success: true }); } 
-    catch (err) { res.status(500).json({ error: "Feedback failed" }); }
-});
-app.get('/api/admin/feedback', async (req, res) => {
-    try { res.json(await Feedback.find().sort({ date: -1 })); } 
-    catch (err) { res.status(500).json({ error: "Failed to fetch feedback" }); }
-});
-
-// Result APIs (Admin & Student)
-app.get('/api/admin/results', async (req, res) => {
-    try { res.json(await Result.find().sort({ _id: -1 })); } 
-    catch (err) { res.status(500).json({ error: "Failed to fetch copies" }); }
-});
-
-app.put('/api/admin/check-copy/:id', async (req, res) => {
+// Answer Key & Live Rank Generator
+app.post('/api/answer-key', async (req, res) => {
     try {
-        await Result.findByIdAndUpdate(req.params.id, { score: req.body.adminMarks, isReleased: true });
-        res.json({ success: true, message: "Result Uploaded Successfully!" });
-    } catch (err) { res.status(500).json({ error: "Failed to upload result" }); }
+        const { rollNo, examTitle } = req.body;
+        
+        const result = await Result.findOne({ rollNo, examTitle });
+        const exam = await Exam.findOne({ title: examTitle });
+        
+        if (!result || !exam) return res.json({ success: false, message: "Data not found" });
+
+        // 🏆 AUTO-RANKING LOGIC
+        const allResults = await Result.find({ examTitle }).sort({ score: -1 });
+        const rank = allResults.findIndex(r => r.rollNo === rollNo) + 1;
+        const totalStudents = allResults.length;
+
+        res.json({ success: true, result, exam, rank, totalStudents });
+    } catch (err) { res.status(500).json({ success: false }); }
 });
 
+// Normal Result Checker
 app.post('/api/check-result', async (req, res) => {
     try {
         const { rollNo, password } = req.body;
@@ -252,33 +297,21 @@ app.post('/api/check-result', async (req, res) => {
         res.json({ success: true, results: myResults, studentName: student.username });
     } catch (err) { res.status(500).json({ error: "Server Error" }); }
 });
-// ==========================================
-// 🌟 NAYA: SECURE COMPILER API (JDoodle)
-// ==========================================
-app.post('/api/compile-code', async (req, res) => {
-    try {
-        const { script, language, versionIndex } = req.body;
-        
-        // Use native fetch to call JDoodle
-        const response = await fetch('https://api.jdoodle.com/v1/execute', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                clientId: process.env.JDOODLE_CLIENT_ID, 
-                clientSecret: process.env.JDOODLE_CLIENT_SECRET, 
-                script: script,
-                language: language,
-                versionIndex: versionIndex
-            })
-        });
-        
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        res.status(500).json({ error: "Compiler connection failed!" });
-    }
-});
 
+// Feedback & Admin Results
+app.post('/api/feedback', async (req, res) => {
+    try { await Feedback.create(req.body); res.json({ success: true }); } 
+    catch (err) { res.status(500).json({ error: "Feedback failed" }); }
+});
+app.get('/api/admin/feedback', async (req, res) => res.json(await Feedback.find().sort({ date: -1 })));
+app.get('/api/admin/results', async (req, res) => res.json(await Result.find().sort({ _id: -1 })));
+
+app.put('/api/admin/check-copy/:id', async (req, res) => {
+    try {
+        await Result.findByIdAndUpdate(req.params.id, { score: req.body.adminMarks, isReleased: true });
+        res.json({ success: true, message: "Result Uploaded Successfully!" });
+    } catch (err) { res.status(500).json({ error: "Failed to upload result" }); }
+});
 
 // ==========================================
 // VERCEL EXPORT (Server Start)
@@ -287,6 +320,3 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
-                                     
-
-
