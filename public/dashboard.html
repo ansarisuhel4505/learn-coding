@@ -31,25 +31,62 @@
         .btn:hover { background: #2563eb; }
         .btn-success { background: #10b981; } .btn-success:hover { background: #059669; }
         .btn-danger { background: #ef4444; } .btn-danger:hover { background: #dc2626; }
+        .btn-warning { background: #f59e0b; color: white;} .btn-warning:hover { background: #d97706; }
 
         .result-box { background: white; padding: 40px; border-radius: 15px; max-width: 500px; margin: 0 auto; text-align: center; }
         .result-box input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.9); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 800px; max-width: 95%; max-height: 90vh; border-radius: 15px; display: flex; flex-direction: column; }
-        .modal-header { background: #f8fafc; padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 30px; overflow-y: auto; flex-grow: 1; }
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.95); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 1000px; max-width: 95%; height: 85vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden;}
+        .modal-header { background: #f8fafc; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         
-        /* 🌟 FIX: Locked input fields style */
+        .exam-setup-form { padding: 40px; }
         .exam-setup-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f1f5f9; color: #64748b; font-weight: bold; cursor: not-allowed; outline: none;}
         
-        .question-block { margin-bottom: 20px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; }
-        .option-label { display: block; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
-        .timer-box { background: #fee2e2; color: #ef4444; font-size: 20px; font-weight: bold; padding: 10px 20px; border-radius: 8px; display: inline-block; margin-bottom: 20px; border: 2px solid #fca5a5;}
+        /* NTA STYLE EXAM LAYOUT */
+        .exam-layout { display: flex; height: 100%; flex-grow: 1; }
+        .exam-left { flex: 3; padding: 30px; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #e2e8f0;}
+        .exam-right { flex: 1; padding: 20px; background: #f8fafc; display: flex; flex-direction: column; overflow-y: auto;}
+
+        .question-block { flex-grow: 1; }
+        .question-block h3 { font-size: 20px; color: #0f172a; margin-bottom: 20px; }
+        .option-label { display: block; padding: 15px; background: white; border: 2px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; font-size: 16px;}
+        .option-label:hover { border-color: #3b82f6; background: #f0f9ff; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.2); cursor: pointer;}
+        
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;}
+        .nav-buttons button { width: 48%; padding: 12px; font-size: 16px;}
+
+        /* PALETTE & LIVE STATS */
+        .timer-box { background: #fee2e2; color: #ef4444; font-size: 20px; font-weight: bold; padding: 10px; border-radius: 8px; text-align: center; border: 2px solid #fca5a5; margin-bottom: 20px;}
+        .stats-box { background: white; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 20px;}
+        .stat-line { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #475569;}
+        .stat-green { color: #10b981; } .stat-red { color: #ef4444; } .stat-gray { color: #94a3b8; }
+
+        .palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .q-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; border: 2px solid #cbd5e1; background: white; color: #64748b; transition: 0.2s;}
+        .q-circle.answered { background: #10b981; color: white; border-color: #10b981; }
+        .q-circle.skipped { background: #ef4444; color: white; border-color: #ef4444; }
+        .q-circle.active { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); border-color: #3b82f6; color: #3b82f6; }
+
+        /* 🌟 NAYA: POPUP DESIGNS RESTORED */
+        .popup-modal { background: white; padding: 30px; border-radius: 15px; width: 400px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .popup-modal h3 { color: #0f172a; margin-bottom: 10px; }
+        .popup-modal p { color: #64748b; margin-bottom: 20px; font-size: 14px; }
+        .popup-modal textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 15px; resize: none;}
+        .flex-btns { display: flex; gap: 10px; }
         
         .toast-popup { position: fixed; top: 30px; right: -400px; background: white; border-left: 6px solid #10b981; padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; z-index: 1000; transition: right 0.5s; }
         .toast-popup.show { right: 30px; }
         .toast-icon { font-size: 28px; color: #10b981; }
+
+        @media (max-width: 768px) {
+            .exam-layout { flex-direction: column; }
+            .exam-left { border-right: none; border-bottom: 2px solid #e2e8f0; flex: none; height: 60%; }
+            .exam-right { flex: none; height: 40%; }
+            .palette-grid { grid-template-columns: repeat(6, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -75,7 +112,7 @@
             <div class="grid-container" id="coursesGrid"></div>
         </div>
         <div id="exams-sec" class="section">
-            <h1>📝 Live Exams</h1>
+            <h1>📝 Live Exams Portal</h1>
             <div class="grid-container" id="examsGrid"></div>
         </div>
         <div id="results-sec" class="section">
@@ -95,63 +132,91 @@
                 <h2 id="modalExamTitle">Exam Setup</h2>
                 <span onclick="closeExam()" style="cursor:pointer; color:red; font-size:24px;">✖</span>
             </div>
-            <div class="modal-body">
-                <div id="examSetupForm" class="exam-setup-form">
-                    <input type="text" id="exName" placeholder="Full Name" readonly>
-                    <input type="text" id="exRoll" placeholder="Roll Number" readonly>
-                    <input type="hidden" id="exId"><input type="hidden" id="exTitleName">
-                    <button onclick="startExam()" class="btn btn-success">Start Exam</button>
+            
+            <div id="examSetupForm" class="exam-setup-form">
+                <h3 style="margin-bottom: 20px; color: #3b82f6;">Confirm Details</h3>
+                <input type="text" id="exName" placeholder="Full Name" readonly>
+                <input type="text" id="exRoll" placeholder="Roll Number" readonly>
+                <input type="hidden" id="exId"><input type="hidden" id="exTitleName">
+                <button onclick="startExam()" class="btn btn-success" style="font-size: 18px;">Start Exam Now</button>
+            </div>
+
+            <div id="examQuestionsArea" class="exam-layout" style="display:none;">
+                <div class="exam-left">
+                    <div class="question-block" id="singleQuestionDisplay"></div>
+                    <div class="nav-buttons">
+                        <button onclick="handlePrev()" class="btn btn-warning" id="prevBtn"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button onclick="handleNext()" class="btn btn-success" id="nextBtn">Save & Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
                 </div>
-                <div id="examQuestionsArea" style="display:none;">
-                    <div id="timerDisplay" class="timer-box">⏳ Time Left: 00:00</div>
-                    <div id="questionsList"></div>
-                    <button onclick="submitExam()" class="btn btn-success">Submit Exam</button>
+                <div class="exam-right">
+                    <div id="timerDisplay" class="timer-box">⏳ 00:00</div>
+                    <div class="stats-box">
+                        <div class="stat-line"><span class="stat-green">Attempted:</span> <span id="statAttempted">0</span></div>
+                        <div class="stat-line"><span class="stat-red">Skipped:</span> <span id="statSkipped">0</span></div>
+                        <div class="stat-line"><span class="stat-gray">Not Visited:</span> <span id="statUnvisited">0</span></div>
+                    </div>
+                    <h4 style="margin-bottom:10px; color:#0f172a; text-align:center;">Question Palette</h4>
+                    <div class="palette-grid" id="questionPalette"></div>
+                    
+                    <button onclick="showSubmitConfirm()" class="btn btn-danger" style="margin-top:auto; font-size:18px;">Submit Final Exam</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let examTimer;
-        let currentExamDuration = 0;
-        let examData = null;
-        let submittedExams = [];
+    <div id="confirmPopup" class="modal" style="z-index: 200;">
+        <div class="popup-modal">
+            <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #f59e0b; margin-bottom: 15px;"></i>
+            <h3>Submit Exam?</h3>
+            <p>Are you sure? You cannot change your answers after submission.</p>
+            <div class="flex-btns">
+                <button onclick="closeConfirmPopup()" class="btn btn-danger">Cancel</button>
+                <button onclick="confirmSubmission()" class="btn btn-success">Yes, Submit</button>
+            </div>
+        </div>
+    </div>
 
+    <div id="feedbackPopup" class="modal" style="z-index: 300;">
+        <div class="popup-modal">
+            <i class="fas fa-laugh-beam" style="font-size: 50px; color: #10b981; margin-bottom: 15px;"></i>
+            <h3>Exam Done! 🎉</h3>
+            <p>Great job! How was your experience?</p>
+            <textarea id="feedbackMsg" rows="3" placeholder="Tell us your thoughts 🚀..."></textarea>
+            <button onclick="sendFeedback()" class="btn btn-success">Send Feedback</button>
+        </div>
+    </div>
+
+    <script>
+        let submittedExams = [];
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // Login check and URL clean
             if(urlParams.get('login') === 'success') {
                 localStorage.setItem('cm_name', urlParams.get('name') || '');
                 localStorage.setItem('cm_roll', urlParams.get('roll') || '');
                 window.history.replaceState({}, document.title, "/dashboard.html");
-                
                 document.getElementById('toastTitle').innerText = `Welcome, ${localStorage.getItem('cm_name')}!`;
                 document.getElementById('loginToast').classList.add('show');
                 setTimeout(() => document.getElementById('loginToast').classList.remove('show'), 4000);
             }
 
-            // Security Lock
+            // 🚨 Strict Security Lock: Redirection handled safely
             if (!localStorage.getItem('cm_roll')) {
-                alert("Session Expired or Not Logged In! Please Login First.");
+                alert("🔒 Secure Area: Please Login First to Access Dashboard.");
                 window.location.href = '/login.html';
                 return;
             }
-
+            
             document.getElementById('resRollNo').value = localStorage.getItem('cm_roll') || '';
             
-            // Fetch exams student has already submitted
             try {
                 const subRes = await fetch('/api/my-submissions', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ rollNo: localStorage.getItem('cm_roll') })
                 });
                 submittedExams = await subRes.json();
-            } catch(e) { console.log(e); }
-
-            loadCourses();
-            loadExams();
+            } catch(e) {}
+            loadCourses(); loadExams();
         };
 
         function switchTab(tabId) {
@@ -173,29 +238,29 @@
             const res = await fetch('/api/exams');
             const exams = await res.json();
             let html = '';
-            
             exams.forEach(e => {
-                // Ignore submitted exams
-                if(submittedExams.includes(e.title)) return;
-
-                html += `<div class="card" style="border-top:4px solid red;"><div class="card-body"><h3 class="card-title">${e.title}</h3><p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p><button onclick="openExam('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button></div></div>`;
+                if(submittedExams.includes(e.title)) return; // Double attempt hide logic
+                html += `<div class="card" style="border-top:4px solid red;"><div class="card-body"><h3 class="card-title">${e.title}</h3><p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p><button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button></div></div>`;
             });
-
-            if (html === '') {
-                document.getElementById('examsGrid').innerHTML = '<p style="color:#10b981; font-weight:bold; font-size:18px;">🎉 You have completed all exams!</p>';
-            } else {
-                document.getElementById('examsGrid').innerHTML = html;
-            }
+            document.getElementById('examsGrid').innerHTML = html === '' ? '<p style="color:#10b981; font-weight:bold; font-size:18px;">🎉 You have completed all exams!</p>' : html;
         }
 
-        function openExam(id, title, duration) {
+        // ==========================================
+        // EXAM ENGINE LOGIC
+        // ==========================================
+        let examTimer;
+        let currentExamDuration = 0;
+        let examData = null;
+        let currentQIndex = 0;
+        let userAnswers = {}; 
+        let questionStatus = []; 
+
+        function openExamSetup(id, title, duration) {
             document.getElementById('modalExamTitle').innerText = title;
             document.getElementById('exId').value = id;
             document.getElementById('exTitleName').value = title;
-            // 🌟 FIX: Name and Roll are auto-filled and locked!
             document.getElementById('exName').value = localStorage.getItem('cm_name') || '';
             document.getElementById('exRoll').value = localStorage.getItem('cm_roll') || '';
-            
             currentExamDuration = duration;
             document.getElementById('examSetupForm').style.display = "block";
             document.getElementById('examQuestionsArea').style.display = "none";
@@ -203,81 +268,68 @@
         }
 
         function closeExam() {
-            clearInterval(examTimer);
-            document.getElementById('examModal').style.display = "none";
+            if(confirm("Exit exam? Progress will be lost.")) {
+                clearInterval(examTimer);
+                document.getElementById('examModal').style.display = "none";
+            }
         }
 
         async function startExam() {
-            if(!document.getElementById('exName').value) return alert("System Error: No valid name found.");
             const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
             examData = await res.json();
             
-            let qHtml = examData.questions.map((q, i) => `
-                <div class="question-block"><h4>Q${i+1}: ${q.questionText}</h4>
-                ${q.options.map(o => `<label class="option-label"><input type="radio" name="q${i}" value="${o}"> ${o}</label>`).join('')}
-                </div>`).join('');
+            currentQIndex = 0;
+            userAnswers = {};
+            questionStatus = Array(examData.questions.length).fill('unvisited');
             
-            document.getElementById('questionsList').innerHTML = qHtml;
             document.getElementById('examSetupForm').style.display = "none";
-            document.getElementById('examQuestionsArea').style.display = "block";
+            document.getElementById('examQuestionsArea').style.display = "flex";
+
+            renderQuestionUI();
 
             let time = currentExamDuration * 60;
             examTimer = setInterval(() => {
                 time--;
-                document.getElementById('timerDisplay').innerText = `⏳ Time Left: ${Math.floor(time/60)}:${time%60 < 10 ? '0':''}${time%60}`;
-                if(time <= 0) { clearInterval(examTimer); alert("Time Up!"); submitExam(); }
+                document.getElementById('timerDisplay').innerText = `⏳ ${Math.floor(time/60)}:${time%60 < 10 ? '0':''}${time%60}`;
+                if(time <= 0) { 
+                    clearInterval(examTimer); 
+                    alert("⏳ Time Up! Auto Submitting..."); 
+                    confirmSubmission(); 
+                }
             }, 1000);
         }
 
-        async function submitExam() {
-            clearInterval(examTimer);
-            let answers = {};
-            examData.questions.forEach((q, i) => {
-                let ans = document.querySelector(`input[name="q${i}"]:checked`);
-                answers[`Q${i+1}`] = ans ? ans.value : "Skipped";
+        function renderQuestionUI() {
+            const q = examData.questions[currentQIndex];
+            let qHtml = `<h3>Q${currentQIndex + 1}. ${q.questionText}</h3>`;
+            q.options.forEach(opt => {
+                let isChecked = userAnswers[currentQIndex] === opt ? "checked" : "";
+                qHtml += `<label class="option-label"><input type="radio" name="currentQ" value="${opt}" ${isChecked}> ${opt}</label>`;
             });
+            document.getElementById('singleQuestionDisplay').innerHTML = qHtml;
 
-            const res = await fetch('/api/submit-exam', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
-                studentName: document.getElementById('exName').value, 
-                rollNo: document.getElementById('exRoll').value,
-                examTitle: document.getElementById('exTitleName').value, 
-                answers: answers
-            })});
-            
-            const resultData = await res.json();
+            document.getElementById('prevBtn').style.visibility = currentQIndex === 0 ? 'hidden' : 'visible';
+            document.getElementById('nextBtn').innerHTML = currentQIndex === examData.questions.length - 1 ? 'Save & Finish' : 'Save & Next <i class="fas fa-arrow-right"></i>';
 
-            // 🌟 FIX: Handle Backend Rejection if already submitted
-            if(!resultData.success) {
-                alert(resultData.message);
-                closeExam();
-                return;
+            let attempted = 0, skipped = 0, unvisited = 0;
+            let paletteHtml = '';
+
+            for(let i=0; i<examData.questions.length; i++) {
+                let statusClass = '';
+                if(questionStatus[i] === 'answered') { statusClass = 'answered'; attempted++; }
+                else if(questionStatus[i] === 'skipped') { statusClass = 'skipped'; skipped++; }
+                else { unvisited++; }
+
+                if(i === currentQIndex) statusClass += ' active'; 
+                paletteHtml += `<div class="q-circle ${statusClass}" onclick="jumpToQuestion(${i})">${i+1}</div>`;
             }
 
-            alert("✅ Exam Submitted! Admin will check your copy.");
-            closeExam();
-            
-            // Add to submitted list and reload UI to hide the exam immediately
-            submittedExams.push(document.getElementById('exTitleName').value);
-            loadExams(); 
+            document.getElementById('questionPalette').innerHTML = paletteHtml;
+            document.getElementById('statAttempted').innerText = attempted;
+            document.getElementById('statSkipped').innerText = skipped;
+            document.getElementById('statUnvisited').innerText = unvisited;
         }
 
-        async function checkMyResult() {
-            const roll = document.getElementById('resRollNo').value;
-            const pass = document.getElementById('resPass').value;
-            const res = await fetch('/api/check-result', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ rollNo: roll, password: pass }) });
-            const data = await res.json();
-            if(!data.success) return alert(data.message);
-            
-            if(data.results.length === 0) {
-                 document.getElementById('resultDisplay').innerHTML = "<p style='color:red;'>No checked copies found yet.</p>";
-            } else {
-                 document.getElementById('resultDisplay').innerHTML = data.results.map(r => `<div style="padding:15px; border:1px solid #ccc; margin-top:10px; border-radius:8px;"><b>${r.examTitle}</b> <span style="color:green; font-weight:bold; float:right;">${r.score} Marks</span></div>`).join('');
-            }
-        }
-
-        function logoutUser() {
-            localStorage.clear();
-        }
-    </script>
-</body>
-</html>
+        function saveCurrentAnswer() {
+            let selectedOpt = document.querySelector('input[name="currentQ"]:checked');
+            if(selecte
