@@ -70,6 +70,7 @@
         .q-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; border: 2px solid #cbd5e1; background: white; color: #64748b; transition: 0.2s;}
         .q-circle.answered { background: #10b981; color: white; border-color: #10b981; }
         .q-circle.skipped { background: #ef4444; color: white; border-color: #ef4444; }
+        .q-circle.review { background: #8b5cf6; color: white; border-color: #8b5cf6; }
         .q-circle.active { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); border-color: #3b82f6; color: #3b82f6; }
 
         /* 🌟 NAYA: POPUP DESIGNS RESTORED */
@@ -188,10 +189,13 @@
             <div id="examQuestionsArea" class="exam-layout" style="display:none;">
                 <div class="exam-left">
                     <div class="question-block" id="singleQuestionDisplay"></div>
-                    <div class="nav-buttons">
-                        <button onclick="handlePrev()" class="btn btn-warning" id="prevBtn"><i class="fas fa-arrow-left"></i> Previous</button>
-                        <button onclick="handleNext()" class="btn btn-success" id="nextBtn">Save & Next <i class="fas fa-arrow-right"></i></button>
+                    <div class="nav-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between;">
+    <button onclick="handlePrev()" class="btn btn-warning" id="prevBtn" style="flex: 1;"><i class="fas fa-arrow-left"></i> Prev</button>
+    <button onclick="clearResponse()" class="btn btn-danger" id="clearBtn" style="flex: 1;"><i class="fas fa-eraser"></i> Clear</button>
+    <button onclick="markForReview()" class="btn" id="reviewBtn" style="flex: 1; background: #8b5cf6; color: white;"><i class="fas fa-bookmark"></i> Review</button>
+    <button onclick="handleNext()" class="btn btn-success" id="nextBtn" style="flex: 1;">Next <i class="fas fa-arrow-right"></i></button>
                     </div>
+                    
                 </div>
                 <div class="exam-right">
                     <div id="timerDisplay" class="timer-box">⏳ 00:00</div>
@@ -525,9 +529,16 @@ function autoSaveExam(timeRemaining) {
 
             for(let i=0; i<examData.questions.length; i++) {
                 let statusClass = '';
-                if(questionStatus[i] === 'answered') { statusClass = 'answered'; attempted++; }
-                else if(questionStatus[i] === 'skipped') { statusClass = 'skipped'; skipped++; }
-                else { unvisited++; }
+                if(questionStatus[i] === 'answered') {
+    statusClass = 'answered'; attempted++;
+} else if(questionStatus[i] === 'skipped') {
+    statusClass = 'skipped'; skipped++;
+} else if(questionStatus[i] === 'review') {
+    statusClass = 'review'; // 💜 Naya purple color
+} else {
+    unvisited++;
+                }
+                
 
                 if(i === currentQIndex) statusClass += ' active'; 
                 paletteHtml += `<div class="q-circle ${statusClass}" onclick="jumpToQuestion(${i})">${i+1}</div>`;
@@ -563,6 +574,30 @@ function autoSaveExam(timeRemaining) {
             saveCurrentAnswer();
             if (currentQIndex > 0) { currentQIndex--; renderQuestionUI(); }
         }
+        // 👇 🧹 NAYA FEATURE: CLEAR RESPONSE 👇
+function clearResponse() {
+    let options = document.getElementsByName('currentQ');
+    options.forEach(opt => opt.checked = false); // Screen par se selection hatayega
+    
+    delete userAnswers[currentQIndex]; // Saved answer delete karega
+    questionStatus[currentQIndex] = 'unvisited'; // Status reset karega
+    
+    renderQuestionUI(); // UI update karega
+}
+
+// 👇 💜 NAYA FEATURE: MARK FOR REVIEW 👇
+function markForReview() {
+    saveCurrentAnswer(); // Agar koi answer tick kiya hai toh save karega
+    questionStatus[currentQIndex] = 'review'; // Status ko review me daal dega
+    
+    if (currentQIndex < examData.questions.length - 1) {
+        currentQIndex++;
+        renderQuestionUI();
+    } else {
+        showSubmitConfirm();
+    }
+}
+        
 
         function jumpToQuestion(index) {
             saveCurrentAnswer(); currentQIndex = index; renderQuestionUI();
