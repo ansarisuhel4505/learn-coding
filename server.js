@@ -248,6 +248,33 @@ app.post('/api/check-result', async (req, res) => {
         res.json({ success: true, results: myResults, studentName: student.username });
     } catch (err) { res.status(500).json({ error: "Server Error" }); }
 });
+// ==========================================
+// 🌟 NAYA: SECURE COMPILER API (JDoodle)
+// ==========================================
+app.post('/api/compile-code', async (req, res) => {
+    try {
+        const { script, language, versionIndex } = req.body;
+        
+        // Use native fetch to call JDoodle
+        const response = await fetch('https://api.jdoodle.com/v1/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                clientId: process.env.JDOODLE_CLIENT_ID, 
+                clientSecret: process.env.JDOODLE_CLIENT_SECRET, 
+                script: script,
+                language: language,
+                versionIndex: versionIndex
+            })
+        });
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: "Compiler connection failed!" });
+    }
+});
+
 
 // ==========================================
 // VERCEL EXPORT (Server Start)
@@ -257,3 +284,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 module.exports = app;
                                      
+
