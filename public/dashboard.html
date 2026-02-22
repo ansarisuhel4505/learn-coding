@@ -27,8 +27,10 @@
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; padding: 20px;}
         .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px;}
         .card-title { font-size: 18px; font-weight: 600; margin: 10px 0; }
-        .btn { display: inline-block; width: 100%; padding: 12px; text-align: center; background: #3b82f6; color: white; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; }
-        .btn-success { background: #10b981; } .btn-danger { background: #ef4444; }
+        .btn { display: inline-block; width: 100%; padding: 12px; text-align: center; background: #3b82f6; color: white; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s;}
+        .btn:hover { background: #2563eb; }
+        .btn-success { background: #10b981; } .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; } .btn-danger:hover { background: #dc2626; }
 
         .result-box { background: white; padding: 40px; border-radius: 15px; max-width: 500px; margin: 0 auto; text-align: center; }
         .result-box input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
@@ -37,7 +39,10 @@
         .modal-content { background: white; width: 800px; max-width: 95%; max-height: 90vh; border-radius: 15px; display: flex; flex-direction: column; }
         .modal-header { background: #f8fafc; padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 30px; overflow-y: auto; flex-grow: 1; }
-        .exam-setup-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; }
+        
+        /* 🌟 FIX: Locked input fields style */
+        .exam-setup-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f1f5f9; color: #64748b; font-weight: bold; cursor: not-allowed; outline: none;}
+        
         .question-block { margin-bottom: 20px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .option-label { display: block; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
         .timer-box { background: #fee2e2; color: #ef4444; font-size: 20px; font-weight: bold; padding: 10px 20px; border-radius: 8px; display: inline-block; margin-bottom: 20px; border: 2px solid #fca5a5;}
@@ -91,9 +96,9 @@
                 <span onclick="closeExam()" style="cursor:pointer; color:red; font-size:24px;">✖</span>
             </div>
             <div class="modal-body">
-                <div id="examSetupForm">
-                    <input type="text" id="exName" placeholder="Full Name" required>
-                    <input type="text" id="exRoll" placeholder="Roll Number" required>
+                <div id="examSetupForm" class="exam-setup-form">
+                    <input type="text" id="exName" placeholder="Full Name" readonly>
+                    <input type="text" id="exRoll" placeholder="Roll Number" readonly>
                     <input type="hidden" id="exId"><input type="hidden" id="exTitleName">
                     <button onclick="startExam()" class="btn btn-success">Start Exam</button>
                 </div>
@@ -106,7 +111,7 @@
         </div>
     </div>
 
-        <script>
+    <script>
         let examTimer;
         let currentExamDuration = 0;
         let examData = null;
@@ -115,29 +120,27 @@
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // 1. Agar login karke aaya hai, toh LocalStorage mein save karo
+            // Login check and URL clean
             if(urlParams.get('login') === 'success') {
                 localStorage.setItem('cm_name', urlParams.get('name') || '');
                 localStorage.setItem('cm_roll', urlParams.get('roll') || '');
                 window.history.replaceState({}, document.title, "/dashboard.html");
                 
-                // Show Welcome Toast
                 document.getElementById('toastTitle').innerText = `Welcome, ${localStorage.getItem('cm_name')}!`;
                 document.getElementById('loginToast').classList.add('show');
                 setTimeout(() => document.getElementById('loginToast').classList.remove('show'), 4000);
             }
 
-            // 🚨 2. STRICT SECURITY LOCK: Agar Roll No nahi hai toh Login pe bhagao
+            // Security Lock
             if (!localStorage.getItem('cm_roll')) {
                 alert("Session Expired or Not Logged In! Please Login First.");
                 window.location.href = '/login.html';
                 return;
             }
 
-            // Auto-fill result form
             document.getElementById('resRollNo').value = localStorage.getItem('cm_roll') || '';
             
-            // 3. FETCH SUBMITTED EXAMS (Taaki dobara attempt na kar sake)
+            // Fetch exams student has already submitted
             try {
                 const subRes = await fetch('/api/my-submissions', {
                     method: 'POST',
@@ -172,7 +175,7 @@
             let html = '';
             
             exams.forEach(e => {
-                // 🌟 FIX: Agar exam 'submittedExams' list mein hai, toh usko mat dikhao!
+                // Ignore submitted exams
                 if(submittedExams.includes(e.title)) return;
 
                 html += `<div class="card" style="border-top:4px solid red;"><div class="card-body"><h3 class="card-title">${e.title}</h3><p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p><button onclick="openExam('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button></div></div>`;
@@ -189,8 +192,10 @@
             document.getElementById('modalExamTitle').innerText = title;
             document.getElementById('exId').value = id;
             document.getElementById('exTitleName').value = title;
+            // 🌟 FIX: Name and Roll are auto-filled and locked!
             document.getElementById('exName').value = localStorage.getItem('cm_name') || '';
             document.getElementById('exRoll').value = localStorage.getItem('cm_roll') || '';
+            
             currentExamDuration = duration;
             document.getElementById('examSetupForm').style.display = "block";
             document.getElementById('examQuestionsArea').style.display = "none";
@@ -203,7 +208,7 @@
         }
 
         async function startExam() {
-            if(!document.getElementById('exName').value) return alert("Enter Name!");
+            if(!document.getElementById('exName').value) return alert("System Error: No valid name found.");
             const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
             examData = await res.json();
             
@@ -232,15 +237,26 @@
                 answers[`Q${i+1}`] = ans ? ans.value : "Skipped";
             });
 
-            await fetch('/api/submit-exam', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
-                studentName: document.getElementById('exName').value, rollNo: document.getElementById('exRoll').value,
-                examTitle: document.getElementById('exTitleName').value, answers
+            const res = await fetch('/api/submit-exam', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+                studentName: document.getElementById('exName').value, 
+                rollNo: document.getElementById('exRoll').value,
+                examTitle: document.getElementById('exTitleName').value, 
+                answers: answers
             })});
+            
+            const resultData = await res.json();
+
+            // 🌟 FIX: Handle Backend Rejection if already submitted
+            if(!resultData.success) {
+                alert(resultData.message);
+                closeExam();
+                return;
+            }
 
             alert("✅ Exam Submitted! Admin will check your copy.");
             closeExam();
             
-            // 🌟 Add to submitted list and reload UI to hide the exam
+            // Add to submitted list and reload UI to hide the exam immediately
             submittedExams.push(document.getElementById('exTitleName').value);
             loadExams(); 
         }
@@ -262,8 +278,6 @@
         function logoutUser() {
             localStorage.clear();
         }
-                    </script>
-    
+    </script>
 </body>
 </html>
-
