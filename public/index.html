@@ -24,11 +24,13 @@
         <nav class="navbar" id="navbar">
             <ul class="nav-links">
                 <li><a href="/" class="active">Home</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="/about.html">About</a></li>
                 <li><a href="#courses">Courses</a></li>
                 <li><a href="#features">Features</a></li>
+                <li><a href="/contact.html">Contact</a></li>
                 <li><a href="/compiler.html">Compiler</a></li>
                 <li><a href="/dashboard.html">Dashboard</a></li>
+                <li><a href="/admin.html">Admin Pannel</a></li>
             </ul>
         </nav>
 
@@ -55,9 +57,18 @@
             </div>
             
             <div class="hero-stats">
-                <div class="stat-item"><h3>50+</h3><p>Projects</p></div>
-                <div class="stat-item"><h3>10k+</h3><p>Students</p></div>
-                <div class="stat-item"><h3>4.9/5</h3><p>Rating</p></div>
+                <div class="stat-item">
+                    <h3>50+</h3>
+                    <p>Live Projects</p>
+                </div>
+                <div class="stat-item">
+                    <h3>10k+</h3>
+                    <p>Students</p>
+                </div>
+                <div class="stat-item">
+                    <h3>4.9/5</h3>
+                    <p>Top Rating</p>
+                </div>
             </div>
         </div>
 
@@ -66,12 +77,59 @@
         </div>
     </section>
 
-    <section class="learning-path" id="courses">
+    <section class="learning-path" id="popular-courses">
         <div class="section-heading">
-            <h2>Choose Your Learning Path 🚀</h2>
-            <p>Master the most in-demand tech skills with our expert-led courses added by the Admin.</p>
+            <h2>Our Premium Learning Paths 🚀</h2>
+            <p>Master the most in-demand tech skills with our expert-led programs.</p>
         </div>
-        
+
+        <div class="course-grid">
+            <div class="course-card">
+                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80" alt="Full Stack Dev">
+                <div class="card-content">
+                    <div class="tags">
+                        <span class="tag-badge web-badge">Web Dev</span>
+                        <span class="rating"><i class='bx bxs-star'></i> 4.9</span>
+                    </div>
+                    <h3>Full-Stack Web Development</h3>
+                    <p>Master HTML, CSS, JavaScript, React, Node.js, and MongoDB. Build real-world projects from scratch.</p>
+                    <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=80" alt="AI Course">
+                <div class="card-content">
+                    <div class="tags">
+                        <span class="tag-badge ai-badge">AI & ML</span>
+                        <span class="rating"><i class='bx bxs-star'></i> 4.8</span>
+                    </div>
+                    <h3>Artificial Intelligence Mastery</h3>
+                    <p>Dive deep into Machine Learning, Neural Networks, Python, and build your own smart AI models.</p>
+                    <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80" alt="App Dev">
+                <div class="card-content">
+                    <div class="tags">
+                        <span class="tag-badge app-badge">Mobile Apps</span>
+                        <span class="rating"><i class='bx bxs-star'></i> 4.9</span>
+                    </div>
+                    <h3>Mobile App Development</h3>
+                    <p>Create stunning Android and iOS applications using modern frameworks. Build apps that scale globally.</p>
+                    <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="learning-path bg-alternate" id="courses">
+        <div class="section-heading">
+            <h2>Latest Admin Courses 📚</h2>
+            <p>Explore our latest courses added recently by the Admin.</p>
+        </div>
         <div class="course-grid" id="dynamic-courses">
             <p class="loading-text">Loading amazing courses for you...</p>
         </div>
@@ -113,7 +171,7 @@
         </div>
     </section>
 
-    <section class="live-exams" id="mock-tests">
+    <section class="live-exams bg-alternate" id="mock-tests">
         <div class="section-heading">
             <h2>Live <span>Mock Tests</span> ⏱️</h2>
             <p>Test your coding skills with our real-time proctored exams.</p>
@@ -133,7 +191,7 @@
                 <h2>Suhel Ansari</h2>
                 <h4 class="title">B.Tech Computer Science & Engineering | Software Developer</h4>
                 <p>Hi, I'm Suhel. As a dedicated Computer Science student and developer, I built CodeMaster to bridge the gap between academic theory and industry-required practical skills.</p>
-                <p>My goal is to simplify complex programming concepts across Web Development, AI, and Mobile Apps. Let's code the future together!</p>
+                <p>My goal is to simplify complex programming concepts across Web Development, AI, and Mobile Apps, empowering you to build logic and write production-ready code. Let's code the future together!</p>
                 <div class="social-links">
                     <a href="#"><i class='bx bxl-github'></i></a>
                     <a href="#"><i class='bx bxl-linkedin-square'></i></a>
@@ -143,15 +201,60 @@
         </div>
     </section>
 
+    <section class="cta-section">
+        <div class="cta-box">
+            <h2>Ready to start your coding journey?</h2>
+            <p>Join our community of developers today and get instant access to our premium dashboard.</p>
+            <a href="/signup.html" class="btn-primary">Create Free Account</a>
+        </div>
+    </section>
+
     <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col brand-col">
+                <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
+                <p>Your ultimate destination for mastering modern software engineering, from full-stack web to AI.</p>
+            </div>
+            
+            <div class="footer-col links-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/aboutus.html">About Us</a></li>
+                    <li><a href="/allcourses.html">All Courses</a></li>
+                    <li><a href="/contactus.html">Contact Support</a></li>
+                    <li><a href="/help.html">HELP DESKBOARD</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col links-col">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="/privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms Of Services</a></li>
+                    <li><a href="refund.html">Refund Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col newsletter-col">
+                <h4>Newsletter</h4>
+                <p>Subscribe to get the latest tech news and course updates.</p>
+                <form action="#" class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn-newsletter"><i class='bx bx-send'></i></button>
+                </form>
+            </div>
+        </div>
+
         <div class="footer-bottom">
             <p>&copy; 2026 CodeMaster by Suhel Ansari. All Rights Reserved.</p>
         </div>
     </footer>
 
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    
     <script>
-        // 1. Hamburger Menu Logic (Half screen, content height)
+        // 1. Hamburger Menu Logic
         const menuIcon = document.getElementById('menu-icon');
         const navbar = document.getElementById('navbar');
 
@@ -169,18 +272,22 @@
             loop: true
         });
 
-        // 3. Fetch Dynamic Content (Courses & Exams) from Server
-        window.onload = () => {
+        // 3. Fetch Dynamic Content (Courses & Exams) from Backend
+        window.addEventListener('DOMContentLoaded', () => {
             fetchPublicCourses();
             fetchPublicExams();
-        };
+        });
 
         async function fetchPublicCourses() {
             try {
                 const res = await fetch('/api/courses');
                 const courses = await res.json();
                 const container = document.getElementById('dynamic-courses');
-                if(courses.length === 0) return container.innerHTML = '<p class="loading-text">New courses dropping soon!</p>';
+                
+                if(courses.length === 0) {
+                    container.innerHTML = '<p class="loading-text">New courses dropping soon!</p>';
+                    return;
+                }
 
                 container.innerHTML = courses.slice(0, 3).map(c => `
                     <div class="course-card">
@@ -188,7 +295,7 @@
                         <div class="card-content">
                             <h3>${c.title}</h3>
                             <p>${c.description.substring(0, 80)}...</p>
-                            <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                            <a href="/login.html" class="btn-card">View Course <i class='bx bx-right-arrow-alt'></i></a>
                         </div>
                     </div>
                 `).join('');
@@ -200,13 +307,17 @@
                 const res = await fetch('/api/exams');
                 const exams = await res.json();
                 const container = document.getElementById('public-exams');
-                if(exams.length === 0) return container.innerHTML = '<p class="loading-text">No live exams right now.</p>';
+                
+                if(exams.length === 0) {
+                    container.innerHTML = '<p class="loading-text">No live exams right now.</p>';
+                    return;
+                }
 
                 container.innerHTML = exams.slice(0, 3).map(e => `
                     <div class="course-card exam-card">
                         <div class="card-content">
                             <h3 class="exam-title"><i class='bx bx-stopwatch'></i> ${e.title}</h3>
-                            <p><b>Marks:</b> ${e.totalMarks}</p>
+                            <p style="margin-top:15px;"><b>Total Marks:</b> ${e.totalMarks}</p>
                             <p><b>Duration:</b> ${e.duration} Mins</p>
                             <a href="/login.html" class="btn-card exam-btn">Login to Attempt</a>
                         </div>
