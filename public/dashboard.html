@@ -441,6 +441,12 @@ document.addEventListener('visibilitychange', function() {
             const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
             examData = await res.json();
             
+            examData.questions.forEach(q => {
+        // Yeh line har question ke options ko random order mein mix kar degi
+        q.options = q.options.sort(() => Math.random() - 0.5);
+    });
+            
+            
             currentQIndex = 0;
             userAnswers = {};
             questionStatus = Array(examData.questions.length).fill('unvisited');
