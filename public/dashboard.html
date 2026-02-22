@@ -106,28 +106,47 @@
         </div>
     </div>
 
-    <script>
+        <script>
         let examTimer;
         let currentExamDuration = 0;
         let examData = null;
+        let submittedExams = [];
 
-        window.onload = () => {
-            // 🌟 FIX: Vercel-Proof Login Check using LocalStorage
+        window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             
+            // 1. Agar login karke aaya hai, toh LocalStorage mein save karo
             if(urlParams.get('login') === 'success') {
                 localStorage.setItem('cm_name', urlParams.get('name') || '');
                 localStorage.setItem('cm_roll', urlParams.get('roll') || '');
+                window.history.replaceState({}, document.title, "/dashboard.html");
                 
-                document.getElementById('toastTitle').innerText = `Welcome, ${urlParams.get('name')}!`;
+                // Show Welcome Toast
+                document.getElementById('toastTitle').innerText = `Welcome, ${localStorage.getItem('cm_name')}!`;
                 document.getElementById('loginToast').classList.add('show');
                 setTimeout(() => document.getElementById('loginToast').classList.remove('show'), 4000);
-                window.history.replaceState({}, document.title, "/dashboard.html");
             }
 
-            // Auto-fill forms
+            // 🚨 2. STRICT SECURITY LOCK: Agar Roll No nahi hai toh Login pe bhagao
+            if (!localStorage.getItem('cm_roll')) {
+                alert("Session Expired or Not Logged In! Please Login First.");
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Auto-fill result form
             document.getElementById('resRollNo').value = localStorage.getItem('cm_roll') || '';
             
+            // 3. FETCH SUBMITTED EXAMS (Taaki dobara attempt na kar sake)
+            try {
+                const subRes = await fetch('/api/my-submissions', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ rollNo: localStorage.getItem('cm_roll') })
+                });
+                submittedExams = await subRes.json();
+            } catch(e) { console.log(e); }
+
             loadCourses();
             loadExams();
         };
@@ -143,16 +162,27 @@
             const res = await fetch('/api/courses');
             const data = await res.json();
             document.getElementById('coursesGrid').innerHTML = data.map(c => 
-                `<div class="card"><img src="${c.thumbnail}"><div class="card-body"><h3>${c.title}</h3><a href="${c.videoLink}" target="_blank" class="btn">Watch Now</a></div></div>`
+                `<div class="card"><img src="${c.thumbnail}"><div class="card-body"><h3 class="card-title">${c.title}</h3><a href="${c.videoLink}" target="_blank" class="btn btn-success">Watch Now</a></div></div>`
             ).join('');
         }
 
         async function loadExams() {
             const res = await fetch('/api/exams');
             const exams = await res.json();
-            document.getElementById('examsGrid').innerHTML = exams.map(e => 
-                `<div class="card" style="border-top:4px solid red;"><div class="card-body"><h3>${e.title}</h3><p>Marks: ${e.totalMarks} | Time: ${e.duration}m</p><button onclick="openExam('${e._id}', '${e.title}', ${e.duration})" class="btn btn-success">Attempt</button></div></div>`
-            ).join('');
+            let html = '';
+            
+            exams.forEach(e => {
+                // 🌟 FIX: Agar exam 'submittedExams' list mein hai, toh usko mat dikhao!
+                if(submittedExams.includes(e.title)) return;
+
+                html += `<div class="card" style="border-top:4px solid red;"><div class="card-body"><h3 class="card-title">${e.title}</h3><p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p><button onclick="openExam('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button></div></div>`;
+            });
+
+            if (html === '') {
+                document.getElementById('examsGrid').innerHTML = '<p style="color:#10b981; font-weight:bold; font-size:18px;">🎉 You have completed all exams!</p>';
+            } else {
+                document.getElementById('examsGrid').innerHTML = html;
+            }
         }
 
         function openExam(id, title, duration) {
@@ -207,8 +237,12 @@
                 examTitle: document.getElementById('exTitleName').value, answers
             })});
 
-            alert("✅ Exam Submitted!");
+            alert("✅ Exam Submitted! Admin will check your copy.");
             closeExam();
+            
+            // 🌟 Add to submitted list and reload UI to hide the exam
+            submittedExams.push(document.getElementById('exTitleName').value);
+            loadExams(); 
         }
 
         async function checkMyResult() {
@@ -217,13 +251,19 @@
             const res = await fetch('/api/check-result', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ rollNo: roll, password: pass }) });
             const data = await res.json();
             if(!data.success) return alert(data.message);
-            document.getElementById('resultDisplay').innerHTML = data.results.map(r => `<div style="padding:10px; border:1px solid #ccc; margin-top:10px;"><b>${r.examTitle}</b> <span style="color:green; float:right;">${r.score} Marks</span></div>`).join('');
+            
+            if(data.results.length === 0) {
+                 document.getElementById('resultDisplay').innerHTML = "<p style='color:red;'>No checked copies found yet.</p>";
+            } else {
+                 document.getElementById('resultDisplay').innerHTML = data.results.map(r => `<div style="padding:15px; border:1px solid #ccc; margin-top:10px; border-radius:8px;"><b>${r.examTitle}</b> <span style="color:green; font-weight:bold; float:right;">${r.score} Marks</span></div>`).join('');
+            }
         }
 
         function logoutUser() {
             localStorage.clear();
         }
-    </script>
+                    </script>
+    
 </body>
 </html>
 
