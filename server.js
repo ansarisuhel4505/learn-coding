@@ -285,6 +285,30 @@ app.post('/api/answer-key', async (req, res) => {
         res.json({ success: true, result, exam, rank, totalStudents });
     } catch (err) { res.status(500).json({ success: false }); }
 });
+// ==========================================
+// 🏆 NAYA: LEADERBOARD & RANK LIST API
+// ==========================================
+app.post('/api/leaderboard', async (req, res) => {
+    try {
+        const { examTitle } = req.body;
+        
+        // Us exam ke saare results fetch karo aur score ke hisaab se descending (-1) sort karo
+        const allResults = await Result.find({ examTitle }).sort({ score: -1 });
+
+        // Rank format ready karo
+        const leaderboard = allResults.map((r, index) => ({
+            rank: index + 1,
+            studentName: r.studentName,
+            rollNo: r.rollNo,
+            score: r.score
+        }));
+
+        res.json({ success: true, leaderboard, examTitle });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
 
 // Normal Result Checker
 app.post('/api/check-result', async (req, res) => {
@@ -320,3 +344,4 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
