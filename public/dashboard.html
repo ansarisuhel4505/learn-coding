@@ -6,6 +6,7 @@
     <title>Student Dashboard - CodeMaster</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { display: flex; background: #f0f4f8; height: 100vh; overflow: hidden; }
@@ -87,6 +88,24 @@
             .exam-right { flex: none; height: 40%; }
             .palette-grid { grid-template-columns: repeat(6, 1fr); }
         }
+                /* 📱 MOBILE RESPONSIVE DASHBOARD FIX */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; height: auto; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; position: sticky; top: 0; padding-bottom: 0; }
+            .sidebar h2 { padding: 15px; border-bottom: none; font-size: 20px; width: auto; }
+            
+            /* Logout Button Top Right Par */
+            .logout-btn { width: auto; border-top: none; padding: 15px; background: #fee2e2; border-radius: 8px; margin: 10px 15px 10px 0; }
+            
+            /* Navigation Tabs Horizontal */
+            .nav-links { display: flex; flex-direction: row; width: 100%; padding: 0; overflow-x: auto; white-space: nowrap; border-top: 1px solid #e2e8f0; }
+            .nav-links li { padding: 12px 20px; flex-shrink: 0; font-size: 14px; border-right: none; border-bottom: 3px solid transparent; }
+            .nav-links li.active { border-right: none; border-bottom: 3px solid #3b82f6; background: transparent; }
+            
+            .main-content { padding: 20px 15px; overflow-y: visible; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
+        
     </style>
 </head>
 <body>
