@@ -384,6 +384,31 @@
         // ==========================================
         // EXAM ENGINE LOGIC (Pagination & Palette)
         // ==========================================
+
+        // 👇 🚨 NAYA ANTI-CHEAT CODE YAHAN SE SHURU 👇
+let isExamActive = false;
+let warningCount = 0;
+const maxWarnings = 3;
+
+document.addEventListener('contextmenu', e => { if(isExamActive) { e.preventDefault(); alert("⚠️ Right-click is disabled during the exam!"); }});
+document.addEventListener('copy', e => { if(isExamActive) e.preventDefault(); });
+document.addEventListener('cut', e => { if(isExamActive) e.preventDefault(); });
+document.addEventListener('paste', e => { if(isExamActive) e.preventDefault(); });
+
+document.addEventListener('visibilitychange', function() {
+    if (isExamActive && document.visibilityState === 'hidden') {
+        warningCount++;
+        if (warningCount >= maxWarnings) {
+            alert("❌ Warning limit crossed! Your exam is auto-submitting.");
+            confirmSubmission(); // Aapke Submit function ko direct call kar diya!
+        } else {
+            alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease do not switch tabs! Your exam will auto-submit after max warnings.`);
+        }
+    }
+});
+// 👆 🚨 NAYA ANTI-CHEAT CODE YAHAN KHATAM 👆
+        
+        
         let examTimer;
         let currentExamDuration = 0;
         let examData = null;
@@ -411,6 +436,8 @@
         }
 
         async function startExam() {
+            isExamActive = true;
+            warningCount = 0;
             const res = await fetch(`/api/exams/${document.getElementById('exId').value}`);
             examData = await res.json();
             
@@ -510,6 +537,7 @@
         }
 
         async function confirmSubmission() {
+            isExamActive = false;
             closeConfirmPopup();
             clearInterval(examTimer);
             
