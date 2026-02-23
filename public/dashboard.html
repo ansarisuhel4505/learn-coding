@@ -178,12 +178,12 @@
                 <span onclick="closeExam()" style="cursor:pointer; color:red; font-size:24px;">✖</span>
             </div>
             
-            <div id="examSetupForm" class="exam-setup-form" style="padding: 0; display: flex; flex-direction: column; height: 100%;">
+            <div id="examSetupForm" class="exam-setup-form" style="padding: 0; display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
     <input type="hidden" id="exId"><input type="hidden" id="exTitleName">
     <input type="hidden" id="exName"><input type="hidden" id="exRoll">
     <input type="hidden" id="exDurationHidden">
 
-    <div style="padding: 15px 25px; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; flex-wrap: wrap; gap: 10px;">
+    <div style="padding: 15px 25px; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
         <h3 style="color: #1e293b; margin: 0;">General Instructions</h3>
         <div style="display: flex; align-items: center; gap: 15px;">
             <div>
@@ -200,7 +200,7 @@
     <div style="flex-grow: 1; overflow-y: auto; padding: 25px; background: white;" id="instructionsContent">
         </div>
 
-    <div style="padding: 20px 25px; background: #f8fafc; border-top: 2px solid #e2e8f0;">
+    <div style="padding: 20px 25px; background: #f8fafc; border-top: 2px solid #e2e8f0; flex-shrink: 0;">
         <label style="display: flex; gap: 15px; align-items: flex-start; cursor: pointer; font-size: 15px; font-weight: 500; color: #0f172a; margin-bottom: 15px;">
             <input type="checkbox" id="declarationCheck" onchange="toggleReadyBtn()" style="width: 25px; height: 25px; cursor: pointer; flex-shrink: 0; margin-top: 2px;">
             <span id="declText">I have read and understood the instructions. All computer hardware allotted to me are in proper working condition. I agree that in case of not adhering to the instructions, I will be disqualified.</span>
@@ -210,6 +210,7 @@
         </div>
     </div>
             </div>
+            
             
 
             <div id="examQuestionsArea" class="exam-layout" style="display:none;">
