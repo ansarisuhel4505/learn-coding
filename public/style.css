@@ -197,44 +197,59 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 @media (max-width: 768px) {
     .header { padding: 15px 5%; }
     .hero h1 { font-size: 40px; }
-    .hero-image-content img { display: none; /* Mobile pe saaf dikhane ke liye image hide ki hai */}
+    .hero-image-content img { display: none; }
     
-    #menu-icon { display: block; z-index: 1001; }
-    .auth-container { display: none; /* Mobile navbar mein space bachane ke liye */ }
+    /* Logo ka size thoda chhota kiya taaki buttons ke liye jagah bache */
+    .logo { font-size: 20px; }
+    .logo i { font-size: 24px; }
+    
+    /* 🌟 MAIN CHANGE: Auth Buttons ko Show kiya aur adjust kiya */
+    .auth-container { 
+        display: flex !important; 
+        gap: 10px; 
+        margin-left: auto; /* Logo Left me, aur buttons Right me shift karne ke liye */
+        align-items: center;
+    }
+    
+    .btn-login { font-size: 13px; }
+    .btn-signup { padding: 8px 12px; font-size: 13px; }
+    
+    #menu-icon { display: block; z-index: 1001; margin-left: 15px; }
     
     /* 🔥 THE MAGIC HAMBURGER MENU 🔥 */
     .navbar {
         position: absolute;
-        top: 80px; /* Header ke theek niche */
-        right: 5%; /* Right side se open hoga */
-        width: 260px; /* Aadhi screen (Perfect size) */
-        height: max-content; /* Sirf content jitni lambaai lega */
+        top: 70px; /* Header ke theek niche */
+        right: 5%; 
+        width: 250px; 
+        height: max-content; 
         background: var(--surface-color);
         box-shadow: 0 15px 40px rgba(0,0,0,0.15);
         border-radius: 15px;
         border: 1px solid var(--border-color);
-        padding: 25px 20px;
+        padding: 20px;
         
         /* Smooth Slide Down Animation */
-        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); /* Default Hidden */
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); 
         transition: clip-path 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .navbar.active {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); /* Revealed */
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); 
     }
 
     .navbar .nav-links {
         display: flex;
         flex-direction: column;
-        gap: 20px;
-        align-items: flex-start; /* Left side align karega items ko */
+        gap: 15px;
+        align-items: flex-start; 
     }
     
     .navbar a {
-        display: block;
+        display: flex;
+        align-items: center;
         width: 100%;
-        font-size: 16px;
+        font-size: 15px;
         padding-bottom: 10px;
         border-bottom: 1px solid var(--border-color);
     }
@@ -247,4 +262,5 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     .footer-container { grid-template-columns: 1fr; text-align: center; }
     .brand-col p { margin: 0 auto; }
 }
+
 
