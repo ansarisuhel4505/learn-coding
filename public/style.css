@@ -290,3 +290,33 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     .footer-container { grid-template-columns: 1fr; text-align: center; }
     .brand-col p { margin: 0 auto; }
 }
+/* ==========================================================
+   🌟 HERO SECTION MOBILE CENTER ALIGNMENT FIX 🌟
+========================================================== */
+@media (max-width: 850px) {
+    .hero-text-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Har cheez ko center mein layega */
+        text-align: center;
+        width: 100%;
+    }
+    
+    .hero p {
+        margin: 0 auto 30px auto !important; /* Paragraph ko beech mein set karega */
+        text-align: center;
+    }
+    
+    .hero-stats {
+        justify-content: center; /* 50+, 10k+, 4.9/5 ko center karega */
+        width: 100%;
+        margin: 0 auto;
+    }
+    
+    .badge {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+
