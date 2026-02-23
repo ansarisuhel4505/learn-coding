@@ -93,9 +93,9 @@
             <li onclick="switchTab('exams')"><i class="fas fa-file-alt"></i> Manage Exams</li>
             <li onclick="switchTab('results')"><i class="fas fa-check-circle"></i> Check Copies</li>
             <li onclick="switchTab('feedback')"><i class="fas fa-comments"></i> Student Feedback</li>
-        </ul>
-        <a href="/" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit Panel</a>
-    </div>
+       </ul>
+    <a href="#" onclick="adminLogout(event)" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout Admin</a>
+</div>
 
     <div class="main-content">
         
@@ -513,6 +513,15 @@ async function checkAdminLogin() {
         loginBtn.innerText = originalText;
         loginBtn.disabled = false;
     }
+}
+        // ==========================================
+// 🔴 SECURE ADMIN LOGOUT LOGIC
+// ==========================================
+function adminLogout(event) {
+    event.preventDefault(); 
+    sessionStorage.removeItem('admin_auth'); 
+    
+    window.location.href = '/admin-logout'; 
 }
         
     </script>
