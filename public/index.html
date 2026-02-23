@@ -17,30 +17,32 @@
 </head>
 <body>
 
-       <header class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;">
+      <header class="header">
         
-        <a href="/" class="logo" style="font-size: 24px; font-weight: 700; color: #0f172a; text-decoration: none; display: flex; align-items: center; gap: 5px;">
-            <i class='bx bx-code-block' style="color: #3b82f6; font-size: 28px;"></i> Code<span style="color: #3b82f6;">Master</span>
+        <a href="/" class="logo">
+            <i class='bx bx-code-block'></i> Code<span>Master</span>
         </a>
 
         <nav class="navbar" id="navbar">
-            <ul class="nav-links" style="list-style: none; display: flex; flex-wrap: wrap; gap: 20px; margin: 0; padding: 0;">
-                <li><a href="/" class="active" style="text-decoration: none; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 5px;"><i class='bx bx-home'></i> Home</a></li>
-                <li><a href="/about.html" style="text-decoration: none; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 5px;"><i class='bx bx-info-circle'></i> About</a></li>
-                <li><a href="/courses.html" style="text-decoration: none; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 5px;"><i class='bx bx-book-open'></i> Courses</a></li>
-                <li><a href="/compiler.html" style="text-decoration: none; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 5px;"><i class='bx bx-code-alt'></i> Compiler</a></li>
-                <li><a href="#" onclick="checkLogin(event)" style="text-decoration: none; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 5px;"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
-                <li><a href="/admin.html" style="text-decoration: none; color: #475569; font-weight: 500; display: flex; align-items: center; gap: 5px;"><i class='bx bx-shield-quarter'></i> Admin</a></li>
+            <ul class="nav-links">
+                <li><a href="/" class="active"><i class='bx bx-home'></i> Home</a></li>
+                <li><a href="/about.html"><i class='bx bx-info-circle'></i> About</a></li>
+                <li><a href="/courses.html"><i class='bx bx-book-open'></i> Courses</a></li>
+                <li><a href="/compiler.html"><i class='bx bx-code-alt'></i> Compiler</a></li>
+                <li><a href="/features.html">Features</a></li>
+                <li><a href="#" onclick="checkLogin(event)"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
+                <li><a href="/admin.html"><i class='bx bx-shield-quarter'></i> Admin</a></li>
             </ul>
         </nav>
 
-        <div class="auth-container" id="auth-buttons" style="display: flex; align-items: center; gap: 15px;">
-            <a href="/login.html" class="btn-login" style="text-decoration: none; color: #0f172a; font-weight: 600; display: flex; align-items: center; gap: 5px;"><i class='bx bx-log-in'></i> Login</a>
-            <a href="/signup.html" class="btn-signup" style="text-decoration: none; background: #3b82f6; color: #fff; padding: 8px 18px; border-radius: 6px; font-weight: 600; box-shadow: 0 4px 6px rgba(59,130,246,0.2);">Sign Up Free</a>
+        <div class="auth-container" id="auth-buttons">
+            <a href="/login.html" class="btn-login"><i class='bx bx-log-in'></i> Login</a>
+            <a href="/signup.html" class="btn-signup">Sign Up Free</a>
         </div>
 
-        <div class="bx bx-menu" id="menu-icon" style="font-size: 30px; cursor: pointer; display: none;"></div>
-       </header>
+        <div class="bx bx-menu" id="menu-icon"></div>
+      </header>
+    
     
   
     <section class="hero" id="home">
@@ -344,6 +346,7 @@ function checkLogin(event) {
     </script>
 </body>
 </html>
+
 
 
 
