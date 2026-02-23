@@ -186,29 +186,33 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 .footer-bottom p { color: #64748b; font-size: 14px; }
 
 /* ==========================================================
-   7. RESPONSIVE & MAGIC HAMBURGER MENU FIX
+   7. RESPONSIVE & MAGIC HAMBURGER MENU FIX (ALL DEVICES)
 ========================================================== */
-@media (max-width: 1024px) {
-    .hero { flex-direction: column; text-align: center; padding-top: 120px; }
-    .hero-text-content { display: flex; flex-direction: column; align-items: center; }
-    .hero-stats { justify-content: center; }
-    .features-content, .instructor-container { flex-direction: column; text-align: center; }
-    .features-list li { text-align: left; }
-    .footer-container { grid-template-columns: 1fr 1fr; }
+
+/* 💻 Small Laptops & Large Tablets (Max 1200px) 
+   Yahan pura header fit hota hai, bas gap thoda kam kiya hai */
+@media (max-width: 1200px) {
+    .navbar .nav-links { gap: 15px; }
+    .logo { font-size: 22px; }
+    .auth-container { gap: 10px; }
+    .navbar a { font-size: 14px; }
 }
 
-@media (max-width: 768px) {
+/* 📱 Tablets & Mobiles (Max 991px) 
+   Yahan screen choti ho jati hai, toh Hamburger Menu aayega */
+@media (max-width: 991px) {
     .header { padding: 15px 5%; }
-    .hero h1 { font-size: 40px; }
-    .hero-image-content img { display: none; }
+    .hero { padding-top: 120px; }
+    .hero h1 { font-size: 42px; }
+    .hero-image-content img { display: none; } /* Image hide ki jagah bachane ke liye */
     
-    /* 👇 1. Logo ko aur chhota kiya 👇 */
-    .logo { font-size: 18px !important; gap: 3px; }
-    .logo i { font-size: 22px !important; }
+    /* Logo ko chhota aur adjust kiya */
+    .logo { font-size: 20px !important; gap: 4px; }
+    .logo i { font-size: 24px !important; }
     
-    /* 👇 2. Header wala Login hide, Menu wala Login show 👇 */
-    .auth-container .btn-login { display: none !important; } /* Header ka login hide */
-    .mobile-login { display: block; } /* Menu ka login show */
+    /* Login button hide (header se) aur Menu me show */
+    .auth-container .btn-login { display: none !important; } 
+    .mobile-login { display: block; } 
     
     .auth-container { 
         display: flex !important; 
@@ -216,17 +220,18 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
         align-items: center;
     }
     
-    /* 👇 3. Sign Up button ko mobile ke hisaab se adjust kiya 👇 */
-    .btn-signup { padding: 6px 12px; font-size: 12px; border-radius: 5px; }
+    /* Sign Up button ko adjust kiya */
+    .btn-signup { padding: 8px 15px; font-size: 13px; border-radius: 6px; }
     
-    #menu-icon { display: block; z-index: 1001; margin-left: 12px; font-size: 28px; }
+    /* Hamburger Menu Icon Show */
+    #menu-icon { display: block; z-index: 1001; margin-left: 15px; font-size: 30px; }
     
     /* 🔥 THE MAGIC HAMBURGER MENU 🔥 */
     .navbar {
         position: absolute;
-        top: 65px; 
+        top: 70px; 
         right: 5%; 
-        width: 240px; 
+        width: 260px; 
         height: max-content; 
         background: var(--surface-color);
         box-shadow: 0 15px 40px rgba(0,0,0,0.15);
@@ -253,8 +258,8 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
         display: flex;
         align-items: center;
         width: 100%;
-        font-size: 15px;
-        padding-bottom: 10px;
+        font-size: 16px;
+        padding-bottom: 12px;
         border-bottom: 1px solid var(--border-color);
         color: var(--text-main);
     }
@@ -264,6 +269,18 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
         padding-bottom: 0;
     }
 
+    .footer-container { grid-template-columns: 1fr 1fr; }
+}
+
+/* 📱 Small Mobiles (Max 500px) */
+@media (max-width: 500px) {
+    .hero h1 { font-size: 36px; }
+    .btn-signup { padding: 6px 10px; font-size: 12px; }
+    .logo { font-size: 18px !important; }
+    
+    .hero-buttons { flex-direction: column; width: 100%; }
+    .btn-primary, .btn-secondary { width: 100%; text-align: center; justify-content: center; }
+    
     .footer-container { grid-template-columns: 1fr; text-align: center; }
     .brand-col p { margin: 0 auto; }
 }
