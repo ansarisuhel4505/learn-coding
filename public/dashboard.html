@@ -271,7 +271,8 @@
             <div class="modal-header">
                 <h2>📊 Result & Answer Key</h2>
                 <div>
-                    <button onclick="downloadPaper()" class="btn btn-warning no-print" style="width: auto; padding: 8px 15px; margin-right: 10px;"><i class="fas fa-file-pdf"></i> Download Paper</button>
+                    <button onclick="downloadQuestionPaper()" class="btn btn-warning no-print" style="width: auto; padding: 8px 15px; margin-right: 10px; margin-bottom: 5px;"><i class="fas fa-file-pdf"></i> Question Paper</button>
+<button onclick="downloadAnswerKey()" class="btn btn-success no-print" style="width: auto; padding: 8px 15px; margin-right: 10px; margin-bottom: 5px;"><i class="fas fa-check-double"></i> Answer Key</button>
                     <span onclick="document.getElementById('answerKeyModal').style.display='none'" style="cursor:pointer; color:red; font-size:24px;" class="no-print">✖</span>
                 </div>
             </div>
@@ -791,13 +792,70 @@ localStorage.removeItem(`cm_save_${rollNo}_${examId}`);
             });
 
             document.getElementById('answerKeyList').innerHTML = akHtml;
+// 🌟 NAYA: Question paper download karne ke liye questions ko save kar rahe hain
+            window.examQuestionsForDownload = data.exam.questions;
             document.getElementById('answerKeyModal').style.display = 'flex';
         }
 
-        function downloadPaper() {
-            // PDF download karne ka sabse solid browser native tarika
-            window.print(); 
-        }
+       // 1. Answer Key Download (सही/गलत जवाब के साथ)
+function downloadAnswerKey() {
+    window.print(); 
+}
+
+// 2. Question Paper Download (बिना आंसर के, एकदम फ्रेश पेपर)
+function downloadQuestionPaper() {
+    let questionsToPrint = window.examQuestionsForDownload;
+    
+    if (!questionsToPrint || questionsToPrint.length === 0) {
+        alert("Oops! Question paper data not found.");
+        return;
+    }
+
+    let printWindow = window.open('', '_blank');
+    
+    let paperHTML = `
+        <html>
+        <head>
+            <title>Question Paper - CodeMaster</title>
+            <style>
+                body { font-family: 'Arial', sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                .header { text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px; }
+                .question-box { margin-bottom: 25px; page-break-inside: avoid; }
+                .question-text { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+                .options-list { margin-left: 20px; list-style-type: none; padding: 0; }
+                .options-list li { margin-bottom: 8px; font-size: 16px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1 style="color: #3b82f6; margin: 0;">CodeMaster</h1>
+                <h2>Question Paper</h2>
+            </div>
+    `;
+
+    questionsToPrint.forEach((q, index) => {
+        paperHTML += `
+            <div class="question-box">
+                <div class="question-text">Q${index + 1}. ${q.questionText}</div>
+                <ul class="options-list">
+        `;
+        q.options.forEach(opt => {
+            paperHTML += `<li>( ) &nbsp; ${opt}</li>`; 
+        });
+        paperHTML += `</ul></div>`;
+    });
+
+    paperHTML += `
+            <script>
+                window.onload = function() { window.print(); window.close(); }
+            <\/script>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(paperHTML);
+    printWindow.document.close();
+}
                 // ==========================================
         // 🏆 LEADERBOARD & EXCEL DOWNLOAD LOGIC
         // ==========================================
