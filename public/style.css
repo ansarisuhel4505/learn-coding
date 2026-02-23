@@ -34,31 +34,39 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 .bg-alternate { background: var(--bg-alternate) !important; }
 
 /* ==========================================================
-   1. HEADER & NAVBAR
+   1. HEADER & NAVBAR (UPDATED WITH ICONS)
 ========================================================== */
 .header {
     position: fixed; top: 0; left: 0; width: 100%;
-    padding: 20px 8%; background: var(--nav-bg); backdrop-filter: blur(12px);
+    padding: 15px 8%; background: var(--nav-bg); backdrop-filter: blur(12px);
     display: flex; justify-content: space-between; align-items: center;
     z-index: 1000; border-bottom: 1px solid var(--border-color);
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
-.logo { font-size: 26px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+.logo { font-size: 26px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 5px; }
 .logo span { color: var(--primary-color); }
-.logo i { color: var(--primary-color); font-size: 30px; }
+.logo i { color: var(--primary-color); font-size: 32px; }
 
-.navbar .nav-links { display: flex; gap: 30px; }
-.navbar a { font-size: 15px; font-weight: 500; color: var(--text-muted); transition: 0.3s; }
+/* Links ke beech ka gap thoda kam kiya taaki overlap na ho */
+.navbar .nav-links { display: flex; gap: 20px; align-items: center; }
+
+/* Icon aur Text ko ek line mein laane ke liye Flexbox lagaya */
+.navbar a { 
+    display: flex; align-items: center; gap: 6px; 
+    font-size: 15px; font-weight: 500; color: var(--text-muted); transition: 0.3s; 
+}
+.navbar a i { font-size: 18px; } /* Icons ka size set kiya */
 .navbar a:hover, .navbar a.active { color: var(--primary-color); }
 
-.auth-container { display: flex; gap: 20px; align-items: center; }
-.btn-login { color: var(--text-main); font-weight: 600; font-size: 15px; transition: 0.3s; }
+.auth-container { display: flex; gap: 15px; align-items: center; }
+.btn-login { display: flex; align-items: center; gap: 5px; color: var(--text-main); font-weight: 600; font-size: 15px; transition: 0.3s; }
 .btn-login:hover { color: var(--primary-color); }
-.btn-signup { background: var(--primary-color); color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; transition: 0.3s; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+.btn-signup { background: var(--primary-color); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: 0.3s; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
 .btn-signup:hover { background: var(--primary-hover); transform: translateY(-2px); }
 
 #menu-icon { font-size: 32px; color: var(--text-main); cursor: pointer; display: none; }
+
 
 /* ==========================================================
    2. HERO SECTION
@@ -239,3 +247,4 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     .footer-container { grid-template-columns: 1fr; text-align: center; }
     .brand-col p { margin: 0 auto; }
 }
+
