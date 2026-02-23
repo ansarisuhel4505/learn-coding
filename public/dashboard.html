@@ -777,11 +777,13 @@ localStorage.removeItem(`cm_save_${rollNo}_${examId}`);
             }
         }
 
-        function logoutUser(event) {
-    event.preventDefault(); // Vercel error wale page par jane se roko
-    localStorage.clear(); // Browser ki memory se Roll No delete karo
-    window.location.href = "/login.html"; // Seedha Login page par bhejo
-        }
+       function logoutUser(event) {
+    event.preventDefault(); 
+    localStorage.clear(); // सिक्योरिटी के लिए डेटा डिलीट
+    
+    // 🌟 NAYA: Seedha Home Page (index.html) par bhejo
+    window.location.href = "/"; 
+}
                 // ==========================================
         // 🌟 ANSWER KEY, RANK & DOWNLOAD LOGIC
         // ==========================================
