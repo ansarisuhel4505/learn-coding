@@ -180,7 +180,9 @@ app.get('/logout', (req, res) => {
     req.logout((err) => {
         if (err) return next(err);
         req.session.destroy();
-        res.redirect('/login.html');
+        
+        // 🌟 NAYA: Seedha Home Page par bhejo
+        res.redirect('/'); 
     });
 });
 
@@ -427,6 +429,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
