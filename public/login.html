@@ -61,5 +61,88 @@
         <p class="bottom-text">Don't have an account? <a href="/signup.html">Sign up here</a></p>
         <a href="/admin.html" class="admin-link"><i class="fas fa-user-shield"></i> Teacher / Admin Access</a>
     </div>
+    <div id="forgotPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <h2 style="color: #3b82f6; margin-bottom: 20px;">Reset Password</h2>
+        
+        <div id="step1-email">
+            <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">Enter your registered Email ID to receive a 6-digit OTP.</p>
+            <input type="email" id="resetEmail" placeholder="Enter Email Address" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; outline: none;">
+            <button onclick="sendOTP()" style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Send OTP to Email</button>
+        </div>
+
+        <div id="step2-otp" style="display: none;">
+            <p style="color: #10b981; margin-bottom: 15px; font-size: 14px;">OTP sent successfully to your Email! 📩</p>
+            <input type="number" id="resetOTP" placeholder="Enter 6-digit OTP" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; outline: none; letter-spacing: 5px; text-align: center; font-size: 18px;">
+            <button onclick="verifyOTP()" style="width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Verify OTP</button>
+        </div>
+
+        <div id="step3-newpass" style="display: none;">
+            <p style="color: #3b82f6; margin-bottom: 15px; font-size: 14px;">OTP Verified! ✅ Create your new password.</p>
+            <input type="password" id="newPassword" placeholder="Enter New Password" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; outline: none;">
+            <button onclick="saveNewPassword()" style="width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Save New Password</button>
+        </div>
+
+        <button onclick="closeForgotModal()" style="margin-top: 15px; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; text-decoration: underline;">Cancel</button>
+    </div>
+</div>
+    <script>
+        function openForgotModal() {
+    document.getElementById('forgotPassModal').style.display = 'flex';
+    document.getElementById('step1-email').style.display = 'block';
+    document.getElementById('step2-otp').style.display = 'none';
+    document.getElementById('step3-newpass').style.display = 'none';
+}
+
+function closeForgotModal() { document.getElementById('forgotPassModal').style.display = 'none'; }
+
+// 📧 1. Send OTP Request
+async function sendOTP() {
+    const email = document.getElementById('resetEmail').value;
+    if(!email) return alert("Please enter your email!");
+
+    const res = await fetch('/api/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email }) });
+    const data = await res.json();
+    
+    if(data.success) {
+        document.getElementById('step1-email').style.display = 'none';
+        document.getElementById('step2-otp').style.display = 'block';
+    } else {
+        alert(data.message);
+    }
+}
+
+// 🔐 2. Verify OTP Request
+async function verifyOTP() {
+    const email = document.getElementById('resetEmail').value;
+    const otp = document.getElementById('resetOTP').value;
+    
+    const res = await fetch('/api/verify-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, otp }) });
+    const data = await res.json();
+    
+    if(data.success) {
+        document.getElementById('step2-otp').style.display = 'none';
+        document.getElementById('step3-newpass').style.display = 'block';
+    } else {
+        alert("Invalid or Expired OTP!");
+    }
+}
+
+// 💾 3. Save New Password
+async function saveNewPassword() {
+    const email = document.getElementById('resetEmail').value;
+    const newPassword = document.getElementById('newPassword').value;
+    
+    if(newPassword.length < 6) return alert("Password must be at least 6 characters!");
+
+    const res = await fetch('/api/reset-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, newPassword }) });
+    const data = await res.json();
+    
+    if(data.success) {
+        alert("🎉 Password updated successfully! Please login with your new password.");
+        closeForgotModal();
+    }
+}
+    </script>
 </body>
 </html>
