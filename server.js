@@ -208,6 +208,18 @@ app.post('/api/compile-code', async (req, res) => {
         res.json(data);
     } catch (error) { res.status(500).json({ error: "Compiler connection failed!" }); }
 });
+// 👇 🔒 ADMIN LOGIN API 👇
+app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    
+    // process.env.ADMIN_PASSWORD Vercel se aayega
+    if (password === process.env.ADMIN_PASSWORD) {
+        res.json({ success: true, message: "Welcome Admin!" });
+    } else {
+        res.json({ success: false, message: "Incorrect Password!" });
+    }
+});
+
 
 // ==========================================
 // 8. ADMIN & STUDENT APIs
@@ -344,4 +356,5 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
