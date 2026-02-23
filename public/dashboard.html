@@ -444,6 +444,33 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 // 👆 🚨 NAYA ANTI-CHEAT CODE YAHAN KHATAM 👆
+        // 👇 🚨 STRICT SCREEN & KEYBOARD LOCK 👇
+
+// 1. Agar koi Full Screen se bahar aane ki koshish kare (Esc dabaye)
+document.addEventListener('fullscreenchange', () => {
+    if (isExamActive && !document.fullscreenElement) {
+        warningCount++;
+        if(warningCount >= maxWarnings) {
+            alert("❌ You exited Full Screen too many times! Auto-submitting.");
+            confirmSubmission();
+        } else {
+            alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease stay in Full Screen mode! Click OK to go back.`);
+            document.documentElement.requestFullscreen(); // Wapas full screen me bhejo
+        }
+    }
+});
+
+// 2. Keyboard ke saare shortcut block karna (F12, Esc, Ctrl, Alt)
+document.addEventListener('keydown', (e) => {
+    if (isExamActive) {
+        // Ctrl, Alt, Meta (Windows tab) ya F-keys ko block karo
+        if (e.ctrlKey || e.altKey || e.metaKey || e.key.startsWith('F')) {
+            e.preventDefault();
+            alert("⚠️ Keyboard shortcuts are disabled during the exam!");
+        }
+    }
+});
+// 👆 🚨 STRICT SCREEN LOCK KHATAM 👆
         // 👇 💾 NAYA FEATURE: AUTO-SAVE PROGRESS 👇
 function autoSaveExam(timeRemaining) {
     const rollNo = localStorage.getItem('cm_roll');
@@ -502,6 +529,13 @@ function autoSaveExam(timeRemaining) {
         }
 
         async function startExam() {
+    // 🌟 NAYA: Force Desktop Mode Check
+    // Agar screen chhoti hai (Mobile view), toh exam chalne hi mat do
+    if (window.innerWidth < 800) {
+        alert("🚫 Exam cannot be started in Mobile View!\n\nPlease click the 3 dots in your browser (Chrome/Safari) and check 'Desktop site', or use a Laptop/PC.");
+        return; // Exam yahi ruk jayega
+    }
+
     isExamActive = true;
     warningCount = 0;
 
