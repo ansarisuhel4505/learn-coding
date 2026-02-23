@@ -205,37 +205,50 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     .btn-login { font-size: 13px; }
 }
 
-/* 📱 Tablets & Mobiles (Max 850px) 
-   Yahan se Hamburger menu activate ho jayega taaki bheed na lage */
+/* 📱 Tablets & Mobiles (Max 850px) */
 @media (max-width: 850px) {
     .header { 
-        padding: 12px 5%; 
-        /* Mobile pe flex layout ko ekdam tight karna zaroori hai */
+        padding: 12px 20px !important; /* Fixed padding taaki width na bigde */
         justify-content: space-between; 
+        align-items: center;
     }
     
-    .hero { padding-top: 120px; text-align: center; }
-    .hero h1 { font-size: 38px; }
-    .hero-image-content img { display: none; } 
+    .logo { font-size: 22px !important; gap: 6px; }
+    .logo i { font-size: 26px !important; }
     
-    /* Logo aur chhota */
-    .logo { font-size: 20px !important; gap: 4px; }
-    .logo i { font-size: 24px !important; }
-    
-    /* Login header se gayab, aur Hamburger menu mein show */
     .auth-container .btn-login { display: none !important; } 
     .mobile-login { display: block !important; } 
     
-    /* Sign Up button aur Menu Icon ko adjust karna */
-    .auth-container { gap: 10px; margin-left: auto; }
-    .btn-signup { padding: 8px 14px; font-size: 13px; }
+    /* Menu aur Button ke beech space banaya */
+    .auth-container { 
+        margin-left: auto; 
+        margin-right: 15px; 
+        display: flex;
+        align-items: center;
+    }
     
-    #menu-icon { display: block; z-index: 1001; margin-left: 10px; font-size: 28px; }
+    /* 🌟 MAIN FIX: Button text ko perfectly Center kiya */
+    .btn-signup { 
+        display: inline-flex !important; 
+        align-items: center; 
+        justify-content: center;
+        height: 38px; /* Fixed height se text humesha center rahega */
+        padding: 0 16px !important; 
+        font-size: 14px !important; 
+        border-radius: 6px !important;
+    }
+    
+    #menu-icon { 
+        display: flex;
+        align-items: center;
+        margin: 0 !important; 
+        font-size: 32px !important; 
+    }
     
     /* 🔥 THE MAGIC HAMBURGER MENU 🔥 */
     .navbar {
         position: absolute;
-        top: 60px; /* Header ke theek niche */
+        top: 65px; 
         right: 5%; 
         width: 250px; 
         height: auto; 
@@ -244,57 +257,36 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
         border-radius: 12px;
         border: 1px solid var(--border-color);
         padding: 20px;
-        
-        /* Smooth Slide Down Animation */
         clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); 
         transition: clip-path 0.3s ease-in-out;
     }
 
-    .navbar.active {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); 
-    }
-
-    .navbar .nav-links {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start; 
-        width: 100%;
-    }
-    
-    .navbar a {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        font-size: 16px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-main);
-    }
-    
-    .navbar a:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
+    .navbar.active { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    .navbar .nav-links { display: flex; flex-direction: column; gap: 15px; align-items: flex-start; width: 100%; }
+    .navbar a { display: flex; align-items: center; width: 100%; font-size: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+    .navbar a:last-child { border-bottom: none; padding-bottom: 0; }
     .footer-container { grid-template-columns: 1fr 1fr; }
 }
 
-/* 📱 Small Mobiles (Max 480px) 
-   Sabse chhoti screens ke liye extra adjustment */
+/* 📱 Small Mobiles (Max 480px) */
 @media (max-width: 480px) {
-    .header { padding: 10px 4%; }
-    .logo { font-size: 18px !important; }
-    .logo i { font-size: 22px !important; }
-    .btn-signup { padding: 6px 10px; font-size: 12px; border-radius: 6px; }
-    #menu-icon { font-size: 26px; }
+    .header { padding: 12px 15px !important; }
+    .logo { font-size: 20px !important; }
+    .logo i { font-size: 24px !important; }
     
-    .hero h1 { font-size: 32px; }
+    /* 🌟 FIX: Chhote phone ke liye Button ko thoda aur smart kiya */
+    .btn-signup { 
+        height: 34px !important; 
+        padding: 0 12px !important; 
+        font-size: 13px !important; 
+    }
     
+    .auth-container { margin-right: 12px; }
+    #menu-icon { font-size: 28px !important; }
+    
+    .hero h1 { font-size: 34px; }
     .hero-buttons { flex-direction: column; width: 100%; gap: 15px; }
     .btn-primary, .btn-secondary { width: 100%; text-align: center; justify-content: center; }
-    
     .footer-container { grid-template-columns: 1fr; text-align: center; }
     .brand-col p { margin: 0 auto; }
 }
-
