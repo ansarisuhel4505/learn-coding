@@ -190,6 +190,77 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 });
 
 // ==========================================
+// 🌟 6.5 FORGOT PASSWORD & OTP SYSTEM
+// ==========================================
+
+// OTP को टेम्परेरी मेमोरी में सेव करने के लिए
+const otpStore = {}; 
+
+// 1️⃣ Send OTP API (Email पर OTP भेजना)
+app.post('/api/send-otp', async (req, res) => {
+    const { email } = req.body;
+    
+    // चेक करें कि बच्चा डेटाबेस में रजिस्टर है या नहीं
+    const user = await User.findOne({ email });
+    if (!user) return res.json({ success: false, message: '❌ This email is not registered with CodeMaster!' });
+
+    // 6-digit random OTP बनाना
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // OTP को 5 मिनट (300000 ms) के लिए सेव करना
+    otpStore[email] = { otp, expiresAt: Date.now() + 300000 }; 
+
+    // Email का डिज़ाइन (आपके पहले से बने transporter का इस्तेमाल करके)
+    const mailOptions = {
+        from: `"CodeMaster Security" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'CodeMaster - Password Reset OTP 🔐',
+        html: `<h2>Password Reset Request</h2>
+               <p>Hello <b>${user.username}</b>,</p>
+               <p>Your 6-digit OTP for password reset is: <b style="font-size: 24px; color: #3b82f6;">${otp}</b></p>
+               <p>This OTP is valid for 5 minutes. Do not share it with anyone.</p>`
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        res.json({ success: true, message: 'OTP sent successfully to your email!' });
+    } catch (error) {
+        console.error(error);
+        res.json({ success: false, message: 'Failed to send email. Please try again later.' });
+    }
+});
+
+// 2️⃣ Verify OTP API (OTP चेक करना)
+app.post('/api/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+    const record = otpStore[email];
+
+    // चेक करें कि OTP मौजूद है, मैच कर रहा है, और टाइम खत्म नहीं हुआ है
+    if (record && record.otp === otp && record.expiresAt > Date.now()) {
+        res.json({ success: true, message: 'OTP Verified!' });
+    } else {
+        res.json({ success: false, message: '❌ Invalid or Expired OTP.' });
+    }
+});
+
+// 3️⃣ Reset Password API (नया पासवर्ड डेटाबेस में सेव करना)
+app.post('/api/reset-password', async (req, res) => {
+    const { email, newPassword } = req.body;
+    
+    try {
+        // MongoDB में बच्चे का नया पासवर्ड अपडेट करना
+        await User.updateOne({ email: email }, { password: newPassword });
+        
+        // सिक्योरिटी के लिए इस्तेमाल हो चुके OTP को डिलीट कर देना
+        delete otpStore[email]; 
+        
+        res.json({ success: true, message: 'Password updated successfully!' });
+    } catch (error) {
+        res.json({ success: false, message: 'Database error occurred while resetting password.' });
+    }
+});
+
+// ==========================================
 // 7. COMPILER API (JDoodle)
 // ==========================================
 app.post('/api/compile-code', async (req, res) => {
@@ -356,5 +427,6 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
