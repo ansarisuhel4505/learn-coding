@@ -439,7 +439,76 @@ function processCSV() {
             addQuestionField(); // Initialize 1 blank question
         };
         
+      // ==========================================
+// 🔒 SECURE ADMIN LOGIN LOGIC (Backend Verification)
+// ==========================================
 
+// 👉 MAIN CHANGE: Yahan se MASTER_PASSWORD wali line hamesha ke liye delete kar di gayi hai! 👈
+
+// Check karo ki pehle se login hai ya nahi
+if (sessionStorage.getItem('admin_auth') === 'verified') {
+    document.getElementById('adminLoginOverlay').style.display = 'none';
+}
+
+// Password Show/Hide karne ka function (Yeh same rahega)
+function toggleAdminPassword() {
+    const input = document.getElementById('adminPassInput');
+    const eyeIcon = document.getElementById('toggleEyeBtn');
+    
+    if (input.type === 'password') {
+        input.type = 'text'; // Text dikhaye
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash'); // Icon change (ankh band)
+    } else {
+        input.type = 'password'; // Wapas dots bana de
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye'); // Icon change (ankh khuli)
+    }
+}
+
+// 👉 NAYA LOGIC: Ab password backend se check hoga
+async function checkAdminLogin() {
+    const enteredPass = document.getElementById('adminPassInput').value;
+    const loginBtn = document.querySelector('button[onclick="checkAdminLogin()"]');
+    
+    if (!enteredPass) {
+        return alert("Please enter the password!");
+    }
+
+    // Button par "Checking..." dikhane ke liye
+    const originalText = loginBtn.innerText;
+    loginBtn.innerText = "Checking..."; 
+    loginBtn.disabled = true;
+
+    try {
+        // Backend (/api/admin/login) ko request bhejna
+        const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: enteredPass })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            // Password sahi nikla
+            sessionStorage.setItem('admin_auth', 'verified');
+            document.getElementById('adminLoginOverlay').style.display = 'none'; // Parda hata do
+        } else {
+            // Password galat nikla
+            alert("❌ Incorrect Password! Try again.");
+            document.getElementById('adminPassInput').value = ''; // Input khali kar do
+        }
+    } catch (error) {
+        alert("⚠️ Server error! Please try again.");
+        console.error("Login Error:", error);
+    } finally {
+        // Button ko wapas normal karna
+        loginBtn.innerText = originalText;
+        loginBtn.disabled = false;
+    }
+}
+        
     </script>
 </body>
 </html>
