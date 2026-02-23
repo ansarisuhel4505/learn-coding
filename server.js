@@ -39,6 +39,11 @@ app.post('/admin-login', (req, res) => {
         res.send('<script>alert("❌ Incorrect Password! Access Denied."); window.location.href="/admin.html";</script>');
     }
 });
+// 🌟 NAYA: Admin Logout Route
+app.get('/admin-logout', (req, res) => {
+    req.session.isAdmin = false; 
+    res.redirect('/'); 
+});
 
 // ==========================================
 // 3. MONGODB DATABASE SETUP & SCHEMAS
@@ -429,6 +434,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
