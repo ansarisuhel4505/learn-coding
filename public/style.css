@@ -315,84 +315,120 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     }
 }
 /* ==========================================================
-   🌙 DARK MODE STYLES & BUTTON 🌟
+   🌙 CODE MASTER - PERFECT DARK MODE (HOME PAGE) 🌟
 ========================================================== */
-/* डार्क मोड बटन का डिज़ाइन (Left Side) */
-.dark-mode-btn {
-    position: fixed;
-    bottom: 30px;
-    left: 30px; /* बाएँ कोने में */
-    width: 55px;
-    height: 55px;
-    background: #1e293b;
-    color: #fbbf24; /* चाँद/सूरज का पीला रंग */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    font-size: 26px;
-    border: 2px solid #334155;
-    cursor: pointer;
-    z-index: 9999;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-}
-.dark-mode-btn:hover {
-    transform: scale(1.1);
-    background: #334155;
-}
 
-/* 🌟 डार्क थीम एक्टिव होने पर वेबसाइट के कलर्स 🌟 */
+/* 1. पूरा बैकग्राउंड डार्क करें */
 body.dark-theme {
-    background-color: #0f172a !important; /* डार्क नेवी ब्लू बैकग्राउंड */
+    background-color: #0f172a !important; 
     color: #f8fafc !important;
 }
 
-/* कार्ड्स, साइडबार और मोडल्स का डार्क कलर */
-body.dark-theme .sidebar, 
-body.dark-theme .card, 
-body.dark-theme .modal-content, 
-body.dark-theme .exam-setup-form,
-body.dark-theme .exam-right,
-body.dark-theme .exam-left,
-body.dark-theme .result-box,
-body.dark-theme .ans-block,
-body.dark-theme table {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
-    color: #f8fafc !important;
+/* 2. Alternate Sections (जैसे Live Exams और Latest Courses) का डार्क रूप */
+body.dark-theme .bg-alternate {
+    background-color: #111827 !important;
 }
 
-/* टेक्स्ट को सफ़ेद करना */
-body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
-body.dark-theme h4, body.dark-theme p, body.dark-theme span, 
-body.dark-theme label, body.dark-theme .card-title,
-body.dark-theme th, body.dark-theme td {
+/* 3. Header और Navbar */
+body.dark-theme .header {
+    background-color: #0f172a !important;
+    border-bottom: 1px solid #1e293b !important;
+}
+body.dark-theme .nav-links a {
+    color: #cbd5e1 !important;
+}
+body.dark-theme .nav-links a:hover, 
+body.dark-theme .nav-links a.active {
+    color: #3b82f6 !important;
+}
+
+/* 4. Logo Fix (चूंकि आपने HTML में inline #0f172a कलर दिया है) */
+body.dark-theme .header .logo span {
+    color: #f8fafc !important; /* 'Code' को सफ़ेद करेगा */
+}
+body.dark-theme .header .logo span span {
+    color: #3b82f6 !important; /* 'Master' को वापस नीला करेगा */
+}
+
+/* 5. Hero Section और Text */
+body.dark-theme h1, 
+body.dark-theme h2, 
+body.dark-theme h3, 
+body.dark-theme h4, 
+body.dark-theme .section-heading p,
+body.dark-theme .hero-text-content p,
+body.dark-theme .features-text p,
+body.dark-theme .instructor-info p {
     color: #e2e8f0 !important;
 }
 
-/* इनपुट फील्ड्स का डार्क डिज़ाइन */
-body.dark-theme input, body.dark-theme select, body.dark-theme textarea {
-    background-color: #0f172a !important;
-    color: #f8fafc !important;
-    border-color: #334155 !important;
-}
-
-/* साइडबार के मेनू होवर पर डार्क रहें */
-body.dark-theme .nav-links li:hover, 
-body.dark-theme .nav-links li.active {
-    background-color: #0f172a !important;
-    border-left-color: #3b82f6 !important;
-}
-
-/* क्वेश्चन ऑप्शन पर होवर */
-body.dark-theme .option-label {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
-}
-body.dark-theme .option-label:hover {
+body.dark-theme .hero-stats .stat-item {
     background-color: #1e293b !important;
-    border-color: #3b82f6 !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
 }
 
+body.dark-theme .hero-stats .stat-item p {
+    color: #94a3b8 !important;
+}
 
+/* 6. Course & Exam Cards (ये सबसे ज्यादा साफ़ दिखने चाहिए) */
+body.dark-theme .course-card {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
+}
+body.dark-theme .card-content p {
+    color: #94a3b8 !important; /* कार्ड के अंदर का पैराग्राफ थोड़ा लाइट */
+}
+body.dark-theme .card-content h3 {
+    color: #f8fafc !important;
+}
+
+/* 7. Features Section */
+body.dark-theme .features-list i {
+    color: #3b82f6 !important;
+    background: #1e293b !important; /* टिक मार्क के पीछे हल्का डार्क */
+}
+body.dark-theme .features-list p {
+    color: #94a3b8 !important;
+}
+
+/* 8. CTA Box (Ready to start) */
+body.dark-theme .cta-box {
+    background-color: #1e293b !important;
+    border: 1px solid #3b82f6 !important;
+}
+body.dark-theme .cta-box p {
+    color: #cbd5e1 !important;
+}
+
+/* 9. Footer और Inputs */
+body.dark-theme .footer {
+    background-color: #020617 !important; /* फुटर को सबसे डार्क रखना है */
+    border-top: 1px solid #1e293b !important;
+}
+body.dark-theme .footer-col p, 
+body.dark-theme .footer-col a,
+body.dark-theme .footer-bottom p {
+    color: #94a3b8 !important;
+}
+body.dark-theme .footer-col a:hover {
+    color: #3b82f6 !important;
+}
+body.dark-theme .newsletter-form input {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+}
+
+/* 10. Social Media Links */
+body.dark-theme .social-links a {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+body.dark-theme .social-links a:hover {
+    background-color: #3b82f6 !important;
+    color: #fff !important;
+}
