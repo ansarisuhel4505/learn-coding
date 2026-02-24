@@ -314,4 +314,85 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
         right: 20px;
     }
 }
+/* ==========================================================
+   🌙 DARK MODE STYLES & BUTTON 🌟
+========================================================== */
+/* डार्क मोड बटन का डिज़ाइन (Left Side) */
+.dark-mode-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px; /* बाएँ कोने में */
+    width: 55px;
+    height: 55px;
+    background: #1e293b;
+    color: #fbbf24; /* चाँद/सूरज का पीला रंग */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 26px;
+    border: 2px solid #334155;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+.dark-mode-btn:hover {
+    transform: scale(1.1);
+    background: #334155;
+}
+
+/* 🌟 डार्क थीम एक्टिव होने पर वेबसाइट के कलर्स 🌟 */
+body.dark-theme {
+    background-color: #0f172a !important; /* डार्क नेवी ब्लू बैकग्राउंड */
+    color: #f8fafc !important;
+}
+
+/* कार्ड्स, साइडबार और मोडल्स का डार्क कलर */
+body.dark-theme .sidebar, 
+body.dark-theme .card, 
+body.dark-theme .modal-content, 
+body.dark-theme .exam-setup-form,
+body.dark-theme .exam-right,
+body.dark-theme .exam-left,
+body.dark-theme .result-box,
+body.dark-theme .ans-block,
+body.dark-theme table {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+/* टेक्स्ट को सफ़ेद करना */
+body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
+body.dark-theme h4, body.dark-theme p, body.dark-theme span, 
+body.dark-theme label, body.dark-theme .card-title,
+body.dark-theme th, body.dark-theme td {
+    color: #e2e8f0 !important;
+}
+
+/* इनपुट फील्ड्स का डार्क डिज़ाइन */
+body.dark-theme input, body.dark-theme select, body.dark-theme textarea {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* साइडबार के मेनू होवर पर डार्क रहें */
+body.dark-theme .nav-links li:hover, 
+body.dark-theme .nav-links li.active {
+    background-color: #0f172a !important;
+    border-left-color: #3b82f6 !important;
+}
+
+/* क्वेश्चन ऑप्शन पर होवर */
+body.dark-theme .option-label {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+body.dark-theme .option-label:hover {
+    background-color: #1e293b !important;
+    border-color: #3b82f6 !important;
+}
+
 
