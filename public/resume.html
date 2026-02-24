@@ -274,6 +274,25 @@
     </div>
 
     <script>
+        // 📸 IMAGE UPLOAD LOGIC
+        let userProfilePic = ''; // फोटो यहाँ सेव होगी
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userProfilePic = e.target.result;
+                    // लेफ्ट पैनल में फोटो दिखाना
+                    document.getElementById('leftPanelImg').src = userProfilePic;
+                    document.getElementById('leftPanelImg').style.display = 'block';
+                    // रेज़्यूमे को तुरंत अपडेट करना
+                    renderResume();
+                };
+                // फोटो को Base64 में बदलना ताकि PDF में बिना एरर के डाउनलोड हो सके
+                reader.readAsDataURL(file);
+            }
+        }
         let currentLayout = 'classic';
         
         // 🌟 JADOO YAHAN HAI: Har cheez ek "Block" hai
@@ -546,25 +565,7 @@
                 alert("⚠️ Failed to connect to AI server.");
             }
         }
-        // 📸 IMAGE UPLOAD LOGIC
-        let userProfilePic = ''; // फोटो यहाँ सेव होगी
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    userProfilePic = e.target.result;
-                    // लेफ्ट पैनल में फोटो दिखाना
-                    document.getElementById('leftPanelImg').src = userProfilePic;
-                    document.getElementById('leftPanelImg').style.display = 'block';
-                    // रेज़्यूमे को तुरंत अपडेट करना
-                    renderResume();
-                };
-                // फोटो को Base64 में बदलना ताकि PDF में बिना एरर के डाउनलोड हो सके
-                reader.readAsDataURL(file);
-            }
-        }
+       
     </script>
 </body>
 </html>
