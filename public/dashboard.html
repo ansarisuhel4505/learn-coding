@@ -1296,52 +1296,74 @@ function removeImage() {
 // ==========================================
 // 🤖 CHATBOT LOGIC (STEP 2: Voice & Chat)
 // ==========================================
-
-// 1. मैसेज भेजने का लॉजिक (Send Message)
-function sendMessage() {
+// ==========================================
+// 🤖 REAL AI MESSAGE SENDER LOGIC (STEP 3)
+// ==========================================
+async function sendMessage() {
     const inputField = document.getElementById('chatInput');
     const text = inputField.value.trim();
     const imageInput = document.getElementById('chatImageUpload');
     const imageFile = imageInput.files[0];
 
-    // अगर टेक्स्ट और इमेज दोनों खाली हैं, तो कुछ मत करो
-    if (!text && !imageFile) return; 
+    if (!text && !imageFile) return;
 
     const chatMessages = document.getElementById('chatMessages');
+    const sendBtn = document.getElementById('sendBtn');
 
-    // User का मैसेज बॉक्स बनाना
+    // 1. User का मैसेज स्क्रीन पर दिखाओ
     let userMsgHTML = `<div class="user-msg">`;
-    if (imageFile) {
-        userMsgHTML += `<div style="font-size: 11px; margin-bottom: 5px; color: #e2e8f0;"><i class="fas fa-paperclip"></i> ${imageFile.name}</div>`;
-    }
-    if (text) {
-        userMsgHTML += `<div>${text}</div>`;
-    }
+    if (imageFile) userMsgHTML += `<div style="font-size: 11px; margin-bottom: 5px; color: #e2e8f0;"><i class="fas fa-paperclip"></i> ${imageFile.name}</div>`;
+    if (text) userMsgHTML += `<div>${text}</div>`;
     userMsgHTML += `</div>`;
-
-    // मैसेज को स्क्रीन पर दिखाना
     chatMessages.innerHTML += userMsgHTML;
-    
-    // चैट को हमेशा सबसे नीचे (Bottom) स्क्रॉल करके रखना
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // भेजने के बाद इनपुट और इमेज को खाली कर देना
+    // 2. इनपुट खाली करो और बटन को Disable करो
     inputField.value = '';
     removeImage();
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`; // गोल घूमने वाला लोडर
 
-    // 🌟 Dummy Bot Reply (Step 3 में हम असली AI बैकएंड जोड़ेंगे) 🌟
-    setTimeout(() => {
-        chatMessages.innerHTML += `<div class="bot-msg">Thinking... 🧠 <br><small style="color:#94a3b8;">(Real AI brain will be connected in Step 3!)</small></div>`;
+    // "Thinking..." का मैसेज दिखाओ
+    const thinkingId = "thinking-" + Date.now();
+    chatMessages.innerHTML += `<div class="bot-msg" id="${thinkingId}">Thinking... 🧠</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // 3. डेटा को Backend तक भेजना
+    const formData = new FormData();
+    formData.append('message', text);
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+        const res = await fetch('/api/ask-ai', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        // Thinking वाले मैसेज को असली रिप्लाई से बदल दो
+        if(data.success) {
+            const formattedReply = data.reply.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            document.getElementById(thinkingId).innerHTML = formattedReply;
+        } else {
+            document.getElementById(thinkingId).innerHTML = data.reply;
+        }
+
+    } catch (error) {
+        document.getElementById(thinkingId).innerHTML = "⚠️ Network Error! Cannot reach the brain.";
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<i class="fas fa-paper-plane"></i>`;
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 800);
+    }
 }
 
-// 'Enter' बटन दबाने पर भी मैसेज सेंड हो जाए
+   // 'Enter' बटन दबाने पर भी मैसेज सेंड हो जाए
 document.getElementById('chatInput').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         sendMessage();
     }
-});
+}); 
 
 // 2. आवाज़ से टाइप करने का लॉजिक (Voice Recognition - Mic)
 function startVoiceRecognition() {
