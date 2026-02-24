@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Resume Builder - CodeMaster</title>
+    <title>Pro AI Resume Builder - CodeMaster</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
+        :root { --theme-color: #3b82f6; --theme-font: 'Poppins', sans-serif; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
 
@@ -17,63 +18,76 @@
         .top-nav h2 { color: #3b82f6; font-weight: 700; }
         .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; }
         .btn-primary { background: #3b82f6; color: white; }
-        .btn-primary:hover { background: #2563eb; }
         .btn-success { background: #10b981; color: white; }
-        .btn-success:hover { background: #059669; }
         .btn-ai { background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; }
 
-        /* Layout Container */
         .builder-container { display: flex; width: 100%; margin-top: 70px; height: calc(100vh - 70px); }
 
-        /* Left Panel - Editor Form */
-        .editor-panel { width: 40%; background: white; padding: 30px; overflow-y: auto; border-right: 1px solid #e2e8f0; }
+        /* Left Panel - Tabs & Editor */
+        .left-panel { width: 45%; background: white; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
+        .tabs { display: flex; border-bottom: 1px solid #e2e8f0; }
+        .tab-btn { flex: 1; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; background: #f8fafc; }
+        
+        .tab-content { padding: 30px; overflow-y: auto; flex-grow: 1; display: none; }
+        .tab-content.active { display: block; }
+
+        /* Form Styles */
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; color: #475569; margin-bottom: 8px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; transition: 0.3s; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
         .form-group input:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
+        /* Layout Selector Grid */
+        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; cursor: pointer; text-align: center; transition: 0.2s; }
+        .layout-card:hover { border-color: #3b82f6; background: #f0f9ff; }
+        .layout-card.active { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+        .layout-img { width: 100%; height: 120px; background: #cbd5e1; border-radius: 5px; margin-bottom: 10px; }
+
         /* Right Panel - A4 Preview */
-        .preview-panel { width: 60%; background: #94a3b8; padding: 40px; display: flex; justify-content: center; overflow-y: auto; }
-        
-        /* A4 Size Paper CSS */
+        .preview-panel { width: 55%; background: #94a3b8; padding: 40px; display: flex; justify-content: center; overflow-y: auto; }
         .a4-paper { 
-            background: white; 
-            width: 210mm; 
-            min-height: 297mm; /* A4 Ratio */
-            padding: 40px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-            color: #1e293b;
-        }
-
-        /* Resume Template Styles */
-        /* 🌟 NAYA: CSS Variables For Theme 🌟 */
-        :root {
-            --theme-color: #3b82f6; /* Default Blue */
-            --theme-font: 'Poppins', sans-serif;
-        }
-
-        /* A4 Size Paper CSS (Updated with Font) */
-        .a4-paper { 
-            background: white; width: 210mm; min-height: 297mm; padding: 40px; 
+            background: white; width: 210mm; min-height: 297mm; height: auto; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b;
-            font-family: var(--theme-font); /* Theme Font Yahan Apply Hoga */
-            transition: 0.3s;
+            font-family: var(--theme-font); position: relative;
         }
 
-        /* Resume Template Styles (Updated with Theme Color) */
-        .res-header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; }
-        .res-name { font-size: 32px; font-weight: 700; color: #0f172a; text-transform: uppercase; }
-        .res-title { font-size: 18px; color: var(--theme-color); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
-        .res-contact { font-size: 14px; color: #475569; }
+        /* =========================================
+           🎨 INFINITE LAYOUT DESIGNS CSS
+           ========================================= */
         
-        .res-section { margin-bottom: 25px; }
-        .res-heading { font-size: 20px; color: var(--theme-color); border-bottom: 2px solid var(--theme-color); padding-bottom: 5px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase;}
-        .res-text { font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; }
+        /* 1. Classic Layout (Single Column) */
+        .layout-classic { padding: 40px; }
+        .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; }
+        .layout-classic .name { font-size: 32px; font-weight: bold; text-transform: uppercase; }
+        .layout-classic .title { font-size: 18px; color: var(--theme-color); font-weight: 600; }
+        .layout-classic .section { margin-bottom: 20px; page-break-inside: avoid; }
+        .layout-classic .sec-title { font-size: 20px; color: var(--theme-color); border-bottom: 2px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
+        .layout-classic .sec-content { font-size: 14px; white-space: pre-wrap; line-height: 1.6; }
 
-        /* Theme Buttons CSS */
-        .theme-selector { display: flex; gap: 10px; margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .color-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; }
-        .color-dot:hover { transform: scale(1.2); }
+        /* 2. Modern Sidebar Layout (2-Column) */
+        .layout-modern { display: flex; min-height: 297mm; }
+        .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; }
+        .layout-modern .main-content { width: 65%; padding: 40px; background: white; }
+        .layout-modern .name { font-size: 30px; font-weight: bold; margin-bottom: 5px; line-height: 1.2; }
+        .layout-modern .title { font-size: 16px; margin-bottom: 30px; opacity: 0.9; }
+        .layout-modern .sec-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .layout-modern .sidebar .sec-title { border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
+        .layout-modern .main-content .sec-title { color: var(--theme-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
+        .layout-modern .section { margin-bottom: 25px; page-break-inside: avoid; }
+        .layout-modern .sec-content { font-size: 13.5px; white-space: pre-wrap; line-height: 1.6; opacity: 0.95; }
+
+        /* 3. Minimalist Layout */
+        .layout-minimal { padding: 50px; }
+        .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+        .layout-minimal .name { font-size: 36px; font-weight: 300; letter-spacing: 2px; }
+        .layout-minimal .title { color: var(--theme-color); font-weight: bold; }
+        .layout-minimal .contact { text-align: right; font-size: 13px; color: #64748b; }
+        .layout-minimal .section { display: flex; margin-bottom: 25px; page-break-inside: avoid; }
+        .layout-minimal .sec-title { width: 25%; font-size: 14px; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 20px; }
+        .layout-minimal .sec-content { width: 75%; font-size: 14px; white-space: pre-wrap; line-height: 1.6; border-left: 2px solid #e2e8f0; padding-left: 20px;}
+
     </style>
 </head>
 <body>
@@ -81,225 +95,228 @@
     <div class="top-nav">
         <a href="/" style="text-decoration: none;"><h2><i class="fas fa-arrow-left"></i> CodeMaster</h2></a>
         <div>
-            <button class="btn btn-ai" onclick="askAIToWrite()"><i class="fas fa-magic"></i> Auto-Generate with AI</button>
+            <button class="btn btn-ai" onclick="askAIToWrite()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
             <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-download"></i> Download PDF</button>
         </div>
     </div>
 
     <div class="builder-container">
-        <div class="editor-panel">
-            <h3 style="margin-bottom: 20px; color: #1e293b;">Personalize Your Resume</h3> 
-            <div class="theme-selector">
-                <div>
-                    <label style="font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">THEME COLOR</label>
-                    <div style="display: flex; gap: 8px;">
-                        <div class="color-dot" style="background: #3b82f6;" onclick="changeThemeColor('#3b82f6')"></div> <div class="color-dot" style="background: #10b981;" onclick="changeThemeColor('#10b981')"></div> <div class="color-dot" style="background: #ef4444;" onclick="changeThemeColor('#ef4444')"></div> <div class="color-dot" style="background: #8b5cf6;" onclick="changeThemeColor('#8b5cf6')"></div> <div class="color-dot" style="background: #0f172a;" onclick="changeThemeColor('#0f172a')"></div> </div>
+        <div class="left-panel">
+            <div class="tabs">
+                <div class="tab-btn active" onclick="switchTab('layoutTab', this)"><i class="fas fa-border-all"></i> 1. Select Layout</div>
+                <div class="tab-btn" onclick="switchTab('dataTab', this)"><i class="fas fa-edit"></i> 2. Enter Details</div>
+            </div>
+
+            <div id="layoutTab" class="tab-content active">
+                <h3 style="margin-bottom: 15px; color: #1e293b;">Choose a Professional Template</h3>
+                <div class="layout-grid">
+                    <div class="layout-card active" onclick="changeLayout('classic', this)">
+                        <div class="layout-img" style="background: linear-gradient(#fff 20%, #e2e8f0 20%); border: 1px solid #ccc;"></div>
+                        <b>Classic 1-Column</b>
+                    </div>
+                    <div class="layout-card" onclick="changeLayout('modern', this)">
+                        <div class="layout-img" style="background: linear-gradient(90deg, #3b82f6 35%, #fff 35%); border: 1px solid #ccc;"></div>
+                        <b>Modern Sidebar</b>
+                    </div>
+                    <div class="layout-card" onclick="changeLayout('minimal', this)">
+                        <div class="layout-img" style="background: linear-gradient(#fff 20%, #f8fafc 20%); border: 1px solid #ccc;"></div>
+                        <b>Minimalist Clean</b>
+                    </div>
                 </div>
-                <div style="margin-left: auto;">
-                    <label style="font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">FONT STYLE</label>
-                    <select onchange="changeThemeFont(this.value)" style="padding: 5px; border-radius: 5px; outline: none; border: 1px solid #cbd5e1;">
-                        <option value="'Poppins', sans-serif">Modern (Poppins)</option>
-                        <option value="'Times New Roman', serif">Classic (Times)</option>
-                        <option value="'Courier New', monospace">Code (Courier)</option>
-                    </select>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px; color: #1e293b;">Theme & Color</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer;" onclick="changeTheme('#3b82f6')"></div>
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #10b981; cursor: pointer;" onclick="changeTheme('#10b981')"></div>
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #ef4444; cursor: pointer;" onclick="changeTheme('#ef4444')"></div>
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #0f172a; cursor: pointer;" onclick="changeTheme('#0f172a')"></div>
                 </div>
             </div>
-            <div style="margin-bottom: 25px; padding: 15px; background: #e0e7ff; border-radius: 8px; border: 1px dashed #3b82f6;">
-                <label style="font-weight: bold; color: #3b82f6; display: block; margin-bottom: 8px;">
-                    <i class="fas fa-file-upload"></i> Have an old resume? Upload & Redesign
-                </label>
-                <input type="file" id="resumeUpload" accept=".pdf" style="margin-bottom: 10px; width: 100%; font-size: 14px;">
-                <button class="btn btn-primary" onclick="uploadOldResume()" id="uploadBtn" style="width: 100%;">
-                    <i class="fas fa-sync-alt"></i> Extract & Redesign
+
+            <div id="dataTab" class="tab-content">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="inpName" placeholder="e.g. Suhel Ansari" onkeyup="renderResume()">
+                </div>
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" id="inpTitle" placeholder="e.g. Full Stack Developer" onkeyup="renderResume()">
+                </div>
+                <div class="form-group">
+                    <label>Contact Info</label>
+                    <input type="text" id="inpContact" placeholder="email@example.com | +91 000000" onkeyup="renderResume()">
+                </div>
+                <div class="form-group">
+                    <label>Summary</label>
+                    <textarea id="inpSummary" rows="3" onkeyup="renderResume()"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Skills</label>
+                    <textarea id="inpSkills" rows="3" onkeyup="renderResume()"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Experience / Projects</label>
+                    <textarea id="inpExperience" rows="5" onkeyup="renderResume()"></textarea>
+                </div>
+
+                <div id="dynamicSectionsArea"></div>
+                <button class="btn" onclick="addNewSection()" style="width: 100%; background: #8b5cf6; color: white;">
+                    <i class="fas fa-plus"></i> Add New Title / Section
                 </button>
-            </div>
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="inpName" placeholder="e.g. Suhel Ansari" onkeyup="updatePreview()">
-            </div>
-            <div class="form-group">
-                <label>Job Title</label>
-                <input type="text" id="inpTitle" placeholder="e.g. Full Stack Developer" onkeyup="updatePreview()">
-            </div>
-            <div class="form-group">
-                <label>Contact Info (Email | Phone | LinkedIn)</label>
-                <input type="text" id="inpContact" placeholder="suhel@email.com | +91 9876543210" onkeyup="updatePreview()">
-            </div>
-            <div class="form-group">
-                <label>Professional Summary</label>
-                <textarea id="inpSummary" rows="4" placeholder="Write about yourself..." onkeyup="updatePreview()"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Skills</label>
-                <textarea id="inpSkills" rows="3" placeholder="React, Node.js, MongoDB..." onkeyup="updatePreview()"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Experience / Projects</label>
-                <textarea id="inpExperience" rows="6" placeholder="Describe your projects or jobs..." onkeyup="updatePreview()"></textarea>
             </div>
         </div>
 
         <div class="preview-panel">
             <div class="a4-paper" id="resumePreview">
-                <div class="res-header">
-                    <div class="res-name" id="outName">YOUR NAME</div>
-                    <div class="res-title" id="outTitle">Job Title</div>
-                    <div class="res-contact" id="outContact">email@example.com | +91 0000000000 | linkedin.com/in/username</div>
                 </div>
-
-                <div class="res-section">
-                    <div class="res-heading">Summary</div>
-                    <div class="res-text" id="outSummary">A passionate developer looking to build awesome projects.</div>
-                </div>
-
-                <div class="res-section">
-                    <div class="res-heading">Skills</div>
-                    <div class="res-text" id="outSkills">HTML, CSS, JavaScript, React, Node.js, MongoDB</div>
-                </div>
-
-                <div class="res-section">
-                    <div class="res-heading">Experience & Projects</div>
-                    <div class="res-text" id="outExperience">Built a full-stack learning management system using Node.js and AI integration.</div>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        // 🔄 Real-time Update Logic (Jaise hi type karoge, right me dikhega)
-        function updatePreview() {
-            document.getElementById('outName').innerText = document.getElementById('inpName').value || "YOUR NAME";
-            document.getElementById('outTitle').innerText = document.getElementById('inpTitle').value || "Job Title";
-            document.getElementById('outContact').innerText = document.getElementById('inpContact').value || "email@example.com | +91 0000000000";
-            document.getElementById('outSummary').innerText = document.getElementById('inpSummary').value || "A passionate developer...";
-            document.getElementById('outSkills').innerText = document.getElementById('inpSkills').value || "HTML, CSS, JS...";
-            document.getElementById('outExperience').innerText = document.getElementById('inpExperience').value || "Your projects here...";
+        let currentLayout = 'classic';
+        let customSections = [];
+
+        // 🗂️ 1. Tab Switcher
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
         }
 
-        // 📥 1-Click PDF Download Logic
+        // 🎨 2. Theme & Layout Changer
+        function changeTheme(color) {
+            document.documentElement.style.setProperty('--theme-color', color);
+        }
+        function changeLayout(layoutName, cardElem) {
+            document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
+            cardElem.classList.add('active');
+            currentLayout = layoutName;
+            renderResume(); // Layout change hote hi resume wapas draw hoga
+        }
+
+        // ➕ 3. Custom Sections (Add Title)
+        function addNewSection() {
+            const id = Date.now();
+            customSections.push({ id: id, title: 'New Section', content: '' });
+            
+            const html = `
+            <div class="form-group" id="sec_${id}" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <input type="text" value="New Section" onkeyup="updateCustomSec(${id}, 'title', this.value)" style="font-weight: bold; margin-bottom: 10px;">
+                <textarea rows="3" onkeyup="updateCustomSec(${id}, 'content', this.value)" placeholder="Enter details..."></textarea>
+                <button onclick="removeCustomSec(${id})" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 5px;"><i class="fas fa-trash"></i> Remove</button>
+            </div>`;
+            document.getElementById('dynamicSectionsArea').insertAdjacentHTML('beforeend', html);
+            renderResume();
+        }
+        function updateCustomSec(id, field, value) {
+            const sec = customSections.find(s => s.id === id);
+            if(sec) { sec[field] = value; renderResume(); }
+        }
+        function removeCustomSec(id) {
+            customSections = customSections.filter(s => s.id !== id);
+            document.getElementById(`sec_${id}`).remove();
+            renderResume();
+        }
+
+        // ⚙️ 4. THE MASTER RENDER ENGINE (Data se Design banana)
+        function renderResume() {
+            // Get Data
+            const d = {
+                name: document.getElementById('inpName').value || 'SUHEL ANSARI',
+                title: document.getElementById('inpTitle').value || 'Full Stack Developer',
+                contact: document.getElementById('inpContact').value || 'suhel@example.com | +91 00000000',
+                summary: document.getElementById('inpSummary').value || 'A passionate developer building scalable apps.',
+                skills: document.getElementById('inpSkills').value || 'React, Node.js, MongoDB',
+                exp: document.getElementById('inpExperience').value || 'Built an AI LMS Platform.'
+            };
+
+            // Custom Sections ka HTML banana
+            let customHtmlClassic = '', customHtmlModern = '', customHtmlMinimal = '';
+            customSections.forEach(s => {
+                // Classic
+                customHtmlClassic += `<div class="section"><div class="sec-title">${s.title}</div><div class="sec-content">${s.content}</div></div>`;
+                // Modern
+                customHtmlModern += `<div class="section"><div class="sec-title">${s.title}</div><div class="sec-content">${s.content}</div></div>`;
+                // Minimal
+                customHtmlMinimal += `<div class="section"><div class="sec-title">${s.title}</div><div class="sec-content">${s.content}</div></div>`;
+            });
+
+            let finalHtml = '';
+
+            // 🖌️ Inject into Layouts
+            if (currentLayout === 'classic') {
+                finalHtml = `
+                <div class="layout-classic">
+                    <div class="header">
+                        <div class="name">${d.name}</div>
+                        <div class="title">${d.title}</div>
+                        <div style="font-size:14px; margin-top:5px; color:#475569;">${d.contact}</div>
+                    </div>
+                    <div class="section"><div class="sec-title">Summary</div><div class="sec-content">${d.summary}</div></div>
+                    <div class="section"><div class="sec-title">Skills</div><div class="sec-content">${d.skills}</div></div>
+                    <div class="section"><div class="sec-title">Experience & Projects</div><div class="sec-content">${d.exp}</div></div>
+                    ${customHtmlClassic}
+                </div>`;
+            } 
+            else if (currentLayout === 'modern') {
+                finalHtml = `
+                <div class="layout-modern">
+                    <div class="sidebar">
+                        <div class="name">${d.name}</div>
+                        <div class="title">${d.title}</div>
+                        <div class="section"><div class="sec-title">Contact</div><div class="sec-content">${d.contact.replace(/ \| /g, '<br>')}</div></div>
+                        <div class="section"><div class="sec-title">Skills</div><div class="sec-content">${d.skills}</div></div>
+                    </div>
+                    <div class="main-content">
+                        <div class="section"><div class="sec-title">Professional Summary</div><div class="sec-content">${d.summary}</div></div>
+                        <div class="section"><div class="sec-title">Experience & Projects</div><div class="sec-content">${d.exp}</div></div>
+                        ${customHtmlModern}
+                    </div>
+                </div>`;
+            }
+            else if (currentLayout === 'minimal') {
+                finalHtml = `
+                <div class="layout-minimal">
+                    <div class="header">
+                        <div>
+                            <div class="name">${d.name}</div>
+                            <div class="title">${d.title}</div>
+                        </div>
+                        <div class="contact">${d.contact.replace(/ \| /g, '<br>')}</div>
+                    </div>
+                    <div class="section"><div class="sec-title">Summary</div><div class="sec-content">${d.summary}</div></div>
+                    <div class="section"><div class="sec-title">Skills</div><div class="sec-content">${d.skills}</div></div>
+                    <div class="section"><div class="sec-title">Experience</div><div class="sec-content">${d.exp}</div></div>
+                    ${customHtmlMinimal}
+                </div>`;
+            }
+
+            document.getElementById('resumePreview').innerHTML = finalHtml;
+        }
+
+        // 📥 5. PDF Download
         function downloadPDF() {
             const element = document.getElementById('resumePreview');
             const opt = {
                 margin:       0,
-                filename:     'My_Professional_Resume.pdf',
+                filename:     `${document.getElementById('inpName').value || 'Resume'}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
-            
-            // Jadoo! html2pdf library screen ko PDF me convert kar degi
             html2pdf().set(opt).from(element).save();
         }
 
-        // 🤖 AI Logic (Next Step me Backend banayenge)
-       
-        // 🤖 AI Magic: Auto-Generate Resume
+        // 🤖 6. AI Auto-Fill Link (Connects to backend later)
         async function askAIToWrite() {
-            // 1. स्टूडेंट से पूछें कि उसे कैसा रेज़्यूमे चाहिए
-            const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher Frontend Developer knowing React and Tailwind CSS'");
-            
-            if (!userPrompt) return; // अगर कुछ नहीं लिखा तो वापस जाओ
-
-            // बटन को 'Loading' स्टेट में बदलें
-            const btn = document.querySelector('.btn-ai');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI is Writing...';
-            btn.disabled = true;
-
-            try {
-                // 2. बैकएंड (AI) को रिक्वेस्ट भेजें
-                const res = await fetch('/api/generate-resume', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: userPrompt })
-                });
-
-                const result = await res.json();
-
-                if (result.success) {
-                    const aiData = result.data;
-                    
-                    // 3. फॉर्म के इनपुट्स में AI का डेटा भर दें
-                    document.getElementById('inpName').value = aiData.fullName || "";
-                    document.getElementById('inpTitle').value = aiData.jobTitle || "";
-                    document.getElementById('inpContact').value = aiData.contactInfo || "";
-                    document.getElementById('inpSummary').value = aiData.summary || "";
-                    document.getElementById('inpSkills').value = aiData.skills || "";
-                    document.getElementById('inpExperience').value = aiData.experience || "";
-
-                    // 4. राईट साइड (Preview) को तुरंत अपडेट करें
-                    updatePreview();
-                } else {
-                    alert("⚠️ " + result.message);
-                }
-            } catch (error) {
-                alert("⚠️ Network Error! Cannot reach AI server.");
-            } finally {
-                // 5. बटन को वापस नार्मल कर दें
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-        // 🎨 Change Theme Color
-        function changeThemeColor(color) {
-            document.documentElement.style.setProperty('--theme-color', color);
+            alert("This will connect to Gemini AI via /api/generate-resume as configured in server.js!");
+            // Yahan backend fetch call ayega jo humne pehle banaya tha
         }
 
-        // 🔤 Change Theme Font
-        function changeThemeFont(fontName) {
-            document.documentElement.style.setProperty('--theme-font', fontName);
-        }
-        // 📤 Upload Old Resume Logic
-        async function uploadOldResume() {
-            const fileInput = document.getElementById('resumeUpload');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("Please select a PDF file first!");
-                return;
-            }
-
-            const btn = document.getElementById('uploadBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reading PDF & Redesigning...';
-            btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('resumePdf', file);
-
-            try {
-                // हमारे नए API को फाइल भेजना
-                const res = await fetch('/api/upload-resume', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await res.json();
-
-                if (result.success) {
-                    const aiData = result.data;
-                    
-                    // फॉर्म में डेटा भरना
-                    document.getElementById('inpName').value = aiData.fullName || "";
-                    document.getElementById('inpTitle').value = aiData.jobTitle || "";
-                    document.getElementById('inpContact').value = aiData.contactInfo || "";
-                    document.getElementById('inpSummary').value = aiData.summary || "";
-                    document.getElementById('inpSkills').value = aiData.skills || "";
-                    document.getElementById('inpExperience').value = aiData.experience || "";
-
-                    // लाइव प्रीव्यू अपडेट करना
-                    updatePreview();
-                    alert("✅ Resume parsed and redesigned successfully!");
-                } else {
-                    alert("⚠️ " + result.message);
-                }
-            } catch (error) {
-                alert("⚠️ Error processing PDF. Make sure it's a valid text-based PDF.");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
+        // Initialize first render
+        renderResume();
     </script>
-
 </body>
 </html>
