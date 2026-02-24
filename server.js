@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const pdfParse = require('pdf-parse'); // PDF पढ़ने के लिए
 const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
@@ -394,7 +395,65 @@ const model = genAI.getGenerativeModel({
         });
     }
 });
+// ==========================================
+// 📄 AI RESUME GENERATOR API
+// ==========================================
+app.post('/api/generate-resume', async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        
+        // AI को सख्त निर्देश (Prompt) देना कि वो सिर्फ JSON फॉर्मेट में ही जवाब दे
+        const aiPrompt = `You are an expert HR and Resume Writer. Based on the following user profile: "${prompt}", generate a professional resume. 
+        Return ONLY a valid JSON object with exactly these keys: 
+        "fullName", "jobTitle", "contactInfo", "summary", "skills", "experience".
+        Make the summary impactful and experience detailed. Do not include any markdown formatting like \`\`\`json.`;
 
+        // Gemini 2.5 Flash का इस्तेमाल (या जो भी मॉडल आप यूज़ कर रहे हैं)
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const result = await model.generateContent(aiPrompt);
+        const responseText = result.response.text();
+
+        // AI कभी-कभी ```json लगा देता है, उसे साफ करना
+        const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const resumeData = JSON.parse(cleanJsonText);
+
+        res.json({ success: true, data: resumeData });
+    } catch (error) {
+        console.error("Resume Generation Error:", error);
+        res.json({ success: false, message: "AI failed to generate resume. Try again!" });
+    }
+});
+// ==========================================
+// 📤 UPLOAD & PARSE OLD RESUME API
+// ==========================================
+// 'upload.single' (multer) का इस्तेमाल हम पहले ही चैटबॉट में कर चुके हैं
+app.post('/api/upload-resume', upload.single('resumePdf'), async (req, res) => {
+    try {
+        if (!req.file) return res.json({ success: false, message: "No file uploaded!" });
+
+        // 1. PDF फाइल के अंदर से सारा कच्चा टेक्स्ट (Raw Text) निकालना
+        const pdfData = await pdfParse(req.file.buffer);
+        const rawText = pdfData.text;
+
+        // 2. AI को यह टेक्स्ट देना ताकि वह इसे सही हिस्सों (Skills, Experience) में बाँट सके
+        const aiPrompt = `You are an expert HR. Read the following text extracted from a resume: 
+        "${rawText}"
+        Extract the details and return ONLY a valid JSON object with exactly these keys: 
+        "fullName", "jobTitle", "contactInfo", "summary", "skills", "experience".
+        Do not include any markdown formatting like \`\`\`json.`;
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const result = await model.generateContent(aiPrompt);
+        
+        const cleanJsonText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+        const resumeData = JSON.parse(cleanJsonText);
+
+        res.json({ success: true, data: resumeData });
+    } catch (error) {
+        console.error("PDF Parsing Error:", error);
+        res.json({ success: false, message: "Failed to read PDF or AI error." });
+    }
+});
 // ==========================================
 // 🌟 9. AUTO-CHECKING & ANSWER KEY ENGINE
 // ==========================================
@@ -509,6 +568,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
