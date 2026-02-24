@@ -168,6 +168,113 @@ html.dark-theme input, html.dark-theme select, html.dark-theme textarea {
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
+        /* ==========================================
+   🤖 AI CHATBOT STYLES 🌟
+========================================== */
+.chatbot-toggle-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px; /* दाएँ कोने में */
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); /* ब्लू-पर्पल ग्रेडिएंट */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 28px;
+    cursor: pointer;
+    z-index: 10000;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transition: 0.3s;
+}
+.chatbot-toggle-btn:hover { transform: scale(1.1); }
+
+.chatbot-window {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.chat-header h3 { font-size: 16px; margin: 0; }
+.close-chat { cursor: pointer; font-size: 18px; font-weight: bold; }
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bot-msg, .user-msg {
+    max-width: 85%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+.bot-msg { background: white; color: #334155; align-self: flex-start; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px;}
+.user-msg { background: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 2px;}
+
+.chat-input-area {
+    display: flex;
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-input-area input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+}
+
+.upload-btn, .mic-btn, .send-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #64748b;
+    transition: 0.2s;
+    padding: 5px;
+}
+.upload-btn:hover, .mic-btn:hover { color: #3b82f6; }
+.send-btn { color: #3b82f6; }
+.send-btn:hover { color: #2563eb; transform: scale(1.1); }
+.image-preview-box { padding: 5px 15px; background: #f1f5f9; border-top: 1px solid #e2e8f0; }
+
+/* 🌟 डार्क मोड सपोर्ट 🌟 */
+body.dark-theme .chatbot-window { background: #1e293b; border-color: #334155; }
+body.dark-theme .chat-messages { background: #0f172a; }
+body.dark-theme .bot-msg { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+body.dark-theme .chat-input-area, body.dark-theme .image-preview-box { background: #1e293b; border-color: #334155; }
+body.dark-theme .chat-input-area input[type="text"] { background: #0f172a; color: white; border-color: #334155; }
         
     </style>
 </head>
@@ -370,6 +477,37 @@ html.dark-theme input, html.dark-theme select, html.dark-theme textarea {
             </div>
         </div>
         </div>
+    <button id="chatbotToggleBtn" onclick="toggleChatbot()" class="chatbot-toggle-btn" title="Ask AI Mentor">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div id="chatbotWindow" class="chatbot-window" style="display: none;">
+        <div class="chat-header">
+            <h3><i class="fas fa-magic"></i> AI Doubt Solver</h3>
+            <span onclick="toggleChatbot()" class="close-chat">✖</span>
+        </div>
+        
+        <div id="chatMessages" class="chat-messages">
+            <div class="bot-msg">Hello! 👋 I am your AI assistant. Ask me any coding doubt, upload an error screenshot, or use the mic!</div>
+        </div>
+        
+        <div id="imagePreviewContainer" class="image-preview-box" style="display: none;">
+            <span style="font-size: 12px; color: #64748b;">📎 Attached: <span id="imageName"></span></span>
+            <i class="fas fa-times" style="color: red; cursor: pointer; margin-left: 10px;" onclick="removeImage()"></i>
+        </div>
+
+        <div class="chat-input-area">
+            <label class="upload-btn" title="Upload Image/Screenshot">
+                <i class="fas fa-paperclip"></i>
+                <input type="file" id="chatImageUpload" accept="image/*" style="display: none;" onchange="previewImage()">
+            </label>
+            
+            <input type="text" id="chatInput" placeholder="Type your doubt here..." autocomplete="off">
+            
+            <button id="micBtn" class="mic-btn" onclick="startVoiceRecognition()" title="Use Voice"><i class="fas fa-microphone"></i></button>
+            <button id="sendBtn" class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
     
 
     <script>
@@ -1127,6 +1265,40 @@ function googleTranslateElementInit() {
                 }
             });
         }
+        // ==========================================
+// 🤖 CHATBOT UI LOGIC (STEP 1)
+// ==========================================
+function toggleChatbot() {
+    const chatWindow = document.getElementById('chatbotWindow');
+    if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+        chatWindow.style.display = 'flex';
+    } else {
+        chatWindow.style.display = 'none';
+    }
+}
+
+// फोटो अटैच करने पर नाम दिखाने के लिए
+function previewImage() {
+    const file = document.getElementById('chatImageUpload').files[0];
+    if(file) {
+        document.getElementById('imageName').innerText = file.name;
+        document.getElementById('imagePreviewContainer').style.display = 'block';
+    }
+}
+
+// फोटो हटाने के लिए
+function removeImage() {
+    document.getElementById('chatImageUpload').value = '';
+    document.getElementById('imagePreviewContainer').style.display = 'none';
+}
+
+// अभी के लिए डमी फंक्शन (Step 2 में असली जादू करेंगे)
+function startVoiceRecognition() {
+    alert("🎤 Voice Feature will be added in Step 2!");
+}
+function sendMessage() {
+    alert("🚀 Message Sending will be added in Step 2!");
+}
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     
