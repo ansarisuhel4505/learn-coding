@@ -334,7 +334,8 @@ app.post('/api/my-submissions', async (req, res) => {
 app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
     try {
         const prompt = req.body.message || "Explain this image";
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });// फास्ट और स्मार्ट मॉडल
+        // 'gemini-pro' सबसे ज्यादा सपोर्टेड मॉडल है, इसे 404 एरर नहीं देना चाहिए
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });// फास्ट और स्मार्ट मॉडल
         let result;
 
         if (req.file) {
@@ -474,6 +475,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
