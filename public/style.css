@@ -427,3 +427,40 @@ body.dark-theme .social-links a:hover {
     background-color: #3b82f6 !important;
     color: #fff !important;
 }
+/* ==========================================================
+   👨‍🏫 MENTOR / INSTRUCTOR SECTION FIX (BLUR REMOVAL) 🌟
+========================================================== */
+
+/* 1. पूरे बॉक्स को प्रॉपर डार्क और साफ़ बनाएं */
+body.dark-theme .instructor-container {
+    background-color: #1e293b !important; /* बॉक्स को डार्क बनाएगा ताकि टेक्स्ट साफ़ दिखे */
+    border: 1px solid #334155 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; /* डार्क और शार्प शैडो */
+    border-radius: 15px !important;
+}
+
+/* 2. आपकी फोटो (Image) का धुंधलापन हटाकर उसे चमकाएं */
+body.dark-theme .instructor-image img {
+    filter: none !important; /* फोटो का कोई भी ब्लर इफ़ेक्ट हटा देगा */
+    opacity: 1 !important;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important; /* फोटो के पीछे एक मस्त ब्लू ग्लो (Glow) लाएगा */
+    border: 3px solid #3b82f6 !important; /* फोटो के चारो तरफ नीली रिंग */
+}
+
+/* 3. फोटो के नीचे का टेक्स्ट और डिज़िग्नेशन एकदम क्रिस्प (Crisp) करें */
+body.dark-theme .instructor-info h2 {
+    color: #f8fafc !important;
+    text-shadow: none !important;
+}
+
+body.dark-theme .instructor-info h4.title {
+    color: #3b82f6 !important; /* आपके डिज़िग्नेशन को शानदार नीले रंग में दिखाएगा */
+    text-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+body.dark-theme .instructor-info p {
+    color: #e2e8f0 !important; /* टेक्स्ट को एकदम ब्राइट वाइट करेगा */
+    text-shadow: none !important;
+    letter-spacing: 0.5px !important; /* अक्षरों के बीच हल्की जगह बनाएगा जिससे ब्लर नहीं लगेगा */
+}
