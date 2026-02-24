@@ -337,6 +337,26 @@ app.post('/api/my-submissions', async (req, res) => {
     res.json(results.map(r => r.examTitle)); 
 });
 // ==========================================
+// 👤 MY PROFILE API
+// ==========================================
+app.post('/api/profile', async (req, res) => {
+    try {
+        const { rollNo } = req.body;
+        // MongoDB से बच्चे को ढूँढो
+        const user = await User.findOne({ rollNo: rollNo });
+        
+        if (!user) {
+            return res.json({ success: false, message: "User not found!" });
+        }
+        
+        // सुरक्षा के लिए पासवर्ड हटाकर बाकी डेटा भेज दो
+        const { password, ...safeUserData } = user._doc;
+        res.json({ success: true, user: safeUserData });
+    } catch (err) {
+        res.json({ success: false, message: "Server error while fetching profile." });
+    }
+});
+// ==========================================
 // 🤖 FINAL FIXED AI DOUBT SOLVER ROUTE
 // ==========================================
 app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
@@ -489,6 +509,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
