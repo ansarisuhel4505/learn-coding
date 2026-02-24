@@ -242,9 +242,20 @@
             </div>
 
             <div id="dataTab" class="tab-content">
-                <div class="form-group" style="border-left: 4px solid #3b82f6;">
+               <div class="form-group" style="border-left: 4px solid #3b82f6;">
                     <label>Personal Details</label>
-                    <input type="text" id="inpName" placeholder="Full Name" value="SUHEL ANSARI" onkeyup="renderResume()">
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 10px;">
+                        <div onclick="document.getElementById('profileImgInput').click()" style="width: 70px; height: 70px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
+                            <i class="fas fa-camera" style="color: #64748b; font-size: 20px;"></i>
+                            <img id="leftPanelImg" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <input type="file" id="profileImgInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                            <input type="text" id="inpName" placeholder="Full Name" value="SUHEL ANSARI" onkeyup="renderResume()">
+                        </div>
+                    </div>
+
                     <input type="text" id="inpTitle" placeholder="Job Title" value="Full Stack Developer" onkeyup="renderResume()">
                     <input type="text" id="inpContact" placeholder="Contact Info" value="suhel@email.com | +91 9876543210" onkeyup="renderResume()">
                 </div>
@@ -399,6 +410,25 @@
             else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
                 finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:18px;">${title}</div><div style="font-size:14px;">${contact}</div></div>${blocksHtml}</div>`; 
             }
+            // 🌟 SMART IMAGE INJECTOR (50 Layouts me automatically photo set karega)
+            if (userProfilePic) {
+                // A4 पेज पर क्लिक करने वाला फोटो टैग
+                let imgTag = `<img src="${userProfilePic}" title="Click to change photo" onclick="document.getElementById('profileImgInput').click()" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 4px solid var(--theme-color); box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; display: block; margin-left: auto; margin-right: auto; transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`;
+
+                if (currentLayout === 'modern' || currentLayout === 'split-right' || currentLayout === 'matrix') {
+                    // अगर साइडबार वाला लेआउट है, तो साइडबार में सबसे ऊपर फोटो लगाओ
+                    finalHtml = finalHtml.replace(/<div class="sidebar">/i, '<div class="sidebar">' + imgTag);
+                } 
+                else if (currentLayout === 'minimal' || currentLayout === 'clean-left' || currentLayout === 'executive' || currentLayout === 'github-style') {
+                    // अगर मिनिमल लेआउट है, तो नाम के बगल में (Flexbox) फोटो लगाओ
+                    imgTag = imgTag.replace('margin-left: auto; margin-right: auto;', 'margin: 0;'); // Center hatana
+                    finalHtml = finalHtml.replace(/<div class="header"/i, `<div class="header" style="display:flex; align-items:center; gap:30px; text-align:left;">` + imgTag);
+                } 
+                else {
+                    // बाकी सभी लेआउट्स में नाम (Name) के ठीक ऊपर गोल फोटो लगा दो
+                    finalHtml = finalHtml.replace(/<div class="name"/i, imgTag + '<div class="name"');
+                }
+            }
 
             document.getElementById('resumePreview').innerHTML = finalHtml;
         }
@@ -514,6 +544,25 @@
             } catch (err) {
                 textArea.value = oldText;
                 alert("⚠️ Failed to connect to AI server.");
+            }
+        }
+        // 📸 IMAGE UPLOAD LOGIC
+        let userProfilePic = ''; // फोटो यहाँ सेव होगी
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userProfilePic = e.target.result;
+                    // लेफ्ट पैनल में फोटो दिखाना
+                    document.getElementById('leftPanelImg').src = userProfilePic;
+                    document.getElementById('leftPanelImg').style.display = 'block';
+                    // रेज़्यूमे को तुरंत अपडेट करना
+                    renderResume();
+                };
+                // फोटो को Base64 में बदलना ताकि PDF में बिना एरर के डाउनलोड हो सके
+                reader.readAsDataURL(file);
             }
         }
     </script>
