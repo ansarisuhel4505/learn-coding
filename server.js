@@ -15,7 +15,15 @@ const multer = require('multer');
 
 // इमेज को मेमोरी में टेम्पररी सेव करने के लिए
 const upload = multer({ storage: multer.memoryStorage() }); 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+    console.error("❌ ERROR: GEMINI_API_KEY is missing from Environment Variables!");
+} else {
+    console.log("✅ SUCCESS: GEMINI_API_KEY has been loaded.");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -482,6 +490,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
