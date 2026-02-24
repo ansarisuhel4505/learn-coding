@@ -1,4 +1,6 @@
+// 1. सबसे पहले .env को लोड करें (केवल एक बार)
 require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -7,17 +9,16 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const nodemailer = require('nodemailer');
 
-const app = express();
-const PORT = process.env.PORT || 8080;
+// 🌟 Google AI & Multer Setup 🌟
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const multer = require('multer');
 
 // इमेज को मेमोरी में टेम्पररी सेव करने के लिए
 const upload = multer({ storage: multer.memoryStorage() }); 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// 🌟 Google Gemini API Setup (API Key हम बाद में डालेंगे)
-const genAI = new GoogleGenerativeAI("YOUR_GEMINI_API_KEY_HERE");
-
+const app = express();
+const PORT = process.env.PORT || 8080;
 // ==========================================
 // 1. MIDDLEWARE & STATIC FILES
 // ==========================================
@@ -473,6 +474,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
