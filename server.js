@@ -9,6 +9,14 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const multer = require('multer');
+
+// इमेज को मेमोरी में टेम्पररी सेव करने के लिए
+const upload = multer({ storage: multer.memoryStorage() }); 
+
+// 🌟 Google Gemini API Setup (API Key हम बाद में डालेंगे)
+const genAI = new GoogleGenerativeAI("YOUR_GEMINI_API_KEY_HERE");
 
 // ==========================================
 // 1. MIDDLEWARE & STATIC FILES
@@ -319,6 +327,37 @@ app.post('/api/my-submissions', async (req, res) => {
     const results = await Result.find({ rollNo: rollNo });
     res.json(results.map(r => r.examTitle)); 
 });
+// ==========================================
+// 🤖 AI DOUBT SOLVER API ROUTE
+// ==========================================
+app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
+    try {
+        const prompt = req.body.message || "Explain this image";
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // फास्ट और स्मार्ट मॉडल
+        let result;
+
+        if (req.file) {
+            // अगर स्टूडेंट ने फोटो भेजी है (Image + Text)
+            const imageParts = [{
+                inlineData: {
+                    data: req.file.buffer.toString("base64"),
+                    mimeType: req.file.mimetype
+                }
+            }];
+            result = await model.generateContent([prompt, ...imageParts]);
+        } else {
+            // अगर सिर्फ टेक्स्ट मैसेज भेजा है
+            result = await model.generateContent(prompt);
+        }
+
+        const responseText = result.response.text();
+        res.json({ success: true, reply: responseText });
+
+    } catch (error) {
+        console.error("AI Error:", error);
+        res.json({ success: false, reply: "Oops! My brain is currently overloaded. Please try again in a minute." });
+    }
+});
 
 // ==========================================
 // 🌟 9. AUTO-CHECKING & ANSWER KEY ENGINE
@@ -434,6 +473,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
