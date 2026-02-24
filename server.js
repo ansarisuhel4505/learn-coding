@@ -336,7 +336,11 @@ app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
         const prompt = req.body.message || "Explain this image and solve the doubt.";
         
         // 1.5-flash सबसे लेटेस्ट और स्टेबल मॉडल है
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
+        // मॉडल का नाम इस तरह से देने पर v1beta वाला एरर खत्म हो जाएगा
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    apiVersion: 'v1' // वर्ज़न को v1 सेट करना ज़रूरी है
+});
         
         let result;
         if (req.file) {
@@ -478,6 +482,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
