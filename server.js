@@ -329,17 +329,17 @@ app.post('/api/my-submissions', async (req, res) => {
     res.json(results.map(r => r.examTitle)); 
 });
 // ==========================================
-// 🤖 AI DOUBT SOLVER API ROUTE
+// 🤖 FINAL FIXED AI DOUBT SOLVER ROUTE
 // ==========================================
 app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
     try {
-        const prompt = req.body.message || "Explain this image";
-        // 'gemini-pro' सबसे ज्यादा सपोर्टेड मॉडल है, इसे 404 एरर नहीं देना चाहिए
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });// फास्ट और स्मार्ट मॉडल
+        const prompt = req.body.message || "Explain this image and solve the doubt.";
+        
+        // 1.5-flash सबसे लेटेस्ट और स्टेबल मॉडल है
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
+        
         let result;
-
         if (req.file) {
-            // अगर स्टूडेंट ने फोटो भेजी है (Image + Text)
             const imageParts = [{
                 inlineData: {
                     data: req.file.buffer.toString("base64"),
@@ -348,16 +348,19 @@ app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
             }];
             result = await model.generateContent([prompt, ...imageParts]);
         } else {
-            // अगर सिर्फ टेक्स्ट मैसेज भेजा है
             result = await model.generateContent(prompt);
         }
 
-        const responseText = result.response.text();
-        res.json({ success: true, reply: responseText });
+        const response = await result.response;
+        const text = response.text();
+        res.json({ success: true, reply: text });
 
     } catch (error) {
-        console.error("AI Error:", error);
-        res.json({ success: false, reply: "Oops! My brain is currently overloaded. Please try again in a minute." });
+        console.error("AI Error Details:", error); // टर्मिनल में पूरा एरर देखने के लिए
+        res.json({ 
+            success: false, 
+            reply: "⚠️ AI Brain Error: Please check if GEMINI_API_KEY is set in Vercel/Local environment variables." 
+        });
     }
 });
 
@@ -475,6 +478,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
