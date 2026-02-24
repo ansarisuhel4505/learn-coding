@@ -275,6 +275,29 @@ body.dark-theme .chat-messages { background: #0f172a; }
 body.dark-theme .bot-msg { background: #1e293b; color: #e2e8f0; border-color: #334155; }
 body.dark-theme .chat-input-area, body.dark-theme .image-preview-box { background: #1e293b; border-color: #334155; }
 body.dark-theme .chat-input-area input[type="text"] { background: #0f172a; color: white; border-color: #334155; }
+        /* ==========================================
+   👤 MY PROFILE STYLES
+   ========================================== */
+.profile-card {
+    background: white; border-radius: 15px; padding: 40px; max-width: 500px; margin: 0 auto;
+    text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+}
+.profile-img { 
+    width: 120px; height: 120px; border-radius: 50%; object-fit: cover; 
+    border: 4px solid #3b82f6; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+.profile-info { text-align: left; margin-top: 30px; }
+.profile-info p { 
+    margin-bottom: 15px; font-size: 16px; color: #475569; 
+    border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center;
+}
+.profile-info i { color: #3b82f6; margin-right: 15px; font-size: 20px; width: 25px; text-align: center; }
+.profile-info b { color: #1e293b; display: inline-block; width: 100px; }
+
+/* Dark Mode Support for Profile */
+html.dark-theme .profile-card { background: #1e293b; border-color: #334155; }
+html.dark-theme .profile-info p { color: #cbd5e1; border-color: #334155; }
+html.dark-theme .profile-info b { color: #f8fafc; }
         
     </style>
 </head>
@@ -292,15 +315,26 @@ body.dark-theme .chat-input-area input[type="text"] { background: #0f172a; color
     <div class="sidebar">
         <h2>CodeMaster</h2>
         <ul class="nav-links">
-            <li class="active" onclick="switchTab('courses')">📚 My Courses</li>
-            <li onclick="switchTab('exams')">📝 Live Exams</li>
-            <li onclick="switchTab('results')">🏆 Check Result</li>
-            <li onclick="switchTab('analytics')">📈 Analytics</li>
-        </ul>
+    <li onclick="switchTab('profile'); loadMyProfile()">👤 My Profile</li> 
+    <li class="active" onclick="switchTab('courses')">📚 My Courses</li>
+    <li onclick="switchTab('exams')">📝 Live Exams</li>
+    <li onclick="switchTab('results')">🏆 Check Result</li>
+    <li onclick="switchTab('analytics')">📈 Analytics</li>
+</ul>
         <a href="#" onclick="logoutUser(event)" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
     <div class="main-content">
+        
+        <div id="profile-sec" class="section">
+            <h1 style="text-align: center;">👤 My Profile</h1>
+            <div class="profile-card" id="profileDisplay">
+                <div style="text-align:center; color: #64748b;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading Profile...
+                </div>
+            </div>
+           </div>
+        
         <div id="courses-sec" class="section active">
             <h1>📚 Available Courses</h1>
             <div class="grid-container" id="coursesGrid"></div>
@@ -1405,6 +1439,47 @@ function startVoiceRecognition() {
 
     // माइक शुरू करो
     recognition.start();
+}
+        // ==========================================
+// 👤 FETCH AND SHOW MY PROFILE
+// ==========================================
+async function loadMyProfile() {
+    const rollNo = localStorage.getItem('cm_roll');
+    if (!rollNo) return;
+
+    try {
+        const res = await fetch('/api/profile', {
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ rollNo: rollNo })
+        });
+        
+        const data = await res.json();
+
+        if(data.success) {
+            const u = data.user;
+            
+            // अगर यूजर के पास गूगल की फोटो है तो वो दिखाओ, वरना नाम का पहला अक्षर (Avatar) बना दो
+            const photoUrl = u.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=3b82f6&color=fff&size=128&bold=true`;
+            
+            document.getElementById('profileDisplay').innerHTML = `
+                <img src="${photoUrl}" class="profile-img" alt="Profile Photo">
+                <h2 style="color: #3b82f6; margin-bottom: 5px;">${u.username}</h2>
+                <span style="background: #e0e7ff; color: #4f46e5; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">🎓 CodeMaster Student</span>
+                
+                <div class="profile-info">
+                    <p><i class="fas fa-id-badge"></i> <b>Roll No:</b> ${u.rollNo}</p>
+                    <p><i class="fas fa-envelope"></i> <b>Email:</b> ${u.email}</p>
+                    <p><i class="fas fa-phone"></i> <b>Mobile:</b> ${u.mobile || '<span style="color:#94a3b8; font-style:italic;">Not Provided</span>'}</p>
+                </div>
+            `;
+        } else {
+            document.getElementById('profileDisplay').innerHTML = `<p style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Error: ${data.message}</p>`;
+        }
+    } catch (error) {
+        console.error("Profile Error:", error);
+        document.getElementById('profileDisplay').innerHTML = `<p style="color:#ef4444;">Network Error. Cannot load profile.</p>`;
+    }
 }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
