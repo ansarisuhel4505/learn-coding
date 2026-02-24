@@ -3,99 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro AI Resume Builder - CodeMaster</title>
+    <title>Ultimate AI Resume Builder</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root { --theme-color: #3b82f6; --theme-font: 'Poppins', sans-serif; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--theme-font); }
         body { background: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Navbar */
-        .top-nav { position: absolute; top: 0; width: 100%; background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; }
-        .top-nav h2 { color: #3b82f6; font-weight: 700; }
-        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-ai { background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; }
+        /* Navbar & Layouts */
+        .top-nav { position: absolute; top: 0; width: 100%; background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; font-family: 'Poppins', sans-serif;}
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white;}
+        .btn-ai { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
+        .btn-success { background: #10b981; }
+        .btn-danger { background: #ef4444; padding: 5px 10px; font-size: 12px; }
 
         .builder-container { display: flex; width: 100%; margin-top: 70px; height: calc(100vh - 70px); }
-
-        /* Left Panel - Tabs & Editor */
         .left-panel { width: 45%; background: white; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
         .tabs { display: flex; border-bottom: 1px solid #e2e8f0; }
-        .tab-btn { flex: 1; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn { flex: 1; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; }
         .tab-btn.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; background: #f8fafc; }
-        
         .tab-content { padding: 30px; overflow-y: auto; flex-grow: 1; display: none; }
         .tab-content.active { display: block; }
 
-        /* Form Styles */
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; color: #475569; margin-bottom: 8px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
-        .form-group input:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        /* Form Controls */
+        .form-group { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; position: relative;}
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif;}
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--theme-color); }
+        
+        /* Layout Grid */
+        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; }
+        .layout-card.active { border-color: var(--theme-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .layout-img { height: 100px; background: #cbd5e1; border-radius: 5px; margin-bottom: 10px; }
 
-        /* Layout Selector Grid */
-        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; cursor: pointer; text-align: center; transition: 0.2s; }
-        .layout-card:hover { border-color: #3b82f6; background: #f0f9ff; }
-        .layout-card.active { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
-        .layout-img { width: 100%; height: 120px; background: #cbd5e1; border-radius: 5px; margin-bottom: 10px; }
-
-        /* Right Panel - A4 Preview */
+        /* Right Panel */
         .preview-panel { width: 55%; background: #94a3b8; padding: 40px; display: flex; justify-content: center; overflow-y: auto; }
-        .a4-paper { 
-            background: white; width: 210mm; min-height: 297mm; height: auto; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b;
-            font-family: var(--theme-font); position: relative;
-        }
+        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; }
 
         /* =========================================
-           🎨 INFINITE LAYOUT DESIGNS CSS
+           🎨 5 PREMIUM LAYOUTS CSS
            ========================================= */
-        
-        /* 1. Classic Layout (Single Column) */
-        .layout-classic { padding: 40px; }
-        .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; }
-        .layout-classic .name { font-size: 32px; font-weight: bold; text-transform: uppercase; }
-        .layout-classic .title { font-size: 18px; color: var(--theme-color); font-weight: 600; }
-        .layout-classic .section { margin-bottom: 20px; page-break-inside: avoid; }
-        .layout-classic .sec-title { font-size: 20px; color: var(--theme-color); border-bottom: 2px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
-        .layout-classic .sec-content { font-size: 14px; white-space: pre-wrap; line-height: 1.6; }
+        .res-section { margin-bottom: 20px; page-break-inside: avoid; }
+        .res-text { font-size: 13.5px; white-space: pre-wrap; line-height: 1.6; }
 
-        /* 2. Modern Sidebar Layout (2-Column) */
+        /* 1. Classic */
+        .layout-classic { padding: 40px; }
+        .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .layout-classic .sec-title { font-size: 18px; color: var(--theme-color); border-bottom: 1px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
+
+        /* 2. Modern Sidebar */
         .layout-modern { display: flex; min-height: 297mm; }
         .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; }
-        .layout-modern .main-content { width: 65%; padding: 40px; background: white; }
-        .layout-modern .name { font-size: 30px; font-weight: bold; margin-bottom: 5px; line-height: 1.2; }
-        .layout-modern .title { font-size: 16px; margin-bottom: 30px; opacity: 0.9; }
-        .layout-modern .sec-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .layout-modern .sidebar .sec-title { border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
-        .layout-modern .main-content .sec-title { color: var(--theme-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
-        .layout-modern .section { margin-bottom: 25px; page-break-inside: avoid; }
-        .layout-modern .sec-content { font-size: 13.5px; white-space: pre-wrap; line-height: 1.6; opacity: 0.95; }
+        .layout-modern .main { width: 65%; padding: 40px; }
+        .layout-modern .sec-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--theme-color);}
+        .layout-modern .sidebar .sec-title { border-color: rgba(255,255,255,0.3); color: white; }
 
-        /* 3. Minimalist Layout */
+        /* 3. Minimal */
         .layout-minimal { padding: 50px; }
-        .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
-        .layout-minimal .name { font-size: 36px; font-weight: 300; letter-spacing: 2px; }
-        .layout-minimal .title { color: var(--theme-color); font-weight: bold; }
-        .layout-minimal .contact { text-align: right; font-size: 13px; color: #64748b; }
-        .layout-minimal .section { display: flex; margin-bottom: 25px; page-break-inside: avoid; }
-        .layout-minimal .sec-title { width: 25%; font-size: 14px; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 20px; }
-        .layout-minimal .sec-content { width: 75%; font-size: 14px; white-space: pre-wrap; line-height: 1.6; border-left: 2px solid #e2e8f0; padding-left: 20px;}
+        .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #cbd5e1; padding-bottom: 20px;}
+        .layout-minimal .res-section { display: flex; }
+        .layout-minimal .sec-title { width: 25%; font-size: 13px; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 15px; border-bottom: none;}
+        .layout-minimal .res-text { width: 75%; border-left: 1px solid #e2e8f0; padding-left: 20px; }
 
+        /* 4. Elegant Center */
+        .layout-elegant { padding: 40px; text-align: center; }
+        .layout-elegant .sec-title { font-size: 16px; font-weight: bold; color: var(--theme-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;}
+        .layout-elegant .res-section { margin-bottom: 30px; }
+
+        /* 5. Timeline Pro */
+        .layout-timeline { padding: 40px; }
+        .layout-timeline .header { background: #f8fafc; padding: 30px; border-left: 8px solid var(--theme-color); margin-bottom: 30px; }
+        .layout-timeline .sec-title { background: var(--theme-color); color: white; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;}
     </style>
 </head>
 <body>
 
     <div class="top-nav">
-        <a href="/" style="text-decoration: none;"><h2><i class="fas fa-arrow-left"></i> CodeMaster</h2></a>
+        <h2><i class="fas fa-file-pdf"></i> Pro Resume Builder</h2>
         <div>
-            <button class="btn btn-ai" onclick="askAIToWrite()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
+            <button class="btn btn-ai" onclick="alert('AI Integration in next step!')"><i class="fas fa-magic"></i> AI Auto-Fill</button>
             <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-download"></i> Download PDF</button>
         </div>
     </div>
@@ -103,80 +92,61 @@
     <div class="builder-container">
         <div class="left-panel">
             <div class="tabs">
-                <div class="tab-btn active" onclick="switchTab('layoutTab', this)"><i class="fas fa-border-all"></i> 1. Select Layout</div>
-                <div class="tab-btn" onclick="switchTab('dataTab', this)"><i class="fas fa-edit"></i> 2. Enter Details</div>
+                <div class="tab-btn active" onclick="switchTab('layoutTab', this)">1. Layout & Theme</div>
+                <div class="tab-btn" onclick="switchTab('dataTab', this)">2. Content & Sections</div>
             </div>
 
             <div id="layoutTab" class="tab-content active">
-                <h3 style="margin-bottom: 15px; color: #1e293b;">Choose a Professional Template</h3>
+                <h3 style="margin-bottom: 15px;">Choose Layout</h3>
                 <div class="layout-grid">
-                    <div class="layout-card active" onclick="changeLayout('classic', this)">
-                        <div class="layout-img" style="background: linear-gradient(#fff 20%, #e2e8f0 20%); border: 1px solid #ccc;"></div>
-                        <b>Classic 1-Column</b>
-                    </div>
-                    <div class="layout-card" onclick="changeLayout('modern', this)">
-                        <div class="layout-img" style="background: linear-gradient(90deg, #3b82f6 35%, #fff 35%); border: 1px solid #ccc;"></div>
-                        <b>Modern Sidebar</b>
-                    </div>
-                    <div class="layout-card" onclick="changeLayout('minimal', this)">
-                        <div class="layout-img" style="background: linear-gradient(#fff 20%, #f8fafc 20%); border: 1px solid #ccc;"></div>
-                        <b>Minimalist Clean</b>
-                    </div>
+                    <div class="layout-card active" onclick="changeLayout('classic', this)"><b>Classic</b></div>
+                    <div class="layout-card" onclick="changeLayout('modern', this)"><b>Modern Sidebar</b></div>
+                    <div class="layout-card" onclick="changeLayout('minimal', this)"><b>Minimalist</b></div>
+                    <div class="layout-card" onclick="changeLayout('elegant', this)"><b>Elegant</b></div>
+                    <div class="layout-card" onclick="changeLayout('timeline', this)"><b>Timeline Pro</b></div>
                 </div>
 
-                <h3 style="margin-top: 30px; margin-bottom: 15px; color: #1e293b;">Theme & Color</h3>
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Theme Color</h3>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer;" onclick="changeTheme('#3b82f6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #10b981; cursor: pointer;" onclick="changeTheme('#10b981')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #ef4444; cursor: pointer;" onclick="changeTheme('#ef4444')"></div>
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #8b5cf6; cursor: pointer;" onclick="changeTheme('#8b5cf6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #0f172a; cursor: pointer;" onclick="changeTheme('#0f172a')"></div>
                 </div>
             </div>
 
             <div id="dataTab" class="tab-content">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="inpName" placeholder="e.g. Suhel Ansari" onkeyup="renderResume()">
-                </div>
-                <div class="form-group">
-                    <label>Job Title</label>
-                    <input type="text" id="inpTitle" placeholder="e.g. Full Stack Developer" onkeyup="renderResume()">
-                </div>
-                <div class="form-group">
-                    <label>Contact Info</label>
-                    <input type="text" id="inpContact" placeholder="email@example.com | +91 000000" onkeyup="renderResume()">
-                </div>
-                <div class="form-group">
-                    <label>Summary</label>
-                    <textarea id="inpSummary" rows="3" onkeyup="renderResume()"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Skills</label>
-                    <textarea id="inpSkills" rows="3" onkeyup="renderResume()"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Experience / Projects</label>
-                    <textarea id="inpExperience" rows="5" onkeyup="renderResume()"></textarea>
+                <div class="form-group" style="border-left: 4px solid #3b82f6;">
+                    <label>Personal Details</label>
+                    <input type="text" id="inpName" placeholder="Full Name" value="SUHEL ANSARI" onkeyup="renderResume()">
+                    <input type="text" id="inpTitle" placeholder="Job Title" value="Full Stack Developer" onkeyup="renderResume()">
+                    <input type="text" id="inpContact" placeholder="Contact Info" value="suhel@email.com | +91 9876543210" onkeyup="renderResume()">
                 </div>
 
-                <div id="dynamicSectionsArea"></div>
-                <button class="btn" onclick="addNewSection()" style="width: 100%; background: #8b5cf6; color: white;">
-                    <i class="fas fa-plus"></i> Add New Title / Section
+                <div id="editorSections"></div>
+
+                <button class="btn" onclick="addSection()" style="width: 100%; background: #3b82f6; margin-top: 10px;">
+                    <i class="fas fa-plus"></i> Add New Section
                 </button>
             </div>
         </div>
 
         <div class="preview-panel">
-            <div class="a4-paper" id="resumePreview">
-                </div>
+            <div class="a4-paper" id="resumePreview"></div>
         </div>
     </div>
 
     <script>
         let currentLayout = 'classic';
-        let customSections = [];
+        
+        // 🌟 JADOO YAHAN HAI: Har cheez ek "Block" hai
+        let sectionsData = [
+            { id: 1, title: 'Professional Summary', text: 'A passionate developer building scalable web applications and AI tools.' },
+            { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
+            { id: 3, title: 'Experience & Projects', text: 'CodeMaster Platform (2025 - Present)\n- Built a full-stack LMS with AI integration.\n- Implemented auto-grading and PDF generation.' }
+        ];
 
-        // 🗂️ 1. Tab Switcher
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -184,138 +154,86 @@
             btn.classList.add('active');
         }
 
-        // 🎨 2. Theme & Layout Changer
-        function changeTheme(color) {
-            document.documentElement.style.setProperty('--theme-color', color);
-        }
+        function changeTheme(color) { document.documentElement.style.setProperty('--theme-color', color); }
         function changeLayout(layoutName, cardElem) {
             document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
             cardElem.classList.add('active');
             currentLayout = layoutName;
-            renderResume(); // Layout change hote hi resume wapas draw hoga
-        }
-
-        // ➕ 3. Custom Sections (Add Title)
-        function addNewSection() {
-            const id = Date.now();
-            customSections.push({ id: id, title: 'New Section', content: '' });
-            
-            const html = `
-            <div class="form-group" id="sec_${id}" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <input type="text" value="New Section" onkeyup="updateCustomSec(${id}, 'title', this.value)" style="font-weight: bold; margin-bottom: 10px;">
-                <textarea rows="3" onkeyup="updateCustomSec(${id}, 'content', this.value)" placeholder="Enter details..."></textarea>
-                <button onclick="removeCustomSec(${id})" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 5px;"><i class="fas fa-trash"></i> Remove</button>
-            </div>`;
-            document.getElementById('dynamicSectionsArea').insertAdjacentHTML('beforeend', html);
-            renderResume();
-        }
-        function updateCustomSec(id, field, value) {
-            const sec = customSections.find(s => s.id === id);
-            if(sec) { sec[field] = value; renderResume(); }
-        }
-        function removeCustomSec(id) {
-            customSections = customSections.filter(s => s.id !== id);
-            document.getElementById(`sec_${id}`).remove();
             renderResume();
         }
 
-        // ⚙️ 4. THE MASTER RENDER ENGINE (Data se Design banana)
+        // 📝 DRAW EDITOR FORMS (Sare default blocks deletable hain)
+        function renderEditor() {
+            let html = '';
+            sectionsData.forEach(sec => {
+                html += `
+                <div class="form-group">
+                    <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; margin-bottom:5px; font-size:16px;">
+                    <button class="btn-danger" onclick="deleteSec(${sec.id})" style="position:absolute; top:15px; right:15px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                    <textarea rows="4" onkeyup="updateSec(${sec.id}, 'text', this.value)">${sec.text}</textarea>
+                </div>`;
+            });
+            document.getElementById('editorSections').innerHTML = html;
+        }
+
+        function addSection() {
+            sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' });
+            renderEditor(); renderResume();
+        }
+        function updateSec(id, field, val) {
+            let sec = sectionsData.find(s => s.id === id);
+            if(sec) { sec[field] = val; renderResume(); }
+        }
+        function deleteSec(id) {
+            sectionsData = sectionsData.filter(s => s.id !== id);
+            renderEditor(); renderResume();
+        }
+
+        // ⚙️ THE MASTER RENDER ENGINE (Har Layout ke hisab se HTML banayega)
         function renderResume() {
-            // Get Data
-            const d = {
-                name: document.getElementById('inpName').value || 'SUHEL ANSARI',
-                title: document.getElementById('inpTitle').value || 'Full Stack Developer',
-                contact: document.getElementById('inpContact').value || 'suhel@example.com | +91 00000000',
-                summary: document.getElementById('inpSummary').value || 'A passionate developer building scalable apps.',
-                skills: document.getElementById('inpSkills').value || 'React, Node.js, MongoDB',
-                exp: document.getElementById('inpExperience').value || 'Built an AI LMS Platform.'
-            };
+            const name = document.getElementById('inpName').value;
+            const title = document.getElementById('inpTitle').value;
+            const contact = document.getElementById('inpContact').value;
 
-            // Custom Sections ka HTML banana
-            let customHtmlClassic = '', customHtmlModern = '', customHtmlMinimal = '';
-            customSections.forEach(s => {
-                // Classic
-                customHtmlClassic += `<div class="section"><div class="sec-title">${s.title}</div><div class="sec-content">${s.content}</div></div>`;
-                // Modern
-                customHtmlModern += `<div class="section"><div class="sec-title">${s.title}</div><div class="sec-content">${s.content}</div></div>`;
-                // Minimal
-                customHtmlMinimal += `<div class="section"><div class="sec-title">${s.title}</div><div class="sec-content">${s.content}</div></div>`;
+            let blocksHtml = '';
+            sectionsData.forEach(s => {
+                blocksHtml += `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`;
             });
 
             let finalHtml = '';
 
-            // 🖌️ Inject into Layouts
             if (currentLayout === 'classic') {
-                finalHtml = `
-                <div class="layout-classic">
-                    <div class="header">
-                        <div class="name">${d.name}</div>
-                        <div class="title">${d.title}</div>
-                        <div style="font-size:14px; margin-top:5px; color:#475569;">${d.contact}</div>
-                    </div>
-                    <div class="section"><div class="sec-title">Summary</div><div class="sec-content">${d.summary}</div></div>
-                    <div class="section"><div class="sec-title">Skills</div><div class="sec-content">${d.skills}</div></div>
-                    <div class="section"><div class="sec-title">Experience & Projects</div><div class="sec-content">${d.exp}</div></div>
-                    ${customHtmlClassic}
-                </div>`;
+                finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:32px; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:18px; color:var(--theme-color);">${title}</div><div style="font-size:14px; color:#475569; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`;
             } 
             else if (currentLayout === 'modern') {
-                finalHtml = `
-                <div class="layout-modern">
-                    <div class="sidebar">
-                        <div class="name">${d.name}</div>
-                        <div class="title">${d.title}</div>
-                        <div class="section"><div class="sec-title">Contact</div><div class="sec-content">${d.contact.replace(/ \| /g, '<br>')}</div></div>
-                        <div class="section"><div class="sec-title">Skills</div><div class="sec-content">${d.skills}</div></div>
-                    </div>
-                    <div class="main-content">
-                        <div class="section"><div class="sec-title">Professional Summary</div><div class="sec-content">${d.summary}</div></div>
-                        <div class="section"><div class="sec-title">Experience & Projects</div><div class="sec-content">${d.exp}</div></div>
-                        ${customHtmlModern}
-                    </div>
-                </div>`;
+                // Modern layout me contact details sidebar me, baaki sab main me jayega
+                finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:30px; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`;
             }
             else if (currentLayout === 'minimal') {
-                finalHtml = `
-                <div class="layout-minimal">
-                    <div class="header">
-                        <div>
-                            <div class="name">${d.name}</div>
-                            <div class="title">${d.title}</div>
-                        </div>
-                        <div class="contact">${d.contact.replace(/ \| /g, '<br>')}</div>
-                    </div>
-                    <div class="section"><div class="sec-title">Summary</div><div class="sec-content">${d.summary}</div></div>
-                    <div class="section"><div class="sec-title">Skills</div><div class="sec-content">${d.skills}</div></div>
-                    <div class="section"><div class="sec-title">Experience</div><div class="sec-content">${d.exp}</div></div>
-                    ${customHtmlMinimal}
-                </div>`;
+                finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:36px; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="font-size:13px; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`;
+            }
+            else if (currentLayout === 'elegant') {
+                finalHtml = `<div class="layout-elegant"><div style="margin-bottom:40px;"><div style="font-size:28px; letter-spacing:3px; text-transform:uppercase;">${name}</div><div style="color:#64748b; margin:10px 0;">${title}</div><div style="font-size:12px; color:var(--theme-color);">${contact}</div></div>${blocksHtml}</div>`;
+            }
+            else if (currentLayout === 'timeline') {
+                finalHtml = `<div class="layout-timeline"><div class="header"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:18px;">${title}</div><div style="margin-top:10px; font-size:14px;">${contact}</div></div>${blocksHtml}</div>`;
             }
 
             document.getElementById('resumePreview').innerHTML = finalHtml;
         }
 
-        // 📥 5. PDF Download
+        // PDF Download
         function downloadPDF() {
             const element = document.getElementById('resumePreview');
-            const opt = {
-                margin:       0,
-                filename:     `${document.getElementById('inpName').value || 'Resume'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set({
+                margin: 0, filename: 'Resume.pdf', image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            }).from(element).save();
         }
 
-        // 🤖 6. AI Auto-Fill Link (Connects to backend later)
-        async function askAIToWrite() {
-            alert("This will connect to Gemini AI via /api/generate-resume as configured in server.js!");
-            // Yahan backend fetch call ayega jo humne pehle banaya tha
-        }
-
-        // Initialize first render
+        // Init
+        renderEditor();
         renderResume();
     </script>
 </body>
