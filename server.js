@@ -133,8 +133,9 @@ async function sendLoginAlertEmail(toEmail, userName) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://learn-coding-jade.vercel.app/auth/google/callback"
-  },
+    callbackURL: "https://learn-coding-jade.vercel.app/auth/google/callback",
+    proxy:true
+},
   async function(accessToken, refreshToken, profile, done) {
       try {
           let user = await User.findOne({ googleId: profile.id });
@@ -568,6 +569,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
