@@ -33,6 +33,18 @@ const PORT = process.env.PORT || 8080;
 // ==========================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
+app.set('trust proxy', 1); 
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'mysecret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production', // Vercel पर इसे true कर देगा
+        maxAge: 24 * 60 * 60 * 1000 
+    }
+}));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'codemaster_super_secret_key_2026',
@@ -569,6 +581,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
