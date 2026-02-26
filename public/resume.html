@@ -643,7 +643,8 @@
                     // 4. ऊपर के Personal Details भरें
                     document.getElementById('inpName').value = aiData.fullName || "Your Name";
                     document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                    document.getElementById('inpContact').value = aiData.contactInfo || "Email | Phone";
+                    contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => s.trim());
+renderContactFields();
 
                     // 5. हमारे डायनामिक Sections को AI के डेटा से रिप्लेस कर दें
                     sectionsData = [
