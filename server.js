@@ -95,7 +95,16 @@ const Course = mongoose.model('Course', new mongoose.Schema({
 
 const Exam = mongoose.model('Exam', new mongoose.Schema({
     title: String, totalMarks: Number, duration: Number,
-    questions: [{ questionText: String, options: [String], correctAnswer: String, marks: Number }],
+    // 🌟 NAYA: scheduleTime add kiya gaya
+    scheduleTime: { type: Date, default: null }, 
+    // 🌟 NAYA: question me 'type' add kiya gaya (mcq ya numerical)
+    questions: [{ 
+        type: { type: String, default: 'mcq' }, 
+        questionText: String, 
+        options: [String], 
+        correctAnswer: String, 
+        marks: Number 
+    }],
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now }
 }));
@@ -581,6 +590,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
