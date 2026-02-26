@@ -360,6 +360,7 @@
         // 📝 DRAW EDITOR FORMS (Sare default blocks deletable hain)
         // 📝 DRAW EDITOR FORMS (AI Button & Real-Time Sync)
         // 📝 DRAW EDITOR FORMS (With Drag-Drop, Move & Table features)
+       // 📝 DRAW EDITOR FORMS (With MS Word Style Rich Editor)
         function renderEditor() {
             let html = '';
             sectionsData.forEach((sec, index) => {
@@ -381,17 +382,40 @@
                         <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">
                             <i class="fas fa-magic"></i> Write with AI
                         </button>
-                        <button onclick="addTableToSec(${sec.id})" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-left: 5px;">
-                            <i class="fas fa-table"></i> Add Table
-                        </button>
                     </div>
                     
-                    <textarea id="text_${sec.id}" rows="4" onkeyup="updateSec(${sec.id}, 'text', this.value)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px;">${sec.text}</textarea>
+                    <textarea id="text_${sec.id}" class="rich-editor" style="width: 100%; min-height: 200px;">${sec.text}</textarea>
                 </div>`;
             });
             document.getElementById('editorSections').innerHTML = html;
-        }
 
+            // 🔥 Initialize MS Word (TinyMCE) Editor
+            setTimeout(() => {
+                tinymce.remove(); // पुराने एडिटर्स क्लियर करें
+                tinymce.init({
+                    selector: '.rich-editor',
+                    plugins: 'table lists advlist',
+                    toolbar: 'bold italic underline | bullist numlist | table | undo redo',
+                    menubar: false,
+                    branding: false,
+                    promotion: false,
+                    height: 220,
+                    setup: function (editor) {
+                        // जब भी स्टूडेंट टाइप करेगा, राईट साइड पेज तुरंत अपडेट होगा
+                        editor.on('input change keyup', function () {
+                            let id = parseInt(editor.id.split('_')[1]);
+                            let sec = sectionsData.find(s => s.id === id);
+                            if(sec) {
+                                sec.text = editor.getContent();
+                                renderResume(); // राईट साइड डिज़ाइन अपडेट
+                            }
+                        });
+                    }
+                });
+            }, 100);
+        }
+                    
+                    
         function addSection() {
             sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' });
             renderEditor(); renderResume();
@@ -534,7 +558,12 @@
             }
 
             document.getElementById('resumePreview').innerHTML = finalHtml;
+            
+            // 🌟 JADOO: राईट साइड पेज को डायरेक्ट एडिटेबल (MS Word जैसा) बना दो!
+            document.getElementById('resumePreview').contentEditable = "true";
+            document.getElementById('resumePreview').style.outline = "none";
         }
+       
 
         // PDF Download
         function downloadPDF() {
@@ -649,82 +678,7 @@
                 alert("⚠️ Failed to connect to AI server.");
             }
         }
-        // ==========================================
-        // 🌟 CANVA-STYLE FREE DRAG & DROP ON A4 PAGE 🌟
-        // ==========================================
-        let isDraggingElement = false;
-        let currentDraggable = null;
-        let offsetX = 0, offsetY = 0;
-
-        // जब माउस दबाएं (Pick up)
-        document.getElementById('resumePreview').addEventListener('mousedown', function(e) {
-            // हम Header, Section या Sidebar को खिसकाने की पावर दे रहे हैं
-            let target = e.target.closest('.res-section') || e.target.closest('.header') || e.target.closest('.sidebar');
-            
-            if (target) {
-                isDraggingElement = true;
-                currentDraggable = target;
-
-                // अगर यह पहले से फ्री नहीं है, तो इसे 'Absolute' बनाओ ताकि यह आज़ाद हो सके
-                if (window.getComputedStyle(currentDraggable).position !== 'absolute') {
-                    let rect = currentDraggable.getBoundingClientRect();
-                    let parentRect = document.getElementById('resumePreview').getBoundingClientRect();
-                    
-                    currentDraggable.style.position = 'absolute';
-                    currentDraggable.style.left = (rect.left - parentRect.left) + 'px';
-                    currentDraggable.style.top = (rect.top - parentRect.top) + 'px';
-                    currentDraggable.style.width = rect.width + 'px'; // चौड़ाई खराब न हो
-                    currentDraggable.style.margin = '0'; // पुरानी मार्जिन हटाओ
-                }
-
-                // माउस कहाँ क्लिक हुआ है, उसका हिसाब
-                let rect = currentDraggable.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
-                
-                currentDraggable.style.zIndex = 1000; // इसे सबसे ऊपर ले आओ
-                currentDraggable.style.cursor = 'grabbing';
-                currentDraggable.style.border = '2px dashed #3b82f6'; // खिसकाते समय नीला बॉर्डर दिखेगा
-            }
-        });
-
-        // जब माउस हिलाएं (Move around)
-        document.addEventListener('mousemove', function(e) {
-            if (isDraggingElement && currentDraggable) {
-                let parentRect = document.getElementById('resumePreview').getBoundingClientRect();
-                
-                // नया X और Y कोआर्डिनेट सेट करो
-                let newX = e.clientX - parentRect.left - offsetX;
-                let newY = e.clientY - parentRect.top - offsetY;
-
-                currentDraggable.style.left = newX + 'px';
-                currentDraggable.style.top = newY + 'px';
-            }
-        });
-
-        // जब माउस छोड़ें (Drop)
-        document.addEventListener('mouseup', function() {
-            if (isDraggingElement && currentDraggable) {
-                isDraggingElement = false;
-                currentDraggable.style.zIndex = '';
-                currentDraggable.style.cursor = 'grab';
-                currentDraggable.style.border = 'none'; // नीला बॉर्डर हटा दो
-                currentDraggable = null;
-            }
-        });
-
-        // CSS ताकि पेज पर ले जाने पर Move वाला आइकॉन (हाथ) दिखे
-        const dragStyle = document.createElement('style');
-        dragStyle.innerHTML = `
-            #resumePreview .res-section:hover, 
-            #resumePreview .header:hover, 
-            #resumePreview .sidebar:hover { 
-                cursor: grab; 
-                outline: 1px dotted #ccc; 
-            }
-        `;
-        document.head.appendChild(dragStyle);
-       
+        
     </script>
 </body>
 </html>
