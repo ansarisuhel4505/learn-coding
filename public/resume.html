@@ -154,6 +154,34 @@
             border: 1px solid #cbd5e1 !important;
         }
     
+   /* =========================================
+           🌟 NEW: RESIZE BLOCKS & PROFESSIONAL TABLES 🌟
+           ========================================= */
+        /* 1. ब्लॉक को छोटा-बड़ा (Resize) करने की पावर */
+        .res-section { 
+            position: relative; 
+            resize: both; /* इससे राईट साइड में बॉक्स के कोने को पकड़ कर छोटा/बड़ा किया जा सकेगा */
+            overflow: hidden; 
+            min-height: 50px;
+        }
+
+        /* 2. टेबल (Table) का प्रोफेशनल डिज़ाइन */
+        .resume-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+            font-size: 13px;
+        }
+        .resume-table th, .resume-table td { 
+            border: 1px solid #cbd5e1; 
+            padding: 8px 12px; 
+            text-align: left; 
+        }
+        .resume-table th { 
+            background-color: var(--theme-color); 
+            color: white; 
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -331,18 +359,32 @@
 
         // 📝 DRAW EDITOR FORMS (Sare default blocks deletable hain)
         // 📝 DRAW EDITOR FORMS (AI Button & Real-Time Sync)
+        // 📝 DRAW EDITOR FORMS (With Drag-Drop, Move & Table features)
         function renderEditor() {
             let html = '';
-            sectionsData.forEach(sec => {
+            sectionsData.forEach((sec, index) => {
                 html += `
-                <div class="form-group" style="position:relative; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
-                    <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; margin-bottom:10px; font-size:16px; width: 70%; color: var(--theme-color);">
+                <div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; border-left: 5px solid #cbd5e1;">
                     
-                    <button class="btn-danger" onclick="deleteSec(${sec.id})" style="position:absolute; top:15px; right:15px; cursor:pointer; border-radius:5px;"><i class="fas fa-trash"></i></button>
+                    <div style="display: flex; align-items: center; margin-bottom:10px;">
+                        <i class="fas fa-grip-vertical" style="color: #94a3b8; margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag to move"></i>
+                        <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:16px; width: 60%; color: var(--theme-color);">
+                    </div>
                     
-                    <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 8px; font-size: 12px; font-weight: bold; display: inline-block;">
-                        <i class="fas fa-magic"></i> Write with AI
-                    </button>
+                    <div style="position:absolute; top:12px; right:12px; display:flex; gap:5px;">
+                        <button onclick="moveSecUp(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Up"><i class="fas fa-arrow-up"></i></button>
+                        <button onclick="moveSecDown(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Down"><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn-danger" onclick="deleteSec(${sec.id})" style="border-radius:4px;"><i class="fas fa-trash"></i></button>
+                    </div>
+                    
+                    <div style="margin-bottom: 8px;">
+                        <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                            <i class="fas fa-magic"></i> Write with AI
+                        </button>
+                        <button onclick="addTableToSec(${sec.id})" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-left: 5px;">
+                            <i class="fas fa-table"></i> Add Table
+                        </button>
+                    </div>
                     
                     <textarea id="text_${sec.id}" rows="4" onkeyup="updateSec(${sec.id}, 'text', this.value)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px;">${sec.text}</textarea>
                 </div>`;
@@ -361,6 +403,48 @@
         function deleteSec(id) {
             sectionsData = sectionsData.filter(s => s.id !== id);
             renderEditor(); renderResume();
+        }
+        // 📊 ADD TABLE LOGIC (एक क्लिक में टेबल बनाएगा)
+        function addTableToSec(id) {
+            let sec = sectionsData.find(s => s.id === id);
+            if(!sec) return;
+            
+            // यह HTML कोड टेक्स्ट एरिया में जुड़ जाएगा और राईट साइड में असली टेबल बन जाएगा
+            const tableHTML = `\n<table class="resume-table">\n  <tr>\n    <th>Degree / Course</th>\n    <th>Institute</th>\n    <th>Year</th>\n  </tr>\n  <tr>\n    <td>B.Tech CSE</td>\n    <td>Your University</td>\n    <td>2024 - 2028</td>\n  </tr>\n  <tr>\n    <td>Intermediate</td>\n    <td>Your School</td>\n    <td>2024</td>\n  </tr>\n</table>\n`;
+            
+            sec.text += tableHTML;
+            renderEditor();
+            renderResume();
+        }
+
+        // ↕️ DRAG & DROP + MOVE LOGIC (सेक्शंस को ऊपर-नीचे करने के लिए)
+        let draggedItemIndex = null;
+
+        function handleDragStart(index) { draggedItemIndex = index; }
+        function handleDragOver(e) { e.preventDefault(); }
+        function handleDrop(targetIndex) {
+            if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
+            const item = sectionsData.splice(draggedItemIndex, 1)[0];
+            sectionsData.splice(targetIndex, 0, item);
+            renderEditor(); renderResume();
+        }
+
+        // 📱 (Mobile Backup) ऊपर-नीचे करने वाले बटन
+        function moveSecUp(index) {
+            if (index > 0) {
+                let temp = sectionsData[index];
+                sectionsData[index] = sectionsData[index - 1];
+                sectionsData[index - 1] = temp;
+                renderEditor(); renderResume();
+            }
+        }
+        function moveSecDown(index) {
+            if (index < sectionsData.length - 1) {
+                let temp = sectionsData[index];
+                sectionsData[index] = sectionsData[index + 1];
+                sectionsData[index + 1] = temp;
+                renderEditor(); renderResume();
+            }
         }
 
         // ⚙️ THE MASTER RENDER ENGINE (Har Layout ke hisab se HTML banayega)
