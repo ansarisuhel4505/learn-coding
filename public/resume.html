@@ -335,16 +335,23 @@
             { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
             { id: 3, title: 'Experience & Projects', text: 'CodeMaster Platform (2025 - Present)\n- Built a full-stack LMS with AI integration.\n- Implemented auto-grading and PDF generation.' }
         ];
-        // 📞 DYNAMIC CONTACT & PERSONAL INFO LOGIC
-        // यहाँ हमने आपका असली नंबर और ईमेल डिफ़ॉल्ट डाल दिया है
-        let contactFields = ["ansarisuhel4505@gmail.com", "+91 9335067990", "Gonda, UP", "linkedin.com/in/suhel"];
+       // 📞 DYNAMIC CONTACT & PERSONAL INFO LOGIC (With Custom Titles)
+        let contactFields = [
+            { label: "Email", value: "ansarisuhel4505@gmail.com" },
+            { label: "Phone", value: "+91 9335067990" },
+            { label: "Location", value: "Gonda, UP" },
+            { label: "LinkedIn", value: "linkedin.com/in/suhel" }
+        ];
 
         function renderContactFields() {
             let html = '';
             contactFields.forEach((field, index) => {
                 html += `
                 <div style="display:flex; gap:5px; margin-bottom:5px;">
-                    <input type="text" value="${field}" onkeyup="updateContactField(${index}, this.value)" placeholder="Email, Phone, Address, etc." style="margin-top:0; padding: 8px;">
+                    <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title (e.g. GitHub)" style="width: 35%; margin-top:0; padding: 8px; font-weight:bold;">
+                    
+                    <input type="text" value="${field.value}" onkeyup="updateContactField(${index}, 'value', this.value)" placeholder="Detail / Link" style="width: 65%; margin-top:0; padding: 8px;">
+                    
                     <button onclick="deleteContactField(${index})" style="background: #ef4444; color: white; border: none; padding: 0 12px; border-radius: 5px; cursor: pointer;" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -354,21 +361,22 @@
         }
 
         function addContactField() {
-            contactFields.push(""); // एक नया खाली बॉक्स जोड़ें
+            contactFields.push({ label: "New Title", value: "" }); // नया बॉक्स जोड़ेगा
             renderContactFields();
             renderResume();
         }
 
-        function updateContactField(index, val) {
-            contactFields[index] = val;
+        function updateContactField(index, key, val) {
+            contactFields[index][key] = val; // Title या Value अपडेट करेगा
             renderResume();
         }
 
         function deleteContactField(index) {
-            contactFields.splice(index, 1); // बॉक्स को डिलीट करें
+            contactFields.splice(index, 1); // बॉक्स को डिलीट करेगा
             renderContactFields();
             renderResume();
         }
+
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -515,8 +523,11 @@
         function renderResume() {
             const name = document.getElementById('inpName').value;
             const title = document.getElementById('inpTitle').value;
-            const contact = contactFields.filter(f => f.trim() !== "").join(' | ');
-
+            // यह टाइटल और वैल्यू को आपस में जोड़ेगा (जैसे "GitHub: link")
+            const contact = contactFields
+                .filter(f => f.value.trim() !== "")
+                .map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value)
+                .join(' | ');
             let blocksHtml = '';
             sectionsData.forEach(s => {
                 blocksHtml += `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`;
@@ -643,8 +654,12 @@
                     // 4. ऊपर के Personal Details भरें
                     document.getElementById('inpName').value = aiData.fullName || "Your Name";
                     document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                    contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => s.trim());
-renderContactFields();
+                   // AI के डेटा को नए फॉर्मेट में बदलना
+                    let aiContacts = (aiData.contactInfo || "Email | Phone").split('|');
+                    contactFields = aiContacts.map(s => {
+                        return { label: "", value: s.trim() };
+                    });
+                    renderContactFields();
 
                     // 5. हमारे डायनामिक Sections को AI के डेटा से रिप्लेस कर दें
                     sectionsData = [
