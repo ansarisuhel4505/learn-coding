@@ -280,11 +280,10 @@
                         </div>
                         <div style="flex-grow: 1;">
                             <input type="file" id="profileImgInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                            <input type="text" id="inpName" placeholder="Full Name" value="SUHEL ANSARI" onkeyup="renderResume()">
+                            <textarea id="inpName" class="mini-editor" placeholder="Full Name">SUHEL ANSARI</textarea>
                         </div>
-                    </div>
-
-                    <input type="text" id="inpTitle" placeholder="Job Title" value="Full Stack Developer" onkeyup="renderResume()" style="margin-bottom: 10px;">
+                        </div>
+                        <textarea id="inpTitle" class="mini-editor" placeholder="Job Title" style="margin-bottom: 10px;">Full Stack Developer</textarea>
                     
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
                         <label style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 10px; display: block;">Contact & Links</label>
@@ -345,22 +344,51 @@
             { label: "LinkedIn", value: "linkedin.com/in/suhel" }
         ];
 
-        function renderContactFields() {
+       function renderContactFields() {
             let html = '';
             contactFields.forEach((field, index) => {
                 html += `
-                <div style="display:flex; gap:5px; margin-bottom:5px;">
-                    <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title (e.g. GitHub)" style="width: 35%; margin-top:0; padding: 8px; font-weight:bold;">
-                    
-                    <input type="text" value="${field.value}" onkeyup="updateContactField(${index}, 'value', this.value)" placeholder="Detail / Link" style="width: 65%; margin-top:0; padding: 8px;">
-                    
-                    <button onclick="deleteContactField(${index})" style="background: #ef4444; color: white; border: none; padding: 0 12px; border-radius: 5px; cursor: pointer;" title="Delete">
+                <div style="display:flex; gap:5px; margin-bottom:8px;">
+                    <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    <div style="width: 60%;">
+                        <textarea id="contact_${index}" class="mini-editor" placeholder="Link / Detail">${field.value}</textarea>
+                    </div>
+                    <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>`;
             });
             document.getElementById('contactFieldsContainer').innerHTML = html;
+            
+            // टूलबार लोड करें
+            setTimeout(() => { initMiniEditors(); }, 100);
         }
+
+        // 🌟 MINI TOOLBAR (Bold, Underline, Size) 🌟
+        function initMiniEditors() {
+            tinymce.remove('.mini-editor');
+            tinymce.init({
+                selector: '.mini-editor',
+                menubar: false,
+                statusbar: false,
+                forced_root_block: false, // डिज़ाइन न बिगड़े इसलिए <p> टैग रोकेगा
+                toolbar: 'bold italic underline | fontsizeselect', // छोटा-बड़ा करने का ऑप्शन
+                height: 120,
+                setup: function (editor) {
+                    editor.on('input change keyup', function () {
+                        editor.save();
+                        // अगर Contact बॉक्स में टाइप किया है, तो उसे सेव करो
+                        if (editor.id.startsWith('contact_')) {
+                            let idx = parseInt(editor.id.split('_')[1]);
+                            contactFields[idx].value = editor.getContent();
+                        }
+                        renderResume(); // तुरंत राईट साइड पेज अपडेट करो
+                    });
+                }
+            });
+        }
+                    
+                    
 
         function addContactField() {
             contactFields.push({ label: "New Title", value: "" }); // नया बॉक्स जोड़ेगा
@@ -523,8 +551,8 @@
 
         // ⚙️ THE MASTER RENDER ENGINE (Har Layout ke hisab se HTML banayega)
         function renderResume() {
-            const name = document.getElementById('inpName').value;
-            const title = document.getElementById('inpTitle').value;
+            const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : document.getElementById('inpName').value;
+            const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : document.getElementById('inpTitle').value;
             // यह टाइटल और वैल्यू को आपस में जोड़ेगा (जैसे "GitHub: link")
             const contact = contactFields
                 .filter(f => f.value.trim() !== "")
@@ -692,6 +720,7 @@
         // Init
         renderContactFields();
         renderEditor();
+        initMiniEditors();
         renderResume();
         // 🤖 SECTION-SPECIFIC AI LOGIC
         async function generateSectionAI(id) {
