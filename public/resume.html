@@ -649,6 +649,81 @@
                 alert("⚠️ Failed to connect to AI server.");
             }
         }
+        // ==========================================
+        // 🌟 CANVA-STYLE FREE DRAG & DROP ON A4 PAGE 🌟
+        // ==========================================
+        let isDraggingElement = false;
+        let currentDraggable = null;
+        let offsetX = 0, offsetY = 0;
+
+        // जब माउस दबाएं (Pick up)
+        document.getElementById('resumePreview').addEventListener('mousedown', function(e) {
+            // हम Header, Section या Sidebar को खिसकाने की पावर दे रहे हैं
+            let target = e.target.closest('.res-section') || e.target.closest('.header') || e.target.closest('.sidebar');
+            
+            if (target) {
+                isDraggingElement = true;
+                currentDraggable = target;
+
+                // अगर यह पहले से फ्री नहीं है, तो इसे 'Absolute' बनाओ ताकि यह आज़ाद हो सके
+                if (window.getComputedStyle(currentDraggable).position !== 'absolute') {
+                    let rect = currentDraggable.getBoundingClientRect();
+                    let parentRect = document.getElementById('resumePreview').getBoundingClientRect();
+                    
+                    currentDraggable.style.position = 'absolute';
+                    currentDraggable.style.left = (rect.left - parentRect.left) + 'px';
+                    currentDraggable.style.top = (rect.top - parentRect.top) + 'px';
+                    currentDraggable.style.width = rect.width + 'px'; // चौड़ाई खराब न हो
+                    currentDraggable.style.margin = '0'; // पुरानी मार्जिन हटाओ
+                }
+
+                // माउस कहाँ क्लिक हुआ है, उसका हिसाब
+                let rect = currentDraggable.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                currentDraggable.style.zIndex = 1000; // इसे सबसे ऊपर ले आओ
+                currentDraggable.style.cursor = 'grabbing';
+                currentDraggable.style.border = '2px dashed #3b82f6'; // खिसकाते समय नीला बॉर्डर दिखेगा
+            }
+        });
+
+        // जब माउस हिलाएं (Move around)
+        document.addEventListener('mousemove', function(e) {
+            if (isDraggingElement && currentDraggable) {
+                let parentRect = document.getElementById('resumePreview').getBoundingClientRect();
+                
+                // नया X और Y कोआर्डिनेट सेट करो
+                let newX = e.clientX - parentRect.left - offsetX;
+                let newY = e.clientY - parentRect.top - offsetY;
+
+                currentDraggable.style.left = newX + 'px';
+                currentDraggable.style.top = newY + 'px';
+            }
+        });
+
+        // जब माउस छोड़ें (Drop)
+        document.addEventListener('mouseup', function() {
+            if (isDraggingElement && currentDraggable) {
+                isDraggingElement = false;
+                currentDraggable.style.zIndex = '';
+                currentDraggable.style.cursor = 'grab';
+                currentDraggable.style.border = 'none'; // नीला बॉर्डर हटा दो
+                currentDraggable = null;
+            }
+        });
+
+        // CSS ताकि पेज पर ले जाने पर Move वाला आइकॉन (हाथ) दिखे
+        const dragStyle = document.createElement('style');
+        dragStyle.innerHTML = `
+            #resumePreview .res-section:hover, 
+            #resumePreview .header:hover, 
+            #resumePreview .sidebar:hover { 
+                cursor: grab; 
+                outline: 1px dotted #ccc; 
+            }
+        `;
+        document.head.appendChild(dragStyle);
        
     </script>
 </body>
