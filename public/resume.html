@@ -282,6 +282,7 @@
                             <input type="file" id="profileImgInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                             <textarea id="inpName" class="mini-editor" placeholder="Full Name">SUHEL ANSARI</textarea>
                         </div>
+                          </div>
                         <textarea id="inpTitle" class="mini-editor" placeholder="Job Title" style="margin-bottom: 10px;">Full Stack Developer</textarea>
                     
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
@@ -371,7 +372,7 @@
                 menubar: false,
                 statusbar: false,
                 forced_root_block: false, // डिज़ाइन न बिगड़े इसलिए <p> टैग रोकेगा
-                toolbar: 'bold italic underline | fontsizeselect', // छोटा-बड़ा करने का ऑप्शन
+                toolbar: 'bold italic underline | fontsize',// छोटा-बड़ा करने का ऑप्शन
                 height: 120,
                 setup: function (editor) {
                     editor.on('input change keyup', function () {
@@ -412,6 +413,14 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
+
+            // 🌟 जादुई फिक्स: जैसे ही टैब खुले, एडिटर्स को तुरंत लोड कर दो!
+            if (tabId === 'dataTab') {
+                setTimeout(() => {
+                    initMiniEditors();
+                    renderEditor(); // मेन सेक्शन वाले एडिटर्स भी रिफ्रेश होंगे
+                }, 100);
+            }
         }
 
        // 🎨 THEME CHANGER (WITH WHITE MODE LOGIC)
