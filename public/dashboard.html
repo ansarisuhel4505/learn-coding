@@ -603,10 +603,31 @@ html.dark-theme .profile-info b { color: #f8fafc; }
                     return;
                 }
 
+                const now = new Date(); // अभी का असली टाइम
+
                 exams.forEach(e => {
-                    // Check if exam is already in submitted list
+                    // 🌟 NAYA: Time Lock Check Logic 🌟
+                    let isTimeValid = true;
+                    let timeMsg = `<p class="card-text" style="color: #10b981;"><b>Status:</b> 🟢 Open Now</p>`;
+                    let buttonHtml = '';
+
+                    if (e.scheduleTime) {
+                        const examStartTime = new Date(e.scheduleTime);
+                        const examEndTime = new Date(examStartTime.getTime() + e.duration * 60000);
+
+                        if (now < examStartTime) {
+                            isTimeValid = false;
+                            timeMsg = `<p class="card-text" style="color: #f59e0b;"><b>Starts:</b> ⏳ ${examStartTime.toLocaleString()}</p>`;
+                            buttonHtml = `<button class="btn btn-warning" style="cursor: not-allowed; opacity: 0.7;" disabled>⏳ Upcoming</button>`;
+                        } else if (now > examEndTime) {
+                            isTimeValid = false;
+                            timeMsg = `<p class="card-text" style="color: #ef4444;"><b>Status:</b> 🔴 Exam Over</p>`;
+                            buttonHtml = `<button class="btn btn-danger" style="cursor: not-allowed; opacity: 0.7;" disabled>❌ Missed</button>`;
+                        }
+                    }
+
+                    // अगर एग्जाम दे चुका है
                     if(submittedExams.includes(e.title)) {
-                        // 🟢 IF ATTEMPTED: Show Key & Leaderboard Buttons
                         html += `
                         <div class="card" style="border-top:4px solid #10b981; background: #f8fafc;">
                             <div class="card-body">
@@ -619,14 +640,21 @@ html.dark-theme .profile-info b { color: #f8fafc; }
                                 </div>
                             </div>
                         </div>`;
-                    } else {
-                        // 🔴 IF NOT ATTEMPTED: Show Active Exam Button
+                    } 
+                    // अगर एग्जाम नहीं दिया है (नया एग्जाम)
+                    else {
+                        // अगर टाइम सही है, तो असली 'Attempt Exam' बटन दिखाओ
+                        if (isTimeValid) {
+                            buttonHtml = `<button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button>`;
+                        }
+
                         html += `
                         <div class="card" style="border-top:4px solid #ef4444;">
                             <div class="card-body">
                                 <h3 class="card-title">${e.title}</h3>
                                 <p class="card-text">Marks: ${e.totalMarks} | Time: ${e.duration}m</p>
-                                <button onclick="openExamSetup('${e._id}', '${e.title}', ${e.duration})" class="btn btn-danger">Attempt Exam</button>
+                                ${timeMsg}
+                                ${buttonHtml}
                             </div>
                         </div>`;
                     }
@@ -637,6 +665,8 @@ html.dark-theme .profile-info b { color: #f8fafc; }
                 console.error("Error loading exams:", error);
             }
         }
+                                   
+                                
         // YAHAN TAK COPY KARKE PASTE KAREIN
 
         
@@ -818,30 +848,38 @@ function autoSaveExam(timeRemaining) {
         function renderQuestionUI() {
             const q = examData.questions[currentQIndex];
             let qHtml = `<h3>Q${currentQIndex + 1}. ${q.questionText}</h3>`;
-            q.options.forEach(opt => {
-                let isChecked = userAnswers[currentQIndex] === opt ? "checked" : "";
-                qHtml += `<label class="option-label"><input type="radio" name="currentQ" value="${opt}" ${isChecked}> ${opt}</label>`;
-            });
+            
+            // 🌟 NAYA: MCQ hai ya Numerical, wo check karega 🌟
+            if (q.type === 'mcq' || !q.type) { // (Purane questions jinme type nahi hai wo MCQ mane jayenge)
+                q.options.forEach(opt => {
+                    let isChecked = userAnswers[currentQIndex] === opt ? "checked" : "";
+                    qHtml += `<label class="option-label"><input type="radio" name="currentQ" value="${opt}" ${isChecked}> ${opt}</label>`;
+                });
+            } else if (q.type === 'numerical') {
+                let savedAns = userAnswers[currentQIndex] || "";
+                qHtml += `
+                    <div style="margin-top: 20px;">
+                        <label style="font-weight: bold; color: #3b82f6; display: block; margin-bottom: 10px;">Enter Numerical Value:</label>
+                        <input type="number" step="any" id="numericalAnsInput" value="${savedAns}" placeholder="Type your answer here..." style="width: 100%; padding: 15px; font-size: 18px; border: 2px solid #cbd5e1; border-radius: 8px; outline: none;" onkeyup="saveNumericalTemp(this.value)">
+                    </div>
+                `;
+            }
+
             document.getElementById('singleQuestionDisplay').innerHTML = qHtml;
 
             document.getElementById('prevBtn').style.visibility = currentQIndex === 0 ? 'hidden' : 'visible';
             document.getElementById('nextBtn').innerHTML = currentQIndex === examData.questions.length - 1 ? 'Save & Finish' : 'Save & Next <i class="fas fa-arrow-right"></i>';
 
+            // Palette Update (Dots Color)
             let attempted = 0, skipped = 0, unvisited = 0;
             let paletteHtml = '';
 
             for(let i=0; i<examData.questions.length; i++) {
                 let statusClass = '';
-                if(questionStatus[i] === 'answered') {
-    statusClass = 'answered'; attempted++;
-} else if(questionStatus[i] === 'skipped') {
-    statusClass = 'skipped'; skipped++;
-} else if(questionStatus[i] === 'review') {
-    statusClass = 'review'; // 💜 Naya purple color
-} else {
-    unvisited++;
-                }
-                
+                if(questionStatus[i] === 'answered') { statusClass = 'answered'; attempted++; } 
+                else if(questionStatus[i] === 'skipped') { statusClass = 'skipped'; skipped++; } 
+                else if(questionStatus[i] === 'review') { statusClass = 'review'; } 
+                else { unvisited++; }
 
                 if(i === currentQIndex) statusClass += ' active'; 
                 paletteHtml += `<div class="q-circle ${statusClass}" onclick="jumpToQuestion(${i})">${i+1}</div>`;
@@ -853,16 +891,40 @@ function autoSaveExam(timeRemaining) {
             document.getElementById('statUnvisited').innerText = unvisited;
         }
 
-        function saveCurrentAnswer() {
-            let selectedOpt = document.querySelector('input[name="currentQ"]:checked');
-            if(selectedOpt) {
-                userAnswers[currentQIndex] = selectedOpt.value;
+        // 🌟 NAYA: Numerical Value ko type karte hi save karega
+        function saveNumericalTemp(val) {
+            if(val.trim() !== "") {
+                userAnswers[currentQIndex] = val;
                 questionStatus[currentQIndex] = 'answered';
             } else {
-                if(!userAnswers[currentQIndex]) questionStatus[currentQIndex] = 'skipped';
+                delete userAnswers[currentQIndex];
+                questionStatus[currentQIndex] = 'unvisited';
             }
         }
 
+        // 🌟 UPDATE: Save Current Answer for both MCQ and Numerical
+        function saveCurrentAnswer() {
+            const q = examData.questions[currentQIndex];
+            
+            if (q.type === 'numerical') {
+                const numInput = document.getElementById('numericalAnsInput');
+                if (numInput && numInput.value.trim() !== "") {
+                    userAnswers[currentQIndex] = numInput.value;
+                    questionStatus[currentQIndex] = 'answered';
+                } else {
+                    if(!userAnswers[currentQIndex]) questionStatus[currentQIndex] = 'skipped';
+                }
+            } else {
+                let selectedOpt = document.querySelector('input[name="currentQ"]:checked');
+                if(selectedOpt) {
+                    userAnswers[currentQIndex] = selectedOpt.value;
+                    questionStatus[currentQIndex] = 'answered';
+                } else {
+                    if(!userAnswers[currentQIndex]) questionStatus[currentQIndex] = 'skipped';
+                }
+            }
+        }
+                
         function handleNext() {
             saveCurrentAnswer();
             if (currentQIndex < examData.questions.length - 1) {
