@@ -277,7 +277,13 @@
                         <div onclick="document.getElementById('profileImgInput').click()" style="width: 70px; height: 70px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
                             <i class="fas fa-camera" style="color: #64748b; font-size: 20px;"></i>
                             <img id="leftPanelImg" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
-                        </div>
+                  <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+                        <label style="font-size: 13px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">Contact, Links & Extra Info</label>
+                        <div id="contactFieldsContainer"></div>
+                        <button onclick="addContactField()" style="background: #e2e8f0; color: #0f172a; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 8px;">
+                            <i class="fas fa-plus"></i> Add Link / Info
+                        </button>
+                    </div>      </div>
                         <div style="flex-grow: 1;">
                             <input type="file" id="profileImgInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                             <input type="text" id="inpName" placeholder="Full Name" value="SUHEL ANSARI" onkeyup="renderResume()">
@@ -285,7 +291,7 @@
                     </div>
 
                     <input type="text" id="inpTitle" placeholder="Job Title" value="Full Stack Developer" onkeyup="renderResume()">
-                    <input type="text" id="inpContact" placeholder="Contact Info" value="suhel@email.com | +91 9876543210" onkeyup="renderResume()">
+                    
                 </div>
 
                 <div id="editorSections"></div>
@@ -329,6 +335,40 @@
             { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
             { id: 3, title: 'Experience & Projects', text: 'CodeMaster Platform (2025 - Present)\n- Built a full-stack LMS with AI integration.\n- Implemented auto-grading and PDF generation.' }
         ];
+        // 📞 DYNAMIC CONTACT & PERSONAL INFO LOGIC
+        // यहाँ हमने आपका असली नंबर और ईमेल डिफ़ॉल्ट डाल दिया है
+        let contactFields = ["ansarisuhel4505@gmail.com", "+91 9335067990", "Gonda, UP", "linkedin.com/in/suhel"];
+
+        function renderContactFields() {
+            let html = '';
+            contactFields.forEach((field, index) => {
+                html += `
+                <div style="display:flex; gap:5px; margin-bottom:5px;">
+                    <input type="text" value="${field}" onkeyup="updateContactField(${index}, this.value)" placeholder="Email, Phone, Address, etc." style="margin-top:0; padding: 8px;">
+                    <button onclick="deleteContactField(${index})" style="background: #ef4444; color: white; border: none; padding: 0 12px; border-radius: 5px; cursor: pointer;" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>`;
+            });
+            document.getElementById('contactFieldsContainer').innerHTML = html;
+        }
+
+        function addContactField() {
+            contactFields.push(""); // एक नया खाली बॉक्स जोड़ें
+            renderContactFields();
+            renderResume();
+        }
+
+        function updateContactField(index, val) {
+            contactFields[index] = val;
+            renderResume();
+        }
+
+        function deleteContactField(index) {
+            contactFields.splice(index, 1); // बॉक्स को डिलीट करें
+            renderContactFields();
+            renderResume();
+        }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -475,7 +515,7 @@
         function renderResume() {
             const name = document.getElementById('inpName').value;
             const title = document.getElementById('inpTitle').value;
-            const contact = document.getElementById('inpContact').value;
+            const contact = contactFields.filter(f => f.trim() !== "").join(' | ');
 
             let blocksHtml = '';
             sectionsData.forEach(s => {
@@ -632,6 +672,7 @@
         }
 
         // Init
+        renderContactFields();
         renderEditor();
         renderResume();
         // 🤖 SECTION-SPECIFIC AI LOGIC
