@@ -499,4 +499,19 @@ body.dark-theme #menu-icon {
         color: #f8fafc !important;
     }
 }
+/* ==========================================================
+   💻 DESKTOP & LAPTOP LOGIN BUTTON DARK MODE FIX 🌟
+========================================================== */
+
+/* डार्क मोड में Login का टेक्स्ट और आइकॉन (Icon) सफ़ेद (White) करना */
+body.dark-theme .auth-container .btn-login,
+body.dark-theme .auth-container .btn-login i {
+    color: #f8fafc !important;
+}
+
+/* माउस ले जाने (Hover) पर उसे शानदार ब्लू रंग देना */
+body.dark-theme .auth-container .btn-login:hover,
+body.dark-theme .auth-container .btn-login:hover i {
+    color: #3b82f6 !important;
+}
 
