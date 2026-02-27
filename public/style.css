@@ -464,3 +464,39 @@ body.dark-theme .instructor-info p {
     text-shadow: none !important;
     letter-spacing: 0.5px !important; /* अक्षरों के बीच हल्की जगह बनाएगा जिससे ब्लर नहीं लगेगा */
 }
+/* ==========================================================
+   🌟 MOBILE MENU & HAMBURGER DARK MODE FIX 🌟
+========================================================== */
+
+/* 1. हैमबर्गर आइकॉन (☰) को डार्क मोड में वाइट (सफ़ेद) करना */
+body.dark-theme #menu-icon {
+    color: #f8fafc !important;
+}
+
+/* 2. मोबाइल स्क्रीन (850px से छोटी) के लिए डार्क मेनू की स्टाइलिंग */
+@media (max-width: 850px) {
+    /* मेनू का डब्बा (Dropdown) डार्क ग्रे करना */
+    body.dark-theme .navbar {
+        background-color: #1e293b !important; 
+        border: 1px solid #334155 !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+    }
+    
+    /* मेनू के अंदर के लिंक्स वाइट करना */
+    body.dark-theme .navbar a {
+        color: #e2e8f0 !important;
+        border-bottom: 1px solid #334155 !important;
+    }
+    
+    /* होवर (Hover) करने पर ब्लू चमक */
+    body.dark-theme .navbar a:hover,
+    body.dark-theme .navbar a.active {
+        color: #3b82f6 !important;
+    }
+
+    /* मोबाइल वाले Login बटन को वाइट करना */
+    body.dark-theme .mobile-login a {
+        color: #f8fafc !important;
+    }
+}
+
