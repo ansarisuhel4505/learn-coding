@@ -15,6 +15,42 @@
         .legal-card h3 { color: #f8fafc; margin-top: 20px; }
         .legal-card p, .legal-card li { color: #94a3b8; line-height: 1.8; margin-bottom: 10px; }
         .back-btn { display: inline-block; margin-bottom: 20px; color: #3b82f6; font-weight: 600; }
+        /* ==========================================
+           🌙 UNIVERSAL DARK THEME FOR THIS PAGE 🌟
+           ========================================== */
+        body.dark-theme {
+            background-color: #0f172a !important;
+            color: #e2e8f0 !important;
+        }
+        /* सारे बॉक्सेस, कार्ड्स और साइडबार को डार्क करें */
+        body.dark-theme .card, 
+        body.dark-theme .modal-content, 
+        body.dark-theme .sidebar, 
+        body.dark-theme .left-panel, 
+        body.dark-theme .auth-container,
+        body.dark-theme .form-group {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        /* सारी हेडिंग्स और टेक्स्ट को वाइट (सफ़ेद) करें */
+        body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
+        body.dark-theme h4, body.dark-theme p, body.dark-theme label, 
+        body.dark-theme span, body.dark-theme th, body.dark-theme td {
+            color: #f8fafc !important;
+        }
+        /* सारे इनपुट, टेक्स्ट बॉक्स और टेबल को डार्क करें */
+        body.dark-theme input, body.dark-theme textarea, 
+        body.dark-theme select, body.dark-theme table {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+        /* रेज़्यूमे वाले A4 पेज को डार्क मोड में भी वाइट ही रहने दें (ताकि PDF न बिगड़े) */
+        body.dark-theme .a4-paper {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
     </style>
 </head>
 <body>
@@ -72,5 +108,11 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.documentElement.classList.add('dark-theme');
+        }
+    </script>
 </body>
 </html>
