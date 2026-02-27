@@ -54,6 +54,75 @@
             color: #0f172a !important;
         }
     </style>
+    <style>
+        /* 1. पूरे पेज का बैकग्राउंड डार्क करें (html और body दोनों) */
+        html.dark-theme, html.dark-theme body, body.dark-theme {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+
+        /* 2. धुंधलापन (Blur) खत्म करने का जादुई कोड (Text Crispness) */
+        body.dark-theme * {
+            text-shadow: none !important;
+            -webkit-font-smoothing: antialiased !important; 
+        }
+
+        /* 3. Navbar और Logo को डार्क मोड में चमकाएं */
+        body.dark-theme .top-nav, body.dark-theme .header, body.dark-theme .navbar {
+            background-color: #1e293b !important;
+            border-bottom: 1px solid #334155 !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+        }
+        body.dark-theme .logo span { color: #f8fafc !important; }
+        body.dark-theme .logo span span { color: #3b82f6 !important; }
+
+        /* 4. सारे हेडिंग्स और टेक्स्ट को वाइट करें */
+        body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, body.dark-theme h4, 
+        body.dark-theme label, body.dark-theme p, body.dark-theme span, body.dark-theme li {
+            color: #e2e8f0 !important;
+        }
+
+        /* 5. कार्ड्स, साइडबार और फॉर्म्स का बैकग्राउंड (Dark Gray) */
+        body.dark-theme .card, body.dark-theme .sidebar, 
+        body.dark-theme .left-panel, body.dark-theme .main-content,
+        body.dark-theme .form-group, body.dark-theme .modal-content,
+        body.dark-theme .auth-container, body.dark-theme .result-box {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        /* 6. इनपुट बॉक्स और टेबल को डार्क करें */
+        body.dark-theme input, body.dark-theme textarea, body.dark-theme select, 
+        body.dark-theme table, body.dark-theme th, body.dark-theme td, body.dark-theme .ans-block {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+
+        /* 7. Resume Builder के A4 पेपर को वाइट ही रखें (वरना PDF काली आएगी) */
+        body.dark-theme .a4-paper {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        body.dark-theme .a4-paper * { color: inherit !important; } /* पेपर के अंदर का टेक्स्ट नॉर्मल रहेगा */
+    </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('dark-theme');
+            });
+        }
+    </script>
+    ```
+
+### 💥 यह काम कैसे करेगा?
+1. **No More Blur:** मैंने इसमें `-webkit-font-smoothing: antialiased !important;` लगा दिया है। यह डार्क मोड में टेक्स्ट को पिक्सल-परफेक्ट (एकदम शार्प और क्रिस्प) बना देता है।
+2. **Instant Dark Mode:** स्क्रिप्ट को `<head>` में रखने से, जैसे ही स्टूडेंट दूसरे पेज पर जाएगा, पेज **सफ़ेद होकर काला नहीं होगा**, बल्कि सीधा **काला (Dark) ही लोड होगा**। 
+3. **100% Coverage:** `html` और `body` दोनों को टारगेट किया है, जिससे कहीं से भी सफ़ेद बैकग्राउंड झांकेगा नहीं।
+
+सुहेल भाई, बस अपने `admin.html`, `dashboard.html`, `resume.html` जैसे सभी पेजों में `</head>` के ठीक ऊपर यह कोड पेस्ट कर दीजिए। आपका लोगो, टेक्स्ट और पूरा पेज एकदम मक्खन की तरह डार्क मोड में सेट हो जाएगा! 🚀 ट्राई करके बताइए!
 </head>
 <body>
  <a href="/" class="back-to-home-btn">
