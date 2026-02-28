@@ -412,10 +412,51 @@ html, body {
         border-bottom: 1px solid rgba(0, 255, 204, 0.1);
     }
 
-    /* ❌ मोबाइल मेनू से "Signup Free" बटन हटाना (Hide) */
-    .navbar .btn-signup, 
+   /* 1. Signup बटन को बाहर (Header में) दिखाना */
     .auth-container .btn-signup {
-        display: none !important;
+        display: inline-block !important; /* बाहर हमेशा दिखेगा */
+        padding: 8px 15px !important;
+        font-size: 13px !important;
+        margin-right: 10px;
+        order: 1; /* अलाइनमेंट के लिए */
+    }
+
+    /* हैमबर्गर आइकॉन की पोजीशन सेट करना */
+    #menu-icon {
+        display: block !important;
+        order: 2;
+        z-index: 10001; /* मेनू के भी ऊपर */
+    }
+
+    /* 2. केवल लॉगिन और अन्य लिंक्स को मेनू के अंदर रखना */
+    .navbar .btn-signup, 
+    .navbar .btn-resume {
+        display: none !important; /* मेनू के अंदर से हटा दिया */
+    }
+
+    /* 3. Header का नया अलाइनमेंट (Logo | Signup | Hamburger) */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .auth-container {
+        display: flex;
+        align-items: center;
+        margin-left: auto; /* लोगो और बटन्स के बीच गैप */
+    }
+
+    .auth-container .btn-login {
+        display: none !important; /* लॉगिन को मेनू के अंदर भेज दिया */
+    }
+
+    /* 4. Drawer को डार्क और प्रीमियम बनाना */
+    .navbar {
+        background: rgba(5, 5, 5, 0.98) !important; /* Evil Black */
+        border-left: 2px solid var(--primary-color);
+        box-shadow: -15px 0 40px rgba(0, 255, 204, 0.2);
     }
 }
+
 
