@@ -140,6 +140,8 @@
             <h1>📝 Create Live Exam</h1>
             <div class="card">
                 <form id="examForm" onsubmit="createExam(event)">
+                    <input type="hidden" id="editExamId" value="">
+                    
                     <div style="display: flex; gap: 15px;">
                         <div class="form-group" style="flex: 2;"><label>Exam Title</label><input type="text" id="eTitle" required></div>
                         <div class="form-group" style="flex: 1;"><label>Total Marks</label><input type="number" id="eMarks" required></div>
@@ -163,7 +165,7 @@
                     <div id="questionsContainer"></div>
                     <button type="button" class="btn btn-success" onclick="addQuestionField()" style="margin-bottom: 20px;">+ Add Question</button>
                     <br>
-                    <button type="submit" class="btn" style="width: 100%;">Publish Exam</button>
+                   <button type="submit" id="submitExamBtn" class="btn" style="width: 100%;">Publish Exam</button>
                 </form>
             </div>
             <div class="card">
@@ -364,14 +366,13 @@ function processCSV() {
 async function createExam(e) {
             e.preventDefault();
             const questions = [];
-            const qBlocks = document.querySelectorAll('.question-block'); // Naya Class
+            const qBlocks = document.querySelectorAll('.question-block'); 
             
             for(let block of qBlocks) {
                 const type = block.querySelector('.qType').value;
                 questions.push({
-                    type: type, // MCQ ya Numerical
+                    type: type,
                     questionText: block.querySelector('.qText').value,
-                    // Agar Numerical hai to options blank jayenge
                     options: type === 'mcq' ? [
                         block.querySelector('.qOpt1').value, 
                         block.querySelector('.qOpt2').value, 
@@ -383,7 +384,6 @@ async function createExam(e) {
                 });
             }
 
-           // 🌟 TIME ZONE FIX: टाइम को इंटरनेशनल (ISO) फॉर्मेट में बदल कर भेजना
             let rawTime = document.getElementById('eSchedule').value;
             let finalTime = rawTime ? new Date(rawTime).toISOString() : null;
 
@@ -391,21 +391,80 @@ async function createExam(e) {
                 title: document.getElementById('eTitle').value, 
                 totalMarks: document.getElementById('eMarks').value,
                 duration: document.getElementById('eDuration').value, 
-                scheduleTime: finalTime, // अब एकदम परफेक्ट टाइम सेव होगा
+                scheduleTime: finalTime, 
                 questions: questions
             };
 
-            await fetch('/api/exams', { 
-                method: 'POST', 
+            const editId = document.getElementById('editExamId').value;
+            let url = '/api/exams';
+            let method = 'POST'; // नया एग्जाम
+
+            if(editId) {
+                url = '/api/exams/' + editId;
+                method = 'PUT'; // पुराना एडिट करना
+            }
+
+            const res = await fetch(url, { 
+                method: method, 
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify(data) 
             });
             
-            alert('Exam Published Successfully!'); 
+            const result = await res.json();
+
+            // 🚨 असली Error Checking
+            if (result.success === false) {
+                return alert("⚠️ Error: " + result.message);
+            }
+            
+            alert(editId ? '✅ Exam Updated Successfully!' : '✅ Exam Published Successfully!'); 
+            
+            // फॉर्म को वापस खाली (Reset) करना
             document.getElementById('examForm').reset(); 
+            document.getElementById('editExamId').value = '';
+            document.getElementById('submitExamBtn').innerText = 'Publish Exam';
             document.getElementById('questionsContainer').innerHTML = ''; 
             loadExams();
-        }        
+        }
+
+        // ✏️ NAYA: Exam को Edit करने का फंक्शन
+        async function editExam(id) {
+            const res = await fetch('/api/exams/' + id);
+            const exam = await res.json();
+            
+            if(!exam || exam.success === false) return alert("Exam not found!");
+
+            document.getElementById('editExamId').value = exam._id;
+            document.getElementById('eTitle').value = exam.title;
+            document.getElementById('eMarks').value = exam.totalMarks;
+            document.getElementById('eDuration').value = exam.duration;
+            
+            if (exam.scheduleTime) {
+                // टाइम को वापस इनपुट बॉक्स में सेट करने का लॉजिक
+                let d = new Date(exam.scheduleTime);
+                let tzOffset = d.getTimezoneOffset() * 60000;
+                let localISOTime = (new Date(d - tzOffset)).toISOString().slice(0, 16);
+                document.getElementById('eSchedule').value = localISOTime;
+            } else {
+                document.getElementById('eSchedule').value = '';
+            }
+
+            document.getElementById('submitExamBtn').innerText = 'Update Exam';
+
+            document.getElementById('questionsContainer').innerHTML = '';
+            qCount = 0; 
+            
+            // पुराने सवाल स्क्रीन पर लाना
+            exam.questions.forEach(q => {
+                let o1 = q.options[0] || ''; let o2 = q.options[1] || '';
+                let o3 = q.options[2] || ''; let o4 = q.options[3] || '';
+                let type = q.type || 'mcq';
+                addQuestionField(q.questionText, o1, o2, o3, o4, q.correctAnswer, q.marks, type);
+            });
+
+            window.scrollTo(0, 0); // फॉर्म भरने के लिए स्क्रीन को सबसे ऊपर ले जाना
+        }
+
         async function loadExams() {
             const res = await fetch('/api/exams');
             const exams = await res.json();
@@ -414,10 +473,15 @@ async function createExam(e) {
             exams.forEach(e => {
                 tbody.innerHTML += `<tr>
                     <td><b>${e.title}</b></td><td>${e.totalMarks}</td><td>${e.duration} mins</td>
-                    <td><button onclick="deleteExam('${e._id}')" class="btn btn-danger"><i class="fas fa-trash"></i></button></td>
+                    <td>
+                        <button onclick="editExam('${e._id}')" class="btn btn-warning" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;"><i class="fas fa-edit"></i> Edit</button>
+                        <button onclick="deleteExam('${e._id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
                 </tr>`;
             });
         }
+           
+       
         async function deleteExam(id) {
             if(confirm("Delete this exam?")) { await fetch(`/api/exams/${id}`, { method: 'DELETE' }); loadExams(); }
         }
