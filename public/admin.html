@@ -107,9 +107,9 @@
         <ul class="nav-links">
             <li class="active" onclick="switchTab('courses')"><i class="fas fa-video"></i> Manage Courses</li>
             <li onclick="switchTab('exams')"><i class="fas fa-file-alt"></i> Manage Exams</li>
-            <li onclick="switchTab('results')"><i class="fas fa-check-circle"></i> Check Copies</li>
-            <li onclick="switchTab('feedback')"><i class="fas fa-comments"></i> Student Feedback</li>
-       </ul>
+           <li onclick="switchTab('feedback')"><i class="fas fa-comments"></i> Student Feedback</li>
+            <li onclick="switchTab('students')"><i class="fas fa-users"></i> Manage Students</li>
+        </ul>
     <a href="#" onclick="adminLogout(event)" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout Admin</a>
 </div>
 
@@ -206,6 +206,27 @@
         </div>
 
     </div>
+    <div id="students-sec" class="section">
+            <h1>👥 Manage Registered Students</h1>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <input type="text" id="searchStudent" placeholder="🔍 Search by Name, Email or Roll No..." onkeyup="filterStudents()" style="flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 14px;">
+                    <span style="background: #e0e7ff; color: #4f46e5; padding: 8px 15px; border-radius: 8px; font-weight: bold;" id="totalStudentsCount">Total: 0</span>
+                </div>
+                
+                <table style="min-width: 700px;">
+                    <thead>
+                        <tr>
+                            <th>Student Details</th>
+                            <th>Contact Info</th>
+                            <th>Login Type</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
 
     <div id="checkModal" class="modal">
         <div class="modal-content">
@@ -241,6 +262,7 @@
             event.currentTarget.classList.add('active');
             
             if(tabId === 'feedback') loadFeedback(); // Load feedback when tab clicked
+            if(tabId === 'students') loadStudents(); // 🌟 NAYA
         }
 
         // --- 2. COURSE MANAGEMENT ---
@@ -654,6 +676,85 @@ function processCSV() {
                 loadFeedback(); // डिलीट होने के बाद लिस्ट को रिफ्रेश कर देगा
             }
         }
+        // ==========================================
+        // 👥 MANAGE STUDENTS LOGIC
+        // ==========================================
+        let allStudentsData = [];
+
+        async function loadStudents() {
+            try {
+                const res = await fetch('/api/admin/students');
+                const data = await res.json();
+                if(data.success) {
+                    allStudentsData = data.students;
+                    document.getElementById('totalStudentsCount').innerText = `Total: ${allStudentsData.length}`;
+                    renderStudentsTable(allStudentsData);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderStudentsTable(data) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ef4444;">No students found!</td></tr>`;
+                return;
+            }
+
+            data.forEach(s => {
+                // चेक करें कि बच्चा गूगल से आया है या फॉर्म से
+                const regMethod = s.googleId 
+                    ? `<span class="badge" style="background:#fef08a; color:#b45309;"><i class="fab fa-google"></i> Google</span>` 
+                    : `<span class="badge" style="background:#e0e7ff; color:#4f46e5;"><i class="fas fa-envelope"></i> Manual</span>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${s.username}</b><br><small style="color:#64748b;">Roll No: ${s.rollNo}</small></td>
+                        <td>${s.email}<br><small style="color:#64748b;">Mob: ${s.mobile || 'N/A'}</small></td>
+                        <td>${regMethod}</td>
+                        <td>
+                            <button onclick="adminResetPassword('${s._id}', '${s.username}')" class="btn btn-warning" style="padding: 5px 10px; font-size: 12px; margin-right: 5px;" title="Reset Password"><i class="fas fa-key"></i></button>
+                            <button onclick="deleteStudent('${s._id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" title="Delete Student"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // 🔍 Live Search
+        function filterStudents() {
+            const query = document.getElementById('searchStudent').value.toLowerCase();
+            const filtered = allStudentsData.filter(s => 
+                (s.username && s.username.toLowerCase().includes(query)) || 
+                (s.email && s.email.toLowerCase().includes(query)) || 
+                (s.rollNo && s.rollNo.toLowerCase().includes(query))
+            );
+            renderStudentsTable(filtered);
+        }
+
+        // 🗑️ Delete Student
+        async function deleteStudent(id) {
+            if(confirm("🚨 DANGER: Are you sure? All data of this student will be lost forever!")) {
+                await fetch('/api/admin/students/'+id, { method: 'DELETE' });
+                loadStudents();
+            }
+        }
+
+        // 🔑 Reset Password directly from Admin
+        async function adminResetPassword(id, name) {
+            const newPass = prompt(`Enter NEW PASSWORD for ${name}:`);
+            if(newPass && newPass.length >= 6) {
+                const res = await fetch('/api/admin/students/reset-password/'+id, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ newPassword: newPass })
+                });
+                const data = await res.json();
+                if(data.success) alert(`✅ Password for ${name} updated successfully!`);
+                else alert("❌ Error updating password.");
+            } else if (newPass) {
+                alert("⚠️ Password must be at least 6 characters.");
+            }
+        }
 
 
         // Initialize Data on Load
@@ -661,6 +762,7 @@ function processCSV() {
             loadCourses();
             loadExams();
             loadResults();
+            loadStudents(); // 🌟 NAYA
             addQuestionField(); // Initialize 1 blank question
         };
         
