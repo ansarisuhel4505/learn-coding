@@ -717,7 +717,35 @@ app.put('/api/admin/check-copy/:id', checkAdmin, async (req, res) => {
 // 🗑️ Admin Delete Options
 app.delete('/api/admin/results/:id', checkAdmin, async (req, res) => { await Result.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 app.delete('/api/admin/feedback/:id', checkAdmin, async (req, res) => { await Feedback.findByIdAndDelete(req.params.id); res.json({ success: true }); });
+// ==========================================
+// 👥 MANAGE STUDENTS APIs (Admin Only)
+// ==========================================
 
+// सारे बच्चों की लिस्ट लाना
+app.get('/api/admin/students', checkAdmin, async (req, res) => {
+    try {
+        const students = await User.find().sort({ _id: -1 }); 
+        res.json({ success: true, students });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// किसी बच्चे को डिलीट करना
+app.delete('/api/admin/students/:id', checkAdmin, async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// एडमिन द्वारा किसी बच्चे का पासवर्ड बदलना
+app.put('/api/admin/students/reset-password/:id', checkAdmin, async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        const hashedPassword = await bcrypt.hash(newPassword, 10); // पासवर्ड एन्क्रिप्ट करें
+        await User.findByIdAndUpdate(req.params.id, { password: hashedPassword });
+        res.json({ success: true, message: "Password reset successfully!" });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
 // ==========================================
 // VERCEL EXPORT (Server Start)
 // ==========================================
@@ -725,6 +753,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
