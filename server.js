@@ -331,14 +331,26 @@ app.post('/api/compile-code', async (req, res) => {
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     
-    // process.env.ADMIN_PASSWORD Vercel se aayega
-    if (password === process.env.ADMIN_PASSWORD) {
-        res.json({ success: true, message: "Welcome Admin!" });
+    // Vercel का पासवर्ड या लोकल पासवर्ड (Suhel@123)
+    if (password === (process.env.ADMIN_PASSWORD || "Suhel@123")) {
+        req.session.isAdmin = true; // 🌟 MAGIC FIX: अब गार्ड आपको नहीं रोकेगा!
+        req.session.save(() => {
+            res.json({ success: true, message: "Welcome Admin!" });
+        });
     } else {
         res.json({ success: false, message: "Incorrect Password!" });
     }
 });
 
+// 🌟 NAYA: Edit/Update Exam API 🌟
+app.put('/api/exams/:id', checkAdmin, async (req, res) => {
+    try {
+        await Exam.findByIdAndUpdate(req.params.id, req.body);
+        res.json({ success: true });
+    } catch(err) {
+        res.status(500).json({ success: false });
+    }
+});
 // ==========================================
 // 🛡️ SECURITY GUARD (IsAdmin Middleware)
 // ==========================================
@@ -642,6 +654,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
