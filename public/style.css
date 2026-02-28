@@ -191,15 +191,52 @@ html, body {
 .footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid var(--border-color); font-size: 14px; color: var(--text-muted); }
 
 /* ==========================================================
-   🌟 LIGHT MODE PERFECTION FIXES 🌟
+   🌟 LIGHT MODE PERFECTION FIXES (PREMIUM DARK HEADER & FOOTER)
 ========================================================== */
 .light-theme .evil-glow { display: none !important; } 
 .light-theme .neon-text { text-shadow: none !important; }
 .light-theme .exam-title, .light-theme .neon-icon { text-shadow: none !important; }
 .light-theme .evil-btn:hover { color: #ffffff !important; } 
-.light-theme .footer { background: var(--bg-alternate); }
 .light-theme .cta-section { background: var(--bg-main); }
 .light-theme .newsletter-form input::placeholder { color: var(--text-muted); }
+
+/* 🔥 LIGHT MODE ME BHI HEADER DARK RAHEGA */
+.light-theme .header {
+    background: rgba(5, 5, 5, 0.95) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.light-theme .header .logo, 
+.light-theme .header .nav-links a, 
+.light-theme #menu-icon {
+    color: #ffffff !important; /* Text White Rahega */
+}
+.light-theme .header .nav-links a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* 🔥 LIGHT MODE ME MOBILE MENU BHI DARK RAHEGA */
+.light-theme .navbar {
+    background: rgba(5, 5, 5, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.light-theme .navbar a {
+    color: #ffffff !important;
+}
+
+/* 🔥 LIGHT MODE ME FOOTER BHI DARK RAHEGA */
+.light-theme .footer {
+    background: #050505 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.light-theme .footer-container h4, 
+.light-theme .brand-col .logo {
+    color: #ffffff !important;
+}
+.light-theme .footer p, 
+.light-theme .links-col ul li a, 
+.light-theme .footer-bottom {
+    color: #94a3b8 !important;
+}
 
 /* ==========================================================
    🌟 FLOATING BUTTONS (HOME & DARK MODE) 🌟
@@ -271,7 +308,15 @@ html, body {
     }
 
     /* 3. Strict Horizontal Scroll Locks */
-    section, .header, .footer { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; overflow-x: hidden !important; }
+   /* 3. Strict Horizontal Scroll Locks (Header Fix) */
+    section, .footer { 
+        width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; overflow-x: hidden !important; 
+    }
+    
+    .header { 
+        width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; 
+        overflow: visible !important; /* 🔥 यही मेनू को कटने से बचाएगा! */
+    }
     h1, h2, h3, p, span, a { word-wrap: break-word !important; white-space: normal !important; }
     
     .hero { flex-direction: column !important; padding-top: 100px !important; text-align: center !important; gap: 30px; }
@@ -302,4 +347,5 @@ html, body {
     .dark-mode-btn { left: 15px; }
     .back-to-home-btn { right: 15px; }
 }
+
 
