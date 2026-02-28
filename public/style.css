@@ -231,19 +231,35 @@ html, body {
     #menu-icon { display: block !important; font-size: 28px !important; z-index: 10002; }
 
     /* 2. Thread-Style Dropdown Menu */
+   /* 2. Pro Dropdown (100% Supported Fade & Slide) */
     .navbar {
         position: absolute; top: 100%; right: 5%;
         width: auto; min-width: 190px; height: auto;
         background: var(--nav-bg); 
         backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid var(--border-color); border-radius: 12px;
-        padding: 15px; display: block;
-        clip-path: inset(0 0 100% 0); /* 🧵 The "Thread" Hide */
-        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 15px; 
+        display: flex !important; 
+        flex-direction: column;
+        
+        /* 🔥 THE FIX: यूनिवर्सल एनिमेशन (जो हर फोन में चलेगा) */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: all 0.3s ease-in-out;
         z-index: 10001;
     }
-    .navbar.active { clip-path: inset(0 0 0 0); /* 🧵 The "Thread" Show */ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
-    .light-theme .navbar.active { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    
+    .navbar.active { 
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+    }
+    
+    .light-theme .navbar.active { 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    }
 
     .navbar .nav-links { flex-direction: column !important; align-items: flex-start !important; gap: 5px !important; width: 100%; }
     .mobile-login { display: block !important; width: 100%; }
@@ -286,3 +302,4 @@ html, body {
     .dark-mode-btn { left: 15px; }
     .back-to-home-btn { right: 15px; }
 }
+
