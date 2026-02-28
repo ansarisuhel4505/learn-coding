@@ -366,40 +366,55 @@ const checkAdmin = (req, res, next) => {
 // 8. ADMIN & STUDENT APIs
 // ==========================================
 
-// 🔒 Locked Admin APIs (अब कोई हैक नहीं कर सकता)
-app.post('/api/courses', checkAdmin, async (req, res) => res.json(await Course.create(req.body)));
-app.delete('/api/courses/:id', checkAdmin, async (req, res) => { await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); });
+// 🔒 Locked Admin APIs (अब सर्वर कभी क्रैश नहीं होगा)
+app.post('/api/courses', checkAdmin, async (req, res) => {
+    try { await Course.create(req.body); res.json({ success: true }); } 
+    catch(err) { res.json({ success: false, message: err.message }); }
+});
+app.delete('/api/courses/:id', checkAdmin, async (req, res) => { 
+    await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); 
+});
 
-app.post('/api/exams', checkAdmin, async (req, res) => res.json(await Exam.create(req.body)));
-app.delete('/api/exams/:id', checkAdmin, async (req, res) => { await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); });
+app.post('/api/exams', checkAdmin, async (req, res) => {
+    try { await Exam.create(req.body); res.json({ success: true }); } 
+    catch(err) { res.json({ success: false, message: err.message }); }
+});
+app.delete('/api/exams/:id', checkAdmin, async (req, res) => { 
+    await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); 
+});
 
-// 🔓 Public APIs (Student के लिए, इनमें गार्ड नहीं लगेगा)
+// 🔓 Public APIs (Student के लिए)
 app.get('/api/courses', async (req, res) => res.json(await Course.find().sort({ createdAt: -1 })));
 app.get('/api/exams', async (req, res) => res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })));
-// 🔒 Anti-Time Hack: कोई भी बच्चा अपने कंप्यूटर का टाइम बदलकर पेपर नहीं देख सकता!
+
+// 🔒 Anti-Time Hack (स्मार्ट लॉजिक के साथ)
 app.get('/api/exams/:id', async (req, res) => {
     try {
         const exam = await Exam.findById(req.params.id);
         if (!exam) return res.json({ success: false, message: "Exam not found" });
 
-        // सर्वर का असली टाइम चेक करना
-        if (exam.scheduleTime) {
-            const now = new Date();
-            const startTime = new Date(exam.scheduleTime);
-            // 5 मिनट का ग्रेस पीरियड (Grace Period) दिया है ताकि बच्चा लेट भी आए तो दे सके
-            const endTime = new Date(startTime.getTime() + (exam.duration + 5) * 60000); 
+        // 🌟 MAGIC FIX: अगर 'Admin' एडिट कर रहा है, तो उस पर टाइम-लॉक मत लगाओ!
+        if (!(req.session && req.session.isAdmin)) {
+            // अगर स्टूडेंट है, तो टाइम चेक करो
+            if (exam.scheduleTime) {
+                const now = new Date();
+                const startTime = new Date(exam.scheduleTime);
+                const endTime = new Date(startTime.getTime() + (exam.duration + 5) * 60000); 
 
-            if (now < startTime) {
-                return res.json({ success: false, message: "🚨 Nice try! The exam has not started yet according to server time." });
-            } else if (now > endTime) {
-                return res.json({ success: false, message: "🚨 Time is over! You cannot start this exam now." });
+                if (now < startTime) {
+                    return res.json({ success: false, message: "🚨 Nice try! The exam has not started yet according to server time." });
+                } else if (now > endTime) {
+                    return res.json({ success: false, message: "🚨 Time is over! You cannot start this exam now." });
+                }
             }
         }
+        
+        // अगर सब सही है या एडमिन है, तो पेपर दे दो
         res.json(exam);
     } catch (err) {
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, message: "Server Error" });
     }
-});
+});            
 app.post('/api/my-submissions', async (req, res) => {
     const { rollNo } = req.body;
     if (!rollNo) return res.json([]);
@@ -654,6 +669,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
