@@ -259,7 +259,7 @@
         };
 
         const typed = new Typed('.multiple-text', {
-            strings: ['Full-Stack Developer', 'AI Engineer', 'Cyber Architect', 'Pro Developer',' Machine Learning',' Learn Python,java,C&C++],
+            strings: ['Full-Stack Developer', 'AI Engineer', 'Cyber Architect', 'Pro Developer',' Machine Learning',' Learn Python,java,C&C++'],
             typeSpeed: 70, backSpeed: 50, backDelay: 1000, loop: true
         });
 
@@ -336,25 +336,11 @@
                 document.getElementById('themeIcon').classList.replace('bx-sun', 'bx-moon');
             }
         }
-        // 1. Hamburger Menu Logic Fix
-const menuIcon = document.getElementById('menu-icon');
-const navbar = document.querySelector('.navbar'); // यहाँ 'navbar' ID की जगह क्लास चेक करें
-
-menuIcon.onclick = () => {
-    menuIcon.classList.toggle('bx-x'); // आइकॉन को 'X' में बदलेगा
-    navbar.classList.toggle('active'); // मेनू को अंदर लाएगा
-};
-
-// मेनू के बाहर क्लिक करने पर मेनू बंद हो जाए
-document.onclick = (e) => {
-    if (!menuIcon.contains(e.target) && !navbar.contains(e.target)) {
-        menuIcon.classList.remove('bx-x');
-        navbar.classList.remove('active');
-    }
-};
+        
     </script>
 </body>
 </html>
+
 
 
 
