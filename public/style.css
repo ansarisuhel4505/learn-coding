@@ -373,90 +373,111 @@ html, body {
     .dark-mode-btn { left: 15px !important; }
     .back-to-home-btn { right: 15px !important; }
 }
-/* 📱 Professional Side-Drawer Menu (Half Screen) */
+/* ==========================================================
+   📱 FINAL MOBILE RESPONSIVE & SIDE-DRAWER FIX
+========================================================== */
+
 @media (max-width: 850px) {
+    /* 1. Header Layout (Logo | Signup | Hamburger) */
+    .header {
+        padding: 10px 5% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* 2. Logo Size Fix */
+    .logo { font-size: 20px !important; }
+
+    /* 3. Auth Container (Sign Up Button Outside) */
+    .auth-container {
+        display: flex !important;
+        align-items: center;
+        margin-left: auto; /* Logo aur buttons ke beech gap */
+        margin-right: 10px;
+    }
+
+    /* Login ko header se chhupa do (Kyunki wo menu ke andar hai) */
+    .auth-container .btn-login {
+        display: none !important;
+    }
+
+    /* Signup button bahar chamkega */
+    .auth-container .btn-signup {
+        display: inline-block !important;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        border-radius: 4px !important;
+    }
+
+    /* 4. Hamburger Icon */
+    #menu-icon {
+        display: block !important;
+        font-size: 28px !important;
+        z-index: 10002;
+    }
+
+    /* 5. Professional Side-Drawer Menu (Half Screen) */
     .navbar {
         position: fixed;
         top: 0;
-        right: -100%; /* शुरुआत में स्क्रीन के बाहर रहेगा */
-        width: 60%;    /* स्क्रीन की आधी से थोड़ी ज़्यादा जगह लेगा */
+        right: -100%; /* Shuru me bahar */
+        width: 65%;    /* Screen ki aadhi se thodi zyada jagah */
         height: 100vh;
-        background: var(--nav-bg);
+        background: rgba(5, 5, 5, 0.98); /* Pitch Black */
         backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-left: 1px solid var(--border-color);
+        border-left: 1px solid var(--primary-color);
         display: flex;
         flex-direction: column;
-        padding: 80px 30px;
-        transition: 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* बाउंस एनीमेशन */
-        z-index: 1000;
+        padding: 80px 20px 30px;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10001;
     }
 
-    /* जब मेनू एक्टिव होगा */
+    /* Menu Active State */
     .navbar.active {
         right: 0;
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        box-shadow: -15px 0 30px rgba(0, 255, 204, 0.1);
     }
 
     .navbar .nav-links {
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 20px !important;
+        gap: 15px !important;
+        width: 100%;
     }
 
     .navbar a {
-        font-size: 18px !important;
+        font-size: 16px !important;
         font-weight: 700;
         width: 100%;
-        padding: 10px 0;
-        border-bottom: 1px solid rgba(0, 255, 204, 0.1);
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: var(--text-main) !important;
     }
 
-   /* 1. Signup बटन को बाहर (Header में) दिखाना */
-    .auth-container .btn-signup {
-        display: inline-block !important; /* बाहर हमेशा दिखेगा */
-        padding: 8px 15px !important;
-        font-size: 13px !important;
-        margin-right: 10px;
-        order: 1; /* अलाइनमेंट के लिए */
+    /* Menu ke andar se Resume aur Signup hatana (Signup bahar hai) */
+    .navbar .btn-resume,
+    .navbar .btn-signup {
+        display: none !important;
     }
 
-    /* हैमबर्गर आइकॉन की पोजीशन सेट करना */
-    #menu-icon {
-        display: block !important;
-        order: 2;
-        z-index: 10001; /* मेनू के भी ऊपर */
+    /* 6. Other Mobile Fixes (Zero Overflow) */
+    .hero {
+        flex-direction: column !important;
+        padding-top: 100px !important;
+        text-align: center !important;
     }
-
-    /* 2. केवल लॉगिन और अन्य लिंक्स को मेनू के अंदर रखना */
-    .navbar .btn-signup, 
-    .navbar .btn-resume {
-        display: none !important; /* मेनू के अंदर से हटा दिया */
-    }
-
-    /* 3. Header का नया अलाइनमेंट (Logo | Signup | Hamburger) */
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .auth-container {
-        display: flex;
-        align-items: center;
-        margin-left: auto; /* लोगो और बटन्स के बीच गैप */
-    }
-
-    .auth-container .btn-login {
-        display: none !important; /* लॉगिन को मेनू के अंदर भेज दिया */
-    }
-
-    /* 4. Drawer को डार्क और प्रीमियम बनाना */
-    .navbar {
-        background: rgba(5, 5, 5, 0.98) !important; /* Evil Black */
-        border-left: 2px solid var(--primary-color);
-        box-shadow: -15px 0 40px rgba(0, 255, 204, 0.2);
-    }
+    .hero-image-content { display: none !important; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+    .course-grid { grid-template-columns: 1fr !important; }
+    .footer-container { grid-template-columns: 1fr !important; text-align: center; }
 }
 
+/* Very Small Devices */
+@media (max-width: 480px) {
+    .navbar { width: 80%; } /* Chhote mobile me thoda aur bada menu */
+    .hero h1 { font-size: 30px !important; }
+    .back-to-home-btn, .dark-mode-btn { width: 45px; height: 45px; font-size: 20px; bottom: 20px; }
+}
 
