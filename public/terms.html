@@ -4,56 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Service - CodeMaster</title> 
-    <link rel="stylesheet" href="style.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <style>
-        .legal-container { max-width: 800px; margin: 120px auto 80px; padding: 40px; background: var(--surface-color); border-radius: 15px; border: 1px solid var(--border-color); }
-        .legal-header { border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px; }
-        .legal-header h1 { font-size: 32px; color: var(--text-main); }
-        .legal-header p { color: var(--text-muted); font-size: 14px; margin-top: 10px; }
+        :root {
+            --bg-body: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-bg: #eff6ff;
+        }
+
+        /* Dark Mode Theme */
+        html.dark-theme, html.dark-theme body, body.dark-theme {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary-bg: rgba(59, 130, 246, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        .legal-content h3 { color: var(--text-main); margin: 30px 0 15px; font-size: 20px; }
-        .legal-content p, .legal-content li { color: var(--text-muted); line-height: 1.8; margin-bottom: 15px; font-size: 15px; }
-        .legal-content ul { padding-left: 20px; margin-bottom: 20px; }
-             
+        body { 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        /* 🌟 Floating Back to Home Button */
+        .back-to-home-btn {
+            position: fixed; top: 25px; left: 25px;
+            background: var(--bg-card); color: var(--primary);
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 24px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; border: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .back-to-home-btn:hover { 
+            background: var(--primary); color: white; 
+            transform: translateY(-3px); box-shadow: 0 6px 15px rgba(59,130,246,0.3); 
+        }
+
+        /* 🌟 Main Card Container */
+        .legal-container { 
+            max-width: 850px; margin: 40px auto 20px; padding: 50px; 
+            background: var(--bg-card); border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+            border: 1px solid var(--border-color); 
+        }
+
+        .legal-header { 
+            text-align: center; border-bottom: 2px dashed var(--border-color); 
+            padding-bottom: 25px; margin-bottom: 35px; 
+        }
+        .legal-header h1 { 
+            font-size: 36px; color: var(--primary); 
+            font-weight: 700; margin-bottom: 10px;
+        }
+        .legal-header p { 
+            color: var(--text-muted); font-size: 15px; 
+            background: var(--primary-bg); display: inline-block;
+            padding: 5px 15px; border-radius: 20px; font-weight: 500;
+        }
+        
+        .legal-content h3 { 
+            color: var(--text-main); margin: 35px 0 15px; font-size: 22px; 
+            display: flex; align-items: center; gap: 10px;
+        }
+        .legal-content h3 i { color: var(--primary); font-size: 20px; }
+        
+        .legal-content p, .legal-content li { 
+            color: var(--text-muted); line-height: 1.8; margin-bottom: 15px; font-size: 15px; 
+        }
+        
+        .legal-content ul { 
+            padding-left: 20px; margin-bottom: 20px; background: var(--primary-bg);
+            padding: 20px 20px 20px 40px; border-radius: 10px; border-left: 4px solid var(--primary);
+        }
+        .legal-content li { margin-bottom: 10px; }
+        .legal-content li:last-child { margin-bottom: 0; }
+
+        .legal-content b { color: var(--text-main); font-weight: 600; }
+        .legal-content a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .legal-content a:hover { text-decoration: underline; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .legal-container { padding: 30px 20px; margin-top: 60px; }
+            .legal-header h1 { font-size: 28px; }
+            .back-to-home-btn { top: 15px; left: 15px; width: 40px; height: 40px; font-size: 20px; }
+        }
     </style>   
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+        }
+    </script>
 </head>
 <body>
- <a href="/" class="back-to-home-btn">
-    <i class='bx bx-home-heart'></i> Back to Home
-</a>
+
+    <a href="/" class="back-to-home-btn" title="Back to Home">
+        <i class='bx bxs-home-heart'></i>
+    </a>
 
     <div class="legal-container">
         <div class="legal-header">
             <h1>Terms of Service</h1>
-            <p>Effective Date: February 20, 2026</p>
+            <p><i class="far fa-calendar-alt"></i> Effective Date: February 20, 2026</p>
         </div>
 
         <div class="legal-content">
-            <p>Welcome to CodeMaster. By accessing or using our platform (learn-coding-2.onrender.com), you agree to be bound by these Terms of Service. Please read them carefully before purchasing any course.</p>
+            <p>Welcome to <b>CodeMaster</b>. By accessing or using our educational platform, you agree to be bound by these Terms of Service. Please read them carefully before purchasing any course or registering for an account.</p>
             
-            <h3>1. Account Registration & Security</h3>
-            <p>To access our courses, you must register for an account. You agree to provide accurate, current, and complete information. You are strictly responsible for maintaining the confidentiality of your password. <b>Account sharing is strictly prohibited</b> and will result in an immediate permanent ban without a refund.</p>
+            <h3><i class="fas fa-user-shield"></i> 1. Account Registration & Security</h3>
+            <p>To access our premium courses and live exams, you must register for a student account. You agree to provide accurate, current, and complete information. You are strictly responsible for maintaining the confidentiality of your password.</p>
+            <p><b>Account sharing is strictly prohibited</b> and will result in an immediate permanent ban without any refund. Our system monitors simultaneous logins and suspicious activities.</p>
 
-            <h3>2. Intellectual Property & Copyright</h3>
-            <p>All content on CodeMaster, including videos, source code, UI designs, and study materials, is the exclusive property of CodeMaster and Suhel Ansari. You are granted a limited, non-exclusive license to view the content for personal learning. You may not:</p>
+            <h3><i class="fas fa-copyright"></i> 2. Intellectual Property & Copyright</h3>
+            <p>All content on CodeMaster, including lecture videos, source code, UI designs, and study materials, is the exclusive property of CodeMaster and <b>Suhel Ansari</b>. You are granted a limited, non-exclusive license to view the content for personal learning. You may strictly not:</p>
             <ul>
-                <li>Download, record, or distribute our course videos.</li>
-                <li>Sell, rent, or sub-license material from CodeMaster.</li>
-                <li>Use our content for commercial purposes without written consent.</li>
+                <li>Download, record, screen-capture, or distribute our course videos.</li>
+                <li>Sell, rent, or sub-license material or notes from CodeMaster.</li>
+                <li>Use our proprietary content for commercial purposes without written consent.</li>
             </ul>
 
-            <h3>3. User Conduct</h3>
-            <p>As a student, you agree to interact respectfully in our community forums. Harassment, spamming, or sharing explicit content will lead to immediate account termination.</p>
+            <h3><i class="fas fa-users-cog"></i> 3. User Conduct</h3>
+            <p>As a student, you agree to interact respectfully in our community forums, feedback sections, and with our AI Chatbot. Harassment, spamming, using abusive language, or sharing explicit content will lead to immediate account termination.</p>
 
-            <h3>4. Modifications to the Service</h3>
-            <p>CodeMaster reserves the right to modify, update, or discontinue any course, feature, or pricing model at any time without prior notice.</p>
+            <h3><i class="fas fa-sync-alt"></i> 4. Modifications to the Service</h3>
+            <p>CodeMaster reserves the right to modify, update, or discontinue any course, feature, exam format, or pricing model at any time without prior notice. We strive to provide the best, most up-to-date content.</p>
             
-            <h3>Contact Us</h3>
-            <p>If you have any questions about these Terms, please contact us at <b>support@codemaster.com</b>.</p>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0 30px;">
+
+            <h3><i class="fas fa-envelope-open-text"></i> Contact Us</h3>
+            <p>If you have any questions, concerns, or feedback regarding these Terms of Service, please feel free to contact our support team at <a href="mailto:support@codemaster.com">support@codemaster.com</a>.</p>
         </div>
     </div>
+
 </body>
 </html>
