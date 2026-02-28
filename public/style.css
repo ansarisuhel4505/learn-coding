@@ -193,38 +193,6 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     .hero h1 { font-size: 46px; }
 }
 
-@media (max-width: 850px) {
-    .header { padding: 12px 20px !important; }
-    .auth-container .btn-login { display: none !important; } 
-    .mobile-login { display: block !important; } 
-    #menu-icon { display: block !important; }
-    
-    .navbar {
-        position: absolute; top: 65px; right: 5%; width: 250px; background: var(--bg-card); 
-        border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;
-        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); transition: 0.3s;
-    }
-    .navbar.active { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); box-shadow: var(--glow-shadow); }
-    .navbar .nav-links { flex-direction: column; align-items: flex-start; }
-    .navbar a { width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
-
-    .hero { flex-direction: column; padding-top: 120px; text-align: center; }
-    .hero-image-content img { width: 80%; }
-    .hero-stats { justify-content: center; width: 100%; margin: 0 auto; flex-wrap: wrap;}
-    
-    .features-content, .instructor-container { flex-direction: column; text-align: center; }
-    .features-list li { text-align: left; }
-    .footer-container { grid-template-columns: 1fr 1fr; }
-}
-
-@media (max-width: 480px) {
-    .hero h1 { font-size: 36px; }
-    .hero-buttons { flex-direction: column; }
-    .footer-container { grid-template-columns: 1fr; text-align: center; }
-    .back-to-home-btn { width: 45px; height: 45px; font-size: 22px; bottom: 20px; right: 20px; }
-    .dark-mode-btn { width: 45px; height: 45px; font-size: 22px; bottom: 20px; left: 20px; }
-}
-
 /* 🌟 FLOATING BUTTONS */
 .back-to-home-btn, .dark-mode-btn {
     position: fixed; bottom: 30px; width: 55px; height: 55px; 
@@ -332,4 +300,127 @@ html, body {
     .footer { padding: 50px 5% 30px; }
 }
 
+/* ==========================================================
+   📱 THE ULTIMATE MOBILE FIX (NO OVERFLOW - 100% FIT) 🌟
+========================================================== */
+
+/* स्क्रीन को लॉक करने के लिए सबसे जरूरी फिक्स */
+html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+/* 📱 850px से नीचे की सभी स्क्रीन्स के लिए (Tablets & Large Phones) */
+@media (max-width: 850px) {
+    /* 1. Navbar & Header */
+    .header {
+        padding: 10px 5% !important;
+        width: 100% !important;
+    }
+    
+    /* 2. Hero Section Fix */
+    .hero {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding-top: 100px !important;
+        padding-bottom: 40px !important;
+        gap: 30px !important;
+        width: 100% !important;
+    }
+    .hero-text-content {
+        width: 100% !important;
+        padding: 0 15px !important;
+    }
+    .hero h1 {
+        font-size: clamp(28px, 8vw, 38px) !important;
+        line-height: 1.2 !important;
+    }
+    .hero-image-content {
+        display: none !important; /* मोबाइल पर इमेज हटा दी ताकि स्क्रॉल न आए */
+    }
+
+    /* 3. Stats & Buttons */
+    .hero-buttons {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+    }
+    .hero-stats {
+        margin: 30px auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 10px !important;
+        padding: 15px !important;
+    }
+    .stat-item h3 { font-size: 20px !important; }
+
+    /* 4. Course Cards Grid (Sabse Zaruri) */
+    .learning-path, .live-exams {
+        padding: 60px 15px !important;
+        width: 100% !important;
+    }
+    .course-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 20px !important;
+        width: 100% !important;
+    }
+    .course-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* 5. Features & Instructor */
+    .features-content {
+        flex-direction: column !important;
+        gap: 30px !important;
+        padding: 0 15px !important;
+    }
+    .features-image { display: none !important; }
+    .instructor-container {
+        flex-direction: column !important;
+        padding: 30px 15px !important;
+        width: 100% !important;
+    }
+    .instructor-image img {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    /* 6. Footer Fix */
+    .footer-container {
+        grid-template-columns: 1fr !important;
+        text-align: center !important;
+        gap: 30px !important;
+    }
+    .footer-col { width: 100% !important; }
+    .newsletter-form { width: 100% !important; }
+}
+
+/* 📱 480px से नीचे की स्क्रीन्स के लिए (Small Mobiles) */
+@media (max-width: 480px) {
+    .hero h1 { font-size: 26px !important; }
+    .hero-buttons a {
+        width: 100% !important;
+        text-align: center;
+        justify-content: center;
+    }
+    .hero-stats {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    .back-to-home-btn, .dark-mode-btn {
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 20px !important;
+        bottom: 20px !important;
+    }
+    .dark-mode-btn { left: 15px !important; }
+    .back-to-home-btn { right: 15px !important; }
+}
 
