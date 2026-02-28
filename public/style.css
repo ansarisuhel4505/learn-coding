@@ -350,4 +350,69 @@ html, body {
     .dark-mode-btn { left: 15px; }
     .back-to-home-btn { right: 15px; }
 }
+/* ==========================================================
+   🚨 STRICT HORIZONTAL SCROLL & OVERFLOW FIX 🚨
+========================================================== */
+
+/* 1. Global Screen Lock */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100vw !important;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+@media (max-width: 850px) {
+    /* 2. Hide background Orbs on mobile (ये स्क्रीन फाड़ रहे थे) */
+    .evil-glow {
+        display: none !important;
+    }
+
+    /* 3. Stats Box Fix (अब ये 3 कॉलम की जगह एक के नीचे एक बहुत सुंदर दिखेंगे) */
+    .hero-stats {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 15px !important;
+        padding: 20px !important;
+    }
+    .stat-item {
+        width: 100% !important;
+    }
+
+    /* 4. Course Cards Fixed Width */
+    .course-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+    .course-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 5. Force All Sections to Stay Inside */
+    section, .header, .footer {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+
+    /* 6. Text Wrapping Fix (ताकि लम्बे शब्द स्क्रीन से बाहर न जाएं) */
+    h1, h2, h3, p, span, a {
+        word-wrap: break-word !important;
+        white-space: normal !important;
+    }
+    
+    /* Typing text fix */
+    .multiple-text {
+        display: inline-block;
+        white-space: pre-wrap !important;
+    }
+}
 
