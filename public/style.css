@@ -234,3 +234,36 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 .back-to-home-btn { right: 30px; background: var(--accent-red); color: white; border: 1px solid var(--accent-red); box-shadow: var(--red-glow); }
 .dark-mode-btn { left: 30px; background: var(--primary-color); color: #000; border: none; box-shadow: var(--glow-shadow); }
 .back-to-home-btn:hover, .dark-mode-btn:hover { transform: scale(1.1) translateY(-5px); }
+/* ==========================================================
+   🌟 LIGHT MODE PERFECTION FIXES 🌟
+========================================================== */
+
+/* 1. लाइट मोड में पीछे के धुंधले ग्लो (Orbs) को छिपा दें ताकि पेज क्लीन लगे */
+.light-theme .evil-glow { display: none; }
+
+/* 2. बटन पर होवर करने पर टेक्स्ट को वाइट करें (ताकि ब्लू बटन पर साफ दिखे) */
+.light-theme .evil-btn:hover { color: #ffffff !important; }
+
+/* 3. लाइट मोड में आइकॉन और हेडिंग्स की लाल शैडो हटाएं ताकि वो गंदे ना लगें */
+.light-theme .exam-title, 
+.light-theme .neon-icon { text-shadow: none !important; }
+
+/* 4. CTA (कॉल टू एक्शन) सेक्शन को लाइट मोड के हिसाब से ढालना */
+.light-theme .cta-section { background: var(--primary-bg); border-top: 1px solid var(--border-color); }
+.light-theme .cta-box { border-color: var(--border-color); box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1); }
+.light-theme .cta-box h2 { color: var(--text-main); }
+.light-theme .cta-box p { color: var(--text-muted); }
+
+/* 5. Footer (फुटर) को वाइट थीम के साथ मैच करना */
+.light-theme .footer { background: var(--bg-alternate); border-top: 1px solid var(--border-color); }
+.light-theme .footer-container h4 { color: var(--text-main); font-weight: 800; }
+.light-theme .footer p, .light-theme .footer a { color: var(--text-muted); }
+.light-theme .brand-col .logo { color: var(--text-main); }
+.light-theme .footer-bottom { border-top: 1px solid var(--border-color); }
+
+/* 6. न्यूज़लेटर इनपुट बॉक्स को सही करना */
+.light-theme .newsletter-form input { 
+    background: var(--surface-color); border-color: var(--border-color); color: var(--text-main); 
+}
+.light-theme .newsletter-form input::placeholder { color: var(--text-muted); }
+
