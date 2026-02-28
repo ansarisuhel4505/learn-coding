@@ -515,15 +515,11 @@ app.post('/api/upload-resume', upload.single('resumePdf'), async (req, res) => {
 // 🌟 9. AUTO-CHECKING & ANSWER KEY ENGINE
 // ==========================================
 
-// Auto-Submit & Check
+// 🟢 Auto-Submit, Edit & Check Engine
 app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, rollNo, mobile, examTitle, answers } = req.body;
         
-        // Security Check: Lock double attempt
-        const alreadySubmitted = await Result.findOne({ rollNo: rollNo, examTitle: examTitle });
-        if (alreadySubmitted) return res.json({ success: false, message: "❌ You have already submitted this exam! Double attempts are not allowed." });
-
         // 🟢 SMART AUTO-GRADING LOGIC (MCQ + Numerical)
         const exam = await Exam.findOne({ title: examTitle });
         let autoScore = 0;
@@ -536,35 +532,36 @@ app.post('/api/submit-exam', async (req, res) => {
                 
                 if (studentAns && studentAns !== "Skipped") {
                     let isCorrect = false;
-
                     if (q.type === 'numerical') {
-                        // अगर Numerical है, तो दोनों को Number में बदलकर चेक करो (जैसे 9.8 और 9.80 बराबर हो जाएंगे)
-                        if (parseFloat(studentAns) === parseFloat(correctAns)) {
-                            isCorrect = true;
-                        }
+                        if (parseFloat(studentAns) === parseFloat(correctAns)) isCorrect = true;
                     } else {
-                        // अगर MCQ है, तो आगे-पीछे के फालतू स्पेस हटाकर और छोटे अक्षरों (lowercase) में चेक करो
-                        if (String(studentAns).trim().toLowerCase() === String(correctAns).trim().toLowerCase()) {
-                            isCorrect = true;
-                        }
+                        if (String(studentAns).trim().toLowerCase() === String(correctAns).trim().toLowerCase()) isCorrect = true;
                     }
-
-                    if (isCorrect) {
-                        autoScore += (q.marks || 1); // सही जवाब पर मार्क्स दो
-                    }
+                    if (isCorrect) autoScore += (q.marks || 1);
                 }
             });
         }
-        // isReleased: true kar diya taaki marks turant bacche ko dikhein!
-        await Result.create({ 
-            studentName, rollNo, mobile, examTitle, 
-            studentAnswers: answers, score: autoScore, isReleased: true 
-        });
-        
-        res.json({ success: true, message: "Exam submitted & Auto-Checked successfully!" });
-    } catch (err) { res.status(500).json({ success: false, message: "Failed to submit exam" }); }
-});
 
+        // 🌟 NAYA LOGIC: अगर पहले से दिया है तो अपडेट (Edit) करो, वरना नया बनाओ
+        let existingResult = await Result.findOne({ rollNo: rollNo, examTitle: examTitle });
+        if (existingResult) {
+            existingResult.studentAnswers = answers;
+            existingResult.score = autoScore;
+            existingResult.studentName = studentName;
+            await existingResult.save();
+        } else {
+            await Result.create({ 
+                studentName, rollNo, mobile, examTitle, 
+                studentAnswers: answers, score: autoScore, isReleased: true 
+            });
+        }
+        
+        res.json({ success: true, message: "Exam Saved Successfully!" });
+    } catch (err) { 
+        console.error("Submit Error:", err);
+        res.status(500).json({ success: false, message: "Failed to submit exam." }); 
+    }
+});
 // Answer Key & Live Rank Generator
 app.post('/api/answer-key', async (req, res) => {
     try {
@@ -634,6 +631,9 @@ app.put('/api/admin/check-copy/:id', checkAdmin, async (req, res) => {
         res.json({ success: true, message: "Result Uploaded Successfully!" });
     } catch (err) { res.status(500).json({ error: "Failed to upload result" }); }
 });
+// 🗑️ Admin Delete Options
+app.delete('/api/admin/results/:id', checkAdmin, async (req, res) => { await Result.findByIdAndDelete(req.params.id); res.json({ success: true }); });
+app.delete('/api/admin/feedback/:id', checkAdmin, async (req, res) => { await Feedback.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
 // ==========================================
 // VERCEL EXPORT (Server Start)
@@ -642,6 +642,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
