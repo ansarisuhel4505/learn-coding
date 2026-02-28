@@ -4,40 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CodeMaster</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <style>
+        html.dark-theme, html.dark-theme body, body.dark-theme { background-color: #0f172a !important; color: #f8fafc !important; }
+        body.dark-theme .container, body.dark-theme .modal > div { background-color: #1e293b !important; border: 1px solid #334155 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important; }
+        body.dark-theme h2, body.dark-theme p, body.dark-theme .divider { color: #f8fafc !important; }
+        body.dark-theme input { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
+        body.dark-theme .btn-google { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
+        body.dark-theme .btn-google:hover { background-color: #334155 !important; }
+    </style>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+        }
+    </script>
+
+    <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f4f8; overflow-x: hidden;}
-        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 420px; text-align: center; }
-        .container h2 { color: #0f172a; font-size: 28px; margin-bottom: 5px; }
-        .container p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
-        .input-group { position: relative; margin-bottom: 15px; }
-        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: #3b82f6; }
-        .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn:hover { background: #2563eb; }
-        .divider { margin: 20px 0; color: #94a3b8; font-size: 14px; position: relative; }
+        body { 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
+            overflow-x: hidden; padding: 20px;
+        }
+
+        /* 🌟 Beautiful Back to Home Button */
+        .back-to-home-btn {
+            position: absolute; top: 25px; left: 25px;
+            background: white; color: #3b82f6;
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 24px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; border: 1px solid #e2e8f0; z-index: 10;
+        }
+        .back-to-home-btn:hover { background: #3b82f6; color: white; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(59,130,246,0.3); }
+
+        .container { 
+            background: white; padding: 40px; border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); width: 100%; max-width: 420px; text-align: center; 
+            transition: transform 0.3s ease;
+        }
+        .container:hover { transform: translateY(-5px); }
+        .container h2 { color: #0f172a; font-size: 28px; margin-bottom: 5px; font-weight: 700; }
+        .container h2 span { color: #3b82f6; }
+        .container p { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+        
+        .input-group { position: relative; margin-bottom: 18px; }
+        .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; }
+        .input-group input { 
+            width: 100%; padding: 14px 15px 14px 50px; 
+            border: 1.5px solid #e2e8f0; border-radius: 10px; 
+            font-size: 15px; outline: none; transition: all 0.3s ease; 
+            background: #f8fafc;
+        }
+        .input-group input:focus { border-color: #3b82f6; background: white; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+        
+        .btn { 
+            width: 100%; padding: 14px; background: #3b82f6; color: white; 
+            border: none; border-radius: 10px; font-size: 16px; font-weight: 600; 
+            cursor: pointer; transition: all 0.3s ease; margin-top: 5px; 
+            box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+        }
+        .btn:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(59,130,246,0.4); }
+
+        .divider { margin: 25px 0; color: #94a3b8; font-size: 14px; position: relative; font-weight: 500;}
         .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #e2e8f0; }
         .divider::before { left: 0; } .divider::after { right: 0; }
-        .btn-google { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-weight: 500; text-decoration: none; transition: 0.3s; }
-        .btn-google img { width: 20px; margin-right: 10px; }
-        .bottom-text { margin-top: 20px; font-size: 14px; color: #64748b; }
-        .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 500; }
-        .admin-link { display: inline-block; margin-top: 15px; font-size: 13px; color: #94a3b8; text-decoration: none; }
-       
+        
+        .btn-google { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; 
+            background: white; color: #475569; font-weight: 600; font-size: 15px; 
+            text-decoration: none; transition: all 0.3s ease; 
+        }
+        .btn-google img { width: 22px; margin-right: 12px; }
+        .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); }
+        
+        .bottom-text { margin-top: 25px; font-size: 14px; color: #64748b; }
+        .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 600; transition: 0.3s;}
+        .bottom-text a:hover { text-decoration: underline; color: #1e40af;}
+        
+        .admin-link { display: inline-block; margin-top: 20px; font-size: 13px; color: #94a3b8; text-decoration: none; font-weight: 500; padding: 8px 15px; border-radius: 20px; border: 1px solid transparent; transition: 0.3s;}
+        .admin-link:hover { background: #f1f5f9; color: #475569; border-color: #e2e8f0;}
+        
+        html.dark-theme .admin-link:hover { background: #334155; color: #e2e8f0; border-color: #475569;}
     </style>
 </head>
 <body>
+
     <a href="/" class="back-to-home-btn" title="Back to Home">
-      <i class='bx bxs-home-heart'></i>
+        <i class='bx bxs-home-heart'></i>
     </a>
 
     <div class="container">
-        <h2>Welcome Back! 👋</h2>
+        <h2>Welcome <span>Back!</span> 👋</h2>
         <p>Login to your CodeMaster Student Portal.</p>
         
         <form action="/login" method="POST">
@@ -46,15 +112,15 @@
                 <input type="text" name="loginId" placeholder="Enter Email OR Roll Number" required>
             </div>
             <div class="input-group">
-    <i class="fas fa-lock"></i>
-    <input type="password" name="password" placeholder="Enter Your Password" required>
-</div>
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Enter Your Password" required>
+            </div>
 
-<div style="text-align: right; margin-bottom: 15px;">
-    <a href="#" onclick="openForgotModal()" style="color: #3b82f6; font-size: 13px; text-decoration: none; font-weight: 500;">Forgot Password?</a>
-</div>
+            <div style="text-align: right; margin-bottom: 20px;">
+                <a href="#" onclick="openForgotModal()" style="color: #3b82f6; font-size: 13px; text-decoration: none; font-weight: 600; transition: 0.3s;">Forgot Password?</a>
+            </div>
 
-<button type="submit" class="btn">Login Securely</button>
+            <button type="submit" class="btn">Login Securely</button>
         </form>
 
         <div class="divider">OR</div>
@@ -67,88 +133,126 @@
         <p class="bottom-text">Don't have an account? <a href="/signup.html">Sign up here</a></p>
         <a href="/admin.html" class="admin-link"><i class="fas fa-user-shield"></i> Teacher / Admin Access</a>
     </div>
-    <div id="forgotPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-        <h2 style="color: #3b82f6; margin-bottom: 20px;">Reset Password</h2>
-        
-        <div id="step1-email">
-            <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">Enter your registered Email ID to receive a 6-digit OTP.</p>
-            <input type="email" id="resetEmail" placeholder="Enter Email Address" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; outline: none;">
-            <button onclick="sendOTP()" style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Send OTP to Email</button>
-        </div>
 
-        <div id="step2-otp" style="display: none;">
-            <p style="color: #10b981; margin-bottom: 15px; font-size: 14px;">OTP sent successfully to your Email! 📩</p>
-            <input type="number" id="resetOTP" placeholder="Enter 6-digit OTP" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; outline: none; letter-spacing: 5px; text-align: center; font-size: 18px;">
-            <button onclick="verifyOTP()" style="width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Verify OTP</button>
-        </div>
+    <div id="forgotPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 40px; border-radius: 20px; width: 400px; max-width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #3b82f6; margin: 0; font-size: 22px; font-weight: 700;">Reset Password</h3>
+                <span onclick="closeForgotModal()" style="cursor: pointer; color: #94a3b8; font-size: 24px; transition: 0.3s;">&times;</span>
+            </div>
+            
+            <div id="step1-email">
+                <p style="color: #64748b; margin-bottom: 20px; font-size: 14px;">Enter your registered Email ID to receive a 6-digit OTP.</p>
+                <input type="email" id="resetEmail" placeholder="e.g. student@gmail.com" style="width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; margin-bottom: 20px; outline: none; font-size: 15px;">
+                <button onclick="sendOTP()" id="btnSendOTP" style="width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 16px; box-shadow: 0 4px 10px rgba(59,130,246,0.3);">Send OTP</button>
+            </div>
 
-        <div id="step3-newpass" style="display: none;">
-            <p style="color: #3b82f6; margin-bottom: 15px; font-size: 14px;">OTP Verified! ✅ Create your new password.</p>
-            <input type="password" id="newPassword" placeholder="Enter New Password" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; outline: none;">
-            <button onclick="saveNewPassword()" style="width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Save New Password</button>
-        </div>
+            <div id="step2-otp" style="display: none;">
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 10px; border: 1px dashed #10b981; margin-bottom: 20px;">
+                    <p style="color: #10b981; font-size: 14px; font-weight: 600; margin: 0;"><i class="fas fa-check-circle"></i> OTP sent successfully!</p>
+                </div>
+                <input type="number" id="resetOTP" placeholder="• • • • • •" style="width: 100%; padding: 15px; border: 2px solid #cbd5e1; border-radius: 10px; margin-bottom: 20px; outline: none; letter-spacing: 10px; text-align: center; font-size: 24px; font-weight: bold; color: #0f172a;">
+                <button onclick="verifyOTP()" id="btnVerifyOTP" style="width: 100%; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 16px; box-shadow: 0 4px 10px rgba(16,185,129,0.3);">Verify OTP</button>
+            </div>
 
-        <button onclick="closeForgotModal()" style="margin-top: 15px; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; text-decoration: underline;">Cancel</button>
+            <div id="step3-newpass" style="display: none;">
+                <p style="color: #3b82f6; margin-bottom: 20px; font-size: 14px; font-weight: 500;">OTP Verified! ✅ Create your new password.</p>
+                <input type="password" id="newPassword" placeholder="Enter New Password" style="width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; margin-bottom: 20px; outline: none; font-size: 15px;">
+                <button onclick="saveNewPassword()" id="btnSavePass" style="width: 100%; padding: 14px; background: #8b5cf6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 16px; box-shadow: 0 4px 10px rgba(139,92,246,0.3);">Save New Password</button>
+            </div>
+
+        </div>
     </div>
-</div>
+
     <script>
         function openForgotModal() {
-    document.getElementById('forgotPassModal').style.display = 'flex';
-    document.getElementById('step1-email').style.display = 'block';
-    document.getElementById('step2-otp').style.display = 'none';
-    document.getElementById('step3-newpass').style.display = 'none';
-}
+            document.getElementById('forgotPassModal').style.display = 'flex';
+            document.getElementById('step1-email').style.display = 'block';
+            document.getElementById('step2-otp').style.display = 'none';
+            document.getElementById('step3-newpass').style.display = 'none';
+            document.getElementById('resetEmail').value = '';
+        }
 
-function closeForgotModal() { document.getElementById('forgotPassModal').style.display = 'none'; }
+        function closeForgotModal() { document.getElementById('forgotPassModal').style.display = 'none'; }
 
-// 📧 1. Send OTP Request
-async function sendOTP() {
-    const email = document.getElementById('resetEmail').value;
-    if(!email) return alert("Please enter your email!");
+        // 📧 1. Send OTP Request
+        async function sendOTP() {
+            const email = document.getElementById('resetEmail').value;
+            if(!email) return alert("Please enter your email!");
 
-    const res = await fetch('/api/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email }) });
-    const data = await res.json();
-    
-    if(data.success) {
-        document.getElementById('step1-email').style.display = 'none';
-        document.getElementById('step2-otp').style.display = 'block';
-    } else {
-        alert(data.message);
-    }
-}
+            const btn = document.getElementById('btnSendOTP');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending...`; btn.disabled = true;
 
-// 🔐 2. Verify OTP Request
-async function verifyOTP() {
-    const email = document.getElementById('resetEmail').value;
-    const otp = document.getElementById('resetOTP').value;
-    
-    const res = await fetch('/api/verify-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, otp }) });
-    const data = await res.json();
-    
-    if(data.success) {
-        document.getElementById('step2-otp').style.display = 'none';
-        document.getElementById('step3-newpass').style.display = 'block';
-    } else {
-        alert("Invalid or Expired OTP!");
-    }
-}
+            try {
+                const res = await fetch('/api/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email }) });
+                const data = await res.json();
+                
+                if(data.success) {
+                    document.getElementById('step1-email').style.display = 'none';
+                    document.getElementById('step2-otp').style.display = 'block';
+                } else {
+                    alert(data.message);
+                    btn.innerHTML = "Send OTP"; btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Network Error!");
+                btn.innerHTML = "Send OTP"; btn.disabled = false;
+            }
+        }
 
-// 💾 3. Save New Password
-async function saveNewPassword() {
-    const email = document.getElementById('resetEmail').value;
-    const newPassword = document.getElementById('newPassword').value;
-    
-    if(newPassword.length < 6) return alert("Password must be at least 6 characters!");
+        // 🔐 2. Verify OTP Request
+        async function verifyOTP() {
+            const email = document.getElementById('resetEmail').value;
+            const otp = document.getElementById('resetOTP').value;
+            if(!otp) return alert("Enter OTP!");
 
-    const res = await fetch('/api/reset-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, newPassword }) });
-    const data = await res.json();
-    
-    if(data.success) {
-        alert("🎉 Password updated successfully! Please login with your new password.");
-        closeForgotModal();
-    }
-}
+            const btn = document.getElementById('btnVerifyOTP');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying...`; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/verify-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, otp }) });
+                const data = await res.json();
+                
+                if(data.success) {
+                    document.getElementById('step2-otp').style.display = 'none';
+                    document.getElementById('step3-newpass').style.display = 'block';
+                } else {
+                    alert("Invalid or Expired OTP!");
+                    btn.innerHTML = "Verify OTP"; btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Network Error!");
+                btn.innerHTML = "Verify OTP"; btn.disabled = false;
+            }
+        }
+
+        // 💾 3. Save New Password
+        async function saveNewPassword() {
+            const email = document.getElementById('resetEmail').value;
+            const newPassword = document.getElementById('newPassword').value;
+            
+            if(newPassword.length < 6) return alert("Password must be at least 6 characters!");
+
+            const btn = document.getElementById('btnSavePass');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/reset-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, newPassword }) });
+                const data = await res.json();
+                
+                if(data.success) {
+                    alert("🎉 Password updated successfully! Please login with your new password.");
+                    closeForgotModal();
+                } else {
+                    alert(data.message);
+                    btn.innerHTML = "Save New Password"; btn.disabled = false;
+                }
+            } catch(e) {
+                alert("Network Error!");
+                btn.innerHTML = "Save New Password"; btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
