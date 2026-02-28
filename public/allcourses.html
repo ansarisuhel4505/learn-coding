@@ -189,16 +189,90 @@
     </section>
 
     <script>
+        // 🔥 10 Premium Dummy Courses (अगर डेटाबेस खाली हो तो ये दिखेंगे)
+        const defaultCourses = [
+            {
+                title: "Full-Stack Web Development (MERN)",
+                description: "Learn MongoDB, Express, React, and Node.js. Build scalable, real-world web applications from scratch.",
+                thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "Python for Data Science & AI",
+                description: "Master Python programming. Learn Pandas, NumPy, and start building your own Artificial Intelligence models.",
+                thumbnail: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "Advanced Java & DSA",
+                description: "Crack top product-based companies. Master Data Structures and Algorithms using Advanced Java concepts.",
+                thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "React Native Mobile App Dev",
+                description: "Build beautiful Android and iOS applications using a single codebase with React Native.",
+                thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "Cybersecurity & Ethical Hacking",
+                description: "Learn how to protect networks and hack systems legally. Become a certified cybersecurity expert.",
+                thumbnail: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "Cloud Computing with AWS",
+                description: "Deploy, manage, and scale applications on Amazon Web Services. Get AWS Architect ready.",
+                thumbnail: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "Machine Learning Masterclass",
+                description: "Deep dive into ML algorithms, neural networks, and Deep Learning using TensorFlow and Keras.",
+                thumbnail: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "C++ for Competitive Programming",
+                description: "Boost your problem-solving speed. Master pointers, STL, and complex algorithms in C++17.",
+                thumbnail: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "UI/UX Design Masterclass",
+                description: "Learn Figma and Adobe XD. Design stunning user interfaces and amazing user experiences.",
+                thumbnail: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            },
+            {
+                title: "DevOps & Docker Engineering",
+                description: "Automate everything! Master CI/CD pipelines, Docker containers, and Kubernetes orchestration.",
+                thumbnail: "https://images.unsplash.com/photo-1618401471353-b98a5233c591?auto=format&fit=crop&w=800&q=80",
+                videoLink: "#"
+            }
+        ];
+
         let allCourses = [];
 
-        // Fetch courses from your actual API
+        // Fetch courses from API or load Default 10 Courses
         async function fetchCourses() {
             try {
                 const res = await fetch('/api/courses');
-                allCourses = await res.json();
+                const data = await res.json();
+                
+                // अगर डेटाबेस में कोर्स हैं, तो वो दिखाओ। अगर खाली है, तो हमारे 10 डिफॉल्ट कोर्स दिखाओ!
+                if (data && data.length > 0) {
+                    allCourses = data;
+                } else {
+                    allCourses = defaultCourses; 
+                }
+                
                 renderCourses(allCourses);
             } catch (error) {
-                document.getElementById('dynamic-courses').innerHTML = `<p style="text-align:center; color:red; grid-column: 1/-1;">Error loading courses. Please check your internet connection.</p>`;
+                // अगर सर्वर बंद भी हो, तब भी 10 कोर्स दिखेंगे!
+                allCourses = defaultCourses;
+                renderCourses(allCourses);
             }
         }
 
@@ -252,6 +326,5 @@
         // Run fetch on load
         window.onload = fetchCourses;
     </script>
-
 </body>
 </html>
