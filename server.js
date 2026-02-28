@@ -364,7 +364,30 @@ app.delete('/api/exams/:id', checkAdmin, async (req, res) => { await Exam.findBy
 // 🔓 Public APIs (Student के लिए, इनमें गार्ड नहीं लगेगा)
 app.get('/api/courses', async (req, res) => res.json(await Course.find().sort({ createdAt: -1 })));
 app.get('/api/exams', async (req, res) => res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })));
-app.get('/api/exams/:id', async (req, res) => res.json(await Exam.findById(req.params.id)));
+// 🔒 Anti-Time Hack: कोई भी बच्चा अपने कंप्यूटर का टाइम बदलकर पेपर नहीं देख सकता!
+app.get('/api/exams/:id', async (req, res) => {
+    try {
+        const exam = await Exam.findById(req.params.id);
+        if (!exam) return res.json({ success: false, message: "Exam not found" });
+
+        // सर्वर का असली टाइम चेक करना
+        if (exam.scheduleTime) {
+            const now = new Date();
+            const startTime = new Date(exam.scheduleTime);
+            // 5 मिनट का ग्रेस पीरियड (Grace Period) दिया है ताकि बच्चा लेट भी आए तो दे सके
+            const endTime = new Date(startTime.getTime() + (exam.duration + 5) * 60000); 
+
+            if (now < startTime) {
+                return res.json({ success: false, message: "🚨 Nice try! The exam has not started yet according to server time." });
+            } else if (now > endTime) {
+                return res.json({ success: false, message: "🚨 Time is over! You cannot start this exam now." });
+            }
+        }
+        res.json(exam);
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
 app.post('/api/my-submissions', async (req, res) => {
     const { rollNo } = req.body;
     if (!rollNo) return res.json([]);
@@ -501,20 +524,37 @@ app.post('/api/submit-exam', async (req, res) => {
         const alreadySubmitted = await Result.findOne({ rollNo: rollNo, examTitle: examTitle });
         if (alreadySubmitted) return res.json({ success: false, message: "❌ You have already submitted this exam! Double attempts are not allowed." });
 
-        // 🟢 AUTO-GRADING LOGIC
+        // 🟢 SMART AUTO-GRADING LOGIC (MCQ + Numerical)
         const exam = await Exam.findOne({ title: examTitle });
         let autoScore = 0;
 
         if (exam) {
             exam.questions.forEach((q, index) => {
                 let qKey = `Q${index + 1}`;
-                // Compare student answer with Correct Answer
-                if (answers[qKey] === q.correctAnswer) {
-                    autoScore += (q.marks || 1); // Har sahi jawab par marks do
+                let studentAns = answers[qKey];
+                let correctAns = q.correctAnswer;
+                
+                if (studentAns && studentAns !== "Skipped") {
+                    let isCorrect = false;
+
+                    if (q.type === 'numerical') {
+                        // अगर Numerical है, तो दोनों को Number में बदलकर चेक करो (जैसे 9.8 और 9.80 बराबर हो जाएंगे)
+                        if (parseFloat(studentAns) === parseFloat(correctAns)) {
+                            isCorrect = true;
+                        }
+                    } else {
+                        // अगर MCQ है, तो आगे-पीछे के फालतू स्पेस हटाकर और छोटे अक्षरों (lowercase) में चेक करो
+                        if (String(studentAns).trim().toLowerCase() === String(correctAns).trim().toLowerCase()) {
+                            isCorrect = true;
+                        }
+                    }
+
+                    if (isCorrect) {
+                        autoScore += (q.marks || 1); // सही जवाब पर मार्क्स दो
+                    }
                 }
             });
         }
-
         // isReleased: true kar diya taaki marks turant bacche ko dikhein!
         await Result.create({ 
             studentName, rollNo, mobile, examTitle, 
@@ -602,6 +642,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
