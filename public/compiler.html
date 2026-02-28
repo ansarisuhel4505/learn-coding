@@ -22,8 +22,9 @@
         .mode-btn { padding: 10px 20px; cursor: pointer; font-weight: 600; font-size: 14px; color: #94a3b8; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .mode-btn.active { background: #3b82f6; color: white; }
         
-        .exit-btn { color: #ef4444; font-weight: bold; text-decoration: none; padding: 8px 15px; border: 1px solid #ef4444; border-radius: 5px; transition: 0.3s;}
-        .exit-btn:hover { background: #ef4444; color: white; }
+        /* 🌟 NAYA: Exit Button targeting Home Page */
+        .exit-btn { color: #ef4444; font-weight: bold; text-decoration: none; padding: 8px 15px; border: 1px solid #ef4444; border-radius: 5px; transition: 0.3s; display: flex; align-items: center; gap: 8px;}
+        .exit-btn:hover { background: #ef4444; color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
 
         /* WORKSPACE CONTAINERS */
         .workspace { display: flex; flex-grow: 1; height: calc(100vh - 70px); width: 100%; }
@@ -45,17 +46,21 @@
         .coding-left { width: 55%; display: flex; flex-direction: column; border-right: 2px solid #334155; }
         .coding-controls { padding: 12px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;}
         
-        select { background: #1e293b; color: #10b981; border: 1px solid #3b82f6; padding: 8px 12px; border-radius: 5px; outline: none; font-weight: 600; font-size: 14px; cursor: pointer; max-width: 300px;}
-        .run-btn { background: #10b981; color: white; border: none; padding: 8px 25px; border-radius: 5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.3s;}
-        .run-btn:hover { background: #059669; }
-        .run-btn:disabled { background: #64748b; cursor: not-allowed; }
+        /* 🌟 NAYA: Beautiful Dropdown for 70+ Languages */
+        select { background: #1e293b; color: #10b981; border: 1px solid #3b82f6; padding: 8px 12px; border-radius: 5px; outline: none; font-weight: 600; font-size: 14px; cursor: pointer; max-width: 350px;}
+        select optgroup { background: #0f172a; color: #94a3b8; font-style: normal; font-weight: bold; }
+        select option { color: #f8fafc; font-weight: normal; }
+
+        .run-btn { background: #10b981; color: white; border: none; padding: 8px 25px; border-radius: 5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);}
+        .run-btn:hover { background: #059669; transform: translateY(-2px); }
+        .run-btn:disabled { background: #64748b; cursor: not-allowed; transform: none; box-shadow: none;}
 
         .coding-left textarea { flex-grow: 1; background: #1e293b; color: #f8fafc; font-family: 'Courier New', monospace; padding: 20px; border: none; outline: none; resize: none; font-size: 16px; line-height: 1.6;}
 
         /* Terminal Side */
         .coding-right { width: 45%; display: flex; flex-direction: column; background: #000; }
         .terminal-header { background: #1e293b; padding: 12px 20px; font-size: 14px; color: #e2e8f0; font-weight: 600; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px;}
-        .terminal-output { flex-grow: 1; padding: 20px; font-family: monospace; font-size: 15px; color: #e2e8f0; overflow-y: auto; white-space: pre-wrap; }
+        .terminal-output { flex-grow: 1; padding: 20px; font-family: 'Courier New', Courier, monospace; font-size: 15px; color: #e2e8f0; overflow-y: auto; white-space: pre-wrap; }
         
         .text-success { color: #10b981; }
         .text-error { color: #ef4444; }
@@ -65,17 +70,13 @@
 </head>
 <body>
     
-<a href="/" class="back-to-home-btn" title="Back to Home">
-    <i class='bx bxs-home-heart'></i>
-</a>
-
     <div class="navbar">
         <h2><i class="fas fa-laptop-code"></i> Code<span>Master</span></h2>
         <div class="mode-toggle">
             <div class="mode-btn active" id="btn-web" onclick="switchMode('web')"><i class="fab fa-html5"></i> Web Developer</div>
-            <div class="mode-btn" id="btn-code" onclick="switchMode('code')"><i class="fas fa-terminal"></i> Pro Languages</div>
+            <div class="mode-btn" id="btn-code" onclick="switchMode('code')"><i class="fas fa-terminal"></i> Pro Languages (75+)</div>
         </div>
-        <a href="/dashboard.html" class="exit-btn"><i class="fas fa-sign-out-alt"></i> Exit IDE</a>
+        <a href="/" class="exit-btn"><i class="fas fa-power-off"></i> Exit IDE</a>
     </div>
 
     <div class="workspace web-workspace" id="webWorkspace">
@@ -111,24 +112,60 @@
         <div class="coding-right">
             <div class="terminal-header"><i class="fas fa-terminal"></i> Cloud Execution Terminal</div>
             <div class="terminal-output" id="terminalOutput">
-<span class="text-success">CodeMaster Private Server [JDoodle Engine]</span>
-Ready to execute code. Select a language and click Run.
+<span class="text-success">CodeMaster Private Server [Cloud Engine Active]</span>
+Ready to execute 75+ Programming Languages. Select a language and click Run.
             </div>
         </div>
     </div>
 
     <script>
-        // JDoodle Language Mapping & Versions
-        const jdoodleLangs = {
-            "python3": { name: "🐍 PYTHON", version: "4", boiler: "print('Hello CodeMaster! 🚀')\n\na = 10\nb = 20\nprint('Sum:', a + b)" },
-            "java": { name: "☕ JAVA", version: "4", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java Master! ☕\");\n    }\n}" },
-            "cpp17": { name: "⚙️ C++ (C++17)", version: "0", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++ Ninja! ⚙️\" << endl;\n    return 0;\n}" },
-            "c": { name: "🛠️ C", version: "5", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C Programmer! 🛠️\\n\");\n    return 0;\n}" },
-            "nodejs": { name: "⚡ JAVASCRIPT (Node)", version: "4", boiler: "console.log('Hello from Node.js! ⚡');\nconst arr = [1, 2, 3];\nconsole.log(arr);" },
-            "php": { name: "🐘 PHP", version: "4", boiler: "<?php\n  echo \"Hello PHP Developer! 🐘\";\n?>" },
-            "csharp": { name: "🎯 C#", version: "4", boiler: "using System;\nclass Program {\n  static void Main() {\n    Console.WriteLine(\"Hello C# World! 🎯\");\n  }\n}" },
-            "go": { name: "🐹 GO", version: "4", boiler: "package main\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello Go Developer! 🐹\")\n}" }
+        // 🌟 1. MOST POPULAR LANGUAGES (Top 15)
+        const popularLangs = {
+            "python3": { name: "🐍 Python 3", v: "4", boiler: "print('Hello CodeMaster! 🚀')\n\na = 10\nb = 20\nprint('Sum:', a + b)" },
+            "java": { name: "☕ Java", v: "4", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java Master! ☕\");\n    }\n}" },
+            "cpp17": { name: "⚙️ C++ (C++17)", v: "0", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++ Ninja! ⚙️\" << endl;\n    return 0;\n}" },
+            "c": { name: "🛠️ C", v: "5", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C Programmer! 🛠️\\n\");\n    return 0;\n}" },
+            "nodejs": { name: "⚡ JavaScript (Node.js)", v: "4", boiler: "console.log('Hello from Node.js! ⚡');\nconst arr = [1, 2, 3];\nconsole.log(arr);" },
+            "csharp": { name: "🎯 C#", v: "4", boiler: "using System;\nclass Program {\n  static void Main() {\n    Console.WriteLine(\"Hello C# World! 🎯\");\n  }\n}" },
+            "php": { name: "🐘 PHP", v: "4", boiler: "<?php\n  echo \"Hello PHP Developer! 🐘\";\n?>" },
+            "go": { name: "🐹 Go", v: "4", boiler: "package main\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello Go Developer! 🐹\")\n}" },
+            "rust": { name: "🦀 Rust", v: "4", boiler: "fn main() {\n    println!(\"Hello Rustacean! 🦀\");\n}" },
+            "swift": { name: "🍏 Swift", v: "4", boiler: "print(\"Hello Swift Developer! 🍏\")" },
+            "kotlin": { name: "🤖 Kotlin", v: "3", boiler: "fun main() {\n    println(\"Hello Kotlin Developer! 🤖\")\n}" },
+            "ruby": { name: "💎 Ruby", v: "4", boiler: "puts 'Hello Ruby Developer! 💎'" },
+            "r": { name: "📊 R", v: "4", boiler: "print(\"Hello Data Scientist! 📊\")" },
+            "sql": { name: "🗄️ SQL", v: "4", boiler: "CREATE TABLE hello (message TEXT);\nINSERT INTO hello VALUES ('Hello SQL Developer!');\nSELECT * FROM hello;" },
+            "bash": { name: "🐧 Bash", v: "4", boiler: "echo \"Hello Linux Master! 🐧\"" }
         };
+
+        // 🌟 2. EXTRA 60+ LANGUAGES SUPPORTED BY JDOODLE
+        const extraLangsData = [
+            ['ada', 'Ada', '4'], ['awk', 'AWK', '4'], ['bc', 'bc', '4'], ['brainfuck', 'Brainfuck', '0'], 
+            ['clojure', 'Clojure', '3'], ['cobol', 'COBOL', '3'], ['d', 'D', '2'], ['dart', 'Dart', '4'], 
+            ['dc', 'dc', '4'], ['elixir', 'Elixir', '4'], ['erlang', 'Erlang', '0'], ['fasm', 'FASM', '0'], 
+            ['fish', 'Fish', '4'], ['forth', 'Forth', '0'], ['fortran', 'Fortran', '4'], ['freebasic', 'FreeBasic', '1'], 
+            ['fsharp', 'F#', '2'], ['groovy', 'Groovy', '4'], ['hack', 'Hack', '0'], ['haskell', 'Haskell', '4'], 
+            ['icon', 'Icon', '1'], ['intercal', 'INTERCAL', '0'], ['j', 'J', '1'], ['julia', 'Julia', '4'], 
+            ['lua', 'Lua', '3'], ['mozart', 'Mozart', '0'], ['nasm', 'NASM', '0'], ['nemerle', 'Nemerle', '0'], 
+            ['nim', 'Nim', '4'], ['objc', 'Objective-C', '4'], ['ocaml', 'OCaml', '3'], ['octave', 'Octave', '4'], 
+            ['pascal', 'Pascal', '3'], ['perl', 'Perl', '4'], ['picolisp', 'PicoLisp', '0'], ['pike', 'Pike', '0'], 
+            ['prolog', 'Prolog', '1'], ['python2', 'Python 2', '3'], ['racket', 'Racket', '3'], ['rhino', 'Rhino JS', '1'], 
+            ['scala', 'Scala', '4'], ['scheme', 'Scheme', '2'], ['sed', 'Sed', '1'], ['smalltalk', 'Smalltalk', '0'], 
+            ['spidermonkey', 'SpiderMonkey', '1'], ['tcl', 'Tcl', '4'], ['unlambda', 'Unlambda', '0'], 
+            ['vala', 'Vala', '0'], ['vbn', 'VB.Net', '3'], ['whitespace', 'Whitespace', '0'], ['yabasic', 'Yabasic', '1'], 
+            ['zsh', 'Zsh', '4'], ['algol', 'Algol 68', '0'], ['befunge', 'Befunge', '0'], ['blockly', 'Blockly', '0'],
+            ['cameo', 'Cameo', '0'], ['chicken', 'Chicken', '0'], ['clisp', 'Common Lisp', '0'], ['cow', 'Cow', '0'],
+            ['gosh', 'Gauche', '0'], ['logo', 'Logo', '0'], ['malbolge', 'Malbolge', '0'], ['rexx', 'Rexx', '0'],
+            ['spim', 'MIPS Assembly', '0']
+        ];
+
+        const otherLangs = {};
+        extraLangsData.forEach(l => {
+            otherLangs[l[0]] = { name: "📄 " + l[1], v: l[2], boiler: `// Write your ${l[1]} code here...\n` };
+        });
+
+        // Combine both objects for execution reference
+        const allLangs = { ...popularLangs, ...otherLangs };
 
         document.addEventListener("DOMContentLoaded", () => {
             // Setup Web Code
@@ -137,12 +174,19 @@ Ready to execute code. Select a language and click Run.
             document.getElementById('jsCode').value = `console.log("Web Engine Active!");`;
             compileWeb(); 
 
-            // Setup JDoodle Dropdown
+            // 🌟 Setup Dropdown with Optgroups
             const select = document.getElementById('langSelect');
-            select.innerHTML = '';
-            for(let key in jdoodleLangs) {
-                select.innerHTML += `<option value="${key}">${jdoodleLangs[key].name}</option>`;
+            let selectHTML = `<optgroup label="🔥 Most Popular">`;
+            for(let key in popularLangs) {
+                selectHTML += `<option value="${key}">${popularLangs[key].name}</option>`;
             }
+            selectHTML += `</optgroup><optgroup label="📚 Other Languages (60+)">`;
+            for(let key in otherLangs) {
+                selectHTML += `<option value="${key}">${otherLangs[key].name}</option>`;
+            }
+            selectHTML += `</optgroup>`;
+            select.innerHTML = selectHTML;
+            
             select.value = 'python3';
             changeLanguage();
         });
@@ -172,14 +216,14 @@ Ready to execute code. Select a language and click Run.
 
         function changeLanguage() {
             const langCode = document.getElementById('langSelect').value;
-            document.getElementById('backendEditor').value = jdoodleLangs[langCode].boiler;
-            document.getElementById('terminalOutput').innerHTML = `<span class="text-info">System Ready.</span> Selected ${jdoodleLangs[langCode].name}.\nClick 'Run Code' to execute.`;
+            document.getElementById('backendEditor').value = allLangs[langCode].boiler;
+            document.getElementById('terminalOutput').innerHTML = `<span class="text-info">System Ready.</span> Selected ${allLangs[langCode].name}.\nClick 'Run Code' to execute.`;
         }
 
         async function executeCode() {
             const langCode = document.getElementById('langSelect').value;
             const code = document.getElementById('backendEditor').value;
-            const version = jdoodleLangs[langCode].version;
+            const version = allLangs[langCode].v;
             
             const terminal = document.getElementById('terminalOutput');
             const runBtn = document.getElementById('runBtn');
@@ -191,7 +235,7 @@ Ready to execute code. Select a language and click Run.
 
             runBtn.disabled = true;
             runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
-            terminal.innerHTML = `<span class="text-warning">➜ Authenticating via CodeMaster Secure API...\n➜ Executing on JDoodle Cloud...</span>\n\n`;
+            terminal.innerHTML = `<span class="text-warning">➜ Authenticating via CodeMaster Secure API...\n➜ Executing on Cloud Engine...</span>\n\n`;
 
             try {
                 const response = await fetch('/api/compile-code', {
@@ -214,7 +258,7 @@ Ready to execute code. Select a language and click Run.
                     terminal.innerHTML += `<span class="text-success">Output:</span>\n${data.output}\n<span class="text-info">Memory: ${data.memory} KB | CPU Time: ${data.cpuTime} Sec</span>`;
                 }
             } catch (error) {
-                terminal.innerHTML = `<span class="text-error">Connection Failed! Ensure Vercel Environment Variables are set.</span>`;
+                terminal.innerHTML = `<span class="text-error">Connection Failed! Ensure Backend Server is running.</span>`;
             }
 
             runBtn.disabled = false;
