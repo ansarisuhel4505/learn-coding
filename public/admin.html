@@ -362,8 +362,8 @@ function processCSV() {
     reader.readAsText(file);
 }
         
-        
-async function createExam(e) {
+// 🌟 NEW & FIXED CREATE/EDIT EXAM FUNCTION 🌟
+        async function createExam(e) {
             e.preventDefault();
             const questions = [];
             const qBlocks = document.querySelectorAll('.question-block'); 
@@ -397,34 +397,37 @@ async function createExam(e) {
 
             const editId = document.getElementById('editExamId').value;
             let url = '/api/exams';
-            let method = 'POST'; // नया एग्जाम
+            let method = 'POST'; 
 
             if(editId) {
                 url = '/api/exams/' + editId;
-                method = 'PUT'; // पुराना एडिट करना
+                method = 'PUT'; 
             }
 
-            const res = await fetch(url, { 
-                method: method, 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify(data) 
-            });
-            
-            const result = await res.json();
+            try {
+                const res = await fetch(url, { 
+                    method: method, 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(data) 
+                });
+                
+                const result = await res.json();
 
-            // 🚨 असली Error Checking
-            if (result.success === false) {
-                return alert("⚠️ Error: " + result.message);
+                if (result.success === false) {
+                    return alert("⚠️ Error: " + result.message);
+                }
+                
+                alert(editId ? '✅ Exam Updated Successfully!' : '✅ Exam Published Successfully!'); 
+                
+                document.getElementById('examForm').reset(); 
+                document.getElementById('editExamId').value = '';
+                document.getElementById('submitExamBtn').innerText = 'Publish Exam';
+                document.getElementById('questionsContainer').innerHTML = ''; 
+                loadExams();
+            } catch (err) {
+                alert("⚠️ Network or Server Error. Please check your backend.");
+                console.error(err);
             }
-            
-            alert(editId ? '✅ Exam Updated Successfully!' : '✅ Exam Published Successfully!'); 
-            
-            // फॉर्म को वापस खाली (Reset) करना
-            document.getElementById('examForm').reset(); 
-            document.getElementById('editExamId').value = '';
-            document.getElementById('submitExamBtn').innerText = 'Publish Exam';
-            document.getElementById('questionsContainer').innerHTML = ''; 
-            loadExams();
         }
 
         // ✏️ NAYA: Exam को Edit करने का फंक्शन
@@ -440,7 +443,6 @@ async function createExam(e) {
             document.getElementById('eDuration').value = exam.duration;
             
             if (exam.scheduleTime) {
-                // टाइम को वापस इनपुट बॉक्स में सेट करने का लॉजिक
                 let d = new Date(exam.scheduleTime);
                 let tzOffset = d.getTimezoneOffset() * 60000;
                 let localISOTime = (new Date(d - tzOffset)).toISOString().slice(0, 16);
@@ -450,21 +452,20 @@ async function createExam(e) {
             }
 
             document.getElementById('submitExamBtn').innerText = 'Update Exam';
-
             document.getElementById('questionsContainer').innerHTML = '';
             qCount = 0; 
             
-            // पुराने सवाल स्क्रीन पर लाना
             exam.questions.forEach(q => {
-                let o1 = q.options[0] || ''; let o2 = q.options[1] || '';
-                let o3 = q.options[2] || ''; let o4 = q.options[3] || '';
+                let o1 = q.options && q.options[0] ? q.options[0] : ''; 
+                let o2 = q.options && q.options[1] ? q.options[1] : '';
+                let o3 = q.options && q.options[2] ? q.options[2] : ''; 
+                let o4 = q.options && q.options[3] ? q.options[3] : '';
                 let type = q.type || 'mcq';
                 addQuestionField(q.questionText, o1, o2, o3, o4, q.correctAnswer, q.marks, type);
             });
 
-            window.scrollTo(0, 0); // फॉर्म भरने के लिए स्क्रीन को सबसे ऊपर ले जाना
+            window.scrollTo(0, 0); 
         }
-
         async function loadExams() {
             const res = await fetch('/api/exams');
             const exams = await res.json();
