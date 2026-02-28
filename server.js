@@ -342,15 +342,6 @@ app.post('/api/admin/login', (req, res) => {
     }
 });
 
-// 🌟 NAYA: Edit/Update Exam API 🌟
-app.put('/api/exams/:id', checkAdmin, async (req, res) => {
-    try {
-        await Exam.findByIdAndUpdate(req.params.id, req.body);
-        res.json({ success: true });
-    } catch(err) {
-        res.status(500).json({ success: false });
-    }
-});
 // ==========================================
 // 🛡️ SECURITY GUARD (IsAdmin Middleware)
 // ==========================================
@@ -362,6 +353,17 @@ const checkAdmin = (req, res, next) => {
     // वरना सीधा हैकर को एरर फेंक कर मारो!
     return res.status(403).json({ success: false, message: "🚨 Unauthorized! Admin access required." });
 };
+
+// 🌟 NAYA: Edit/Update Exam API 🌟
+app.put('/api/exams/:id', checkAdmin, async (req, res) => {
+    try {
+        await Exam.findByIdAndUpdate(req.params.id, req.body);
+        res.json({ success: true });
+    } catch(err) {
+        res.status(500).json({ success: false });
+    }
+});
+
 // ==========================================
 // 8. ADMIN & STUDENT APIs
 // ==========================================
@@ -669,6 +671,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
