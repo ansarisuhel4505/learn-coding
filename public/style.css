@@ -107,7 +107,19 @@ html, body {
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
 .evil-badge { display: inline-block; padding: 8px 18px; background: rgba(255, 0, 60, 0.1); color: var(--accent-red); border-radius: 4px; font-weight: 700; font-size: 13px; margin-bottom: 25px; border: 1px solid rgba(255, 0, 60, 0.3); text-transform: uppercase; letter-spacing: 2px; }
-.hero h1 { font-size: 58px; line-height: 1.1; margin-bottom: 20px; color: var(--text-main); font-weight: 800;}
+.hero h1 { 
+    font-size: 58px; 
+    line-height: 1.1; 
+    margin-bottom: 20px; 
+    color: var(--text-main); 
+    font-weight: 800;
+}
+/* 🔥 NAYA FIX: Typing text ko screen fadne se rokne ke liye */
+.multiple-text { 
+    white-space: pre-wrap !important; 
+    word-break: break-word !important; 
+    display: inline-block;
+}
 .hero p { color: var(--text-muted); font-size: 17px; line-height: 1.7; margin-bottom: 40px; max-width: 550px; }
 
 .hero-buttons { display: flex; gap: 20px; margin-bottom: 50px; }
@@ -338,3 +350,4 @@ html, body {
     .dark-mode-btn { left: 15px; }
     .back-to-home-btn { right: 15px; }
 }
+
