@@ -475,6 +475,28 @@ app.post('/api/profile', async (req, res) => {
         res.json({ success: false, message: "Server error while fetching profile." });
     }
 });
+// 🌟 NAYA: Edit/Update Profile API
+app.put('/api/profile/update', async (req, res) => {
+    try {
+        const { rollNo, mobile, newPassword } = req.body;
+        const user = await User.findOne({ rollNo });
+        
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        // मोबाइल नंबर अपडेट करें
+        if (mobile) user.mobile = mobile;
+        
+        // अगर बच्चे ने नया पासवर्ड डाला है, तो उसे भी एन्क्रिप्ट (Secure) करके सेव करें
+        if (newPassword && newPassword.trim() !== "") {
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        await user.save();
+        res.json({ success: true, message: "Profile updated successfully!" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Server error while updating profile." });
+    }
+});
 // ==========================================
 // 🤖 FINAL FIXED AI DOUBT SOLVER ROUTE
 // ==========================================
@@ -703,6 +725,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
