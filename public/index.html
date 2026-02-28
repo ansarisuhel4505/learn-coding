@@ -22,12 +22,10 @@
             <i class='bx bx-code-block'></i> Code<span class="neon-text">Master</span>
         </a>
 
-        <nav class="navbar" id="navbar">
+        <nav class="navbar">
             <ul class="nav-links">
                 <li><a href="/" class="active"><i class='bx bx-home'></i> Home</a></li>
-                <a href="/resume.html" class="btn-resume">
-                    <i class="bx bx-file"></i> RESUME
-                </a>
+                <li><a href="/resume.html"><i class="bx bx-file"></i> Resume</a></li>
                 <li><a href="/compiler.html"><i class='bx bx-terminal'></i> Compiler</a></li>
                 <li><a href="#" onclick="checkLogin(event)"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
                 <li><a href="/admin.html"><i class='bx bx-shield-quarter'></i> Admin</a></li>
@@ -35,13 +33,14 @@
             </ul>
         </nav>
 
-        <div class="auth-container" id="auth-buttons">
+        <div class="auth-container">
             <a href="/login.html" class="btn-login"><i class='bx bx-log-in'></i> Login</a>
             <a href="/signup.html" class="btn-signup evil-btn">Sign Up Free</a>
         </div>
 
         <div class="bx bx-menu" id="menu-icon"></div>
     </header>
+                
 
     <section class="hero" id="home">
         <div class="hero-text-content">
@@ -250,19 +249,34 @@
     
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     <script>
-        const menuIcon = document.getElementById('menu-icon');
-        const navbar = document.getElementById('navbar');
+        // 1. Typewriter Effect (Fixed Error: Missing Quotes)
+        const typed = new Typed('.multiple-text', {
+            strings: ['Full-Stack Developer', 'AI Engineer', 'Cyber Architect', 'Pro Developer', 'Machine Learning', 'Python, Java, C & C++'],
+            typeSpeed: 70, 
+            backSpeed: 50, 
+            backDelay: 1000, 
+            loop: true
+        });
 
-        menuIcon.onclick = () => {
+        // 2. Hamburger Menu Logic (Signup bahar rahega)
+        const menuIcon = document.getElementById('menu-icon');
+        const navbar = document.querySelector('.navbar');
+
+        menuIcon.onclick = (e) => {
+            e.stopPropagation(); 
             menuIcon.classList.toggle('bx-x');
             navbar.classList.toggle('active');
         };
 
-        const typed = new Typed('.multiple-text', {
-            strings: ['Full-Stack Developer', 'AI Engineer', 'Cyber Architect', 'Pro Developer',' Machine Learning',' Learn Python,java,C&C++'],
-            typeSpeed: 70, backSpeed: 50, backDelay: 1000, loop: true
+        // Bahar click karne par band hona
+        document.addEventListener('click', (e) => {
+            if (!menuIcon.contains(e.target) && !navbar.contains(e.target)) {
+                menuIcon.classList.remove('bx-x');
+                navbar.classList.remove('active');
+            }
         });
 
+        // 3. Dynamic Courses & Exams
         window.addEventListener('DOMContentLoaded', () => {
             fetchPublicCourses();
             fetchPublicExams();
@@ -318,28 +332,21 @@
             else window.location.href = "/login.html";
         }
 
-        // Force Dark Mode but allow toggle for users who want Light mode
         function toggleDarkMode() {
             document.body.classList.toggle('light-theme');
+            const icon = document.getElementById('themeIcon');
             if (document.body.classList.contains('light-theme')) {
                 localStorage.setItem('theme', 'light');
-                document.getElementById('themeIcon').classList.replace('bx-sun', 'bx-moon');
+                icon.classList.replace('bx-sun', 'bx-moon');
             } else {
                 localStorage.setItem('theme', 'dark');
-                document.getElementById('themeIcon').classList.replace('bx-moon', 'bx-sun');
+                icon.classList.replace('bx-moon', 'bx-sun');
             }
         }
-
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-theme');
-            if(document.getElementById('themeIcon')) {
-                document.getElementById('themeIcon').classList.replace('bx-sun', 'bx-moon');
-            }
-        }
-        
     </script>
 </body>
 </html>
+
 
 
 
