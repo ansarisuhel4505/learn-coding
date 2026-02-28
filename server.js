@@ -186,26 +186,88 @@ passport.deserializeUser(async (id, done) => {
 // ==========================================
 // 6. ROUTES: SIGNUP & LOGIN (1000-2000 Limit)
 // ==========================================
-app.post('/signup', async (req, res) => {
+// ==========================================
+// 🚀 SECURE SIGNUP (OTP VERIFICATION SYSTEM)
+// ==========================================
+
+const pendingSignups = {}; // जो बच्चे OTP का इंतज़ार कर रहे हैं, उनका डेटा यहाँ सेव होगा
+
+// 1️⃣ Step 1: फॉर्म सबमिट करने पर OTP भेजना
+app.post('/api/signup-init', async (req, res) => {
     try {
         const { username, email, password, mobile, rollNo } = req.body; 
         
+        // 1. Roll No चेक करो
         const rNum = parseInt(rollNo);
         if (isNaN(rNum) || rNum < 1000 || rNum > 2000) {
-            return res.send("<script>alert('❌ Invalid Roll No! Only Roll Numbers between 1000 and 2000 are allowed.'); window.location.href='/signup.html';</script>");
+            return res.json({ success: false, message: '❌ Invalid Roll No! Must be between 1000 and 2000.' });
         }
 
+        // 2. चेक करो कि ईमेल या रोल नंबर पहले से रजिस्टर तो नहीं है
         const existingUser = await User.findOne({ $or: [{ email }, { rollNo }] });
-        if(existingUser) return res.send("<script>alert('Email or Roll No already registered!'); window.location.href='/signup.html';</script>");
-        
-        // 🌟 MAGIC: Password ko encrypt (hash) karna
-        const hashedPassword = await bcrypt.hash(password, 10);
+        if(existingUser) return res.json({ success: false, message: '❌ Email or Roll No already registered!' });
 
-        await User.create({ username, email, password: hashedPassword, mobile, rollNo });
-        sendWelcomeEmail(email, username); 
-        res.redirect('/login.html?signup=success');
-    } catch (err) { res.send("Error during signup."); }
+        // 3. 6-digit का OTP बनाओ
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // 4. बच्चे का डेटा 10 मिनट के लिए टेम्परेरी मेमोरी में सेव करो
+        pendingSignups[email] = {
+            userData: { username, email, password, mobile, rollNo },
+            otp: otp,
+            expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
+        };
+
+        // 5. ईमेल पर OTP भेजो
+        const mailOptions = {
+            from: `"CodeMaster Verification" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Verify Your CodeMaster Account 🚀',
+            html: `<h2>Welcome ${username}!</h2>
+                   <p>Your OTP to verify your email and create your account is: <b style="font-size: 24px; color: #3b82f6; letter-spacing: 2px;">${otp}</b></p>
+                   <p>This OTP is valid for 10 minutes. Do not share it with anyone.</p>`
+        };
+        
+        await transporter.sendMail(mailOptions);
+        res.json({ success: true, message: 'OTP sent successfully to your email!' });
+
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false, message: 'Server error during signup initialization.' });
+    }
 });
+
+// 2️⃣ Step 2: OTP चेक करके असली अकाउंट बनाना
+app.post('/api/signup-verify', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const pending = pendingSignups[email];
+
+        // चेक करो कि OTP सही है और टाइम एक्सपायर नहीं हुआ है
+        if (pending && pending.otp === otp && pending.expiresAt > Date.now()) {
+            
+            const { username, password, mobile, rollNo } = pending.userData;
+            
+            // पासवर्ड को हैकर्स से बचाने के लिए एन्क्रिप्ट करो
+            const hashedPassword = await bcrypt.hash(password, 10);
+            
+            // डेटाबेस में असली अकाउंट बनाओ!
+            await User.create({ username, email, password: hashedPassword, mobile, rollNo });
+            
+            // मेमोरी से कचरा साफ करो
+            delete pendingSignups[email];
+            
+            // वेलकम ईमेल भेजो
+            sendWelcomeEmail(email, username);
+
+            res.json({ success: true, message: 'Account created successfully!' });
+        } else {
+            res.json({ success: false, message: '❌ Invalid or Expired OTP.' });
+        }
+    } catch (err) {
+        res.json({ success: false, message: 'Error creating account.' });
+    }
+});
+       
 
 app.post('/login', async (req, res) => {
     try {
@@ -753,6 +815,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
