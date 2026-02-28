@@ -1,517 +1,236 @@
-/* Laptop pe Menu wala login hide rahega */
-.mobile-login { display: none; }
-
 /* ==========================================================
-   Google Fonts & Global Variables (Premium Color Palette)
+   🔥 THE ULTIMATE "EVIL / CYBERPUNK" CSS 
 ========================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Unique Professional Background Colors */
-    --bg-main: #f0f4f8;        /* Soft Slate Gray for a premium tech feel */
-    --bg-alternate: #ffffff;   /* Pure White for alternating sections */
-    --surface-color: #ffffff;  /* White for cards */
+    /* Dark Theme (Default Hacker Vibe) */
+    --bg-main: #050505;          /* Pitch Black */
+    --bg-alternate: #0a0a0a;     /* Slightly lighter black */
+    --surface-color: rgba(15, 23, 42, 0.7); /* Glass effect */
     
-    /* Text Colors */
-    --text-main: #0f172a;      /* Deep Midnight Blue for headings */
-    --text-muted: #64748b;     /* Professional Gray for paragraphs */
+    --text-main: #ffffff;        
+    --text-muted: #94a3b8;       
     
-    /* Accents */
-    --primary-color: #2563eb;  /* Royal Blue */
+    /* The "Evil" Accents (Neon Cyan & Crimson Red) */
+    --primary-color: #00ffcc;    /* Neon Cyan */
+    --primary-hover: #00ccaa;
+    --accent-red: #ff003c;       /* Cyberpunk Red */
+    --accent-purple: #8b5cf6;
+    
+    --border-color: rgba(0, 255, 204, 0.2); 
+    --nav-bg: rgba(5, 5, 5, 0.8);
+    --glow-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+    --red-glow: 0 0 20px rgba(255, 0, 60, 0.5);
+}
+
+/* Light Theme (For the toggle) */
+.light-theme {
+    --bg-main: #f8fafc;
+    --bg-alternate: #ffffff;
+    --surface-color: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --primary-color: #2563eb;
     --primary-hover: #1d4ed8;
-    --accent-green: #10b981;   
+    --accent-red: #ef4444;
     --border-color: #e2e8f0;
     --nav-bg: rgba(255, 255, 255, 0.95);
+    --glow-shadow: 0 10px 30px rgba(37, 99, 235, 0.15);
+    --red-glow: 0 10px 30px rgba(239, 68, 68, 0.15);
 }
 
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-    text-decoration: none; list-style: none;
-    scroll-behavior: smooth;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; text-decoration: none; list-style: none; scroll-behavior: smooth; }
 
-body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; }
-
-/* Alternating Background Utility Class */
+body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; transition: 0.3s; }
 .bg-alternate { background: var(--bg-alternate) !important; }
 
+/* 🌟 BACKGROUND GLOW EFFECTS */
+.evil-glow {
+    position: absolute; border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none;
+}
+.orb-1 { width: 400px; height: 400px; background: rgba(0, 255, 204, 0.15); top: -100px; left: -100px; }
+.orb-2 { width: 500px; height: 500px; background: rgba(255, 0, 60, 0.1); top: 40%; right: -200px; }
+
+/* 🌟 NEON TEXT UTILITY */
+.neon-text { color: var(--primary-color); text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
+.light-theme .neon-text { text-shadow: none; }
 
 /* ==========================================================
-   1. HEADER & NAVBAR (UPDATED)
+   1. HEADER & NAVBAR
 ========================================================== */
 .header {
-    position: fixed; top: 0; left: 0; width: 100%;
-    padding: 15px 8%; background: var(--nav-bg); backdrop-filter: blur(12px);
-    display: flex; justify-content: space-between; align-items: center;
-    z-index: 1000; border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    /* Naya: Flex-wrap ensure karega items bahar na girein chhoti screen par bhi */
-    flex-wrap: nowrap; 
+    position: fixed; top: 0; left: 0; width: 100%; padding: 15px 8%; background: var(--nav-bg); 
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    display: flex; justify-content: space-between; align-items: center; z-index: 1000; 
+    border-bottom: 1px solid var(--border-color); flex-wrap: nowrap; 
 }
+.logo { font-size: 26px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+.logo i { color: var(--primary-color); font-size: 32px; text-shadow: var(--glow-shadow); }
 
-.logo { font-size: 26px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-.logo span { color: var(--primary-color); }
-.logo i { color: var(--primary-color); font-size: 32px; }
+.navbar .nav-links { display: flex; gap: 25px; align-items: center; }
+.navbar a { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+.navbar a:hover, .navbar a.active { color: var(--primary-color); text-shadow: 0 0 8px rgba(0, 255, 204, 0.6); }
 
-.navbar .nav-links { display: flex; gap: 20px; align-items: center; margin: 0; padding: 0;}
-.navbar a { 
-    display: flex; align-items: center; gap: 6px; 
-    font-size: 15px; font-weight: 500; color: var(--text-muted); transition: 0.3s; 
-}
-.navbar a i { font-size: 18px; }
-.navbar a:hover, .navbar a.active { color: var(--primary-color); }
+.btn-resume { background: linear-gradient(45deg, #ff003c, #8b5cf6); color: white !important; padding: 8px 18px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: var(--red-glow); }
+.btn-resume:hover { transform: scale(1.05); }
 
-.auth-container { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
-.btn-login { display: flex; align-items: center; gap: 5px; color: var(--text-main); font-weight: 600; font-size: 15px; transition: 0.3s; }
+.auth-container { display: flex; gap: 15px; align-items: center; }
+.btn-login { color: var(--text-main); font-weight: 600; font-size: 15px; }
 .btn-login:hover { color: var(--primary-color); }
-.btn-signup { background: var(--primary-color); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: 0.3s; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); white-space: nowrap; }
-.btn-signup:hover { background: var(--primary-hover); transform: translateY(-2px); }
+.evil-btn {
+    background: transparent; color: var(--primary-color); padding: 10px 25px; border-radius: 4px; 
+    font-weight: 700; border: 1px solid var(--primary-color); transition: 0.3s;
+    box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2), 0 0 15px rgba(0, 255, 204, 0.2);
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.evil-btn:hover { background: var(--primary-color); color: #000; box-shadow: 0 0 25px var(--primary-color); transform: translateY(-2px); }
 
 #menu-icon { font-size: 32px; color: var(--text-main); cursor: pointer; display: none; }
-
-/* Desktop par Menu wala login hide rahega */
 .mobile-login { display: none; }
-
 
 /* ==========================================================
    2. HERO SECTION
 ========================================================== */
-.hero { min-height: 100vh; padding: 140px 8% 80px; display: flex; align-items: center; justify-content: space-between; gap: 50px; background: var(--bg-main); }
-.hero-text-content { flex: 1.2; }
-.hero-image-content { flex: 1; text-align: right; }
-.hero-image-content img { width: 100%; max-width: 550px; border-radius: 20px; box-shadow: 0 30px 60px rgba(37, 99, 235, 0.15); animation: float 4s ease-in-out infinite; }
+.hero { min-height: 100vh; padding: 150px 8% 80px; display: flex; align-items: center; justify-content: space-between; gap: 50px; position: relative; }
+.hero-text-content { flex: 1.2; z-index: 2; }
+.hero-image-content { flex: 1; text-align: right; z-index: 2; }
+.cyber-img { width: 100%; max-width: 550px; border-radius: 20px; border: 2px solid var(--border-color); box-shadow: var(--glow-shadow); animation: float 4s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-
-.badge { display: inline-block; padding: 8px 15px; background: rgba(37, 99, 235, 0.1); color: var(--primary-color); border-radius: 30px; font-weight: 600; font-size: 13px; margin-bottom: 20px; border: 1px solid rgba(37, 99, 235, 0.2); }
-.hero h1 { font-size: 52px; line-height: 1.2; margin-bottom: 15px; color: var(--text-main); font-weight: 800;}
-.hero h2 { font-size: 26px; color: var(--text-muted); margin-bottom: 25px; font-weight: 500;}
-.multiple-text { color: var(--primary-color); font-weight: 700; }
-.hero p { color: var(--text-muted); font-size: 16px; line-height: 1.7; margin-bottom: 40px; max-width: 550px; }
+.evil-badge { display: inline-block; padding: 8px 18px; background: rgba(255, 0, 60, 0.1); color: var(--accent-red); border-radius: 4px; font-weight: 700; font-size: 13px; margin-bottom: 25px; border: 1px solid rgba(255, 0, 60, 0.3); text-transform: uppercase; letter-spacing: 2px; }
+.hero h1 { font-size: 58px; line-height: 1.1; margin-bottom: 20px; color: var(--text-main); font-weight: 800;}
+.hero p { color: var(--text-muted); font-size: 17px; line-height: 1.7; margin-bottom: 40px; max-width: 550px; }
 
 .hero-buttons { display: flex; gap: 20px; margin-bottom: 50px; }
-.btn-primary { background: var(--primary-color); color: white; padding: 15px 30px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-3px); }
-.btn-secondary { background: white; color: var(--text-main); border: 2px solid var(--border-color); padding: 13px 30px; border-radius: 10px; font-weight: 600; transition: 0.3s; }
-.btn-secondary:hover { border-color: var(--text-muted); background: var(--bg-main); }
+.outline-btn { background: transparent; color: var(--text-main); border: 1px solid var(--text-muted); padding: 10px 25px; border-radius: 4px; font-weight: 600; text-transform: uppercase; transition: 0.3s;}
+.outline-btn:hover { border-color: var(--primary-color); color: var(--primary-color); box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2); }
 
-.hero-stats { display: flex; gap: 50px; border-top: 1px solid var(--border-color); padding-top: 30px; max-width: 500px;}
-.stat-item h3 { font-size: 28px; color: var(--text-main); font-weight: 800;}
-.stat-item p { font-size: 14px; color: var(--text-muted); font-weight: 500;}
+.glass-box { background: var(--surface-color); backdrop-filter: blur(10px); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; }
+.hero-stats { display: flex; gap: 40px; max-width: 500px;}
+.stat-item h3 { font-size: 32px; font-weight: 800;}
+.stat-item p { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
 
 /* ==========================================================
-   3. GLOBAL SECTION HEADINGS & COURSE CARDS
+   3. GLASSMORPHISM CARDS (COURSES)
 ========================================================== */
-.learning-path, .live-exams { padding: 100px 8%; }
+.learning-path, .live-exams { padding: 100px 8%; position: relative;}
 .section-heading { text-align: center; margin-bottom: 60px; }
-.section-heading h2 { font-size: 38px; color: var(--text-main); margin-bottom: 15px; font-weight: 800;}
-.section-heading p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.6;}
-.loading-text { text-align: center; width: 100%; grid-column: 1 / -1; color: var(--text-muted); font-style: italic; font-size: 18px;}
+.section-heading h2 { font-size: 42px; color: var(--text-main); margin-bottom: 15px; font-weight: 800;}
+.section-heading p { color: var(--text-muted); font-size: 16px; }
+.loading-text { text-align: center; width: 100%; grid-column: 1 / -1; color: var(--primary-color); font-size: 18px; text-transform: uppercase; letter-spacing: 2px;}
 
 .course-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 35px; }
-.course-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; transition: 0.4s; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.02);}
-.course-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: rgba(37, 99, 235, 0.3);}
-.course-card img { width: 100%; height: 220px; object-fit: cover; }
-.card-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column;}
+.glass-card { background: var(--surface-color); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: 0.4s; display: flex; flex-direction: column; }
+.glass-card:hover { transform: translateY(-10px); box-shadow: var(--glow-shadow); border-color: var(--primary-color); }
+.img-wrapper { overflow: hidden; height: 220px; border-bottom: 1px solid var(--border-color); }
+.img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; filter: grayscale(30%) contrast(120%); }
+.glass-card:hover .img-wrapper img { transform: scale(1.1); filter: grayscale(0%); }
 
+.card-content { padding: 30px; display: flex; flex-direction: column; flex-grow: 1; }
 .tags { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.tag-badge { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; }
-.web-badge { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
-.ai-badge { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-.app-badge { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.rating { color: #f59e0b; font-size: 14px; font-weight: 600; }
+.tag-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 1px solid;}
+.web-badge { background: rgba(0, 255, 204, 0.1); color: #00ffcc; border-color: #00ffcc; }
+.ai-badge { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-color: #8b5cf6; }
+.app-badge { background: rgba(255, 0, 60, 0.1); color: #ff003c; border-color: #ff003c; }
+.rating { color: #f59e0b; font-size: 14px; font-weight: 700; }
 
 .card-content h3 { font-size: 22px; margin-bottom: 12px; color: var(--text-main); font-weight: 700;}
 .card-content p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.6; flex-grow: 1;}
-.btn-card { display: block; text-align: center; background: var(--bg-main); color: var(--primary-color); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; font-weight: 600; transition: 0.3s; margin-top: auto;}
-.btn-card:hover { background: var(--primary-color); color: white; border-color: var(--primary-color);}
+.btn-card { display: block; text-align: center; background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); padding: 12px; border-radius: 4px; font-weight: 700; text-transform: uppercase; transition: 0.3s; margin-top: auto;}
+.btn-card:hover { background: var(--primary-color); color: #000; box-shadow: var(--glow-shadow); }
 
-/* Live Exams Special Styling */
-.exam-card { border-top: 5px solid #ef4444; }
-.exam-title { color: #ef4444 !important; }
-.exam-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
-.exam-btn:hover { background: #ef4444; color: white; }
+.exam-card { border-top: 3px solid var(--accent-red); }
+.exam-title { color: var(--accent-red) !important; text-shadow: 0 0 10px rgba(255,0,60,0.4); }
+.exam-btn { color: var(--accent-red); border-color: var(--accent-red); }
+.exam-btn:hover { background: var(--accent-red); color: white; box-shadow: var(--red-glow); }
 
 /* ==========================================================
-   4. FEATURES SECTION
+   4. FEATURES & INSTRUCTOR
 ========================================================== */
-.features { background: var(--surface-color); padding: 100px 8%; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);}
+.features { padding: 100px 8%; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);}
 .features-content { display: flex; align-items: center; gap: 60px; }
 .features-text { flex: 1; }
-.features-text h2 { font-size: 38px; margin-bottom: 15px; font-weight: 800;}
-.features-text h2 span { color: var(--primary-color); }
-.features-text > p { color: var(--text-muted); margin-bottom: 40px; font-size: 16px; line-height: 1.6;}
+.features-text h2 { font-size: 42px; margin-bottom: 15px; font-weight: 800;}
 .features-list li { display: flex; gap: 20px; margin-bottom: 30px; }
-.features-list i { font-size: 28px; color: var(--accent-green); margin-top: 3px; }
-.features-list h4 { font-size: 18px; color: var(--text-main); margin-bottom: 8px; }
-.features-list p { font-size: 14px; color: var(--text-muted); line-height: 1.6;}
-.features-image { flex: 1; }
-.features-image img { width: 100%; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+.neon-icon { font-size: 32px; color: var(--accent-red); margin-top: 3px; text-shadow: var(--red-glow); }
+.features-list h4 { font-size: 20px; color: var(--text-main); margin-bottom: 5px; }
 
-/* ==========================================================
-   5. INSTRUCTOR SECTION
-========================================================== */
-.instructor { padding: 100px 8%; background: var(--bg-alternate); }
-.instructor-container { display: flex; align-items: center; gap: 60px; background: var(--bg-main); padding: 50px; border-radius: 25px; border: 1px solid var(--border-color); }
-.instructor-image img { width: 280px; height: 280px; border-radius: 50%; object-fit: cover; border: 8px solid var(--surface-color); box-shadow: 0 15px 30px rgba(0,0,0,0.1);}
-.instructor-info h2 { font-size: 36px; margin: 15px 0 5px; font-weight: 800;}
-.instructor-info .title { color: var(--primary-color); font-weight: 600; margin-bottom: 20px; font-size: 16px;}
-.instructor-info p { color: var(--text-muted); font-size: 15px; margin-bottom: 15px; line-height: 1.7; }
+.instructor { padding: 100px 8%; }
+.instructor-container { display: flex; align-items: center; gap: 60px; padding: 50px; border-radius: 12px; }
+.instructor-image img { width: 250px; height: 250px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); box-shadow: var(--glow-shadow); filter: contrast(120%);}
+.instructor-info h2 { font-size: 40px; margin: 15px 0 5px; font-weight: 800;}
 .social-links { display: flex; gap: 15px; margin-top: 25px; }
-.social-links a { width: 45px; height: 45px; background: var(--surface-color); display: flex; justify-content: center; align-items: center; border-radius: 50%; color: var(--text-main); font-size: 22px; transition: 0.3s; border: 1px solid var(--border-color);}
-.social-links a:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);}
+.social-links a { width: 45px; height: 45px; background: var(--bg-main); display: flex; justify-content: center; align-items: center; border-radius: 50%; color: var(--primary-color); font-size: 22px; border: 1px solid var(--primary-color); transition: 0.3s;}
+.social-links a:hover { background: var(--primary-color); color: #000; box-shadow: var(--glow-shadow); transform: translateY(-5px);}
 
 /* ==========================================================
-   6. PREMIUM CTA & FOOTER
+   5. CTA & FOOTER
 ========================================================== */
-.cta-section { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 100px 8%; text-align: center; }
-.cta-box { max-width: 700px; margin: 0 auto; }
-.cta-box h2 { font-size: 40px; color: white; margin-bottom: 20px; font-weight: 800;}
-.cta-box p { color: #94a3b8; font-size: 16px; margin-bottom: 40px; line-height: 1.6;}
+.cta-section { background: linear-gradient(45deg, #050505, #111); padding: 100px 8%; text-align: center; border-top: 1px solid #334155;}
+.cta-box { max-width: 800px; margin: 0 auto; border-color: var(--primary-color); padding: 50px; box-shadow: var(--glow-shadow);}
+.cta-box h2 { font-size: 46px; color: white; margin-bottom: 20px; font-weight: 800; text-transform: uppercase;}
 
-.footer { background: #0b1120; color: white; padding: 80px 8% 30px; }
+.footer { background: #020202; color: #94a3b8; padding: 80px 8% 30px; border-top: 1px solid #111;}
 .footer-container { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 50px; margin-bottom: 60px; }
 .brand-col .logo { color: white; margin-bottom: 20px; display: inline-flex;}
-.brand-col p { color: #64748b; font-size: 14px; line-height: 1.7; max-width: 300px;}
-.links-col h4, .newsletter-col h4 { font-size: 18px; margin-bottom: 25px; color: white; }
+.links-col h4, .newsletter-col h4 { font-size: 18px; margin-bottom: 25px; color: white; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-color);}
 .links-col ul li { margin-bottom: 15px; }
 .links-col ul li a { color: #94a3b8; font-size: 14px; transition: 0.3s; }
 .links-col ul li a:hover { color: var(--primary-color); padding-left: 5px; }
-
-.newsletter-col p { color: #64748b; font-size: 14px; margin-bottom: 20px; line-height: 1.6;}
-.newsletter-form { display: flex; }
-.newsletter-form input { flex: 1; padding: 12px 15px; border-radius: 8px 0 0 8px; border: none; outline: none; background: rgba(255,255,255,0.05); color: white; }
-.btn-newsletter { padding: 12px 20px; background: var(--primary-color); color: white; border: none; border-radius: 0 8px 8px 0; cursor: pointer; font-size: 18px; transition: 0.3s;}
-.btn-newsletter:hover { background: var(--primary-hover); }
-
-.footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); }
-.footer-bottom p { color: #64748b; font-size: 14px; }
+.newsletter-form { display: flex; border: 1px solid #334155; border-radius: 4px; overflow: hidden;}
+.newsletter-form input { flex: 1; padding: 12px 15px; background: transparent; border: none; color: white; outline: none; }
+.btn-newsletter { padding: 12px 20px; background: var(--primary-color); color: #000; border: none; cursor: pointer; font-size: 18px; transition: 0.3s;}
+.footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid #111; font-size: 14px; }
 
 /* ==========================================================
-   7. RESPONSIVE & MAGIC HAMBURGER MENU FIX (ALL DEVICES)
+   6. RESPONSIVE / MOBILE CSS
 ========================================================== */
-
-/* 💻 Medium Screens (Laptops & iPads Landscape) - Max 1100px */
 @media (max-width: 1100px) {
     .header { padding: 15px 4%; }
-    .navbar .nav-links { gap: 12px; }
+    .navbar .nav-links { gap: 15px; }
     .logo { font-size: 22px; }
-    .logo i { font-size: 26px; }
-    .auth-container { gap: 10px; }
-    .navbar a { font-size: 13px; }
-    .btn-signup { padding: 8px 15px; font-size: 13px; }
-    .btn-login { font-size: 13px; }
+    .hero h1 { font-size: 46px; }
 }
 
-/* 📱 Tablets & Mobiles (Max 850px) */
 @media (max-width: 850px) {
-    /* --- Header & Menu Adjustments --- */
-    .header { 
-        padding: 12px 20px !important; 
-        justify-content: space-between; 
-        align-items: center;
-    }
-    .logo { font-size: 22px !important; gap: 6px; }
-    .logo i { font-size: 26px !important; }
+    .header { padding: 12px 20px !important; }
     .auth-container .btn-login { display: none !important; } 
     .mobile-login { display: block !important; } 
-    .auth-container { margin-left: auto; margin-right: 15px; display: flex; align-items: center; }
-    
-    .btn-signup { 
-        display: inline-flex !important; align-items: center; justify-content: center;
-        height: 38px; padding: 0 16px !important; font-size: 14px !important; border-radius: 6px !important;
-    }
-    #menu-icon { display: flex; align-items: center; margin: 0 !important; font-size: 32px !important; }
+    #menu-icon { display: block !important; }
     
     .navbar {
-        position: absolute; top: 65px; right: 5%; width: 250px; height: auto; 
-        background: var(--surface-color); box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        border-radius: 12px; border: 1px solid var(--border-color); padding: 20px;
-        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); transition: clip-path 0.3s ease-in-out;
+        position: absolute; top: 65px; right: 5%; width: 250px; background: var(--bg-card); 
+        border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); transition: 0.3s;
     }
-    .navbar.active { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-    .navbar .nav-links { display: flex; flex-direction: column; gap: 15px; align-items: flex-start; width: 100%; }
-    .navbar a { display: flex; align-items: center; width: 100%; font-size: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
-    .navbar a:last-child { border-bottom: none; padding-bottom: 0; }
+    .navbar.active { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); box-shadow: var(--glow-shadow); }
+    .navbar .nav-links { flex-direction: column; align-items: flex-start; }
+    .navbar a { width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
 
-    /* --- Hero Section Stacking & Centering --- */
-    .hero { flex-direction: column; padding-top: 130px; }
-    .hero-image-content img { display: none; } /* Mobile par image hide */
-    .hero-text-content { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-    .hero p { margin: 0 auto 30px auto !important; text-align: center; }
-    .hero-stats { justify-content: center; width: 100%; margin: 0 auto; }
-    .badge { margin-left: auto; margin-right: auto; }
-
-    /* --- Features & Instructor Stacking --- */
+    .hero { flex-direction: column; padding-top: 120px; text-align: center; }
+    .hero-image-content img { width: 80%; }
+    .hero-stats { justify-content: center; width: 100%; margin: 0 auto; flex-wrap: wrap;}
+    
     .features-content, .instructor-container { flex-direction: column; text-align: center; }
-    .features-list li { text-align: left; } /* List padhne layak rahe */
+    .features-list li { text-align: left; }
     .footer-container { grid-template-columns: 1fr 1fr; }
 }
 
-/* 📱 Mobile Typing Text Fix (Max 600px) */
-@media (max-width: 600px) {
-    .hero h1 { font-size: 36px !important; }
-    .hero h2 { font-size: 20px !important; margin-bottom: 20px !important; }
-    .multiple-text { white-space: nowrap !important; } /* 🔥 Text 2 line me nahi tootega */
-    .hero p { font-size: 14px !important; padding: 0 10px; }
-}
-
-/* 📱 Small Mobiles (Max 480px) */
 @media (max-width: 480px) {
-    .header { padding: 12px 15px !important; }
-    .logo { font-size: 20px !important; }
-    .logo i { font-size: 24px !important; }
-    
-    .btn-signup { height: 34px !important; padding: 0 12px !important; font-size: 13px !important; }
-    .auth-container { margin-right: 12px; }
-    #menu-icon { font-size: 28px !important; }
-    
-    .hero h1 { font-size: 32px !important; }
-    .hero-buttons { flex-direction: column; width: 100%; gap: 15px; }
-    .btn-primary, .btn-secondary { width: 100%; text-align: center; justify-content: center; }
-    
+    .hero h1 { font-size: 36px; }
+    .hero-buttons { flex-direction: column; }
     .footer-container { grid-template-columns: 1fr; text-align: center; }
-    .brand-col p { margin: 0 auto; }
-}
-/* ==========================================================
-   🌟 UNIQUE BACK TO HOME FLOATING ICON STYLES 🌟
-========================================================== */
-.back-to-home-btn {
-    position: fixed; 
-    bottom: 30px;    
-    right: 30px;     
-    width: 55px;     
-    height: 55px;   
-    background: var(--primary-color); 
-    color: white;    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    font-size: 26px;    
-    text-decoration: none;
-    z-index: 9999; 
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); 
-    transition: all 0.3s ease; 
-    border: 2px solid transparent; 
+    .back-to-home-btn { width: 45px; height: 45px; font-size: 22px; bottom: 20px; right: 20px; }
+    .dark-mode-btn { width: 45px; height: 45px; font-size: 22px; bottom: 20px; left: 20px; }
 }
 
-.back-to-home-btn:hover {
-    background: var(--bg-main); 
-    color: var(--primary-color); 
-    border-color: var(--primary-color); 
-    transform: translateY(-5px) scale(1.1); 
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5); 
+/* 🌟 FLOATING BUTTONS */
+.back-to-home-btn, .dark-mode-btn {
+    position: fixed; bottom: 30px; width: 55px; height: 55px; 
+    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+    font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s;
 }
-
-@media (max-width: 480px) {
-    .back-to-home-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 22px;
-        bottom: 20px;
-        right: 20px;
-    }
-}
-/* ==========================================================
-   🌙 MASTER DARK MODE CSS (BUTTON + HOME PAGE FIX) 🌟
-========================================================== */
-
-/* 1️⃣ बटन का डिज़ाइन (ये आपके गायब हुए बटन को वापस लाएगा) */
-.dark-mode-btn {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    width: 55px;
-    height: 55px;
-    background: #1e293b;
-    color: #fbbf24; /* पीला रंग */
-    border: 2px solid #334155;
-    border-radius: 50%;
-    font-size: 26px;
-    cursor: pointer;
-    z-index: 99999; /* सबसे ऊपर रखेगा */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: 0.3s;
-}
-.dark-mode-btn:hover {
-    transform: scale(1.1);
-    background: #334155;
-}
-
-/* 2️⃣ धुंधलापन (Blur) हटाने और बैकग्राउंड डार्क करने का कोड */
-body.dark-theme, 
-body.dark-theme .hero, 
-body.dark-theme .learning-path, 
-body.dark-theme .features, 
-body.dark-theme .instructor {
-    background-color: #0f172a !important; 
-    color: #f8fafc !important;
-}
-
-body.dark-theme .bg-alternate {
-    background-color: #111827 !important;
-}
-
-/* 3️⃣ टेक्स्ट को एकदम साफ़ (Crisp) और चमकदार बनाना */
-body.dark-theme h1, 
-body.dark-theme h2, 
-body.dark-theme h3, 
-body.dark-theme h4, 
-body.dark-theme p, 
-body.dark-theme span {
-    color: #f8fafc !important;
-    text-shadow: none !important; /* धुंधलापन हटाएगा */
-}
-
-body.dark-theme p {
-    color: #cbd5e1 !important; /* पैराग्राफ थोड़ा हल्का ताकि आँखों में न चुभे */
-}
-
-/* 4️⃣ Header (Navbar) */
-body.dark-theme .header {
-    background-color: #0f172a !important;
-    border-bottom: 1px solid #1e293b !important;
-}
-body.dark-theme .nav-links a {
-    color: #cbd5e1 !important;
-}
-body.dark-theme .nav-links a:hover, 
-body.dark-theme .nav-links a.active {
-    color: #3b82f6 !important;
-}
-
-/* 5️⃣ Logo Fix */
-body.dark-theme .header .logo span { color: #f8fafc !important; }
-body.dark-theme .header .logo span span { color: #3b82f6 !important; }
-
-/* 6️⃣ Cards (Courses & Exams) */
-body.dark-theme .course-card,
-body.dark-theme .hero-stats .stat-item,
-body.dark-theme .features-list i,
-body.dark-theme .cta-box {
-    background-color: #1e293b !important;
-    border: 1px solid #334155 !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
-}
-
-/* 7️⃣ Footer */
-body.dark-theme .footer {
-    background-color: #020617 !important; /* फुटर डार्क ब्लैक */
-    border-top: 1px solid #1e293b !important;
-}
-body.dark-theme .footer a, 
-body.dark-theme .footer-bottom p {
-    color: #94a3b8 !important;
-}
-body.dark-theme .footer a:hover {
-    color: #3b82f6 !important;
-}
-body.dark-theme .newsletter-form input {
-    background-color: #1e293b !important;
-    color: #f8fafc !important;
-    border: 1px solid #334155 !important;
-}
-
-/* 8️⃣ Social Media Links */
-body.dark-theme .social-links a {
-    background-color: #1e293b !important;
-    color: #e2e8f0 !important;
-    border-color: #334155 !important;
-}
-body.dark-theme .social-links a:hover {
-    background-color: #3b82f6 !important;
-    color: #fff !important;
-}
-/* ==========================================================
-   👨‍🏫 MENTOR / INSTRUCTOR SECTION FIX (BLUR REMOVAL) 🌟
-========================================================== */
-
-/* 1. पूरे बॉक्स को प्रॉपर डार्क और साफ़ बनाएं */
-body.dark-theme .instructor-container {
-    background-color: #1e293b !important; /* बॉक्स को डार्क बनाएगा ताकि टेक्स्ट साफ़ दिखे */
-    border: 1px solid #334155 !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; /* डार्क और शार्प शैडो */
-    border-radius: 15px !important;
-}
-
-/* 2. आपकी फोटो (Image) का धुंधलापन हटाकर उसे चमकाएं */
-body.dark-theme .instructor-image img {
-    filter: none !important; /* फोटो का कोई भी ब्लर इफ़ेक्ट हटा देगा */
-    opacity: 1 !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important; /* फोटो के पीछे एक मस्त ब्लू ग्लो (Glow) लाएगा */
-    border: 3px solid #3b82f6 !important; /* फोटो के चारो तरफ नीली रिंग */
-}
-
-/* 3. फोटो के नीचे का टेक्स्ट और डिज़िग्नेशन एकदम क्रिस्प (Crisp) करें */
-body.dark-theme .instructor-info h2 {
-    color: #f8fafc !important;
-    text-shadow: none !important;
-}
-
-body.dark-theme .instructor-info h4.title {
-    color: #3b82f6 !important; /* आपके डिज़िग्नेशन को शानदार नीले रंग में दिखाएगा */
-    text-shadow: none !important;
-    font-weight: 600 !important;
-}
-
-body.dark-theme .instructor-info p {
-    color: #e2e8f0 !important; /* टेक्स्ट को एकदम ब्राइट वाइट करेगा */
-    text-shadow: none !important;
-    letter-spacing: 0.5px !important; /* अक्षरों के बीच हल्की जगह बनाएगा जिससे ब्लर नहीं लगेगा */
-}
-/* ==========================================================
-   🌟 MOBILE MENU & HAMBURGER DARK MODE FIX 🌟
-========================================================== */
-
-/* 1. हैमबर्गर आइकॉन (☰) को डार्क मोड में वाइट (सफ़ेद) करना */
-body.dark-theme #menu-icon {
-    color: #f8fafc !important;
-}
-
-/* 2. मोबाइल स्क्रीन (850px से छोटी) के लिए डार्क मेनू की स्टाइलिंग */
-@media (max-width: 850px) {
-    /* मेनू का डब्बा (Dropdown) डार्क ग्रे करना */
-    body.dark-theme .navbar {
-        background-color: #1e293b !important; 
-        border: 1px solid #334155 !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
-    }
-    
-    /* मेनू के अंदर के लिंक्स वाइट करना */
-    body.dark-theme .navbar a {
-        color: #e2e8f0 !important;
-        border-bottom: 1px solid #334155 !important;
-    }
-    
-    /* होवर (Hover) करने पर ब्लू चमक */
-    body.dark-theme .navbar a:hover,
-    body.dark-theme .navbar a.active {
-        color: #3b82f6 !important;
-    }
-
-    /* मोबाइल वाले Login बटन को वाइट करना */
-    body.dark-theme .mobile-login a {
-        color: #f8fafc !important;
-    }
-}
-/* ==========================================================
-   💻 DESKTOP & LAPTOP LOGIN BUTTON DARK MODE FIX 🌟
-========================================================== */
-
-/* डार्क मोड में Login का टेक्स्ट और आइकॉन (Icon) सफ़ेद (White) करना */
-body.dark-theme .auth-container .btn-login,
-body.dark-theme .auth-container .btn-login i {
-    color: #f8fafc !important;
-}
-
-/* माउस ले जाने (Hover) पर उसे शानदार ब्लू रंग देना */
-body.dark-theme .auth-container .btn-login:hover,
-body.dark-theme .auth-container .btn-login:hover i {
-    color: #3b82f6 !important;
-}
-
+.back-to-home-btn { right: 30px; background: var(--accent-red); color: white; border: 1px solid var(--accent-red); box-shadow: var(--red-glow); }
+.dark-mode-btn { left: 30px; background: var(--primary-color); color: #000; border: none; box-shadow: var(--glow-shadow); }
+.back-to-home-btn:hover, .dark-mode-btn:hover { transform: scale(1.1) translateY(-5px); }
