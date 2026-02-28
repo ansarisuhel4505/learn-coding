@@ -383,11 +383,15 @@ async function createExam(e) {
                 });
             }
 
+           // 🌟 TIME ZONE FIX: टाइम को इंटरनेशनल (ISO) फॉर्मेट में बदल कर भेजना
+            let rawTime = document.getElementById('eSchedule').value;
+            let finalTime = rawTime ? new Date(rawTime).toISOString() : null;
+
             const data = {
                 title: document.getElementById('eTitle').value, 
                 totalMarks: document.getElementById('eMarks').value,
                 duration: document.getElementById('eDuration').value, 
-                scheduleTime: document.getElementById('eSchedule').value, // 🌟 NAYA Time Lock
+                scheduleTime: finalTime, // अब एकदम परफेक्ट टाइम सेव होगा
                 questions: questions
             };
 
@@ -424,26 +428,60 @@ async function createExam(e) {
         async function loadResults() {
             const res = await fetch('/api/admin/results');
             allResultsData = await res.json();
+            
+            // 🌟 SMART RANKING LOGIC (Highest Marks first)
+            allResultsData.sort((a, b) => {
+                if (a.examTitle === b.examTitle) return b.score - a.score;
+                return a.examTitle.localeCompare(b.examTitle);
+            });
+
+            let currentExam = ""; let currentRank = 1;
             const tbody = document.getElementById('resultsTableBody');
             tbody.innerHTML = '';
 
             allResultsData.forEach(r => {
+                if (r.examTitle !== currentExam) { currentExam = r.examTitle; currentRank = 1; } 
+                else { currentRank++; }
+
                 let statusBadge = r.isReleased ? `<span class="badge badge-checked">Checked ✅</span>` : `<span class="badge badge-pending">Pending ⏳</span>`;
                 let actionBtn = r.isReleased
-                    ? `<span style="font-weight:bold; color:#10b981;">Marks: ${r.score}</span>`
-                    : `<button onclick="openCheckModal('${r._id}')" class="btn"><i class="fas fa-edit"></i> Check Copy</button>`;
+                    ? `<button onclick="openCheckModal('${r._id}')" class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-eye"></i> View</button>`
+                    : `<button onclick="openCheckModal('${r._id}')" class="btn"><i class="fas fa-edit"></i> Check</button>`;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><b>${r.studentName}</b><br><small style="color:#64748b;">Roll No: ${r.rollNo || 'N/A'}</small></td>
+                        <td><b>${r.studentName}</b><br><small style="color:#64748b;">Roll No: ${r.rollNo}</small></td>
                         <td>${r.examTitle}</td>
-                        <td>${statusBadge}</td>
-                        <td>${actionBtn}</td>
-                    </tr>
-                `;
+                        <td><b style="color:#10b981;">Score: ${r.score}</b><br><small style="color:#f59e0b; font-weight:bold;">Rank: #${currentRank}</small></td>
+                        <td>
+                            ${actionBtn}
+                            <button onclick="deleteResult('${r._id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;" title="Delete Copy"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
             });
         }
 
+        async function deleteResult(id) {
+            if(confirm("Delete this student's result permanently?")) {
+                await fetch('/api/admin/results/'+id, {method:'DELETE'});
+                loadResults();
+            }
+        }
+
+        function downloadAllResultsCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Exam Title,Rank,Student Name,Roll No,Score\n";
+            let curExam = ""; let curRank = 1;
+            allResultsData.forEach(r => {
+                if(r.examTitle !== curExam) { curExam = r.examTitle; curRank = 1; } else { curRank++; }
+                csvContent += `"${r.examTitle}",${curRank},"${r.studentName}",${r.rollNo},${r.score}\n`;
+            });
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "All_Students_Rank_List.csv");
+            document.body.appendChild(link); link.click(); link.remove();
+        }
+
+            
         function openCheckModal(id) {
             const result = allResultsData.find(r => r._id === id);
             document.getElementById('modalStudentName').innerText = "Copy of: " + result.studentName;
@@ -497,18 +535,26 @@ async function createExam(e) {
                 }
 
                 feedbacks.forEach(f => {
-                    const date = new Date(f.date).toLocaleDateString();
                     container.innerHTML += `
                         <div class="feedback-card">
                             <h4>${f.studentName}</h4>
                             <small>Roll No: ${f.rollNo} | Exam: ${f.examTitle}</small><br>
                             <small style="color: #94a3b8;">${date}</small>
                             <p>"${f.message}"</p>
+                            <button onclick="deleteFeedback('${f._id}')" class="btn btn-danger" style="padding: 3px 8px; font-size: 12px; margin-top: 10px;"><i class="fas fa-trash"></i> Delete</button>
                         </div>
                     `;
                 });
             } catch (e) { console.error(e); }
         }
+        // 🌟 NAYA: Delete Feedback Function
+        async function deleteFeedback(id) {
+            if(confirm("Delete this feedback permanently?")) { 
+                await fetch('/api/admin/feedback/'+id, {method:'DELETE'}); 
+                loadFeedback(); // डिलीट होने के बाद लिस्ट को रिफ्रेश कर देगा
+            }
+        }
+
 
         // Initialize Data on Load
         window.onload = () => {
