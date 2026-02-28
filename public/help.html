@@ -3,75 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support & Legal - CodeMaster</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>Help & Support - CodeMaster</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <style>
-        .legal-container { padding: 100px 10%; background: #0f172a; min-height: 100vh; }
-        .legal-card { background: #1e293b; padding: 40px; border-radius: 15px; border: 1px solid #334155; margin-bottom: 30px; }
-        .legal-card h2 { color: #3b82f6; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .legal-card h3 { color: #f8fafc; margin-top: 20px; }
-        .legal-card p, .legal-card li { color: #94a3b8; line-height: 1.8; margin-bottom: 10px; }
-        .back-btn { display: inline-block; margin-bottom: 20px; color: #3b82f6; font-weight: 600; }
-       
+        :root {
+            --bg-body: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-bg: #eff6ff;
+            --input-bg: #f8fafc;
+        }
+
+        /* Dark Mode Theme */
+        html.dark-theme, html.dark-theme body, body.dark-theme {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary-bg: rgba(59, 130, 246, 0.15);
+            --input-bg: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        /* 🌟 Floating Back to Home Button */
+        .back-to-home-btn {
+            position: fixed; top: 25px; left: 25px;
+            background: var(--bg-card); color: var(--primary);
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 24px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; border: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .back-to-home-btn:hover { 
+            background: var(--primary); color: white; 
+            transform: translateY(-3px); box-shadow: 0 6px 15px rgba(59,130,246,0.3); 
+        }
+
+        /* 🌟 Main Container */
+        .help-container { 
+            max-width: 850px; margin: 40px auto 20px; 
+        }
+
+        .page-header { 
+            text-align: center; margin-bottom: 40px; 
+        }
+        .page-header h1 { 
+            font-size: 36px; color: var(--text-main); 
+            font-weight: 700; margin-bottom: 10px;
+        }
+        .page-header h1 span { color: var(--primary); }
+        .page-header p { 
+            color: var(--text-muted); font-size: 15px; 
+        }
+
+        /* 🌟 Card Design */
+        .help-card {
+            background: var(--bg-card); padding: 35px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
+            margin-bottom: 25px; transition: transform 0.3s ease;
+        }
+        .help-card:hover { transform: translateY(-3px); }
+
+        .help-card h2 { 
+            color: var(--primary); font-size: 22px; margin-bottom: 20px; 
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;
+        }
+        .help-card h2 i { background: var(--primary-bg); padding: 10px; border-radius: 10px; }
+        
+        .faq-item h3 { color: var(--text-main); font-size: 16px; margin-top: 15px; margin-bottom: 5px; }
+        .faq-item p { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; }
+
+        .legal-list { padding-left: 20px; color: var(--text-muted); font-size: 14px; margin-bottom: 15px;}
+        .legal-list li { margin-bottom: 8px; }
+
+        /* 🌟 Modern Form Styling */
+        .form-group { margin-bottom: 15px; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 14px; border: 1.5px solid var(--border-color); 
+            border-radius: 10px; background: var(--input-bg); color: var(--text-main);
+            font-size: 15px; outline: none; transition: all 0.3s ease;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--primary); color: white; 
+            border: none; border-radius: 10px; font-size: 16px; font-weight: 600; 
+            cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+        }
+        .btn-submit:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(59,130,246,0.4); }
+
+        .quick-links { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;}
+        .quick-link-btn {
+            background: var(--primary-bg); color: var(--primary); padding: 8px 15px;
+            border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600;
+            border: 1px solid transparent; transition: 0.3s;
+        }
+        .quick-link-btn:hover { border-color: var(--primary); }
+
+        @media (max-width: 600px) {
+            .help-container { padding: 10px; margin-top: 60px; }
+            .page-header h1 { font-size: 28px; }
+            .help-card { padding: 25px; }
+            .back-to-home-btn { top: 15px; left: 15px; width: 40px; height: 40px; font-size: 20px; }
+        }
     </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+        }
+    </script>
 </head>
 <body>
-   <a href="/" class="back-to-home-btn" title="Back to Home">
-      <i class='bx bxs-home-heart'></i>
-   </a>
 
- 
-    <nav class="navbar">
-        <div class="logo"><i class="fas fa-code"></i> CodeMaster</div>
-        <a href="/" class="btn-signup">Back to Home</a>
-    </nav>
+    <a href="/" class="back-to-home-btn" title="Back to Home">
+        <i class='bx bxs-home-heart'></i>
+    </a>
 
-    <div class="legal-container">
-        <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    <div class="help-container">
+        <div class="page-header">
+            <h1>Help & <span>Support Center</span></h1>
+            <p>How can we assist you today?</p>
+        </div>
 
-        <div class="legal-card" id="help">
-            <h2><i class="fas fa-question-circle"></i> Help Center & FAQ</h2>
-            <h3>How do I start learning?</h3>
-            <p>Simply create an account, browse our courses section, and click on "Start Learning". Our roadmap is designed for beginners to pros.</p>
+        <div class="help-card" id="help">
+            <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
             
-            <h3>Is the Online Compiler free?</h3>
-            <p>Yes, our Code Runner is free for all students to practice C++, Java, and Python directly in the browser.</p>
+            <div class="faq-item">
+                <h3><i class="fas fa-play" style="color: var(--primary); font-size: 12px; margin-right: 5px;"></i> How do I start learning?</h3>
+                <p>Simply create a student account, browse our courses section, and click on "Start Learning". Our roadmap is designed to take you from a beginner to a pro developer.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3><i class="fas fa-laptop-code" style="color: var(--primary); font-size: 12px; margin-right: 5px;"></i> Is the Online Compiler free?</h3>
+                <p>Yes, absolutely! Our advanced Code Runner is 100% free for all students. You can practice C++, Java, and Python directly in your browser without installing anything.</p>
+            </div>
         </div>
 
-        <div class="legal-card" id="privacy">
-            <h2><i class="fas fa-shield-alt"></i> Privacy Policy</h2>
-            <p><strong>Last Updated: Feb 2026</strong></p>
-            <p>At CodeMaster, we prioritize your data security. We collect minimal information (Name & Email) only to personalize your learning experience.</p>
-            <ul>
-                <li>We do not share your personal data with third-party advertisers.</li>
-                <li>All payments (if any) are processed through encrypted secure gateways.</li>
-                <li>You can request data deletion at any time by contacting support.</li>
+        <div class="help-card" id="policies">
+            <h2><i class="fas fa-shield-alt"></i> Legal & Policies Summary</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">By using CodeMaster, you agree to follow our community guidelines and policies:</p>
+            
+            <ul class="legal-list">
+                <li><b>Privacy:</b> We collect minimal information (Name & Email) only to personalize your learning experience. We never share your data with advertisers.</li>
+                <li><b>Terms:</b> All content provided is for educational purposes. Unauthorized scraping, copying, or selling of our course material is strictly prohibited.</li>
             </ul>
+
+            <div class="quick-links">
+                <a href="/privacy.html" class="quick-link-btn"><i class="fas fa-user-secret"></i> Read Full Privacy Policy</a>
+                <a href="/terms.html" class="quick-link-btn"><i class="fas fa-file-contract"></i> Read Terms of Service</a>
+                <a href="/refund.html" class="quick-link-btn"><i class="fas fa-hand-holding-usd"></i> Refund Policy</a>
+            </div>
         </div>
 
-        <div class="legal-card" id="terms">
-            <h2><i class="fas fa-file-contract"></i> Terms of Service</h2>
-            <p>By using CodeMaster, you agree to follow our community guidelines:</p>
-            <ul>
-                <li>The content provided is for educational purposes only.</li>
-                <li>Unauthorized scraping or copying of our course material is strictly prohibited.</li>
-                <li>Users are responsible for maintaining the security of their accounts.</li>
-            </ul>
-        </div>
-
-        <div class="legal-card" id="report">
-            <h2><i class="fas fa-bug"></i> Report a Bug</h2>
+        <div class="help-card" id="report">
+            <h2><i class="fas fa-bug"></i> Found a Bug? Report It!</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">If you face any issues while watching videos, submitting exams, or using the compiler, let us know.</p>
+            
             <form action="/report-bug" method="POST">
-                <input type="text" name="bugTitle" placeholder="Issue Title (e.g. Compiler not loading)" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px;">
-                <textarea name="bugDesc" placeholder="Describe the problem in detail..." rows="4" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px;"></textarea>
-                <button type="submit" class="btn primary-btn" style="width: 100%;">Submit Report</button>
+                <div class="form-group">
+                    <input type="text" name="bugTitle" placeholder="Issue Title (e.g. Compiler not loading in Python)" required>
+                </div>
+                <div class="form-group">
+                    <textarea name="bugDesc" placeholder="Please describe the problem in detail so our engineers can fix it quickly..." rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Submit Bug Report</button>
             </form>
         </div>
+
     </div>
 
-    <script src="script.js"></script>
 </body>
 </html>
