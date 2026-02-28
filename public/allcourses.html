@@ -3,49 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Courses - CodeMaster</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <title>Explore Courses - CodeMaster</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <style>
-        .page-header { padding: 150px 5% 50px; text-align: center; }
-        .page-header h1 { font-size: 40px; color: var(--text-main); margin-bottom: 15px; }
+        :root {
+            --bg-body: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-bg: #eff6ff;
+            --input-bg: #f8fafc;
+        }
+
+        /* Dark Mode Theme */
+        html.dark-theme, html.dark-theme body, body.dark-theme {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary-bg: rgba(59, 130, 246, 0.15);
+            --input-bg: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        .search-filter { display: flex; justify-content: center; gap: 15px; margin-bottom: 50px; padding: 0 5%; flex-wrap: wrap;}
-        .search-box { display: flex; align-items: center; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 20px; width: 100%; max-width: 400px; }
-        .search-box input { background: transparent; border: none; color: #fff; width: 100%; outline: none; margin-left: 10px; font-size: 15px;}
-        .filter-btn { background: var(--primary-color); color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        
+        body { 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 🌟 Floating Back to Home Button */
+        .back-to-home-btn {
+            position: fixed; top: 25px; left: 25px;
+            background: var(--bg-card); color: var(--primary);
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 24px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; border: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .back-to-home-btn:hover { 
+            background: var(--primary); color: white; 
+            transform: translateY(-3px); box-shadow: 0 6px 15px rgba(59,130,246,0.3); 
+        }
+
+        /* 🌟 Page Header */
+        .page-header { 
+            padding: 120px 5% 40px; 
+            text-align: center; 
+        }
+        .page-header h1 { 
+            font-size: 42px; color: var(--text-main); margin-bottom: 10px; font-weight: 700; 
+        }
+        .page-header h1 span { color: var(--primary); }
+        .page-header p { 
+            color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 16px; 
+        }
+
+        /* 🌟 Smart Search Filter */
+        .search-filter { 
+            display: flex; justify-content: center; gap: 15px; 
+            margin-bottom: 50px; padding: 0 5%; flex-wrap: wrap;
+        }
+        .search-box { 
+            display: flex; align-items: center; background: var(--bg-card); 
+            border: 1.5px solid var(--border-color); border-radius: 12px; 
+            padding: 5px 20px; width: 100%; max-width: 500px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.03); transition: all 0.3s ease;
+        }
+        .search-box:focus-within {
+            border-color: var(--primary); box-shadow: 0 10px 25px rgba(59,130,246,0.15);
+            transform: translateY(-2px);
+        }
+        .search-box input { 
+            background: transparent; border: none; color: var(--text-main); 
+            width: 100%; outline: none; margin-left: 10px; font-size: 15px;
+            padding: 10px 0;
+        }
+        .filter-btn { 
+            background: var(--primary); color: #fff; border: none; 
+            padding: 12px 30px; border-radius: 12px; cursor: pointer; 
+            font-weight: 600; font-size: 15px; transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+        }
+        .filter-btn:hover {
+            background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(59,130,246,0.4);
+        }
+
+        /* 🌟 Courses Grid & Cards (Pre-styled for script.js) */
+        .learning-path { padding: 0 5% 80px; max-width: 1200px; margin: 0 auto; }
+        .course-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; 
+        }
+
+        /* Loading State Styling */
+        .loading-text {
+            grid-column: 1 / -1; text-align: center; color: var(--primary);
+            font-size: 18px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+
+        /* ✨ MAGIC: Pre-styling the cards your script.js will generate ✨ */
+        .course-card {
+            background: var(--bg-card); border-radius: 16px; overflow: hidden;
+            border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease; display: flex; flex-direction: column;
+        }
+        .course-card:hover {
+            transform: translateY(-8px); border-color: var(--primary);
+            box-shadow: 0 15px 35px rgba(59,130,246,0.15);
+        }
+        .course-img { width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid var(--border-color); }
+        .course-content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .course-title { font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .course-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; flex-grow: 1;}
+        .course-btn {
+            background: var(--primary-bg); color: var(--primary); width: 100%; text-align: center;
+            padding: 12px; border-radius: 10px; text-decoration: none; font-weight: 600;
+            transition: all 0.3s ease; border: 1px solid transparent;
+        }
+        .course-btn:hover { background: var(--primary); color: white; }
+
+        @media (max-width: 600px) {
+            .page-header { padding: 100px 5% 30px; }
+            .page-header h1 { font-size: 32px; }
+            .search-box { max-width: 100%; }
+            .filter-btn { width: 100%; }
+            .back-to-home-btn { top: 15px; left: 15px; width: 40px; height: 40px; font-size: 20px; }
+        }
     </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+        }
+    </script>
 </head>
 <body>
-<a href="/" class="back-to-home-btn" title="Back to Home">
-    <i class='bx bxs-home-heart'></i>
-</a>
 
+    <a href="/" class="back-to-home-btn" title="Back to Home">
+        <i class='bx bxs-home-heart'></i>
+    </a>
 
     <div class="page-header">
-        <h1>Explore Our <span>Courses</span></h1>
-        <p style="color: var(--text-muted);">Find the perfect course to level up your skills.</p>
+        <h1>Explore Our <span>Pro Courses</span></h1>
+        <p>Unlock your true potential. Find the perfect course to level up your coding and development skills today.</p>
     </div>
 
     <div class="search-filter">
         <div class="search-box">
-            <i class='bx bx-search' style="color: var(--text-muted); font-size: 20px;"></i>
-            <input type="text" placeholder="Search for Web Dev, AI, Python...">
+            <i class='bx bx-search' style="color: var(--primary); font-size: 22px;"></i>
+            <input type="text" id="searchInput" placeholder="Search for Web Dev, AI, Python...">
         </div>
-        <button class="filter-btn">Search</button>
+        <button class="filter-btn"><i class="fas fa-filter"></i> Search</button>
     </div>
 
-    <section class="learning-path" style="padding: 0 5% 80px;">
-        <div class="course-grid" id="dynamic-courses" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
-            <p style="text-align: center; width: 100%; color: var(--text-muted);">Loading courses from database...</p>
+    <section class="learning-path">
+        <div class="course-grid" id="dynamic-courses">
+            <div class="loading-text">
+                <i class="fas fa-spinner fa-spin" style="font-size: 30px;"></i>
+                <span>Loading premium courses...</span>
+            </div>
         </div>
     </section>
 
-   
     <script src="script.js"></script>
+
 </body>
 </html>
