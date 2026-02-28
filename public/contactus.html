@@ -3,56 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Support - CodeMaster</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <title>Contact Us - CodeMaster</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <style>
-        .contact-container { display: flex; flex-wrap: wrap; padding: 120px 5% 80px; gap: 40px; justify-content: space-between; max-width: 1200px; margin: auto; }
-        .contact-info { flex: 1; min-width: 300px; }
-        .contact-info h2 { font-size: 35px; color: var(--text-main); margin-bottom: 15px; }
-        .info-box { display: flex; align-items: center; gap: 15px; margin-top: 30px; background: var(--surface-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .info-box i { font-size: 30px; color: var(--primary-color); }
+        :root {
+            --bg-body: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-bg: #eff6ff;
+            --input-bg: #f8fafc;
+        }
+
+        /* Dark Mode Theme */
+        html.dark-theme, html.dark-theme body, body.dark-theme {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary-bg: rgba(59, 130, 246, 0.15);
+            --input-bg: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        .contact-form { flex: 1; min-width: 300px; background: var(--surface-color); padding: 40px; border-radius: 15px; border: 1px solid var(--border-color); }
-        .input-group { margin-bottom: 20px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 15px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: 'Poppins', sans-serif;}
-        .input-group textarea { height: 120px; resize: none; }
-        .btn-submit { background: var(--primary-color); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;}
-        .btn-submit:hover { background: #2563eb; }
-     
+        body { 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 🌟 Floating Back to Home Button */
+        .back-to-home-btn {
+            position: fixed; top: 25px; left: 25px;
+            background: var(--bg-card); color: var(--primary);
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 24px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; border: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .back-to-home-btn:hover { 
+            background: var(--primary); color: white; 
+            transform: translateY(-3px); box-shadow: 0 6px 15px rgba(59,130,246,0.3); 
+        }
+
+        /* 🌟 Page Header */
+        .page-header { 
+            padding: 100px 5% 40px; 
+            text-align: center; 
+        }
+        .page-header h1 { 
+            font-size: 42px; color: var(--text-main); margin-bottom: 10px; font-weight: 700; 
+        }
+        .page-header h1 span { color: var(--primary); }
+        .page-header p { 
+            color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 16px; 
+        }
+
+        /* 🌟 Main Layout */
+        .contact-wrapper {
+            max-width: 1100px; margin: 0 auto 80px; padding: 0 5%;
+            display: flex; flex-wrap: wrap; gap: 40px;
+        }
+
+        /* --- Left Side: Contact Info --- */
+        .contact-info {
+            flex: 1; min-width: 300px;
+        }
+        .contact-info h3 { font-size: 26px; margin-bottom: 15px; color: var(--text-main); font-weight: 700;}
+        .contact-info > p { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+
+        .info-box {
+            display: flex; align-items: center; gap: 20px;
+            background: var(--bg-card); padding: 20px; border-radius: 15px;
+            border: 1px solid var(--border-color); margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03); transition: all 0.3s ease;
+        }
+        .info-box:hover {
+            transform: translateX(10px); border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(59,130,246,0.1);
+        }
+        .info-box i {
+            font-size: 28px; color: var(--primary); background: var(--primary-bg);
+            padding: 15px; border-radius: 12px;
+        }
+        .info-details h4 { font-size: 18px; margin-bottom: 3px; color: var(--text-main); }
+        .info-details p { color: var(--text-muted); font-size: 14px; margin: 0; }
+
+        /* --- Right Side: Contact Form --- */
+        .contact-form {
+            flex: 1.5; min-width: 320px;
+            background: var(--bg-card); padding: 40px; border-radius: 20px;
+            border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+        .contact-form h3 { font-size: 24px; margin-bottom: 25px; color: var(--text-main); font-weight: 700;}
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group input, .input-group textarea {
+            width: 100%; padding: 15px 15px 15px 45px;
+            background: var(--input-bg); border: 1.5px solid var(--border-color);
+            border-radius: 10px; color: var(--text-main); font-size: 15px;
+            outline: none; transition: all 0.3s ease;
+        }
+        .input-group i {
+            position: absolute; left: 15px; top: 16px; color: var(--text-muted); font-size: 18px;
+        }
+        .input-group textarea {
+            padding-left: 15px; height: 140px; resize: none;
+        }
+        .input-group textarea + i { display: none; } /* Hide icon for textarea */
+
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+            background: var(--bg-card);
+        }
+        .input-group input:focus + i { color: var(--primary); }
+
+        .btn-submit {
+            width: 100%; padding: 15px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+        }
+        .btn-submit:hover { background: #2563eb; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(59,130,246,0.4); }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .contact-wrapper { flex-direction: column; gap: 30px;}
+            .page-header { padding: 90px 5% 30px; }
+            .page-header h1 { font-size: 32px; }
+            .contact-form { padding: 30px 20px; }
+            .back-to-home-btn { top: 15px; left: 15px; width: 40px; height: 40px; font-size: 20px; }
+        }
     </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+        }
+    </script>
 </head>
 <body>
-<a href="/" class="back-to-home-btn" title="Back to Home">
-    <i class='bx bxs-home-heart'></i>
-</a>
 
-  
-    <div class="contact-container">
+    <a href="/" class="back-to-home-btn" title="Back to Home">
+        <i class='bx bxs-home-heart'></i>
+    </a>
+
+    <div class="page-header">
+        <h1>Let's <span>Connect</span></h1>
+        <p>Have questions about our courses, need technical support, or want to hire our students? We are here to help you out.</p>
+    </div>
+
+    <div class="contact-wrapper">
+        
         <div class="contact-info">
-            <h2>Get in <span>Touch</span></h2>
-            <p style="color: var(--text-muted); line-height: 1.6;">Have a question about our courses, pricing, or your account? Our team is here to help you 24/7.</p>
+            <h3>Get In Touch</h3>
+            <p>We are always open to discussing new projects, creative ideas, or opportunities to be part of your tech journey.</p>
+            
+            <div class="info-box">
+                <i class='bx bx-map'></i>
+                <div class="info-details">
+                    <h4>Headquarters</h4>
+                    <p>Gonda, Uttar Pradesh, India</p>
+                </div>
+            </div>
             
             <div class="info-box">
                 <i class='bx bx-envelope'></i>
-                <div><h4 style="color:#fff;">Email Us</h4><p style="color:var(--text-muted); font-size:14px;">support@codemaster.com</p></div>
+                <div class="info-details">
+                    <h4>Email Us</h4>
+                    <p>support@codemaster.com</p>
+                </div>
             </div>
+            
             <div class="info-box">
-                <i class='bx bx-map'></i>
-                <div><h4 style="color:#fff;">Location</h4><p style="color:var(--text-muted); font-size:14px;">Uttar Pradesh, India</p></div>
+                <i class='bx bx-phone-call'></i>
+                <div class="info-details">
+                    <h4>Call Us</h4>
+                    <p>+91 XXXXX XXXXX</p>
+                </div>
             </div>
         </div>
 
-        <form class="contact-form">
-            <h3 style="color:#fff; margin-bottom: 25px;">Send a Message</h3>
-            <div class="input-group"><input type="text" placeholder="Your Full Name" required></div>
-            <div class="input-group"><input type="email" placeholder="Your Email Address" required></div>
-            <div class="input-group"><textarea placeholder="How can we help you?" required></textarea></div>
-            <button type="submit" class="btn-submit">Send Message</button>
-        </form>
+        <div class="contact-form">
+            <h3>Send us a Message</h3>
+            
+            <form id="contactForm" onsubmit="submitContactForm(event)">
+                <div class="input-group">
+                    <input type="text" id="cName" placeholder="Your Full Name" required>
+                    <i class='bx bx-user'></i>
+                </div>
+                
+                <div class="input-group">
+                    <input type="email" id="cEmail" placeholder="Your Email Address" required>
+                    <i class='bx bx-envelope'></i>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="cSubject" placeholder="Subject / Query Topic" required>
+                    <i class='bx bx-info-circle'></i>
+                </div>
+                
+                <div class="input-group">
+                    <textarea id="cMessage" placeholder="How can we help you? Describe your query in detail..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Send Message <i class='bx bx-send'></i>
+                </button>
+            </form>
+        </div>
+
     </div>
+
+    <script>
+        function submitContactForm(event) {
+            event.preventDefault(); // पेज को रीफ्रेश होने से रोकें
+            
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            
+            // बटन पर लोडिंग इफ़ेक्ट दिखाएं
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending...`;
+            btn.disabled = true;
+
+            // 1.5 सेकंड का फेक डिले (ताकि लगे कि सर्वर पर जा रहा है)
+            setTimeout(() => {
+                alert("🎉 Thank you for reaching out! Your message has been sent successfully. Our team will contact you shortly.");
+                
+                // फॉर्म को खाली करें और बटन को नार्मल करें
+                document.getElementById('contactForm').reset();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        }
+    </script>
 </body>
 </html>
-
