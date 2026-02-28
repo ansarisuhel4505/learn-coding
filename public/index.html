@@ -4,193 +4,189 @@
     <meta name="google-site-verification" content="jU5aN8_fHXe9GM_W3kGzo0QzQ2UE11GugqfMfa1ogAc" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeMaster | Master Software Development</title>
+    <title>CodeMaster | The Ultimate Tech Hub</title>
     
     <meta name="description" content="Learn Full-Stack Development, Artificial Intelligence, and Mobile App Creation with CodeMaster.">
-    <meta name="keywords" content="Coding, Web Development, AI, Mobile Apps, Programming">
+    <meta name="keywords" content="Coding, Web Development, AI, Mobile Apps, Programming, Hacker">
     
     <link rel="stylesheet" href="style.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-
 </head>
-<body>
+<body class="dark-theme"> <div class="evil-glow orb-1"></div>
+    <div class="evil-glow orb-2"></div>
 
-          <header class="header">
-        
-        <a href="/" class="logo" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
-    <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="64" height="64" rx="12" fill="#2563eb"/> <path d="M24 18L10 32L24 46" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/> <path d="M40 18L54 32L40 46" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/> <path d="M36 14L28 50" stroke="white" stroke-width="6" stroke-linecap="round"/> </svg>
-    <span style="font-size: 24px; font-weight: 800; color: #0f172a;">
-        Code<span style="color: #2563eb;">Master</span>
-    </span>
+    <header class="header">
+        <a href="/" class="logo">
+            <i class='bx bx-code-block'></i> Code<span class="neon-text">Master</span>
         </a>
-              
 
         <nav class="navbar" id="navbar">
             <ul class="nav-links">
                 <li><a href="/" class="active"><i class='bx bx-home'></i> Home</a></li>
-               <a href="/resume.html" class="btn" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none;">
-    <i class="fas fa-file-alt"></i> RESUME
-</a>
-                <li><a href="/compiler.html"><i class='bx bx-code-alt'></i> Compiler</a></li>
+                <a href="/resume.html" class="btn-resume">
+                    <i class="bx bx-file"></i> RESUME
+                </a>
+                <li><a href="/compiler.html"><i class='bx bx-terminal'></i> Compiler</a></li>
                 <li><a href="#" onclick="checkLogin(event)"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
                 <li><a href="/admin.html"><i class='bx bx-shield-quarter'></i> Admin</a></li>
-                
                 <li class="mobile-login"><a href="/login.html"><i class='bx bx-log-in'></i> Login</a></li>
             </ul>
         </nav>
 
         <div class="auth-container" id="auth-buttons">
             <a href="/login.html" class="btn-login"><i class='bx bx-log-in'></i> Login</a>
-            <a href="/signup.html" class="btn-signup">Sign Up Free</a>
+            <a href="/signup.html" class="btn-signup evil-btn">Sign Up Free</a>
         </div>
 
         <div class="bx bx-menu" id="menu-icon"></div>
-          </header>
+    </header>
+
     <section class="hero" id="home">
         <div class="hero-text-content">
-            <span class="badge">🚀 100% Practical Learning</span>
-            <h1>Build Your Future With<br> Next-Gen Tech Skills</h1>
+            <span class="badge evil-badge"><i class='bx bxs-virus'></i> 100% Core Practical Learning</span>
+            <h1>Dominate The Web.<br> Become A <span class="multiple-text neon-text"></span></h1>
             
-            <h2>Become a <span class="multiple-text"></span></h2>
-            
-            <p>From foundational coding principles to advanced software engineering. Join our comprehensive programs and transform your career with hands-on projects, expert mentorship, and a thriving developer community.</p>
+            <p>Step out of the matrix. Master Full-Stack, AI, and advanced algorithms with hands-on projects. We don't just teach coding; we build digital architects.</p>
             
             <div class="hero-buttons">
-                <a href="#courses" class="btn-primary course-btn">Explore Courses <i class='bx bx-right-arrow-alt'></i></a>
-                <a href="#about" class="btn-secondary">Learn More</a>
+                <a href="#courses" class="btn-primary evil-btn">Enter The System <i class='bx bx-right-arrow-alt'></i></a>
+                <a href="#about" class="btn-secondary outline-btn">View Target</a>
             </div>
-            <div class="hero-stats">
+            
+            <div class="hero-stats glass-box">
                 <div class="stat-item">
-                    <h3>50+</h3>
+                    <h3 class="neon-text">50+</h3>
                     <p>Live Projects</p>
                 </div>
                 <div class="stat-item">
-                    <h3>10k+</h3>
-                    <p>Students</p>
+                    <h3 class="neon-text">10k+</h3>
+                    <p>Hackers Trained</p>
                 </div>
                 <div class="stat-item">
-                    <h3>4.9/5</h3>
-                    <p>Top Rating</p>
+                    <h3 class="neon-text">4.9/5</h3>
+                    <p>User Rating</p>
                 </div>
             </div>
         </div>
         <div class="hero-image-content">
-            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" alt="Coding Dashboard UI">
+            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80" alt="Hacker Coding Setup" class="cyber-img">
         </div>
     </section>
 
     <section class="learning-path" id="popular-courses">
         <div class="section-heading">
-            <h2>Our Premium Learning Paths 🚀</h2>
-            <p>Master the most in-demand tech skills with our expert-led programs.</p>
+            <h2>Premium <span class="neon-text">Learning Paths</span> 🚀</h2>
+            <p>Access highly classified knowledge and in-demand tech skills.</p>
         </div>
         <div class="course-grid">
-            <div class="course-card">
-                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80" alt="Full Stack Dev">
+            <div class="course-card glass-card">
+                <div class="img-wrapper"><img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80" alt="Full Stack"></div>
                 <div class="card-content">
                     <div class="tags">
                         <span class="tag-badge web-badge">Web Dev</span>
                         <span class="rating"><i class='bx bxs-star'></i> 4.9</span>
                     </div>
-                    <h3>Full-Stack Web Development</h3>
-                    <p>Master HTML, CSS, JavaScript, React, Node.js, and MongoDB. Build real-world projects from scratch.</p>
-                    <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                    <h3>Full-Stack Architecture</h3>
+                    <p>Master React, Node.js, and MongoDB. Build highly scalable architectures from scratch.</p>
+                    <a href="/login.html" class="btn-card">Initialize Course <i class='bx bx-right-arrow-alt'></i></a>
                 </div>
             </div>
-            <div class="course-card">
-                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=80" alt="AI Course">
+            <div class="course-card glass-card">
+                <div class="img-wrapper"><img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80" alt="AI Course"></div>
                 <div class="card-content">
                     <div class="tags">
                         <span class="tag-badge ai-badge">AI & ML</span>
                         <span class="rating"><i class='bx bxs-star'></i> 4.8</span>
                     </div>
-                    <h3>Artificial Intelligence Mastery</h3>
-                    <p>Dive deep into Machine Learning, Neural Networks, Python, and build your own smart AI models.</p>
-                    <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                    <h3>Artificial Intelligence</h3>
+                    <p>Dive deep into Neural Networks, Python, and build systems that think for themselves.</p>
+                    <a href="/login.html" class="btn-card">Initialize Course <i class='bx bx-right-arrow-alt'></i></a>
                 </div>
             </div>
-            <div class="course-card">
-                <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80" alt="App Dev">
+            <div class="course-card glass-card">
+                <div class="img-wrapper"><img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80" alt="App Dev"></div>
                 <div class="card-content">
                     <div class="tags">
                         <span class="tag-badge app-badge">Mobile Apps</span>
                         <span class="rating"><i class='bx bxs-star'></i> 4.9</span>
                     </div>
-                    <h3>Mobile App Development</h3>
-                    <p>Create stunning Android and iOS applications using modern frameworks. Build apps that scale globally.</p>
-                    <a href="/login.html" class="btn-card">Start Learning <i class='bx bx-right-arrow-alt'></i></a>
+                    <h3>Mobile App Dev</h3>
+                    <p>Dominate the app stores. Create stunning iOS and Android apps with modern frameworks.</p>
+                    <a href="/login.html" class="btn-card">Initialize Course <i class='bx bx-right-arrow-alt'></i></a>
                 </div>
             </div>
         </div>
     </section>
+
     <section class="learning-path bg-alternate" id="courses">
         <div class="section-heading">
-            <h2>Latest Admin Courses 📚</h2>
-            <p>Explore our latest courses added recently by the Admin.</p>
+            <h2>Latest <span class="neon-text">Deployments</span> 📚</h2>
+            <p>Fresh courses synced directly from the Admin mainframe.</p>
         </div>
         <div class="course-grid" id="dynamic-courses">
-            <p class="loading-text">Loading amazing courses for you...</p>
+            <p class="loading-text"><i class='bx bx-loader-alt bx-spin'></i> Fetching data from mainframe...</p>
         </div>
     </section>
+
     <section class="features" id="features">
         <div class="features-content">
             <div class="features-text">
-                <h2>Why Learn With <span>CodeMaster?</span></h2>
-                <p>We don't just teach syntax; we teach software engineering. Here is what makes our platform stand out.</p>
+                <h2>Why Hack The Future With <span class="neon-text">CodeMaster?</span></h2>
+                <p>We don't just teach syntax. We inject logic into your brain. Here's our operational advantage.</p>
                 
                 <ul class="features-list">
                     <li>
-                        <i class='bx bxs-check-circle'></i>
+                        <i class='bx bx-target-lock neon-icon'></i>
                         <div>
-                            <h4>Project-Based Learning</h4>
-                            <p>Build real-world applications instead of just watching theoretical videos.</p>
+                            <h4>Project-Based Execution</h4>
+                            <p>Build real-world, production-ready applications instead of watching boring lectures.</p>
                         </div>
                     </li>
                     <li>
-                        <i class='bx bxs-check-circle'></i>
+                        <i class='bx bx-server neon-icon'></i>
                         <div>
-                            <h4>Database & Backend Focus</h4>
-                            <p>Deep dive into architecture, APIs, and secure database management.</p>
+                            <h4>Backend & Database Mastery</h4>
+                            <p>Deep dive into microservices, APIs, and highly secure database management.</p>
                         </div>
                     </li>
                     <li>
-                        <i class='bx bxs-check-circle'></i>
+                        <i class='bx bx-terminal neon-icon'></i>
                         <div>
                             <h4>Industry-Standard Tools</h4>
-                            <p>Learn Git, GitHub, Docker, and deployment workflows used by top tech companies.</p>
+                            <p>Master Git, Docker, and deployment workflows used by Silicon Valley elites.</p>
                         </div>
                     </li>
                 </ul>
             </div>
             <div class="features-image">
-                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=500&q=80" alt="Developer at work">
+                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=500&q=80" alt="Hacker typing" class="cyber-img">
             </div>
         </div>
     </section>
+
     <section class="live-exams bg-alternate" id="mock-tests">
         <div class="section-heading">
-            <h2>Live <span>Mock Tests</span> ⏱️</h2>
-            <p>Test your coding skills with our real-time proctored exams.</p>
+            <h2>Live <span class="neon-text">Proctored Exams</span> ⏱️</h2>
+            <p>Prove your worth. Test your skills in our real-time execution environment.</p>
         </div>
         <div class="course-grid" id="public-exams">
-            <p class="loading-text">Loading active exams for you...</p>
+            <p class="loading-text"><i class='bx bx-loader-alt bx-spin'></i> Scanning for active exams...</p>
         </div>
     </section>
+
     <section class="instructor" id="about">
-        <div class="instructor-container">
+        <div class="instructor-container glass-card">
             <div class="instructor-image">
-                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=400&q=80" alt="Suhel Ansari - Instructor">
+                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=400&q=80" alt="Suhel Ansari - Founder">
             </div>
             <div class="instructor-info">
-                <span class="badge">Meet Your Mentor</span>
+                <span class="badge evil-badge">System Admin & Founder</span>
                 <h2>Suhel Ansari</h2>
-                <h4 class="title">B.Tech Computer Science & Engineering | Software Developer</h4>
-                <p>Hi, I'm Suhel. As a dedicated Computer Science student and developer, I built CodeMaster to bridge the gap between academic theory and industry-required practical skills.</p>
-                <p>My goal is to simplify complex programming concepts across Web Development, AI, and Mobile Apps, empowering you to build logic and write production-ready code. Let's code the future together!</p>
+                <h4 class="title neon-text">B.Tech CSE | Software Architect</h4>
+                <p>Welcome to my domain. I built CodeMaster to bridge the massive gap between boring academic theory and hardcore industry skills.</p>
+                <p>My mission is to hand you the blueprint of modern software engineering. We will write code that scales, builds logic, and disrupts the tech industry. Ready to code the future?</p>
                 <div class="social-links">
                     <a href="https://github.com/ansarisuhel4505" target="_blank"><i class='bx bxl-github'></i></a>
                     <a href="https://www.instagram.com/ansarisuhel4505" target="_blank"><i class='bx bxl-instagram'></i></a>
@@ -200,19 +196,20 @@
             </div>
         </div>
     </section>
+
     <section class="cta-section">
-        <div class="cta-box">
-            <h2>Ready to start your coding journey?</h2>
-            <p>Join our community of developers today and get instant access to our premium dashboard.</p>
-            <a href="/signup.html" class="btn-primary">Create Free Account</a>
+        <div class="cta-box glass-card">
+            <h2>System Ready For Initialization</h2>
+            <p>Join an elite network of developers. Gain instant access to the premium dashboard today.</p>
+            <a href="/signup.html" class="btn-primary evil-btn">Create Free Account</a>
         </div>
     </section>
 
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-col brand-col">
-                <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span>Master</span></a>
-                <p>Your ultimate destination for mastering modern software engineering, from full-stack web to AI.</p>
+                <a href="/" class="logo"><i class='bx bx-code-block'></i> Code<span class="neon-text">Master</span></a>
+                <p>Your ultimate destination for mastering modern software engineering, from full-stack web to AI architecture.</p>
             </div>
             
             <div class="footer-col links-col">
@@ -222,7 +219,7 @@
                     <li><a href="/aboutus.html">About Us</a></li>
                     <li><a href="/allcourses.html">All Courses</a></li>
                     <li><a href="/contactus.html">Contact Support</a></li>
-                    <li><a href="/help.html">HELP DESKBOARD</a></li>
+                    <li><a href="/help.html">Help Dashboard</a></li>
                 </ul>
             </div>
 
@@ -235,8 +232,8 @@
                 </ul>
             </div>
             <div class="footer-col newsletter-col">
-                <h4>Newsletter</h4>
-                <p>Subscribe to get the latest tech news and course updates.</p>
+                <h4>Network Updates</h4>
+                <p>Subscribe to our encrypted channel for the latest tech news.</p>
                 <form action="#" class="newsletter-form">
                     <input type="email" placeholder="Enter your email" required>
                     <button type="submit" class="btn-newsletter"><i class='bx bx-send'></i></button>
@@ -247,16 +244,12 @@
             <p>&copy; 2026 CodeMaster by Suhel Ansari. All Rights Reserved.</p>
         </div>
     </footer>
-    <a href="/" class="back-to-home-btn" title="Back to Home">
-    <i class='bx bxs-home-heart'></i>
-    </a>
-    <button id="darkModeToggle" class="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle Dark/Light Mode">
-    <i class='bx bx-moon' id="themeIcon"></i>
-    </button>
+
+    <a href="/" class="back-to-home-btn" title="Back to Home"><i class='bx bxs-home-heart'></i></a>
+    <button id="darkModeToggle" class="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle Theme"><i class='bx bx-sun' id="themeIcon"></i></button>
     
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     <script>
-        // 1. Hamburger Menu Logic
         const menuIcon = document.getElementById('menu-icon');
         const navbar = document.getElementById('navbar');
 
@@ -265,16 +258,11 @@
             navbar.classList.toggle('active');
         };
 
-        // 2. Typewriter Effect Logic
         const typed = new Typed('.multiple-text', {
-            strings: ['Full-Stack Developer', 'AI Engineer', 'Mobile App Creator', 'Software Architect'],
-            typeSpeed: 70,
-            backSpeed: 50,
-            backDelay: 1000,
-            loop: true
+            strings: ['Full-Stack Hacker', 'AI Engineer', 'Cyber Architect', 'Pro Developer'],
+            typeSpeed: 70, backSpeed: 50, backDelay: 1000, loop: true
         });
 
-        // 3. Fetch Dynamic Content (Courses & Exams) from Backend
         window.addEventListener('DOMContentLoaded', () => {
             fetchPublicCourses();
             fetchPublicExams();
@@ -285,19 +273,17 @@
                 const res = await fetch('/api/courses');
                 const courses = await res.json();
                 const container = document.getElementById('dynamic-courses');
-                
                 if(courses.length === 0) {
-                    container.innerHTML = '<p class="loading-text">New courses dropping soon!</p>';
+                    container.innerHTML = '<p class="loading-text">No data found in mainframe.</p>';
                     return;
                 }
-
                 container.innerHTML = courses.slice(0, 3).map(c => `
-                    <div class="course-card">
-                        <img src="${c.thumbnail}" alt="Course">
+                    <div class="course-card glass-card">
+                        <div class="img-wrapper"><img src="${c.thumbnail}" alt="Course"></div>
                         <div class="card-content">
                             <h3>${c.title}</h3>
                             <p>${c.description.substring(0, 80)}...</p>
-                            <a href="/login.html" class="btn-card">View Course <i class='bx bx-right-arrow-alt'></i></a>
+                            <a href="/login.html" class="btn-card">Execute Code <i class='bx bx-right-arrow-alt'></i></a>
                         </div>
                     </div>
                 `).join('');
@@ -309,75 +295,47 @@
                 const res = await fetch('/api/exams');
                 const exams = await res.json();
                 const container = document.getElementById('public-exams');
-                
                 if(exams.length === 0) {
-                    container.innerHTML = '<p class="loading-text">No live exams right now.</p>';
+                    container.innerHTML = '<p class="loading-text">No active tasks found.</p>';
                     return;
                 }
-
                 container.innerHTML = exams.slice(0, 3).map(e => `
-                    <div class="course-card exam-card">
+                    <div class="course-card glass-card exam-card">
                         <div class="card-content">
-                            <h3 class="exam-title"><i class='bx bx-stopwatch'></i> ${e.title}</h3>
-                            <p style="margin-top:15px;"><b>Total Marks:</b> ${e.totalMarks}</p>
-                            <p><b>Duration:</b> ${e.duration} Mins</p>
-                            <a href="/login.html" class="btn-card exam-btn">Login to Attempt</a>
+                            <h3 class="exam-title"><i class='bx bx-radar'></i> ${e.title}</h3>
+                            <p style="margin-top:15px; color:#e2e8f0;"><b>Max Score:</b> ${e.totalMarks}</p>
+                            <p style="color:#e2e8f0;"><b>Time Limit:</b> ${e.duration} Mins</p>
+                            <a href="/login.html" class="btn-card exam-btn">Bypass Security & Enter</a>
                         </div>
                     </div>
                 `).join('');
             } catch (err) { console.log(err); }
         }
-        // 🌟 SMART DASHBOARD LINK LOGIC
-function checkLogin(event) {
-    event.preventDefault(); // Default link click ko roko
-    
-    // Check karo kya browser ki memory mein Roll No save hai
-    if(localStorage.getItem('cm_roll')) {
-        // Agar save hai (Logged In), toh Dashboard kholo
-        window.location.href = "/dashboard.html";
-    } else {
-        // Agar save nahi hai (Logged Out), toh Login Page par bhejo
-        window.location.href = "/login.html";
-    }
-}
-        function toggleDarkMode() {
-    document.body.classList.toggle('dark-theme');
-    
-    // Check karo aur sabhi pages ke liye memory me save kar do
-    if (document.body.classList.contains('dark-theme')) {
-        localStorage.setItem('theme', 'dark');
-        document.getElementById('themeIcon').classList.replace('bx-moon', 'bx-sun');
-    } else {
-        localStorage.setItem('theme', 'light');
-        document.getElementById('themeIcon').classList.replace('bx-sun', 'bx-moon');
-    }
-}
 
-// Page load par check karega
-if (localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark-theme');
-    if(document.getElementById('themeIcon')) {
-        document.getElementById('themeIcon').classList.replace('bx-moon', 'bx-sun');
-    }
-}
-        
-        
+        function checkLogin(event) {
+            event.preventDefault();
+            if(localStorage.getItem('cm_roll')) window.location.href = "/dashboard.html";
+            else window.location.href = "/login.html";
+        }
+
+        // Force Dark Mode but allow toggle for users who want Light mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-theme');
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+                document.getElementById('themeIcon').classList.replace('bx-sun', 'bx-moon');
+            } else {
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('themeIcon').classList.replace('bx-moon', 'bx-sun');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            if(document.getElementById('themeIcon')) {
+                document.getElementById('themeIcon').classList.replace('bx-sun', 'bx-moon');
+            }
+        }
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
