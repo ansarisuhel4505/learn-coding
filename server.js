@@ -36,20 +36,21 @@ app.use(express.urlencoded({ extended: true }));
 // 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
 app.set('trust proxy', 1); 
 
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'mysecret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production', // Vercel पर इसे true कर देगा
-        maxAge: 24 * 60 * 60 * 1000 
-    }
-}));
+// 🌟 VERCEL SESSION FIX (MongoDB Store) 🌟
+const MongoStore = require('connect-mongo');
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'codemaster_super_secret_key_2026',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: MongoStore.create({ 
+        mongoUrl: process.env.MONGO_URI, // Session अब MongoDB में सेव होगा!
+        ttl: 24 * 60 * 60 // 1 दिन तक Admin लॉगिन रहेगा
+    }),
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
+    }
 }));
 
 app.use(passport.initialize());
@@ -338,21 +339,32 @@ app.post('/api/admin/login', (req, res) => {
     }
 });
 
-
+// ==========================================
+// 🛡️ SECURITY GUARD (IsAdmin Middleware)
+// ==========================================
+const checkAdmin = (req, res, next) => {
+    // अगर Session में Admin है, तो ही आगे जाने दो
+    if (req.session && req.session.isAdmin) {
+        return next();
+    }
+    // वरना सीधा हैकर को एरर फेंक कर मारो!
+    return res.status(403).json({ success: false, message: "🚨 Unauthorized! Admin access required." });
+};
 // ==========================================
 // 8. ADMIN & STUDENT APIs
 // ==========================================
 
-// Courses & Exams
-app.get('/api/courses', async (req, res) => res.json(await Course.find().sort({ createdAt: -1 })));
-app.post('/api/courses', async (req, res) => res.json(await Course.create(req.body)));
-app.delete('/api/courses/:id', async (req, res) => { await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); });
+// 🔒 Locked Admin APIs (अब कोई हैक नहीं कर सकता)
+app.post('/api/courses', checkAdmin, async (req, res) => res.json(await Course.create(req.body)));
+app.delete('/api/courses/:id', checkAdmin, async (req, res) => { await Course.findByIdAndDelete(req.params.id); res.json({ success: true }); });
 
+app.post('/api/exams', checkAdmin, async (req, res) => res.json(await Exam.create(req.body)));
+app.delete('/api/exams/:id', checkAdmin, async (req, res) => { await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); });
+
+// 🔓 Public APIs (Student के लिए, इनमें गार्ड नहीं लगेगा)
+app.get('/api/courses', async (req, res) => res.json(await Course.find().sort({ createdAt: -1 })));
 app.get('/api/exams', async (req, res) => res.json(await Exam.find({ isActive: true }).sort({ _id: -1 })));
 app.get('/api/exams/:id', async (req, res) => res.json(await Exam.findById(req.params.id)));
-app.post('/api/exams', async (req, res) => res.json(await Exam.create(req.body)));
-app.delete('/api/exams/:id', async (req, res) => { await Exam.findByIdAndDelete(req.params.id); res.json({ success: true }); });
-
 app.post('/api/my-submissions', async (req, res) => {
     const { rollNo } = req.body;
     if (!rollNo) return res.json([]);
@@ -576,7 +588,7 @@ app.post('/api/feedback', async (req, res) => {
 app.get('/api/admin/feedback', async (req, res) => res.json(await Feedback.find().sort({ date: -1 })));
 app.get('/api/admin/results', async (req, res) => res.json(await Result.find().sort({ _id: -1 })));
 
-app.put('/api/admin/check-copy/:id', async (req, res) => {
+app.put('/api/admin/check-copy/:id', checkAdmin, async (req, res) => {
     try {
         await Result.findByIdAndUpdate(req.params.id, { score: req.body.adminMarks, isReleased: true });
         res.json({ success: true, message: "Result Uploaded Successfully!" });
@@ -590,6 +602,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
