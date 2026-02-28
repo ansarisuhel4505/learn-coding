@@ -266,4 +266,70 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     background: var(--surface-color); border-color: var(--border-color); color: var(--text-main); 
 }
 .light-theme .newsletter-form input::placeholder { color: var(--text-muted); }
+/* ==========================================================
+   📱 ULTIMATE MOBILE LAYOUT FIXES (NO HORIZONTAL SCROLL) 🌟
+========================================================== */
+
+/* 1. स्क्रीन को लेफ्ट-राइट खिसकने से रोकने के लिए ग्लोबल फिक्स */
+html, body {
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* 2. टेबलेट और मोबाइल स्क्रीन के लिए (Max Width: 850px) */
+@media (max-width: 850px) {
+    /* Hero Section Fix */
+    .hero { padding-top: 120px; padding-bottom: 50px; }
+    .hero h1 { font-size: 38px !important; line-height: 1.2; margin-bottom: 15px; }
+    .hero p { font-size: 15px !important; padding: 0 10px; }
+    
+    /* Stats Box Wrapping (ताकि डिब्बे स्क्रीन से बाहर न जाएं) */
+    .hero-stats { 
+        flex-wrap: wrap; 
+        gap: 15px; 
+        padding: 15px; 
+    }
+    .stat-item { flex: 1 1 45%; } /* दो डिब्बे एक लाइन में */
+
+    /* Course Cards Grid Fix (ताकि कार्ड स्क्रीन के अंदर फिट रहें) */
+    .course-grid { 
+        grid-template-columns: 1fr !important; /* मोबाइल पर सिर्फ 1 कॉलम */
+        gap: 25px; 
+    }
+
+    /* Instructor & CTA Box Padding Fix */
+    .instructor-container { padding: 30px 20px !important; }
+    .instructor-image img { width: 200px !important; height: 200px !important; }
+    .cta-box { padding: 35px 20px !important; }
+    .cta-box h2 { font-size: 30px !important; }
+}
+
+/* 3. छोटी मोबाइल स्क्रीन के लिए (Max Width: 480px) */
+@media (max-width: 480px) {
+    /* Main Heading थोड़ा और छोटा किया */
+    .hero h1 { font-size: 32px !important; }
+    
+    /* Buttons को फुल विड्थ (Full Width) में सेट किया */
+    .hero-buttons { 
+        display: flex; 
+        flex-direction: column; 
+        width: 100%; 
+        gap: 15px; 
+    }
+    .hero-buttons a { width: 100%; justify-content: center; }
+    
+    /* Stats को एक के नीचे एक कर दिया */
+    .stat-item { flex: 1 1 100%; }
+    
+    /* Features Section */
+    .features-text h2 { font-size: 32px !important; }
+    .features-list li { flex-direction: column; gap: 10px; text-align: center; align-items: center;}
+    .features-list i { margin-bottom: 5px; }
+    
+    /* Footer Fix */
+    .footer-container { gap: 30px; }
+    .footer { padding: 50px 5% 30px; }
+}
+
 
