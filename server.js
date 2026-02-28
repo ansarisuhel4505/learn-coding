@@ -2,7 +2,8 @@
 require('dotenv').config();
 
 const express = require('express');
-const pdfParse = require('pdf-parse'); // PDF पढ़ने के लिए
+const pdfParse = require('pdf-parse');// PDF पढ़ने के लिए
+const bcrypt = require('bcryptjs'); // 🌟 NAYA: Password Security ke liye
 const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
@@ -197,7 +198,10 @@ app.post('/signup', async (req, res) => {
         const existingUser = await User.findOne({ $or: [{ email }, { rollNo }] });
         if(existingUser) return res.send("<script>alert('Email or Roll No already registered!'); window.location.href='/signup.html';</script>");
         
-        await User.create({ username, email, password, mobile, rollNo });
+        // 🌟 MAGIC: Password ko encrypt (hash) karna
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await User.create({ username, email, password: hashedPassword, mobile, rollNo });
         sendWelcomeEmail(email, username); 
         res.redirect('/login.html?signup=success');
     } catch (err) { res.send("Error during signup."); }
@@ -214,13 +218,27 @@ app.post('/login', async (req, res) => {
             }
         }
 
-        const user = await User.findOne({ $or: [{ email: loginId }, { rollNo: loginId }], password: password });
-        if (!user) return res.send("<script>alert('❌ Invalid Email/Roll No or Password.'); window.location.href='/login.html';</script>");
+        // Pehle user ko dhoondo (password bina check kiye)
+        const user = await User.findOne({ $or: [{ email: loginId }, { rollNo: loginId }] });
+        if (!user) return res.send("<script>alert('❌ User not found!'); window.location.href='/login.html';</script>");
+        
+        // 🌟 MAGIC: Encrypted password ko check karna
+        let isMatch = false;
+        if (user.password.startsWith('$2')) {
+            // Agar password naya (hashed) hai
+            isMatch = await bcrypt.compare(password, user.password);
+        } else {
+            // Backup: Agar purana test account hai (plain text wala)
+            isMatch = (password === user.password);
+        }
+
+        if (!isMatch) return res.send("<script>alert('❌ Incorrect Password.'); window.location.href='/login.html';</script>");
         
         sendLoginAlertEmail(user.email, user.username); 
         res.redirect(`/dashboard.html?login=success&name=${encodeURIComponent(user.username)}&roll=${user.rollNo || ''}`);
     } catch (err) { res.send("Login Error"); }
 });
+
 
 app.get('/logout', (req, res) => {
     req.logout((err) => {
@@ -235,6 +253,20 @@ app.get('/logout', (req, res) => {
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login.html' }), (req, res) => {
     res.redirect(`/dashboard.html?login=success&name=${encodeURIComponent(req.user.username)}&roll=${req.user.rollNo}`);
+});
+app.post('/api/reset-password', async (req, res) => {
+    const { email, newPassword } = req.body;
+    try {
+        // 🌟 NAYA: Naye password ko bhi encrypt karke save karo
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        await User.updateOne({ email: email }, { password: hashedPassword });
+        delete otpStore[email]; 
+        
+        res.json({ success: true, message: 'Password updated successfully!' });
+    } catch (error) {
+        res.json({ success: false, message: 'Database error occurred while resetting password.' });
+    }
 });
 
 // ==========================================
@@ -671,6 +703,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
