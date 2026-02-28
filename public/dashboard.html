@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     // Ye code check karega ki Home Page par Dark mode ON tha ya nahi
@@ -268,6 +269,21 @@ html.dark-theme input, html.dark-theme select, html.dark-theme textarea {
 .send-btn { color: #3b82f6; }
 .send-btn:hover { color: #2563eb; transform: scale(1.1); }
 .image-preview-box { padding: 5px 15px; background: #f1f5f9; border-top: 1px solid #e2e8f0; }
+        /* 🌟 AI Code Block Styles 🌟 */
+.bot-msg pre { 
+    background: #1e293b !important; 
+    color: #e2e8f0 !important; 
+    padding: 12px; 
+    border-radius: 8px; 
+    overflow-x: auto; 
+    margin: 10px 0;
+    border: 1px solid #334155;
+}
+.bot-msg code { 
+    font-family: 'Consolas', 'Courier New', monospace; 
+    font-size: 13px; 
+}
+.bot-msg p { margin-bottom: 8px; }
 
 /* 🌟 डार्क मोड सपोर्ट 🌟 */
 body.dark-theme .chatbot-window { background: #1e293b; border-color: #334155; }
@@ -1435,10 +1451,10 @@ async function sendMessage() {
             body: formData
         });
         const data = await res.json();
-
-        // Thinking वाले मैसेज को असली रिप्लाई से बदल दो
+       // Thinking वाले मैसेज को असली रिप्लाई से बदल दो
         if(data.success) {
-            const formattedReply = data.reply.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            // marked.parse() AI के कोड को सुंदर 'Code Box' और 'टेबल' में बदल देगा!
+            const formattedReply = marked.parse(data.reply);
             document.getElementById(thinkingId).innerHTML = formattedReply;
         } else {
             document.getElementById(thinkingId).innerHTML = data.reply;
