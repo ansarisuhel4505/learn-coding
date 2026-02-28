@@ -199,273 +199,118 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 .footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid #111; font-size: 14px; }
 
 /* ==========================================================
-   6. RESPONSIVE / MOBILE CSS
-========================================================== */
-@media (max-width: 1100px) {
-    .header { padding: 15px 4%; }
-    .navbar .nav-links { gap: 15px; }
-    .logo { font-size: 22px; }
-    .hero h1 { font-size: 46px; }
-}
-
-/* 🌟 FLOATING BUTTONS */
-.back-to-home-btn, .dark-mode-btn {
-    position: fixed; bottom: 30px; width: 55px; height: 55px; 
-    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-    font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s;
-}
-.back-to-home-btn { right: 30px; background: var(--accent-red); color: white; border: 1px solid var(--accent-red); box-shadow: var(--red-glow); }
-.dark-mode-btn { left: 30px; background: var(--primary-color); color: #000; border: none; box-shadow: var(--glow-shadow); }
-.back-to-home-btn:hover, .dark-mode-btn:hover { transform: scale(1.1) translateY(-5px); }
-/* ==========================================================
-   🌟 LIGHT MODE PERFECTION FIXES 🌟
-========================================================== */
-
-/* 1. लाइट मोड में पीछे के धुंधले ग्लो (Orbs) को छिपा दें ताकि पेज क्लीन लगे */
-.light-theme .evil-glow { display: none; }
-
-/* 2. बटन पर होवर करने पर टेक्स्ट को वाइट करें (ताकि ब्लू बटन पर साफ दिखे) */
-.light-theme .evil-btn:hover { color: #ffffff !important; }
-
-/* 3. लाइट मोड में आइकॉन और हेडिंग्स की लाल शैडो हटाएं ताकि वो गंदे ना लगें */
-.light-theme .exam-title, 
-.light-theme .neon-icon { text-shadow: none !important; }
-
-/* 4. CTA (कॉल टू एक्शन) सेक्शन को लाइट मोड के हिसाब से ढालना */
-.light-theme .cta-section { background: var(--primary-bg); border-top: 1px solid var(--border-color); }
-.light-theme .cta-box { border-color: var(--border-color); box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1); }
-.light-theme .cta-box h2 { color: var(--text-main); }
-.light-theme .cta-box p { color: var(--text-muted); }
-
-/* 5. Footer (फुटर) को वाइट थीम के साथ मैच करना */
-.light-theme .footer { background: var(--bg-alternate); border-top: 1px solid var(--border-color); }
-.light-theme .footer-container h4 { color: var(--text-main); font-weight: 800; }
-.light-theme .footer p, .light-theme .footer a { color: var(--text-muted); }
-.light-theme .brand-col .logo { color: var(--text-main); }
-.light-theme .footer-bottom { border-top: 1px solid var(--border-color); }
-
-/* 6. न्यूज़लेटर इनपुट बॉक्स को सही करना */
-.light-theme .newsletter-form input { 
-    background: var(--surface-color); border-color: var(--border-color); color: var(--text-main); 
-}
-.light-theme .newsletter-form input::placeholder { color: var(--text-muted); }
-
-/* ==========================================================
-   📱 THE ULTIMATE MOBILE FIX (NO OVERFLOW - 100% FIT) 🌟
-========================================================== */
-
-/* स्क्रीन को लॉक करने के लिए सबसे जरूरी फिक्स */
-html, body {
-    overflow-x: hidden !important;
-    width: 100% !important;
-    position: relative;
-    margin: 0;
-    padding: 0;
-}
-
-/* 📱 850px से नीचे की सभी स्क्रीन्स के लिए (Tablets & Large Phones) */
-@media (max-width: 850px) {
-    /* 1. Navbar & Header */
-    .header {
-        padding: 10px 5% !important;
-        width: 100% !important;
-    }
-    
-    /* 2. Hero Section Fix */
-    .hero {
-        flex-direction: column !important;
-        text-align: center !important;
-        padding-top: 100px !important;
-        padding-bottom: 40px !important;
-        gap: 30px !important;
-        width: 100% !important;
-    }
-    .hero-text-content {
-        width: 100% !important;
-        padding: 0 15px !important;
-    }
-    .hero h1 {
-        font-size: clamp(28px, 8vw, 38px) !important;
-        line-height: 1.2 !important;
-    }
-    .hero-image-content {
-        display: none !important; /* मोबाइल पर इमेज हटा दी ताकि स्क्रॉल न आए */
-    }
-
-    /* 3. Stats & Buttons */
-    .hero-buttons {
-        justify-content: center !important;
-        flex-wrap: wrap !important;
-    }
-    .hero-stats {
-        margin: 30px auto !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 10px !important;
-        padding: 15px !important;
-    }
-    .stat-item h3 { font-size: 20px !important; }
-
-    /* 4. Course Cards Grid (Sabse Zaruri) */
-    .learning-path, .live-exams {
-        padding: 60px 15px !important;
-        width: 100% !important;
-    }
-    .course-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 20px !important;
-        width: 100% !important;
-    }
-    .course-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-    }
-
-    /* 5. Features & Instructor */
-    .features-content {
-        flex-direction: column !important;
-        gap: 30px !important;
-        padding: 0 15px !important;
-    }
-    .features-image { display: none !important; }
-    .instructor-container {
-        flex-direction: column !important;
-        padding: 30px 15px !important;
-        width: 100% !important;
-    }
-    .instructor-image img {
-        width: 180px !important;
-        height: 180px !important;
-    }
-
-    /* 6. Footer Fix */
-    .footer-container {
-        grid-template-columns: 1fr !important;
-        text-align: center !important;
-        gap: 30px !important;
-    }
-    .footer-col { width: 100% !important; }
-    .newsletter-form { width: 100% !important; }
-}
-
-/* 📱 480px से नीचे की स्क्रीन्स के लिए (Small Mobiles) */
-@media (max-width: 480px) {
-    .hero h1 { font-size: 26px !important; }
-    .hero-buttons a {
-        width: 100% !important;
-        text-align: center;
-        justify-content: center;
-    }
-    .hero-stats {
-        grid-template-columns: 1fr !important;
-        gap: 20px !important;
-    }
-    .back-to-home-btn, .dark-mode-btn {
-        width: 45px !important;
-        height: 45px !important;
-        font-size: 20px !important;
-        bottom: 20px !important;
-    }
-    .dark-mode-btn { left: 15px !important; }
-    .back-to-home-btn { right: 15px !important; }
-}
-/* ==========================================================
-   📱 FINAL PRO DRAWER: CONTENT-BASED WIDTH & LOGIN FIX
+   📱 FINAL MOBILE RESPONSIVE: THREAD DROPDOWN & LIGHT MODE
 ========================================================== */
 
 @media (max-width: 850px) {
-    /* 1. Header Layout */
+    /* 1. Header Layout Fix */
     .header {
         padding: 10px 5% !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+        height: 70px;
     }
 
-    /* 2. Auth Container (Sirf Signup Bahar Rahega) */
+    /* Logo Size for Mobile */
+    .logo { font-size: 20px !important; }
+
+    /* Signup Button Bahar Rahega */
     .auth-container {
         display: flex !important;
         align-items: center;
         margin-left: auto; 
-        margin-right: 15px;
+        margin-right: 12px;
     }
-
-    .auth-container .btn-login {
-        display: none !important; /* Header se login gayab */
-    }
-
-    .btn-signup {
-        padding: 7px 14px !important;
-        font-size: 12px !important;
+    .auth-container .btn-login { display: none !important; } /* Header se login hide */
+    
+    .btn-signup { 
+        padding: 6px 12px !important; 
+        font-size: 12px !important; 
         white-space: nowrap;
     }
 
-    /* 3. Hamburger Icon */
+    /* Hamburger Icon Position */
     #menu-icon {
         display: block !important;
+        font-size: 28px !important;
         z-index: 10002;
     }
 
-    /* 4. Professional Side-Drawer (Width based on Content) */
+    /* 2. Thread-Style Dropdown (Dhage ki tarah khulega) */
     .navbar {
-        position: fixed;
-        top: 0;
-        right: -100%; 
-        width: auto;           /* 👈 Auto width: jitna content utni jagah */
-        min-width: 200px;      /* Minimum itna bada rahega */
-        max-width: 80%;        /* Screen se bahar na nikal jaye */
-        height: 100vh;
-        background: rgba(5, 5, 5, 0.98); 
+        position: absolute;
+        top: 100%;       /* Header ke thik niche */
+        right: 5%;
+        width: auto;     /* Content ke barabar width */
+        min-width: 190px; 
+        height: auto;    /* Extra space khatam */
+        background: var(--nav-bg); 
         backdrop-filter: blur(20px);
-        border-left: 1px solid var(--primary-color);
-        display: flex;
-        flex-direction: column;
-        padding: 80px 40px 40px 30px; /* Right me thoda extra space X icon ke liye */
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 15px;
+        display: block;
+        
+        /* 🧵 Top-to-Bottom Opening Animation */
+        clip-path: inset(0 0 100% 0); 
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 10001;
     }
 
+    /* Jab click hoga tab ye active hoga */
     .navbar.active {
-        right: 0;
-        box-shadow: -15px 0 30px rgba(0, 255, 204, 0.15);
+        clip-path: inset(0 0 0 0);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
     .navbar .nav-links {
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 15px !important;
+        gap: 5px !important;
         width: 100%;
     }
 
-    /* 5. Login Button Inside Menu (Visibility Fix) */
+    /* 3. Login Inside Menu & Visibility */
     .mobile-login {
-        display: block !important; /* 👈 Login ab menu ke andar dikhega */
+        display: block !important; 
         width: 100%;
     }
 
     .navbar a {
-        font-size: 16px !important;
+        font-size: 15px !important;
         font-weight: 600;
         width: 100%;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        display: flex !important; /* Icon aur text barabar dikhne ke liye */
+        padding: 10px;
+        color: var(--text-main) !important;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+        display: flex !important;
         align-items: center;
         gap: 10px;
-        white-space: nowrap; /* Text ko ek hi line me rakhega */
     }
 
-    /* Menu se Resume hatana (Zaroorat ho to use rakhein ya hatayein) */
-    .navbar .btn-resume {
-        display: none !important;
+    /* Light Mode Special Fix */
+    .light-theme .navbar {
+        background: rgba(255, 255, 255, 0.98) !important;
+        border-color: #e2e8f0;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
-    
-    .navbar .btn-signup {
-        display: none !important; /* Menu ke andar signup nahi dikhega kyunki wo bahar hai */
-    }
+
+    /* Remove unnecessary buttons from menu */
+    .navbar .btn-resume, .navbar .btn-signup { display: none !important; }
+
+    /* 4. Global Mobile Fixes (No Overflow) */
+    .hero { flex-direction: column !important; padding-top: 100px !important; text-align: center !important; gap: 30px; }
+    .hero-image-content { display: none !important; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+    .course-grid { grid-template-columns: 1fr !important; }
+    .footer-container { grid-template-columns: 1fr !important; text-align: center; }
 }
 
+/* Very Small Mobiles */
+@media (max-width: 480px) {
+    .navbar { width: 65%; right: 5%; }
+    .hero h1 { font-size: 28px !important; }
+    .back-to-home-btn, .dark-mode-btn { width: 45px; height: 45px; font-size: 20px; bottom: 20px; }
+}
