@@ -4,62 +4,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - CodeMaster</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
     <style>
+        html.dark-theme, html.dark-theme body, body.dark-theme { background-color: #0f172a !important; color: #f8fafc !important; }
+        body.dark-theme .container { background-color: #1e293b !important; border: 1px solid #334155 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important; }
+        body.dark-theme h2, body.dark-theme p, body.dark-theme .divider { color: #f8fafc !important; }
+        body.dark-theme input { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
+        body.dark-theme .btn-google { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
+        body.dark-theme .btn-google:hover { background-color: #334155 !important; }
+    </style>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-theme'));
+        }
+    </script>
+
+    <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f4f8; }
-        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; text-align: center; }
-        .container h2 { color: #0f172a; font-size: 28px; margin-bottom: 5px; }
+        body { 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
+            overflow-x: hidden; padding: 20px;
+        }
+        
+        /* 🌟 Beautiful Back to Home Button */
+        .back-to-home-btn {
+            position: absolute; top: 25px; left: 25px;
+            background: white; color: #3b82f6;
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%; font-size: 24px;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; border: 1px solid #e2e8f0;
+        }
+        .back-to-home-btn:hover { background: #3b82f6; color: white; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(59,130,246,0.3); }
+
+        .container { 
+            background: white; padding: 40px; border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); width: 100%; max-width: 450px; text-align: center; 
+            transition: transform 0.3s ease;
+        }
+        .container:hover { transform: translateY(-5px); }
+        .container h2 { color: #0f172a; font-size: 28px; margin-bottom: 5px; font-weight: 700; }
         .container h2 span { color: #3b82f6; }
-        .container p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
-        .input-group { position: relative; margin-bottom: 15px; }
-        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-        .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn:hover { background: #2563eb; }
-        .divider { margin: 20px 0; color: #94a3b8; font-size: 14px; position: relative; }
-        .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #e2e8f0; }
+        .container p { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+        
+        .input-group { position: relative; margin-bottom: 18px; }
+        .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; }
+        .input-group input { 
+            width: 100%; padding: 14px 15px 14px 50px; 
+            border: 1.5px solid #e2e8f0; border-radius: 10px; 
+            font-size: 15px; outline: none; transition: all 0.3s ease; 
+            background: #f8fafc;
+        }
+        .input-group input:focus { border-color: #3b82f6; background: white; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+        
+        .btn { 
+            width: 100%; padding: 14px; background: #3b82f6; color: white; 
+            border: none; border-radius: 10px; font-size: 16px; font-weight: 600; 
+            cursor: pointer; transition: all 0.3s ease; margin-top: 5px; 
+            box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+        }
+        .btn:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(59,130,246,0.4); }
+        .btn-success { background: #10b981; box-shadow: 0 4px 10px rgba(16,185,129,0.3); } 
+        .btn-success:hover { background: #059669; box-shadow: 0 6px 15px rgba(16,185,129,0.4); }
+
+        .divider { margin: 25px 0; color: #94a3b8; font-size: 14px; position: relative; font-weight: 500;}
+        .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 42%; height: 1px; background: #e2e8f0; }
         .divider::before { left: 0; } .divider::after { right: 0; }
-        .btn-google { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-weight: 500; text-decoration: none; transition: 0.3s; }
-        .btn-google img { width: 20px; margin-right: 10px; }
-        .btn-google:hover { background: #f8fafc; }
-        .bottom-text { margin-top: 20px; font-size: 14px; color: #64748b; }
-        .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 500; }
-       
-       
+        
+        .btn-google { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; 
+            background: white; color: #475569; font-weight: 600; font-size: 15px; 
+            text-decoration: none; transition: all 0.3s ease; 
+        }
+        .btn-google img { width: 22px; margin-right: 12px; }
+        .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); }
+        
+        .bottom-text { margin-top: 25px; font-size: 14px; color: #64748b; }
+        .bottom-text a { color: #3b82f6; text-decoration: none; font-weight: 600; transition: 0.3s;}
+        .bottom-text a:hover { text-decoration: underline; color: #1e40af;}
+
+        /* OTP Section Style */
+        #otpSection {
+            background: #f0fdf4; padding: 25px; border-radius: 15px; 
+            border: 2px dashed #10b981; margin-top: 10px; display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
+
     <a href="/" class="back-to-home-btn" title="Back to Home">
-      <i class='bx bxs-home-heart'></i>
+        <i class='bx bxs-home-heart'></i>
     </a>
 
     <div class="container">
         <h2>Join <span>CodeMaster</span> 🚀</h2>
         <p>Create your student account to start learning!</p>
         
-        <form action="/signup" method="POST">
-            <div class="input-group"><i class="fas fa-user"></i><input type="text" name="username" placeholder="Full Name" required></div>
-            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" name="email" placeholder="Email Address" required></div>
-            <div class="input-group"><i class="fas fa-phone"></i><input type="number" name="mobile" placeholder="Mobile Number" required></div>
-            <div class="input-group"><i class="fas fa-id-badge"></i><input type="text" name="rollNo" placeholder="Create Roll Number (e.g., CS2026)" required></div>
-            <div class="input-group"><i class="fas fa-lock"></i><input type="password" name="password" placeholder="Create Password" required></div>
-            <button type="submit" class="btn">Create Account</button>
+        <form id="signupForm" onsubmit="initiateSignup(event)">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="sName" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="sEmail" placeholder="Email Address" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-phone"></i>
+                <input type="number" id="sMobile" placeholder="Mobile Number" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-id-badge"></i>
+                <input type="number" id="sRoll" placeholder="Roll No (1000 - 2000)" required min="1000" max="2000" title="Enter a number between 1000 and 2000">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="sPass" placeholder="Create Password" required minlength="6">
+            </div>
+            
+            <button type="submit" id="btnSignup" class="btn">Sign Up & Verify Email</button>
+
+            <div class="divider">OR</div>
+            
+            <a href="/auth/google" class="btn-google">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                Sign up with Google
+            </a>
         </form>
 
-        <div class="divider">OR</div>
-        
-        <a href="/auth/google" class="btn-google">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-            Sign up with Google
-        </a>
-        
+        <div id="otpSection">
+            <h3 style="color: #10b981; margin-bottom: 5px; font-weight: 700;"><i class="fas fa-envelope-open-text"></i> Check Your Email</h3>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">We've sent a 6-digit verification code to your email.</p>
+            
+            <input type="number" id="verifyOtpInput" placeholder="• • • • • •" style="width: 100%; padding: 15px; font-size: 24px; text-align: center; letter-spacing: 10px; border: 2px solid #cbd5e1; border-radius: 10px; outline: none; margin-bottom: 20px; background: white; font-weight: bold; color: #0f172a;">
+            
+            <button onclick="verifySignupOTP()" id="btnVerify" class="btn btn-success" style="width: 100%;">Verify & Create Account</button>
+            <button onclick="window.location.reload()" style="background: none; border: none; color: #ef4444; margin-top: 15px; cursor: pointer; text-decoration: underline; font-size: 14px; font-weight: 500;">Wrong Email? Go Back</button>
+        </div>
+
         <p class="bottom-text">Already have an account? <a href="/login.html">Login here</a></p>
     </div>
-    
+
+    <script>
+        async function initiateSignup(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnSignup');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending OTP...`;
+            btn.disabled = true;
+
+            const payload = {
+                username: document.getElementById('sName').value,
+                email: document.getElementById('sEmail').value,
+                mobile: document.getElementById('sMobile').value,
+                rollNo: document.getElementById('sRoll').value,
+                password: document.getElementById('sPass').value
+            };
+
+            try {
+                const res = await fetch('/api/signup-init', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // फॉर्म को छुपाओ और OTP वाला डिब्बा दिखाओ
+                    document.getElementById('signupForm').style.display = 'none';
+                    document.querySelector('.divider').style.display = 'none';
+                    document.querySelector('.btn-google').style.display = 'none';
+                    document.getElementById('otpSection').style.display = 'block';
+                } else {
+                    alert(data.message);
+                    btn.innerHTML = `Sign Up & Verify Email`;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert("⚠️ Network Error! Please try again.");
+                btn.innerHTML = `Sign Up & Verify Email`;
+                btn.disabled = false;
+            }
+        }
+
+        async function verifySignupOTP() {
+            const otp = document.getElementById('verifyOtpInput').value;
+            const email = document.getElementById('sEmail').value;
+
+            if(!otp) return alert("Please enter the OTP!");
+
+            const btn = document.getElementById('btnVerify');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Creating Account...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/signup-verify', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert("🎉 Welcome to CodeMaster! Login to continue.");
+                    window.location.href = '/login.html?signup=success';
+                } else {
+                    alert(data.message);
+                    btn.innerHTML = `Verify & Create Account`;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert("⚠️ Network Error!");
+                btn.innerHTML = `Verify & Create Account`;
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
