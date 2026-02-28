@@ -180,6 +180,11 @@
         <div id="results-sec" class="section">
             <h1>✅ Check Copies & Upload Results</h1>
             <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <input type="text" id="searchResult" placeholder="🔍 Search by Name, Roll No or Exam..." onkeyup="filterResults()" style="flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 14px;">
+                    <button onclick="downloadAllResultsCSV()" class="btn btn-success" style="white-space: nowrap;"><i class="fas fa-file-excel"></i> Download Excel</button>
+                </div>
+                
                 <table>
                     <thead>
                         <tr>
@@ -487,24 +492,35 @@ function processCSV() {
             if(confirm("Delete this exam?")) { await fetch(`/api/exams/${id}`, { method: 'DELETE' }); loadExams(); }
         }
 
-        // --- 4. COPY CHECKING & RESULTS MANAGEMENT ---
+       // --- 4. COPY CHECKING, SEARCH & RESULTS MANAGEMENT ---
         let allResultsData = []; 
 
         async function loadResults() {
             const res = await fetch('/api/admin/results');
             allResultsData = await res.json();
             
-            // 🌟 SMART RANKING LOGIC (Highest Marks first)
+            // 🌟 SMART RANKING LOGIC
             allResultsData.sort((a, b) => {
                 if (a.examTitle === b.examTitle) return b.score - a.score;
                 return a.examTitle.localeCompare(b.examTitle);
             });
 
+            // पहली बार में सारा डेटा दिखाओ
+            renderResultsTable(allResultsData);
+        }
+
+        // 🌟 NAYA: Table बनाने का अलग फंक्शन (ताकि सर्च काम करे)
+        function renderResultsTable(data) {
             let currentExam = ""; let currentRank = 1;
             const tbody = document.getElementById('resultsTableBody');
             tbody.innerHTML = '';
 
-            allResultsData.forEach(r => {
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ef4444; font-weight: 500;">No records found! 🤷‍♂️</td></tr>`;
+                return;
+            }
+
+            data.forEach(r => {
                 if (r.examTitle !== currentExam) { currentExam = r.examTitle; currentRank = 1; } 
                 else { currentRank++; }
 
@@ -525,6 +541,25 @@ function processCSV() {
                     </tr>`;
             });
         }
+
+        // 🌟 NAYA: Live Search Logic (टाइप करते ही फ़िल्टर करेगा)
+        function filterResults() {
+            const query = document.getElementById('searchResult').value.toLowerCase();
+            
+            // सिर्फ वही डेटा छांटो जो नाम, रोल नंबर या एग्जाम से मैच करे
+            const filteredData = allResultsData.filter(r => 
+                r.studentName.toLowerCase().includes(query) || 
+                (r.rollNo && r.rollNo.toLowerCase().includes(query)) ||
+                r.examTitle.toLowerCase().includes(query)
+            );
+            
+            // छंटे हुए डेटा को टेबल में दिखाओ
+            renderResultsTable(filteredData);
+        } 
+
+       
+          
+                
 
         async function deleteResult(id) {
             if(confirm("Delete this student's result permanently?")) {
