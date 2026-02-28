@@ -5,17 +5,17 @@
 
 :root {
     /* Dark Theme (Default Hacker Vibe) */
-    --bg-main: #050505;          /* Pitch Black */
-    --bg-alternate: #0a0a0a;     /* Slightly lighter black */
-    --surface-color: rgba(15, 23, 42, 0.7); /* Glass effect */
+    --bg-main: #050505;          
+    --bg-alternate: #0a0a0a;     
+    --surface-color: rgba(15, 23, 42, 0.7); 
     
     --text-main: #ffffff;        
     --text-muted: #94a3b8;       
     
     /* The "Evil" Accents (Neon Cyan & Crimson Red) */
-    --primary-color: #00ffcc;    /* Neon Cyan */
+    --primary-color: #00ffcc;    
     --primary-hover: #00ccaa;
-    --accent-red: #ff003c;       /* Cyberpunk Red */
+    --accent-red: #ff003c;       
     --accent-purple: #8b5cf6;
     
     --border-color: rgba(0, 255, 204, 0.2); 
@@ -24,7 +24,7 @@
     --red-glow: 0 0 20px rgba(255, 0, 60, 0.5);
 }
 
-/* Light Theme (For the toggle) */
+/* Light Theme Variables */
 .light-theme {
     --bg-main: #f8fafc;
     --bg-alternate: #ffffff;
@@ -40,9 +40,16 @@
     --red-glow: 0 10px 30px rgba(239, 68, 68, 0.15);
 }
 
+/* GLOBAL RESET & SCROLL FIX */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; text-decoration: none; list-style: none; scroll-behavior: smooth; }
 
-body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; transition: 0.3s; }
+html, body { 
+    background: var(--bg-main); 
+    color: var(--text-main); 
+    overflow-x: hidden !important; /* PREVENTS HORIZONTAL SCROLL */
+    width: 100%;
+    transition: background-color 0.3s, color 0.3s; 
+}
 .bg-alternate { background: var(--bg-alternate) !important; }
 
 /* 🌟 BACKGROUND GLOW EFFECTS */
@@ -54,7 +61,7 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 
 /* 🌟 NEON TEXT UTILITY */
 .neon-text { color: var(--primary-color); text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
-.light-theme .neon-text { text-shadow: none; }
+
 
 /* ==========================================================
    1. HEADER & NAVBAR
@@ -82,26 +89,12 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
     background: transparent; color: var(--primary-color); padding: 10px 25px; border-radius: 4px; 
     font-weight: 700; border: 1px solid var(--primary-color); transition: 0.3s;
     box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2), 0 0 15px rgba(0, 255, 204, 0.2);
-    text-transform: uppercase; letter-spacing: 1px;
+    text-transform: uppercase; letter-spacing: 1px; display: inline-block;
 }
 .evil-btn:hover { background: var(--primary-color); color: #000; box-shadow: 0 0 25px var(--primary-color); transform: translateY(-2px); }
 
-/* ☰ Hamburger Icon Fix */
-#menu-icon {
-    font-size: 32px;
-    color: var(--text-main);
-    cursor: pointer;
-    display: none; /* लैपटॉप पर छिपा रहेगा */
-    z-index: 1001;
-    transition: 0.3s;
-}
-
-/* मोबाइल मोड में आइकॉन को दिखाना */
-@media (max-width: 850px) {
-    #menu-icon {
-        display: block !important;
-    }
-}
+/* ☰ Hamburger Icon Default Hide */
+#menu-icon { font-size: 32px; color: var(--text-main); cursor: pointer; display: none; z-index: 1001; transition: 0.3s; }
 .mobile-login { display: none; }
 
 /* ==========================================================
@@ -182,26 +175,49 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
 /* ==========================================================
    5. CTA & FOOTER
 ========================================================== */
-.cta-section { background: linear-gradient(45deg, #050505, #111); padding: 100px 8%; text-align: center; border-top: 1px solid #334155;}
+.cta-section { background: linear-gradient(45deg, var(--bg-main), var(--bg-alternate)); padding: 100px 8%; text-align: center; border-top: 1px solid var(--border-color);}
 .cta-box { max-width: 800px; margin: 0 auto; border-color: var(--primary-color); padding: 50px; box-shadow: var(--glow-shadow);}
-.cta-box h2 { font-size: 46px; color: white; margin-bottom: 20px; font-weight: 800; text-transform: uppercase;}
+.cta-box h2 { font-size: 46px; color: var(--text-main); margin-bottom: 20px; font-weight: 800; text-transform: uppercase;}
 
-.footer { background: #020202; color: #94a3b8; padding: 80px 8% 30px; border-top: 1px solid #111;}
+.footer { background: #020202; padding: 80px 8% 30px; border-top: 1px solid var(--border-color);}
 .footer-container { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 50px; margin-bottom: 60px; }
-.brand-col .logo { color: white; margin-bottom: 20px; display: inline-flex;}
-.links-col h4, .newsletter-col h4 { font-size: 18px; margin-bottom: 25px; color: white; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-color);}
+.brand-col .logo { color: var(--text-main); margin-bottom: 20px; display: inline-flex;}
+.links-col h4, .newsletter-col h4 { font-size: 18px; margin-bottom: 25px; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px;}
 .links-col ul li { margin-bottom: 15px; }
-.links-col ul li a { color: #94a3b8; font-size: 14px; transition: 0.3s; }
+.links-col ul li a { color: var(--text-muted); font-size: 14px; transition: 0.3s; }
 .links-col ul li a:hover { color: var(--primary-color); padding-left: 5px; }
-.newsletter-form { display: flex; border: 1px solid #334155; border-radius: 4px; overflow: hidden;}
-.newsletter-form input { flex: 1; padding: 12px 15px; background: transparent; border: none; color: white; outline: none; }
+.newsletter-form { display: flex; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;}
+.newsletter-form input { flex: 1; padding: 12px 15px; background: transparent; border: none; color: var(--text-main); outline: none; }
 .btn-newsletter { padding: 12px 20px; background: var(--primary-color); color: #000; border: none; cursor: pointer; font-size: 18px; transition: 0.3s;}
-.footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid #111; font-size: 14px; }
+.footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid var(--border-color); font-size: 14px; color: var(--text-muted); }
 
 /* ==========================================================
-   📱 FINAL MOBILE RESPONSIVE: THREAD DROPDOWN & LIGHT MODE
+   🌟 LIGHT MODE PERFECTION FIXES (MISSING PART RE-ADDED) 🌟
 ========================================================== */
+.light-theme .evil-glow { display: none; } /* Hide blurry Orbs in Light mode */
+.light-theme .neon-text { text-shadow: none !important; }
+.light-theme .exam-title, .light-theme .neon-icon { text-shadow: none !important; }
+.light-theme .evil-btn:hover { color: #ffffff !important; } /* White text on hover in light mode */
+.light-theme .footer { background: var(--bg-alternate); }
+.light-theme .cta-section { background: var(--bg-main); }
+.light-theme .newsletter-form input::placeholder { color: var(--text-muted); }
 
+/* ==========================================================
+   🌟 FLOATING BUTTONS (HOME & DARK MODE) RE-ADDED 🌟
+========================================================== */
+.back-to-home-btn, .dark-mode-btn {
+    position: fixed; bottom: 30px; width: 55px; height: 55px; 
+    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+    font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s;
+}
+.back-to-home-btn { right: 30px; background: var(--accent-red); color: white; border: 1px solid var(--accent-red); box-shadow: var(--red-glow); }
+.dark-mode-btn { left: 30px; background: var(--primary-color); color: #000; border: none; box-shadow: var(--glow-shadow); }
+.back-to-home-btn:hover, .dark-mode-btn:hover { transform: scale(1.1) translateY(-5px); }
+
+
+/* ==========================================================
+   📱 FINAL MOBILE RESPONSIVE: THREAD DROPDOWN & FIXES
+========================================================== */
 @media (max-width: 850px) {
     /* 1. Header Layout Fix */
     .header {
@@ -290,27 +306,35 @@ body { background: var(--bg-main); color: var(--text-main); overflow-x: hidden; 
         gap: 10px;
     }
 
-    /* Light Mode Special Fix */
-    .light-theme .navbar {
-        background: rgba(255, 255, 255, 0.98) !important;
-        border-color: #e2e8f0;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    }
-
     /* Remove unnecessary buttons from menu */
     .navbar .btn-resume, .navbar .btn-signup { display: none !important; }
 
-    /* 4. Global Mobile Fixes (No Overflow) */
+    /* 4. Global Mobile Fixes (No Overflow & Resize Fixes) */
     .hero { flex-direction: column !important; padding-top: 100px !important; text-align: center !important; gap: 30px; }
+    .hero h1 { font-size: 38px !important; }
     .hero-image-content { display: none !important; }
-    .hero-stats { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; flex-wrap: wrap;}
+    .stat-item h3 { font-size: 20px !important; }
+    
+    .learning-path, .live-exams, .features, .instructor { padding: 60px 15px !important; width: 100%; }
     .course-grid { grid-template-columns: 1fr !important; }
-    .footer-container { grid-template-columns: 1fr !important; text-align: center; }
+    
+    .features-content { flex-direction: column !important; text-align: left; }
+    .features-image { display: none !important; }
+    
+    .instructor-container { flex-direction: column !important; padding: 30px 15px !important; }
+    .instructor-image img { width: 180px !important; height: 180px !important; }
+    
+    .footer-container { grid-template-columns: 1fr !important; text-align: center; gap: 30px; }
 }
 
 /* Very Small Mobiles */
 @media (max-width: 480px) {
     .navbar { width: 65%; right: 5%; }
-    .hero h1 { font-size: 28px !important; }
+    .hero h1 { font-size: 32px !important; }
+    .hero-buttons { flex-direction: column; width: 100%; }
+    .hero-buttons a { width: 100%; text-align: center; justify-content: center; }
     .back-to-home-btn, .dark-mode-btn { width: 45px; height: 45px; font-size: 20px; bottom: 20px; }
+    .dark-mode-btn { left: 15px; }
+    .back-to-home-btn { right: 15px; }
 }
