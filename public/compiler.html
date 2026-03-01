@@ -167,15 +167,45 @@ Ready to execute code.
     </div>
 
     <script>
-        // 🌟 1. LANGUAGES DATA
+       // 🌟 1. LANGUAGES DATA
         const popularLangs = {
             "python3": { name: "Python 3", v: "4", ext: "py", monaco: "python", boiler: "print('Hello CodeMaster! 🚀')" },
             "java": { name: "Java", v: "4", ext: "java", monaco: "java", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java!\");\n    }\n}" },
             "cpp17": { name: "C++", v: "0", ext: "cpp", monaco: "cpp", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++!\" << endl;\n    return 0;\n}" },
             "c": { name: "C", v: "5", ext: "c", monaco: "c", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C!\\n\");\n    return 0;\n}" },
-            "nodejs": { name: "JavaScript", v: "4", ext: "js", monaco: "javascript", boiler: "console.log('Hello Node.js!');" }
+            "nodejs": { name: "JavaScript", v: "4", ext: "js", monaco: "javascript", boiler: "console.log('Hello Node.js!');" },
+            "sql": { name: "SQL", v: "4", ext: "sql", monaco: "sql", boiler: "CREATE TABLE hello (message TEXT);\nINSERT INTO hello VALUES ('Hello SQL Developer!');\nSELECT * FROM hello;" }
         };
-        const allLangs = { ...popularLangs }; // Add extra languages here as needed
+
+        const extraLangsData = [
+            ['php','PHP','4','php','php'], ['go','Go','4','go','go'], ['ruby','Ruby','4','rb','ruby'], ['rust','Rust','4','rs','rust'], ['swift','Swift','4','swift','swift'],
+            ['r', 'R', '4', 'r', 'r'], ['bash', 'Bash', '4', 'sh', 'shell'], ['ada', 'Ada', '4', 'ada', 'ada'], ['awk', 'AWK', '4', 'awk', 'plaintext'], 
+            ['bc', 'bc', '4', 'bc', 'plaintext'], ['brainfuck', 'Brainfuck', '0', 'bf', 'plaintext'], ['clojure', 'Clojure', '3', 'clj', 'clojure'], 
+            ['cobol', 'COBOL', '3', 'cob', 'cobol'], ['d', 'D', '2', 'd', 'plaintext'], ['dart', 'Dart', '4', 'dart', 'dart'], ['dc', 'dc', '4', 'dc', 'plaintext'], 
+            ['elixir', 'Elixir', '4', 'ex', 'elixir'], ['erlang', 'Erlang', '0', 'erl', 'plaintext'], ['fasm', 'FASM', '0', 'asm', 'plaintext'], 
+            ['fish', 'Fish', '4', 'fish', 'plaintext'], ['forth', 'Forth', '0', 'fth', 'plaintext'], ['fortran', 'Fortran', '4', 'f90', 'plaintext'], 
+            ['freebasic', 'FreeBasic', '1', 'bas', 'plaintext'], ['fsharp', 'F#', '2', 'fs', 'fsharp'], ['groovy', 'Groovy', '4', 'groovy', 'groovy'], 
+            ['hack', 'Hack', '0', 'hack', 'plaintext'], ['haskell', 'Haskell', '4', 'hs', 'plaintext'], ['icon', 'Icon', '1', 'icn', 'plaintext'], 
+            ['intercal', 'INTERCAL', '0', 'i', 'plaintext'], ['j', 'J', '1', 'ijs', 'plaintext'], ['julia', 'Julia', '4', 'jl', 'julia'], 
+            ['lua', 'Lua', '3', 'lua', 'lua'], ['mozart', 'Mozart', '0', 'oz', 'plaintext'], ['nasm', 'NASM', '0', 'asm', 'plaintext'], 
+            ['nemerle', 'Nemerle', '0', 'n', 'plaintext'], ['nim', 'Nim', '4', 'nim', 'plaintext'], ['objc', 'Objective-C', '4', 'm', 'objective-c'], 
+            ['ocaml', 'OCaml', '3', 'ml', 'plaintext'], ['octave', 'Octave', '4', 'm', 'plaintext'], ['pascal', 'Pascal', '3', 'pas', 'pascal'], 
+            ['perl', 'Perl', '4', 'pl', 'perl'], ['picolisp', 'PicoLisp', '0', 'l', 'plaintext'], ['pike', 'Pike', '0', 'pike', 'plaintext'], 
+            ['prolog', 'Prolog', '1', 'pl', 'plaintext'], ['python2', 'Python 2', '3', 'py', 'python'], ['racket', 'Racket', '3', 'rkt', 'scheme'], 
+            ['rhino', 'Rhino JS', '1', 'js', 'javascript'], ['scala', 'Scala', '4', 'scala', 'scala'], ['scheme', 'Scheme', '2', 'scm', 'scheme'], 
+            ['sed', 'Sed', '1', 'sed', 'plaintext'], ['smalltalk', 'Smalltalk', '0', 'st', 'plaintext'], ['spidermonkey', 'SpiderMonkey', '1', 'js', 'javascript'], 
+            ['tcl', 'Tcl', '4', 'tcl', 'plaintext'], ['unlambda', 'Unlambda', '0', 'unl', 'plaintext'], ['vala', 'Vala', '0', 'vala', 'plaintext'], 
+            ['vbn', 'VB.Net', '3', 'vb', 'vb'], ['whitespace', 'Whitespace', '0', 'ws', 'plaintext'], ['yabasic', 'Yabasic', '1', 'bas', 'plaintext'], 
+            ['zsh', 'Zsh', '4', 'sh', 'shell'], ['algol', 'Algol 68', '0', 'alg', 'plaintext'], ['befunge', 'Befunge', '0', 'bf', 'plaintext'], 
+            ['blockly', 'Blockly', '0', 'xml', 'xml']
+        ];
+
+        const otherLangs = {};
+        extraLangsData.forEach(l => { 
+            otherLangs[l[0]] = { name: "📄 " + l[1], v: l[2], ext: l[3], monaco: l[4], boiler: `// Write your ${l[1]} code here...\n` }; 
+        });
+
+        const allLangs = { ...popularLangs, ...otherLangs };
 
         // 🌟 2. VIRTUAL FILE SYSTEM LOGIC
         let fileSystem = JSON.parse(localStorage.getItem('cm_filesystem')) || {
@@ -374,22 +404,48 @@ Ready to execute code.
             runBtn.disabled = false; runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
         }
 
+       // 🌟 4. AI CODE MENTOR LOGIC (FIXED)
         async function askAI(action) {
             const code = editorInstance.getValue();
             const terminal = document.getElementById('terminalOutput');
-            if(!code.trim()) return alert("Write some code first!");
             
-            terminal.innerHTML = `<span class="text-info"><i class="fas fa-brain fa-spin"></i> AI is analyzing...</span>\n`;
-            let prompt = action === 'fix' ? `Find bugs in this code, explain them, and provide fixed code:\n\n${code}` : `Explain this code line by line:\n\n${code}`;
+            if(!code.trim()) return alert("Please write some code first!");
+            
+            // Loading Animation
+            terminal.innerHTML = `<span class="text-info"><i class="fas fa-brain fa-spin"></i> CodeMaster AI is analyzing your code... Please wait.</span>\n`;
 
-            const formData = new FormData(); formData.append('message', prompt);
+            let prompt = action === 'fix' 
+                ? `Act as an expert programmer. Find bugs in this code, explain them shortly, and provide the fixed code:\n\n${code}` 
+                : `Explain what this code does line by line in simple terms (Hindi/English mix):\n\n${code}`;
+
             try {
-                const res = await fetch('/api/ask-ai', { method: 'POST', body: formData });
+                // 🌟 NAYA: FormData की जगह सुरक्षित JSON का इस्तेमाल
+                const res = await fetch('/api/ask-ai', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: prompt }) 
+                });
+                
                 const data = await res.json();
-                if(data.success) terminal.innerHTML = `<span class="text-success">🤖 AI Response:</span>\n<div style="background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 10px;">${marked.parse(data.reply)}</div>`;
-                else terminal.innerHTML = `<span class="text-error">AI Error: ${data.reply}</span>`;
-            } catch(e) { terminal.innerHTML = `<span class="text-error">AI Network Error!</span>`; }
+                
+                if(data.success) {
+                    // Marked.js का सेफ इस्तेमाल
+                    const formattedReply = typeof marked !== 'undefined' ? marked.parse(data.reply) : data.reply;
+                    terminal.innerHTML = `
+                        <span class="text-success">🤖 CodeMaster AI Mentor:</span>
+                        <div style="background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 10px; color: #e2e8f0; font-family: 'Poppins', sans-serif;">
+                            ${formattedReply}
+                        </div>`;
+                } else {
+                    terminal.innerHTML = `<span class="text-error">AI Error: ${data.reply}</span>`;
+                }
+            } catch(e) { 
+                console.error("AI Error:", e);
+                terminal.innerHTML = `<span class="text-error">⚠️ AI Network Error! Is the backend server running?</span>`; 
+            }
         }
+            
+            
 
         function downloadCurrentFile() {
             const code = editorInstance.getValue();
