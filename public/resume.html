@@ -116,7 +116,7 @@
         .layout-tech-lead { padding: 30px; display: flex; flex-wrap: wrap; } .layout-tech-lead .header { width: 100%; border-left: 5px solid var(--theme-color); padding-left: 20px; margin-bottom: 25px; } .layout-tech-lead .res-section { width: 48%; margin-right: 2%; margin-bottom: 20px; } .layout-tech-lead .sec-title { color: var(--theme-color); font-weight: bold; text-transform: uppercase; font-size: 14px; margin-bottom: 5px; }
         .layout-terminal { background: #1e1e1e; padding: 40px; font-family: 'Consolas', monospace; color: #d4d4d4; min-height: 297mm; } .layout-terminal .name { color: #569cd6; font-size: 28px; } .layout-terminal .sec-title { color: #c586c0; margin-top: 20px; margin-bottom: 10px; } .layout-terminal .res-text { color: #ce9178; }
         .layout-euro-cv { padding: 40px 60px; } .layout-euro-cv .header { margin-bottom: 40px; } .layout-euro-cv .name { font-size: 32px; font-weight: 300; color: var(--theme-color); border-bottom: 1px solid #ccc; padding-bottom: 10px; } .layout-euro-cv .res-section { display: flex; margin-bottom: 20px; } .layout-euro-cv .sec-title { width: 30%; font-weight: bold; color: #333; } .layout-euro-cv .res-text { width: 70%; border-left: 2px solid var(--theme-color); padding-left: 20px; }
-        /* Add basic paddings for the rest to keep code fast and robust */
+        
         .layout-dual-sidebar { display: flex; justify-content: space-between; padding: 20px; } .layout-dual-sidebar .main { width: 50%; padding: 20px; } .layout-dual-sidebar .sidebar { width: 23%; background: #f8fafc; padding: 20px; border-radius: 8px; }
         .layout-elegant-gold { background: #111; color: #eee; padding: 50px; } .layout-elegant-gold .name { font-family: serif; font-size: 38px; color: #d4af37; text-align: center; } .layout-elegant-gold .sec-title { color: #d4af37; border-bottom: 1px solid #d4af37; text-align: center; margin-bottom: 15px; }
         .layout-classic-serif { font-family: Georgia, serif; padding: 50px; } .layout-timeline-right { padding: 40px; border-right: 4px solid var(--theme-color); text-align: right; }
@@ -127,19 +127,18 @@
         .layout-glass { padding: 40px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); } .layout-glass .res-section { background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.8); margin-bottom: 20px; }
         .layout-centered-minimal { text-align: center; padding: 60px; } .layout-wave { padding: 40px; border-top: 50px solid var(--theme-color); border-radius: 50% 50% 0 0 / 20px 20px 0 0; }
         .layout-split-diagonal { padding: 40px; background: linear-gradient(135deg, var(--theme-color) 30%, #fff 30%); } .layout-dark-pro { background: #0f172a; color: #cbd5e1; padding: 50px; } .layout-dark-pro .name { color: white; }
+    
     /* =========================================
            🌟 PURE WHITE / INK SAVER OVERRIDE 🌟
            ========================================= */
         .force-white-theme {
-            --theme-color: #0f172a !important; /* Theme Color को डार्क ग्रे/ब्लैक कर देगा */
+            --theme-color: #0f172a !important; 
         }
-        /* सारे बैकग्राउंड और रंग हटाकर टेक्स्ट को डार्क कर देगा */
         .force-white-theme * {
             background-color: transparent !important;
             background-image: none !important;
             color: #0f172a !important; 
         }
-        /* जिन डिज़ाइन्स में सॉलिड बॉक्स थे, उन्हें सिर्फ बॉर्डर दे देगा ताकि डिज़ाइन न बिगड़े */
         .force-white-theme .layout-modern .sidebar,
         .force-white-theme .layout-split-right .sidebar,
         .force-white-theme .layout-startup .header,
@@ -157,15 +156,13 @@
    /* =========================================
            🌟 NEW: RESIZE BLOCKS & PROFESSIONAL TABLES 🌟
            ========================================= */
-        /* 1. ब्लॉक को छोटा-बड़ा (Resize) करने की पावर */
         .res-section { 
             position: relative; 
-            resize: both; /* इससे राईट साइड में बॉक्स के कोने को पकड़ कर छोटा/बड़ा किया जा सकेगा */
+            resize: both; 
             overflow: hidden; 
             min-height: 50px;
         }
 
-        /* 2. टेबल (Table) का प्रोफेशनल डिज़ाइन */
         .resume-table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -182,6 +179,15 @@
             color: white; 
             font-weight: bold;
         }
+
+        /* 🌟 NAYA: Home Button CSS */
+        .back-to-home-btn {
+            position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px; 
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s;
+            background: #ef4444; color: white; border: none; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); text-decoration: none;
+        }
+        .back-to-home-btn:hover { transform: scale(1.1) translateY(-5px); color: white;}
     </style>
 </head>
 <body>
@@ -256,11 +262,20 @@
                     <div class="layout-card" onclick="changeLayout('dark-pro', this)"><b>Dark Mode Pro</b></div>
                 </div>
 
-                <h3 style="margin-top: 30px; margin-bottom: 15px;">Theme Color</h3>
+                <h3 style="margin-top: 30px; margin-bottom: 10px;">Font Style</h3>
+                <select onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
+                    <option value="'Poppins', sans-serif">Poppins (Modern & Clean)</option>
+                    <option value="'Times New Roman', serif">Times New Roman (Formal & Academic)</option>
+                    <option value="'Courier New', monospace">Courier New (Tech & Code)</option>
+                    <option value="'Arial', sans-serif">Arial (Classic)</option>
+                    <option value="'Georgia', serif">Georgia (Elegant Serif)</option>
+                </select>
+
+                <h3 style="margin-bottom: 15px;">Theme Color</h3>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="changeTheme('#0f172a', true)" title="Pure White / B&W">
-        <i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i>
-    </div>
+                        <i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i>
+                    </div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer;" onclick="changeTheme('#3b82f6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #10b981; cursor: pointer;" onclick="changeTheme('#10b981')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #ef4444; cursor: pointer;" onclick="changeTheme('#ef4444')"></div>
@@ -282,8 +297,8 @@
                             <input type="file" id="profileImgInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                             <textarea id="inpName" class="mini-editor" placeholder="Full Name">SUHEL ANSARI</textarea>
                         </div>
-                          </div>
-                        <textarea id="inpTitle" class="mini-editor" placeholder="Job Title" style="margin-bottom: 10px;">Full Stack Developer</textarea>
+                     </div>
+                     <textarea id="inpTitle" class="mini-editor" placeholder="Job Title" style="margin-bottom: 10px;">Full Stack Developer</textarea>
                     
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
                         <label style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 10px; display: block;">Contact & Links</label>
@@ -308,9 +323,11 @@
         </div>
     </div>
 
+    <a href="/" class="back-to-home-btn" title="Back to Home"><i class="fas fa-home"></i></a>
+
     <script>
         // 📸 IMAGE UPLOAD LOGIC
-        let userProfilePic = ''; // फोटो यहाँ सेव होगी
+        let userProfilePic = '';
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
@@ -318,25 +335,21 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     userProfilePic = e.target.result;
-                    // लेफ्ट पैनल में फोटो दिखाना
                     document.getElementById('leftPanelImg').src = userProfilePic;
                     document.getElementById('leftPanelImg').style.display = 'block';
-                    // रेज़्यूमे को तुरंत अपडेट करना
                     renderResume();
                 };
-                // फोटो को Base64 में बदलना ताकि PDF में बिना एरर के डाउनलोड हो सके
                 reader.readAsDataURL(file);
             }
         }
         let currentLayout = 'classic';
         
-        // 🌟 JADOO YAHAN HAI: Har cheez ek "Block" hai
         let sectionsData = [
             { id: 1, title: 'Professional Summary', text: 'A passionate developer building scalable web applications and AI tools.' },
             { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
             { id: 3, title: 'Experience & Projects', text: 'CodeMaster Platform (2025 - Present)\n- Built a full-stack LMS with AI integration.\n- Implemented auto-grading and PDF generation.' }
         ];
-       // 📞 DYNAMIC CONTACT & PERSONAL INFO LOGIC (With Custom Titles)
+       
         let contactFields = [
             { label: "Email", value: "ansarisuhel4505@gmail.com" },
             { label: "Phone", value: "+91 9335067990" },
@@ -359,54 +372,48 @@
                 </div>`;
             });
             document.getElementById('contactFieldsContainer').innerHTML = html;
-            
-            // टूलबार लोड करें
             setTimeout(() => { initMiniEditors(); }, 100);
         }
 
-        // 🌟 MINI TOOLBAR (Bold, Underline, Size) 🌟
         function initMiniEditors() {
+            // 🌟 FIXED BUG: Sirf mini-editor hatega, sab nahi!
             tinymce.remove('.mini-editor');
             tinymce.init({
                 selector: '.mini-editor',
                 menubar: false,
                 statusbar: false,
-                forced_root_block: false, // डिज़ाइन न बिगड़े इसलिए <p> टैग रोकेगा
-                toolbar: 'bold italic underline | fontsize',// छोटा-बड़ा करने का ऑप्शन
+                forced_root_block: false, 
+                toolbar: 'bold italic underline | fontsize',
                 height: 120,
                 setup: function (editor) {
                     editor.on('input change keyup', function () {
                         editor.save();
-                        // अगर Contact बॉक्स में टाइप किया है, तो उसे सेव करो
                         if (editor.id.startsWith('contact_')) {
                             let idx = parseInt(editor.id.split('_')[1]);
                             contactFields[idx].value = editor.getContent();
                         }
-                        renderResume(); // तुरंत राईट साइड पेज अपडेट करो
+                        renderResume(); 
                     });
                 }
             });
         }
-                    
-                    
 
         function addContactField() {
-            contactFields.push({ label: "New Title", value: "" }); // नया बॉक्स जोड़ेगा
+            contactFields.push({ label: "New Title", value: "" }); 
             renderContactFields();
             renderResume();
         }
 
         function updateContactField(index, key, val) {
-            contactFields[index][key] = val; // Title या Value अपडेट करेगा
+            contactFields[index][key] = val; 
             renderResume();
         }
 
         function deleteContactField(index) {
-            contactFields.splice(index, 1); // बॉक्स को डिलीट करेगा
+            contactFields.splice(index, 1); 
             renderContactFields();
             renderResume();
         }
-
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -414,28 +421,31 @@
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
 
-            // 🌟 जादुई फिक्स: जैसे ही टैब खुले, एडिटर्स को तुरंत लोड कर दो!
             if (tabId === 'dataTab') {
                 setTimeout(() => {
                     initMiniEditors();
-                    renderEditor(); // मेन सेक्शन वाले एडिटर्स भी रिफ्रेश होंगे
+                    renderEditor(); 
                 }, 100);
             }
         }
 
-       // 🎨 THEME CHANGER (WITH WHITE MODE LOGIC)
+       // 🎨 THEME CHANGER
         function changeTheme(color, isWhite = false) {
             document.documentElement.style.setProperty('--theme-color', color);
             const paper = document.getElementById('resumePreview');
             
-            // अगर स्टूडेंट ने White बटन दबाया है, तो Override क्लास लगा दो
             if (isWhite) {
                 paper.classList.add('force-white-theme');
             } else {
-                // अगर कोई और रंग चुना है, तो White क्लास हटा दो
                 paper.classList.remove('force-white-theme');
             }
         }
+
+        // 🌟 NAYA: FONT CHANGER
+        function changeFont(font) {
+            document.documentElement.style.setProperty('--theme-font', font);
+        }
+
         function changeLayout(layoutName, cardElem) {
             document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
             cardElem.classList.add('active');
@@ -443,11 +453,7 @@
             renderResume();
         }
 
-        // 📝 DRAW EDITOR FORMS (Sare default blocks deletable hain)
-        // 📝 DRAW EDITOR FORMS (AI Button & Real-Time Sync)
-        // 📝 DRAW EDITOR FORMS (With Drag-Drop, Move & Table features)
-       // 📝 DRAW EDITOR FORMS (With MS Word Style Rich Editor)
-        function renderEditor() {
+       function renderEditor() {
             let html = '';
             sectionsData.forEach((sec, index) => {
                 html += `
@@ -464,9 +470,12 @@
                         <button class="btn-danger" onclick="deleteSec(${sec.id})" style="border-radius:4px;"><i class="fas fa-trash"></i></button>
                     </div>
                     
-                    <div style="margin-bottom: 8px;">
+                    <div style="margin-bottom: 8px; display: flex; gap: 5px;">
                         <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">
                             <i class="fas fa-magic"></i> Write with AI
+                        </button>
+                        <button onclick="addTableToSec(${sec.id})" style="background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                            <i class="fas fa-table"></i> Add Table
                         </button>
                     </div>
                     
@@ -475,9 +484,9 @@
             });
             document.getElementById('editorSections').innerHTML = html;
 
-            // 🔥 Initialize MS Word (TinyMCE) Editor
             setTimeout(() => {
-                tinymce.remove(); // पुराने एडिटर्स क्लियर करें
+                // 🌟 FIXED BUG: Sirf rich-editor hatega, taaki contact wale box delete na ho!
+                tinymce.remove('.rich-editor'); 
                 tinymce.init({
                     selector: '.rich-editor',
                     plugins: 'table lists advlist',
@@ -487,13 +496,12 @@
                     promotion: false,
                     height: 220,
                     setup: function (editor) {
-                        // जब भी स्टूडेंट टाइप करेगा, राईट साइड पेज तुरंत अपडेट होगा
                         editor.on('input change keyup', function () {
                             let id = parseInt(editor.id.split('_')[1]);
                             let sec = sectionsData.find(s => s.id === id);
                             if(sec) {
                                 sec.text = editor.getContent();
-                                renderResume(); // राईट साइड डिज़ाइन अपडेट
+                                renderResume(); 
                             }
                         });
                     }
@@ -514,12 +522,12 @@
             sectionsData = sectionsData.filter(s => s.id !== id);
             renderEditor(); renderResume();
         }
-        // 📊 ADD TABLE LOGIC (एक क्लिक में टेबल बनाएगा)
+
+        // 📊 ADD TABLE LOGIC
         function addTableToSec(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
             
-            // यह HTML कोड टेक्स्ट एरिया में जुड़ जाएगा और राईट साइड में असली टेबल बन जाएगा
             const tableHTML = `\n<table class="resume-table">\n  <tr>\n    <th>Degree / Course</th>\n    <th>Institute</th>\n    <th>Year</th>\n  </tr>\n  <tr>\n    <td>B.Tech CSE</td>\n    <td>Your University</td>\n    <td>2024 - 2028</td>\n  </tr>\n  <tr>\n    <td>Intermediate</td>\n    <td>Your School</td>\n    <td>2024</td>\n  </tr>\n</table>\n`;
             
             sec.text += tableHTML;
@@ -527,7 +535,7 @@
             renderResume();
         }
 
-        // ↕️ DRAG & DROP + MOVE LOGIC (सेक्शंस को ऊपर-नीचे करने के लिए)
+        // ↕️ DRAG & DROP + MOVE LOGIC
         let draggedItemIndex = null;
 
         function handleDragStart(index) { draggedItemIndex = index; }
@@ -539,7 +547,6 @@
             renderEditor(); renderResume();
         }
 
-        // 📱 (Mobile Backup) ऊपर-नीचे करने वाले बटन
         function moveSecUp(index) {
             if (index > 0) {
                 let temp = sectionsData[index];
@@ -557,11 +564,11 @@
             }
         }
 
-        // ⚙️ THE MASTER RENDER ENGINE (Har Layout ke hisab se HTML banayega)
+        // ⚙️ THE MASTER RENDER ENGINE
         function renderResume() {
             const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : document.getElementById('inpName').value;
             const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : document.getElementById('inpTitle').value;
-            // यह टाइटल और वैल्यू को आपस में जोड़ेगा (जैसे "GitHub: link")
+            
             const contact = contactFields
                 .filter(f => f.value.trim() !== "")
                 .map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value)
@@ -577,7 +584,6 @@
                 finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:32px; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:18px; color:var(--theme-color);">${title}</div><div style="font-size:14px; color:#475569; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`;
             } 
             else if (currentLayout === 'modern') {
-                // Modern layout me contact details sidebar me, baaki sab main me jayega
                 finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:30px; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`;
             }
             else if (currentLayout === 'minimal') {
@@ -622,33 +628,27 @@
             else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:18px; margin-top:10px;">${title}</div><div style="color:#666; font-size:14px;">${contact}</div></div>` + sectionsData.map(s => `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`).join('') + `</div>`; }
             
-            // Generic Fallbacks for the rest to keep it extremely stable
+            // Generic Fallbacks for the rest
             else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
                 finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:18px;">${title}</div><div style="font-size:14px;">${contact}</div></div>${blocksHtml}</div>`; 
             }
-            // 🌟 SMART IMAGE INJECTOR (50 Layouts me automatically photo set karega)
+            // 🌟 SMART IMAGE INJECTOR
             if (userProfilePic) {
-                // A4 पेज पर क्लिक करने वाला फोटो टैग
                 let imgTag = `<img src="${userProfilePic}" title="Click to change photo" onclick="document.getElementById('profileImgInput').click()" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 4px solid var(--theme-color); box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; display: block; margin-left: auto; margin-right: auto; transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`;
 
                 if (currentLayout === 'modern' || currentLayout === 'split-right' || currentLayout === 'matrix') {
-                    // अगर साइडबार वाला लेआउट है, तो साइडबार में सबसे ऊपर फोटो लगाओ
                     finalHtml = finalHtml.replace(/<div class="sidebar">/i, '<div class="sidebar">' + imgTag);
                 } 
                 else if (currentLayout === 'minimal' || currentLayout === 'clean-left' || currentLayout === 'executive' || currentLayout === 'github-style') {
-                    // अगर मिनिमल लेआउट है, तो नाम के बगल में (Flexbox) फोटो लगाओ
                     imgTag = imgTag.replace('margin-left: auto; margin-right: auto;', 'margin: 0;'); // Center hatana
                     finalHtml = finalHtml.replace(/<div class="header"/i, `<div class="header" style="display:flex; align-items:center; gap:30px; text-align:left;">` + imgTag);
                 } 
                 else {
-                    // बाकी सभी लेआउट्स में नाम (Name) के ठीक ऊपर गोल फोटो लगा दो
                     finalHtml = finalHtml.replace(/<div class="name"/i, imgTag + '<div class="name"');
                 }
             }
 
             document.getElementById('resumePreview').innerHTML = finalHtml;
-            
-            // 🌟 JADOO: राईट साइड पेज को डायरेक्ट एडिटेबल (MS Word जैसा) बना दो!
             document.getElementById('resumePreview').contentEditable = "true";
             document.getElementById('resumePreview').style.outline = "none";
         }
@@ -663,21 +663,20 @@
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             }).from(element).save();
         }
-        // 🚀 GLOBAL AI AUTO-FILL (पूरा रेज़्यूमे एक बार में भर देगा)
+        
+        // 🚀 GLOBAL AI AUTO-FILL
         async function askAIToWriteGlobal() {
-            // 1. स्टूडेंट से पूछें कि उसे कैसा रेज़्यूमे चाहिए
             const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher MERN Stack Developer looking for internship'");
             
-            if (!userPrompt) return; // अगर कुछ नहीं लिखा तो वापस जाओ
+            if (!userPrompt) return; 
 
-            // 2. बटन को 'Loading' स्टेट में बदलें
             const btn = document.querySelector('.btn-ai');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Auto-Filling...';
             btn.disabled = true;
 
             try {
-                // 3. बैकएंड को रिक्वेस्ट भेजें (जो JSON फॉर्मेट में डेटा देगा)
+                // 🌟 FIXED: JSON format (like compiler)
                 const res = await fetch('/api/generate-resume', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -689,28 +688,24 @@
                 if (result.success) {
                     const aiData = result.data;
                     
-                    // 4. ऊपर के Personal Details भरें
                     document.getElementById('inpName').value = aiData.fullName || "Your Name";
                     document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                   // AI के डेटा को नए फॉर्मेट में बदलना
+                    
                     let aiContacts = (aiData.contactInfo || "Email | Phone").split('|');
                     contactFields = aiContacts.map(s => {
                         return { label: "", value: s.trim() };
                     });
                     renderContactFields();
 
-                    // 5. हमारे डायनामिक Sections को AI के डेटा से रिप्लेस कर दें
                     sectionsData = [
                         { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
                         { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
                         { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
                     ];
 
-                    // 6. UI और A4 पेज को तुरंत अपडेट करें
                     renderEditor(); 
                     renderResume();
 
-                    // 7. स्टूडेंट को "2. Content & Sections" वाले टैब पर ले जाएँ ताकि वो बदलाव देख सके
                     document.querySelectorAll('.tab-btn')[1].click();
                     
                 } else {
@@ -719,7 +714,6 @@
             } catch (error) {
                 alert("⚠️ Network Error! Cannot reach AI server.");
             } finally {
-                // 8. बटन को वापस नार्मल कर दें
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -730,38 +724,34 @@
         renderEditor();
         initMiniEditors();
         renderResume();
+
         // 🤖 SECTION-SPECIFIC AI LOGIC
         async function generateSectionAI(id) {
-            // 1. किस ब्लॉक का बटन दबाया है, उसे ढूँढो
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
 
-            // 2. स्टूडेंट से पूछो कि उसे इस ब्लॉक में क्या लिखवाना है
             let jobTitle = document.getElementById('inpTitle').value || "Professional";
             let promptText = prompt(`What details should AI include for "${sec.title}"?\nExample: Worked on React, Node.js and MongoDB for 2 years`);
             
-            if(!promptText) return; // अगर कैंसिल कर दिया तो वापस जाओ
+            if(!promptText) return; 
 
-            // 3. UI में Loading दिखाओ
             let textArea = document.getElementById(`text_${id}`);
             let oldText = textArea.value;
             textArea.value = "AI is thinking & writing... 🧠\nPlease wait 3-4 seconds.";
 
             try {
-                // 4. आपके मौजूदा चैटबॉट API को एक स्मार्ट प्रॉम्प्ट भेजना
-                const formData = new FormData();
+                // 🌟 FIXED: Using JSON format to prevent backend crashes
                 const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write it in 3 to 4 impactful bullet points. Do NOT use markdown like ** or *. Just use plain text bullets starting with '- '. Keep it concise and ATS-friendly.`;
-                formData.append('message', aiCommand);
-
+                
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: aiCommand })
                 });
                 
                 const data = await res.json();
                 
                 if(data.success) {
-                    // 5. AI का जवाब बॉक्स में भर दो और स्क्रीन अपडेट कर दो
                     sec.text = data.reply.trim();
                     renderEditor(); 
                     renderResume(); 
