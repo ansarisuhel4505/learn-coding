@@ -22,14 +22,37 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { display: flex; background: #f0f4f8; height: 100vh; overflow: hidden; }
         
-/* 🌟 NEW SIDEBAR & LOGOUT CSS (Desktop + Mobile) 🌟 */
-        .sidebar { 
-            width: 250px; background: #ffffff; box-shadow: 2px 0 10px rgba(0,0,0,0.05); 
-            display: flex; flex-direction: column; z-index: 10; height: 100vh; position: relative; 
+
+       /* 🌟 1. HAMBURGER MENU & OVERLAY CSS 🌟 */
+        .hamburger-btn {
+            position: fixed; top: 20px; left: 20px; background: #3b82f6; color: white;
+            width: 45px; height: 45px; border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; cursor: pointer; z-index: 9998; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); transition: 0.3s;
         }
-        .sidebar h2 { padding: 25px 20px; color: #3b82f6; font-weight: 700; font-size: 24px; border-bottom: 1px solid #e2e8f0; }
+        .hamburger-btn:hover { background: #2563eb; transform: scale(1.05); }
+        html.dark-theme .hamburger-btn { background: #1e293b; border: 1px solid #334155; }
+
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px);
+            z-index: 9999; opacity: 0; visibility: hidden; transition: 0.4s;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        /* 🌟 2. UNIFIED SLIDE-OUT SIDEBAR 🌟 */
+        .sidebar { 
+            position: fixed; left: -300px; top: 0; width: 260px; height: 100vh;
+            background: #ffffff; box-shadow: 2px 0 15px rgba(0,0,0,0.2); 
+            display: flex; flex-direction: column; z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar.active { left: 0; }
+        
+        .sidebar h2 { padding: 25px 20px; color: #3b82f6; font-weight: 700; font-size: 22px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;}
+        .close-sidebar { color: #ef4444; cursor: pointer; font-size: 26px; transition: 0.3s; }
+        .close-sidebar:hover { transform: scale(1.1) rotate(90deg); }
+        
         .nav-links { list-style: none; padding: 20px 0; flex-grow: 1; overflow-y: auto; }
-        .nav-links li { padding: 15px 25px; cursor: pointer; color: #64748b; font-weight: 500; transition: 0.3s; }
+        .nav-links li { padding: 15px 25px; cursor: pointer; color: #64748b; font-weight: 500; transition: 0.3s; display: block; width: 100%; border-bottom: none; }
         .nav-links li:hover, .nav-links li.active { background: #f8fafc; color: #3b82f6; border-right: 4px solid #3b82f6; }
         
         .logout-wrapper { padding: 20px; margin-top: auto; border-top: 1px solid #e2e8f0; background: #fff;}
@@ -42,22 +65,16 @@
 
         /* 📱 Mobile Responsiveness */
         @media (max-width: 768px) {
-            body { flex-direction: column; overflow-y: auto; height: auto; }
-            .sidebar { width: 100%; height: auto; flex-direction: column; position: static; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            
-            /* Mobile Header with Title and Logout Side-by-Side */
-            .mobile-sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #e2e8f0; }
-            .sidebar h2 { padding: 0; border: none; font-size: 22px; }
-            .logout-wrapper { padding: 0; margin: 0; border: none; background: transparent; }
-            .logout-btn { padding: 8px 15px; font-size: 14px; box-shadow: none; }
-            
-            /* Horizontal Scrollable Tabs */
-            .nav-links { display: flex; flex-direction: row; padding: 0; overflow-x: auto; white-space: nowrap; }
-            .nav-links::-webkit-scrollbar { display: none; }
-            .nav-links li { padding: 12px 20px; font-size: 14px; border-right: none; border-bottom: 3px solid transparent; }
-            .nav-links li.active { border-right: none; border-bottom: 3px solid #3b82f6; background: transparent; }
-            
-            .main-content { padding: 20px 15px; overflow-y: visible; }
+            .main-content { padding: 80px 15px 20px !important; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
+        
+        /* Dark Mode fixes */
+        html.dark-theme .logout-wrapper { background-color: #1e293b; border-color: #334155; }
+        html.dark-theme .logout-btn { background: rgba(239, 68, 68, 0.1); }
+        html.dark-theme .logout-btn:hover { background: #ef4444; }
+        
+        .main-content { flex-grow: 1; padding: 80px 40px 40px; overflow-y: auto; position: relative; width: 100vw; }   
             .grid-container { grid-template-columns: 1fr; }
         }
         
@@ -355,13 +372,13 @@ html.dark-theme .profile-info b { color: #f8fafc; }
         <div><h4 id="toastTitle">Welcome!</h4><p id="toastMessage">Logged in successfully.</p></div>
     </div>
 
-   <div class="sidebar">
-        <div class="mobile-sidebar-header">
-            <h2>CodeMaster</h2>
-            <div class="logout-wrapper">
-                <a href="#" onclick="logoutUser(event)" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div>
-        </div>
+   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="hamburger-btn" onclick="toggleSidebar()" title="Open Menu">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="sidebar" id="dashboardSidebar">
+        <h2>CodeMaster <i class="fas fa-times close-sidebar" onclick="toggleSidebar()" title="Close"></i></h2>
         
         <ul class="nav-links">
             <li onclick="switchTab('profile'); loadMyProfile()">👤 My Profile</li> 
@@ -370,7 +387,13 @@ html.dark-theme .profile-info b { color: #f8fafc; }
             <li onclick="switchTab('results')">🏆 Check Result</li>
             <li onclick="switchTab('analytics')">📈 Analytics</li>
         </ul>
+        
+        <div class="logout-wrapper">
+            <a href="#" onclick="logoutUser(event)" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
     </div>
+        
+       
 
     <div class="main-content">
         
@@ -640,13 +663,23 @@ html.dark-theme .profile-info b { color: #f8fafc; }
             loadCourses(); loadExams();
         };
 
+        // 🌟 NAYA: Open / Close Sidebar Logic
+        function toggleSidebar() {
+            document.getElementById('dashboardSidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // 🌟 UPDATE: Tab switch hone par sidebar automatically band ho jayega
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
             document.getElementById(tabId + '-sec').classList.add('active');
             event.currentTarget.classList.add('active');
+            
+            // Tab select karne ke baad mobile/laptop me sidebar hide kar do
+            document.getElementById('dashboardSidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
         }
-
         async function loadCourses() {
             const res = await fetch('/api/courses');
             const data = await res.json();
