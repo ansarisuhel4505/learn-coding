@@ -687,7 +687,7 @@ app.post('/api/submit-exam', async (req, res) => {
     try {
         const { studentName, rollNo, mobile, examTitle, answers } = req.body;
         
-        // 🟢 SMART AUTO-GRADING LOGIC (MCQ + Numerical)
+       // 🟢 SMART AUTO-GRADING LOGIC (MCQ + Numerical + Negative Marking)
         const exam = await Exam.findOne({ title: examTitle });
         let autoScore = 0;
 
@@ -696,6 +696,7 @@ app.post('/api/submit-exam', async (req, res) => {
                 let qKey = `Q${index + 1}`;
                 let studentAns = answers[qKey];
                 let correctAns = q.correctAnswer;
+                let qMarks = parseFloat(q.marks) || 1; // डिफ़ॉल्ट 1 नंबर
                 
                 if (studentAns && studentAns !== "Skipped") {
                     let isCorrect = false;
@@ -704,10 +705,19 @@ app.post('/api/submit-exam', async (req, res) => {
                     } else {
                         if (String(studentAns).trim().toLowerCase() === String(correctAns).trim().toLowerCase()) isCorrect = true;
                     }
-                    if (isCorrect) autoScore += (q.marks || 1);
+                    
+                    if (isCorrect) {
+                        autoScore += qMarks; // 🌟 सही जवाब पर पूरे नंबर
+                    } else {
+                        autoScore -= (qMarks * 0.25); // 🚨 गलत जवाब पर 25% (1/4) नंबर कटेंगे
+                    }
                 }
             });
         }
+        
+        // 🌟 NAYA: JavaScript के अजीब डेसिमल को ठीक करने के लिए (जैसे 14.750000001 को 14.75 बनाना)
+        autoScore = parseFloat(autoScore.toFixed(2));
+                
 
         // 🌟 NAYA LOGIC: अगर पहले से दिया है तो अपडेट (Edit) करो, वरना नया बनाओ
         let existingResult = await Result.findOne({ rollNo: rollNo, examTitle: examTitle });
@@ -880,6 +890,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
