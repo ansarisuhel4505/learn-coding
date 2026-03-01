@@ -135,13 +135,24 @@
             
             <button type="submit" id="btnSignup" class="btn">Sign Up & Verify Email</button>
 
-            <div class="divider">OR</div>
+           <div class="divider">OR</div>
             
-            <a href="/auth/google" class="btn-google">
+            <a href="/auth/google" class="btn-google" id="googleSignupBtn">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
                 Sign up with Google
             </a>
         </form>
+
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('error') === 'suspended') {
+                    alert("🚨 Access Denied: This account has been permanently suspended by the Administrator.");
+                    // URL से एरर हटा दें ताकि बार-बार अलर्ट न आए
+                    window.history.replaceState({}, document.title, "/signup.html");
+                }
+            });
+        </script>
 
         <div id="otpSection">
             <h3 style="color: #10b981; margin-bottom: 5px; font-weight: 700;"><i class="fas fa-envelope-open-text"></i> Check Your Email</h3>
