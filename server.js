@@ -87,7 +87,9 @@ mongoose.connect(process.env.MONGO_URI)
 const User = mongoose.model('User', new mongoose.Schema({
     username: String, email: String, password: String,
     mobile: String, rollNo: { type: String, unique: true },
-    googleId: String, photo: String
+    googleId: String, photo: String,
+    // 🌟 NAYA: स्टूडेंट को ब्लॉक करने का सिस्टम
+    isBlocked: { type: Boolean, default: false } 
 }));
 
 const Course = mongoose.model('Course', new mongoose.Schema({
@@ -161,8 +163,13 @@ passport.use(new GoogleStrategy({
 },
   async function(accessToken, refreshToken, profile, done) {
       try {
-          let user = await User.findOne({ googleId: profile.id });
+          let user = await User.findOne({ $or: [{ googleId: profile.id }, { email: profile.emails[0].value }] });
+          
           if (user) {
+              // 🚨 GOOGLE BLOCK CHECK
+              if (user.isBlocked) {
+                  return done(null, false, { message: 'Account Suspended by Admin' });
+              }
               sendLoginAlertEmail(user.email, user.username);
               return done(null, user); 
           } else {
@@ -203,9 +210,16 @@ app.post('/api/signup-init', async (req, res) => {
             return res.json({ success: false, message: '❌ Invalid Roll No! Must be between 1000 and 2000.' });
         }
 
-        // 2. चेक करो कि ईमेल या रोल नंबर पहले से रजिस्टर तो नहीं है
-        const existingUser = await User.findOne({ $or: [{ email }, { rollNo }] });
-        if(existingUser) return res.json({ success: false, message: '❌ Email or Roll No already registered!' });
+       // 2. चेक करो कि बच्चा डेटाबेस में है या नहीं (Mobile भी चेक करो)
+        const existingUser = await User.findOne({ $or: [{ email }, { rollNo }, { mobile }] });
+        
+        if (existingUser) {
+            // 🚨 अगर बच्चा ब्लॉक है, तो उसे साफ-साफ बताओ
+            if (existingUser.isBlocked) {
+                return res.json({ success: false, message: '🚨 Access Denied! This Email or Mobile is permanently suspended.' });
+            }
+            return res.json({ success: false, message: '❌ Email, Mobile or Roll No already registered!' });
+        }
 
         // 3. 6-digit का OTP बनाओ
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -284,6 +298,11 @@ app.post('/login', async (req, res) => {
         const user = await User.findOne({ $or: [{ email: loginId }, { rollNo: loginId }] });
         if (!user) return res.send("<script>alert('❌ User not found!'); window.location.href='/login.html';</script>");
         
+        // 🚨 BLOCK CHECK: अगर बच्चा ब्लॉक है तो सीधा बाहर फेंको
+        if (user.isBlocked) {
+            return res.send("<script>alert('🚨 Access Denied! Your account has been permanently suspended by the Admin.'); window.location.href='/login.html';</script>");
+        }
+
         // 🌟 MAGIC: Encrypted password ko check karna
         let isMatch = false;
         if (user.password.startsWith('$2')) {
@@ -808,6 +827,23 @@ app.put('/api/admin/students/reset-password/:id', checkAdmin, async (req, res) =
         res.json({ success: true, message: "Password reset successfully!" });
     } catch (err) { res.status(500).json({ success: false }); }
 });
+
+// 🚨 🌟 NAYA: Admin द्वारा किसी बच्चे को Block या Unblock करना
+app.put('/api/admin/students/toggle-block/:id', checkAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        // अगर ब्लॉक है तो अनब्लॉक करो, और अगर अनब्लॉक है तो ब्लॉक कर दो
+        user.isBlocked = !user.isBlocked; 
+        await user.save();
+        
+        const statusMessage = user.isBlocked ? "BLOCKED 🚫" : "UNBLOCKED ✅";
+        res.json({ success: true, message: `Student has been ${statusMessage}` });
+    } catch (err) { 
+        res.status(500).json({ success: false, message: "Server Error" }); 
+    }
+});
 // ==========================================
 // VERCEL EXPORT (Server Start)
 // ==========================================
@@ -815,6 +851,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
