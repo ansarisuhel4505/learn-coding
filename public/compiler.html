@@ -7,22 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         /* NAVBAR */
-        .navbar { background: #1e293b; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+        .navbar { background: #1e293b; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; z-index: 10;}
         .navbar h2 { color: #3b82f6; font-size: 22px; display: flex; align-items: center; gap: 10px; font-weight: 700;}
         .navbar h2 span { color: white; }
         
-        /* MODE SWITCHER */
         .mode-toggle { display: flex; background: #0f172a; border-radius: 8px; border: 1px solid #334155; overflow: hidden; }
         .mode-btn { padding: 10px 20px; cursor: pointer; font-weight: 600; font-size: 14px; color: #94a3b8; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .mode-btn.active { background: #3b82f6; color: white; }
         
-        /* 🌟 NAYA: Exit Button targeting Home Page */
         .exit-btn { color: #ef4444; font-weight: bold; text-decoration: none; padding: 8px 15px; border: 1px solid #ef4444; border-radius: 5px; transition: 0.3s; display: flex; align-items: center; gap: 8px;}
         .exit-btn:hover { background: #ef4444; color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
 
@@ -30,42 +31,57 @@
         .workspace { display: flex; flex-grow: 1; height: calc(100vh - 70px); width: 100%; }
         .hidden { display: none !important; }
 
-        /* 1. WEB DEVELOPMENT WORKSPACE */
+        /* 1. WEB WORKSPACE */
         .web-workspace { flex-direction: column; }
         .web-editors { display: flex; height: 50%; border-bottom: 2px solid #334155; }
         .editor-box { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #334155; background: #1e293b;}
         .editor-header { padding: 8px 15px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; background: #0f172a; border-bottom: 1px solid #334155;}
-        .editor-box textarea { flex-grow: 1; background: #1e293b; color: #f8fafc; font-family: 'Courier New', monospace; padding: 15px; border: none; outline: none; resize: none; font-size: 15px; line-height: 1.5;}
-        
+        .editor-box textarea { flex-grow: 1; background: #1e293b; color: #f8fafc; font-family: 'Courier New', monospace; padding: 15px; border: none; outline: none; resize: none; font-size: 15px;}
         .web-preview-area { height: 50%; display: flex; flex-direction: column; background: white; }
         .preview-header { background: #cbd5e1; color: #0f172a; padding: 5px 15px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px;}
         iframe { flex-grow: 1; border: none; width: 100%; height: 100%; }
 
-        /* 2. UNIVERSAL CODING WORKSPACE */
+        /* 2. PRO CODING WORKSPACE */
         .code-workspace { display: flex; width: 100%; }
-        .coding-left { width: 55%; display: flex; flex-direction: column; border-right: 2px solid #334155; }
-        .coding-controls { padding: 12px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;}
+
+        /* 🌟 NAYA: VS CODE FILE EXPLORER SIDEBAR 🌟 */
+        .file-explorer { width: 220px; background: #0b1120; border-right: 1px solid #334155; display: flex; flex-direction: column; flex-shrink: 0;}
+        .explorer-header { padding: 12px 15px; font-size: 12px; font-weight: bold; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b;}
+        .explorer-actions i { cursor: pointer; padding: 5px; transition: 0.3s; }
+        .explorer-actions i:hover { color: #f8fafc; background: #1e293b; border-radius: 4px; }
+        .file-list { flex-grow: 1; overflow-y: auto; padding: 10px 0; }
+        .file-item { padding: 8px 15px; font-size: 13px; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 8px; border-left: 3px solid transparent;}
+        .file-item:hover { background: #1e293b; }
+        .file-item.active { background: #1e293b; color: #3b82f6; border-left: 3px solid #3b82f6; font-weight: 500;}
+        .file-item i { font-size: 14px; width: 15px; text-align: center; }
+
+        /* EDITOR AREA */
+        .coding-left { flex-grow: 1; display: flex; flex-direction: column; border-right: 2px solid #334155; min-width: 0;}
+        .coding-controls { padding: 10px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;}
         
-        /* 🌟 NAYA: Beautiful Dropdown for 70+ Languages */
-        select { background: #1e293b; color: #10b981; border: 1px solid #3b82f6; padding: 8px 12px; border-radius: 5px; outline: none; font-weight: 600; font-size: 14px; cursor: pointer; max-width: 350px;}
-        select optgroup { background: #0f172a; color: #94a3b8; font-style: normal; font-weight: bold; }
-        select option { color: #f8fafc; font-weight: normal; }
-
-        .run-btn { background: #10b981; color: white; border: none; padding: 8px 25px; border-radius: 5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);}
-        .run-btn:hover { background: #059669; transform: translateY(-2px); }
-        .run-btn:disabled { background: #64748b; cursor: not-allowed; transform: none; box-shadow: none;}
-
-        .coding-left textarea { flex-grow: 1; background: #1e293b; color: #f8fafc; font-family: 'Courier New', monospace; padding: 20px; border: none; outline: none; resize: none; font-size: 16px; line-height: 1.6;}
-
-        /* Terminal Side */
-        .coding-right { width: 45%; display: flex; flex-direction: column; background: #000; }
-        .terminal-header { background: #1e293b; padding: 12px 20px; font-size: 14px; color: #e2e8f0; font-weight: 600; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px;}
-        .terminal-output { flex-grow: 1; padding: 20px; font-family: 'Courier New', Courier, monospace; font-size: 15px; color: #e2e8f0; overflow-y: auto; white-space: pre-wrap; }
+        select { background: #1e293b; color: #10b981; border: 1px solid #3b82f6; padding: 6px 10px; border-radius: 5px; outline: none; font-weight: 600; font-size: 13px; cursor: pointer; max-width: 200px;}
+        select optgroup { background: #0f172a; color: #94a3b8; font-weight: bold; }
         
-        .text-success { color: #10b981; }
-        .text-error { color: #ef4444; }
-        .text-warning { color: #f59e0b; }
-        .text-info { color: #3b82f6; }
+        .action-btns { display: flex; gap: 8px; }
+        .btn-ai { background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .btn-ai:hover { background: #8b5cf6; color: white; box-shadow: 0 0 10px rgba(139, 92, 246, 0.4); }
+
+        .run-btn { background: #10b981; color: white; border: none; padding: 6px 20px; border-radius: 5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s;}
+        .run-btn:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+
+        #monacoEditor { flex-grow: 1; width: 100%; text-align: left; }
+
+        /* TERMINAL AREA */
+        .coding-right { width: 35%; display: flex; flex-direction: column; background: #000; flex-shrink: 0;}
+        .terminal-header { background: #1e293b; padding: 10px 15px; font-size: 13px; color: #e2e8f0; font-weight: 600; border-bottom: 1px solid #334155;}
+        
+        .custom-input-area { height: 30%; border-bottom: 2px solid #334155; display: flex; flex-direction: column; }
+        .custom-input-area textarea { flex-grow: 1; background: #0f172a; color: #f8fafc; border: none; padding: 10px; outline: none; font-family: monospace; resize: none; font-size: 14px;}
+        
+        .terminal-output { flex-grow: 1; padding: 15px; font-family: 'Courier New', monospace; font-size: 14px; color: #e2e8f0; overflow-y: auto; white-space: pre-wrap; background: #000;}
+        
+        .text-success { color: #10b981; } .text-error { color: #ef4444; } .text-warning { color: #f59e0b; } .text-info { color: #3b82f6; }
+        .terminal-output pre { background: #1e293b; padding: 10px; border-radius: 5px; border: 1px solid #334155; margin: 10px 0; overflow-x: auto;}
     </style>
 </head>
 <body>
@@ -74,7 +90,7 @@
         <h2><i class="fas fa-laptop-code"></i> Code<span>Master</span></h2>
         <div class="mode-toggle">
             <div class="mode-btn active" id="btn-web" onclick="switchMode('web')"><i class="fab fa-html5"></i> Web Developer</div>
-            <div class="mode-btn" id="btn-code" onclick="switchMode('code')"><i class="fas fa-terminal"></i> Pro Languages (75+)</div>
+            <div class="mode-btn" id="btn-code" onclick="switchMode('code')"><i class="fas fa-terminal"></i> Pro Languages</div>
         </div>
         <a href="/" class="exit-btn"><i class="fas fa-power-off"></i> Exit IDE</a>
     </div>
@@ -101,94 +117,108 @@
     </div>
 
     <div class="workspace code-workspace hidden" id="codeWorkspace">
+        
+        <div class="file-explorer">
+            <div class="explorer-header">
+                <span>EXPLORER</span>
+                <div class="explorer-actions">
+                    <i class="fas fa-file-medical" onclick="createNewFile()" title="New File"></i>
+                    
+                    <label for="fileUpload" title="Upload File"><i class="fas fa-file-upload"></i></label>
+                    <input type="file" id="fileUpload" style="display:none;" onchange="uploadFiles(event, false)">
+                    
+                    <label for="folderUpload" title="Open Folder"><i class="fas fa-folder-open"></i></label>
+                    <input type="file" id="folderUpload" style="display:none;" webkitdirectory directory multiple onchange="uploadFiles(event, true)">
+                </div>
+            </div>
+            <div class="file-list" id="fileList">
+                </div>
+        </div>
+
         <div class="coding-left">
             <div class="coding-controls">
-                <select id="langSelect" onchange="changeLanguage()"></select>
-                <button class="run-btn" id="runBtn" onclick="executeCode()"><i class="fas fa-play"></i> Run Code</button>
+                <div style="color: #94a3b8; font-size: 14px; font-weight: bold;" id="currentFileName">main.py</div>
+                
+                <select id="langSelect" onchange="manualLanguageChange()"></select>
+                
+                <div class="action-btns">
+                    <button class="btn-ai" onclick="askAI('fix')" title="AI Fix Bugs"><i class="fas fa-bug"></i> Fix</button>
+                    <button class="btn-ai" onclick="askAI('explain')" title="AI Explain"><i class="fas fa-brain"></i> Explain</button>
+                    <button class="btn-ai" onclick="downloadCurrentFile()" style="color: #eab308; border-color: #eab308;"><i class="fas fa-download"></i> Save</button>
+                </div>
+
+                <button class="run-btn" id="runBtn" onclick="executeCode()"><i class="fas fa-play"></i> Run</button>
             </div>
-            <textarea id="backendEditor" spellcheck="false"></textarea>
+            
+            <div id="monacoEditor"></div>
         </div>
         
         <div class="coding-right">
-            <div class="terminal-header"><i class="fas fa-terminal"></i> Cloud Execution Terminal</div>
+            <div class="custom-input-area">
+                <div class="terminal-header" style="background: #0f172a; border-bottom: none;"><i class="fas fa-keyboard"></i> Custom Input (stdin)</div>
+                <textarea id="customInput" placeholder="Enter inputs here..."></textarea>
+            </div>
+            <div class="terminal-header"><i class="fas fa-terminal"></i> Output / Terminal</div>
             <div class="terminal-output" id="terminalOutput">
-<span class="text-success">CodeMaster Private Server [Cloud Engine Active]</span>
-Ready to execute 75+ Programming Languages. Select a language and click Run.
+<span class="text-success">CodeMaster Cloud Environment Started...</span>
+Ready to execute code.
             </div>
         </div>
     </div>
 
     <script>
-        // 🌟 1. MOST POPULAR LANGUAGES (Top 15)
+        // 🌟 1. LANGUAGES DATA
         const popularLangs = {
-            "python3": { name: "🐍 Python 3", v: "4", boiler: "print('Hello CodeMaster! 🚀')\n\na = 10\nb = 20\nprint('Sum:', a + b)" },
-            "java": { name: "☕ Java", v: "4", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java Master! ☕\");\n    }\n}" },
-            "cpp17": { name: "⚙️ C++ (C++17)", v: "0", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++ Ninja! ⚙️\" << endl;\n    return 0;\n}" },
-            "c": { name: "🛠️ C", v: "5", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C Programmer! 🛠️\\n\");\n    return 0;\n}" },
-            "nodejs": { name: "⚡ JavaScript (Node.js)", v: "4", boiler: "console.log('Hello from Node.js! ⚡');\nconst arr = [1, 2, 3];\nconsole.log(arr);" },
-            "csharp": { name: "🎯 C#", v: "4", boiler: "using System;\nclass Program {\n  static void Main() {\n    Console.WriteLine(\"Hello C# World! 🎯\");\n  }\n}" },
-            "php": { name: "🐘 PHP", v: "4", boiler: "<?php\n  echo \"Hello PHP Developer! 🐘\";\n?>" },
-            "go": { name: "🐹 Go", v: "4", boiler: "package main\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello Go Developer! 🐹\")\n}" },
-            "rust": { name: "🦀 Rust", v: "4", boiler: "fn main() {\n    println!(\"Hello Rustacean! 🦀\");\n}" },
-            "swift": { name: "🍏 Swift", v: "4", boiler: "print(\"Hello Swift Developer! 🍏\")" },
-            "kotlin": { name: "🤖 Kotlin", v: "3", boiler: "fun main() {\n    println(\"Hello Kotlin Developer! 🤖\")\n}" },
-            "ruby": { name: "💎 Ruby", v: "4", boiler: "puts 'Hello Ruby Developer! 💎'" },
-            "r": { name: "📊 R", v: "4", boiler: "print(\"Hello Data Scientist! 📊\")" },
-            "sql": { name: "🗄️ SQL", v: "4", boiler: "CREATE TABLE hello (message TEXT);\nINSERT INTO hello VALUES ('Hello SQL Developer!');\nSELECT * FROM hello;" },
-            "bash": { name: "🐧 Bash", v: "4", boiler: "echo \"Hello Linux Master! 🐧\"" }
+            "python3": { name: "Python 3", v: "4", ext: "py", monaco: "python", boiler: "print('Hello CodeMaster! 🚀')" },
+            "java": { name: "Java", v: "4", ext: "java", monaco: "java", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java!\");\n    }\n}" },
+            "cpp17": { name: "C++", v: "0", ext: "cpp", monaco: "cpp", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++!\" << endl;\n    return 0;\n}" },
+            "c": { name: "C", v: "5", ext: "c", monaco: "c", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C!\\n\");\n    return 0;\n}" },
+            "nodejs": { name: "JavaScript", v: "4", ext: "js", monaco: "javascript", boiler: "console.log('Hello Node.js!');" }
         };
+        const allLangs = { ...popularLangs }; // Add extra languages here as needed
 
-        // 🌟 2. EXTRA 60+ LANGUAGES SUPPORTED BY JDOODLE
-        const extraLangsData = [
-            ['ada', 'Ada', '4'], ['awk', 'AWK', '4'], ['bc', 'bc', '4'], ['brainfuck', 'Brainfuck', '0'], 
-            ['clojure', 'Clojure', '3'], ['cobol', 'COBOL', '3'], ['d', 'D', '2'], ['dart', 'Dart', '4'], 
-            ['dc', 'dc', '4'], ['elixir', 'Elixir', '4'], ['erlang', 'Erlang', '0'], ['fasm', 'FASM', '0'], 
-            ['fish', 'Fish', '4'], ['forth', 'Forth', '0'], ['fortran', 'Fortran', '4'], ['freebasic', 'FreeBasic', '1'], 
-            ['fsharp', 'F#', '2'], ['groovy', 'Groovy', '4'], ['hack', 'Hack', '0'], ['haskell', 'Haskell', '4'], 
-            ['icon', 'Icon', '1'], ['intercal', 'INTERCAL', '0'], ['j', 'J', '1'], ['julia', 'Julia', '4'], 
-            ['lua', 'Lua', '3'], ['mozart', 'Mozart', '0'], ['nasm', 'NASM', '0'], ['nemerle', 'Nemerle', '0'], 
-            ['nim', 'Nim', '4'], ['objc', 'Objective-C', '4'], ['ocaml', 'OCaml', '3'], ['octave', 'Octave', '4'], 
-            ['pascal', 'Pascal', '3'], ['perl', 'Perl', '4'], ['picolisp', 'PicoLisp', '0'], ['pike', 'Pike', '0'], 
-            ['prolog', 'Prolog', '1'], ['python2', 'Python 2', '3'], ['racket', 'Racket', '3'], ['rhino', 'Rhino JS', '1'], 
-            ['scala', 'Scala', '4'], ['scheme', 'Scheme', '2'], ['sed', 'Sed', '1'], ['smalltalk', 'Smalltalk', '0'], 
-            ['spidermonkey', 'SpiderMonkey', '1'], ['tcl', 'Tcl', '4'], ['unlambda', 'Unlambda', '0'], 
-            ['vala', 'Vala', '0'], ['vbn', 'VB.Net', '3'], ['whitespace', 'Whitespace', '0'], ['yabasic', 'Yabasic', '1'], 
-            ['zsh', 'Zsh', '4'], ['algol', 'Algol 68', '0'], ['befunge', 'Befunge', '0'], ['blockly', 'Blockly', '0'],
-            ['cameo', 'Cameo', '0'], ['chicken', 'Chicken', '0'], ['clisp', 'Common Lisp', '0'], ['cow', 'Cow', '0'],
-            ['gosh', 'Gauche', '0'], ['logo', 'Logo', '0'], ['malbolge', 'Malbolge', '0'], ['rexx', 'Rexx', '0'],
-            ['spim', 'MIPS Assembly', '0']
-        ];
+        // 🌟 2. VIRTUAL FILE SYSTEM LOGIC
+        let fileSystem = JSON.parse(localStorage.getItem('cm_filesystem')) || {
+            "main.py": { code: popularLangs['python3'].boiler, lang: "python3" }
+        };
+        let activeFile = Object.keys(fileSystem)[0] || "main.py";
+        let editorInstance;
 
-        const otherLangs = {};
-        extraLangsData.forEach(l => {
-            otherLangs[l[0]] = { name: "📄 " + l[1], v: l[2], boiler: `// Write your ${l[1]} code here...\n` };
+        // Initialize Monaco
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            editorInstance = monaco.editor.create(document.getElementById('monacoEditor'), {
+                value: fileSystem[activeFile].code,
+                language: popularLangs[fileSystem[activeFile].lang].monaco,
+                theme: 'vs-dark',
+                automaticLayout: true, fontSize: 16, minimap: { enabled: false }
+            });
+
+            // Save code on typing
+            editorInstance.onDidChangeModelContent(() => {
+                fileSystem[activeFile].code = editorInstance.getValue();
+                localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
+            });
+            
+            renderFileList();
+            updateDropdownUI();
         });
 
-        // Combine both objects for execution reference
-        const allLangs = { ...popularLangs, ...otherLangs };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            // Setup Web Code
-            document.getElementById('htmlCode').value = `<div class="card">\n  <h1>Hello Developer! 🚀</h1>\n  <p>Start editing HTML, CSS, and JS to see changes instantly.</p>\n</div>`;
-            document.getElementById('cssCode').value = `body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f4f8; font-family: sans-serif; margin: 0; }\n.card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }\nh1 { color: #3b82f6; }`;
-            document.getElementById('jsCode').value = `console.log("Web Engine Active!");`;
-            compileWeb(); 
-
-            // 🌟 Setup Dropdown with Optgroups
+        // Setup Dropdown UI
+        function updateDropdownUI() {
             const select = document.getElementById('langSelect');
-            let selectHTML = `<optgroup label="🔥 Most Popular">`;
-            for(let key in popularLangs) {
-                selectHTML += `<option value="${key}">${popularLangs[key].name}</option>`;
-            }
-            selectHTML += `</optgroup><optgroup label="📚 Other Languages (60+)">`;
-            for(let key in otherLangs) {
-                selectHTML += `<option value="${key}">${otherLangs[key].name}</option>`;
-            }
+            let selectHTML = `<optgroup label="Languages">`;
+            for(let key in allLangs) { selectHTML += `<option value="${key}">${allLangs[key].name}</option>`; }
             selectHTML += `</optgroup>`;
             select.innerHTML = selectHTML;
-            
-            select.value = 'python3';
-            changeLanguage();
+            select.value = fileSystem[activeFile].lang;
+        }
+
+        // Web mode vs Code mode
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('htmlCode').value = `<h1>Hello Web Developer!</h1>`;
+            document.getElementById('cssCode').value = `h1 { color: #3b82f6; text-align: center; margin-top: 50px; font-family: sans-serif;}`;
+            compileWeb(); 
         });
 
         function switchMode(mode) {
@@ -204,65 +234,171 @@ Ready to execute 75+ Programming Languages. Select a language and click Run.
                 document.getElementById('codeWorkspace').classList.remove('hidden');
             }
         }
-
         function compileWeb() {
-            try {
-                const html = document.getElementById('htmlCode').value;
-                const css = `<style>${document.getElementById('cssCode').value}</style>`;
-                const js = "<scr" + "ipt>" + document.getElementById('jsCode').value + "</scr" + "ipt>";
-                document.getElementById('webOutput').srcdoc = html + css + js;
-            } catch(e) {}
+            const html = document.getElementById('htmlCode').value;
+            const css = `<style>${document.getElementById('cssCode').value}</style>`;
+            const js = "<scr" + "ipt>" + document.getElementById('jsCode').value + "</scr" + "ipt>";
+            document.getElementById('webOutput').srcdoc = html + css + js;
         }
 
-        function changeLanguage() {
+        // 🌟 3. FILE EXPLORER FUNCTIONS
+        function renderFileList() {
+            const list = document.getElementById('fileList');
+            list.innerHTML = '';
+            for (let filename in fileSystem) {
+                // Get File Icon based on extension
+                let icon = 'fa-file-code';
+                if(filename.endsWith('.py')) icon = 'fa-python';
+                else if(filename.endsWith('.js')) icon = 'fa-js';
+                else if(filename.endsWith('.java')) icon = 'fa-java';
+                
+                list.innerHTML += `
+                    <div class="file-item ${filename === activeFile ? 'active' : ''}" onclick="switchFile('${filename}')">
+                        <i class="fab ${icon} text-info"></i> ${filename}
+                        <i class="fas fa-times" style="margin-left:auto; color:#ef4444; font-size:12px;" onclick="deleteFile(event, '${filename}')"></i>
+                    </div>
+                `;
+            }
+            document.getElementById('currentFileName').innerText = activeFile;
+        }
+
+        function switchFile(filename) {
+            activeFile = filename;
+            const fileData = fileSystem[filename];
+            
+            monaco.editor.setModelLanguage(editorInstance.getModel(), allLangs[fileData.lang].monaco);
+            editorInstance.setValue(fileData.code);
+            
+            document.getElementById('langSelect').value = fileData.lang;
+            renderFileList();
+        }
+
+        function createNewFile() {
+            let filename = prompt("Enter new file name (e.g. script.py, Main.java):");
+            if(!filename) return;
+            filename = filename.trim();
+            if(fileSystem[filename]) return alert("File already exists!");
+
+            // Detect language from extension
+            let detectedLang = "python3"; // default
+            for(let key in allLangs) {
+                if(filename.endsWith("." + allLangs[key].ext)) {
+                    detectedLang = key; break;
+                }
+            }
+
+            fileSystem[filename] = { code: allLangs[detectedLang].boiler, lang: detectedLang };
+            localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
+            switchFile(filename);
+        }
+
+        function deleteFile(e, filename) {
+            e.stopPropagation();
+            if(Object.keys(fileSystem).length === 1) return alert("Cannot delete the last file!");
+            if(confirm(`Delete ${filename}?`)) {
+                delete fileSystem[filename];
+                if(activeFile === filename) activeFile = Object.keys(fileSystem)[0];
+                localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
+                switchFile(activeFile);
+            }
+        }
+
+        // 🌟 4. OPEN FOLDER / FILE UPLOAD
+        function uploadFiles(event, isFolder) {
+            const files = event.target.files;
+            if(!files || files.length === 0) return;
+
+            let fileLoadedCount = 0;
+
+            for(let i=0; i<files.length; i++) {
+                const file = files[i];
+                const filename = file.name;
+                
+                // Detect language
+                let detectedLang = "python3";
+                for(let key in allLangs) {
+                    if(filename.endsWith("." + allLangs[key].ext)) { detectedLang = key; break; }
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fileSystem[filename] = { code: e.target.result, lang: detectedLang };
+                    fileLoadedCount++;
+                    
+                    // Switch to the first loaded file
+                    if(fileLoadedCount === 1) switchFile(filename);
+                    if(fileLoadedCount === files.length) {
+                        localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
+                        renderFileList();
+                    }
+                };
+                reader.readAsText(file);
+            }
+            event.target.value = ""; // Reset input
+        }
+
+        function manualLanguageChange() {
             const langCode = document.getElementById('langSelect').value;
-            document.getElementById('backendEditor').value = allLangs[langCode].boiler;
-            document.getElementById('terminalOutput').innerHTML = `<span class="text-info">System Ready.</span> Selected ${allLangs[langCode].name}.\nClick 'Run Code' to execute.`;
+            fileSystem[activeFile].lang = langCode;
+            monaco.editor.setModelLanguage(editorInstance.getModel(), allLangs[langCode].monaco);
+            localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
         }
 
+        // 🌟 5. EXECUTION & AI (Unchanged Backend Logic)
         async function executeCode() {
             const langCode = document.getElementById('langSelect').value;
-            const code = document.getElementById('backendEditor').value;
+            const code = editorInstance.getValue();
+            const customInput = document.getElementById('customInput').value;
             const version = allLangs[langCode].v;
             
             const terminal = document.getElementById('terminalOutput');
             const runBtn = document.getElementById('runBtn');
 
-            if (!code.trim()) {
-                terminal.innerHTML = `<span class="text-error">Error: Code editor is empty!</span>`;
-                return;
-            }
+            if (!code.trim()) return terminal.innerHTML = `<span class="text-error">Error: Code is empty!</span>`;
 
-            runBtn.disabled = true;
-            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
-            terminal.innerHTML = `<span class="text-warning">➜ Authenticating via CodeMaster Secure API...\n➜ Executing on Cloud Engine...</span>\n\n`;
+            runBtn.disabled = true; runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            terminal.innerHTML = `<span class="text-warning">➜ Executing on Cloud Engine...</span>\n`;
 
             try {
                 const response = await fetch('/api/compile-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        script: code, 
-                        language: langCode, 
-                        versionIndex: version 
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ script: code, language: langCode, versionIndex: version, stdin: customInput })
                 });
-                
                 const data = await response.json();
                 
-                if (data.error) {
-                    terminal.innerHTML += `<span class="text-error">Server Error: ${data.error}</span>`;
-                } else if (data.statusCode !== 200) {
-                    terminal.innerHTML += `<span class="text-error">Compilation Error:\n${data.output}</span>`;
-                } else {
-                    terminal.innerHTML += `<span class="text-success">Output:</span>\n${data.output}\n<span class="text-info">Memory: ${data.memory} KB | CPU Time: ${data.cpuTime} Sec</span>`;
-                }
-            } catch (error) {
-                terminal.innerHTML = `<span class="text-error">Connection Failed! Ensure Backend Server is running.</span>`;
-            }
+                if (data.error) terminal.innerHTML += `<span class="text-error">Server Error: ${data.error}</span>`;
+                else if (data.statusCode !== 200) terminal.innerHTML += `<span class="text-error">Compilation Error:\n${data.output}</span>`;
+                else terminal.innerHTML += `<span class="text-success">Output:</span>\n${data.output}\n<span class="text-info">Memory: ${data.memory} KB | CPU Time: ${data.cpuTime} Sec</span>`;
+            } catch (error) { terminal.innerHTML = `<span class="text-error">Connection Failed!</span>`; }
+            
+            runBtn.disabled = false; runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
+        }
 
-            runBtn.disabled = false;
-            runBtn.innerHTML = '<i class="fas fa-play"></i> Run Code';
+        async function askAI(action) {
+            const code = editorInstance.getValue();
+            const terminal = document.getElementById('terminalOutput');
+            if(!code.trim()) return alert("Write some code first!");
+            
+            terminal.innerHTML = `<span class="text-info"><i class="fas fa-brain fa-spin"></i> AI is analyzing...</span>\n`;
+            let prompt = action === 'fix' ? `Find bugs in this code, explain them, and provide fixed code:\n\n${code}` : `Explain this code line by line:\n\n${code}`;
+
+            const formData = new FormData(); formData.append('message', prompt);
+            try {
+                const res = await fetch('/api/ask-ai', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.success) terminal.innerHTML = `<span class="text-success">🤖 AI Response:</span>\n<div style="background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 10px;">${marked.parse(data.reply)}</div>`;
+                else terminal.innerHTML = `<span class="text-error">AI Error: ${data.reply}</span>`;
+            } catch(e) { terminal.innerHTML = `<span class="text-error">AI Network Error!</span>`; }
+        }
+
+        function downloadCurrentFile() {
+            const code = editorInstance.getValue();
+            if(!code.trim()) return;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = activeFile; a.click();
+            window.URL.revokeObjectURL(url);
         }
     </script>
 </body>
