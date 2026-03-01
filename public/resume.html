@@ -585,6 +585,7 @@
             document.body.removeChild(fileDownload);
         }
 
+       // 🚀 GLOBAL AI AUTO-FILL (FIXED)
         async function askAIToWriteGlobal() {
             const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher React Developer'");
             if (!userPrompt) return; 
@@ -595,33 +596,45 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch('/api/generate-resume', {
+                // 🌟 FIX 1: Using your working /api/ask-ai endpoint
+                const aiCommand = `Write a professional resume for: ${userPrompt}. Return ONLY a valid raw JSON object (without any markdown like \`\`\`json). The JSON must have these exact keys: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | Link), "summary", "skills", "experience".`;
+                
+                const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: userPrompt })
+                    body: JSON.stringify({ message: aiCommand })
                 });
+                
                 const result = await res.json();
 
                 if (result.success) {
-                    const aiData = result.data;
-                    document.getElementById('inpName').value = aiData.fullName || "Your Name";
-                    document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                    
-                    contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
-                    renderContactFields();
+                    try {
+                        // 🌟 FIX 2: AI के जवाब को JSON में बदलना 
+                        const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
+                        
+                        document.getElementById('inpName').value = aiData.fullName || "Your Name";
+                        document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
+                        
+                        contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
+                        renderContactFields();
 
-                    sectionsData = [
-                        { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
-                        { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
-                        { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
-                    ];
+                        sectionsData = [
+                            { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
+                            { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
+                            { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
+                        ];
 
-                    renderEditor(); renderResume();
-                    document.querySelectorAll('.tab-btn')[1].click();
-                } else alert("⚠️ AI Error: " + result.message);
-            } catch (error) { alert("⚠️ Network Error!"); } 
+                        renderEditor(); 
+                        renderResume();
+                        document.querySelectorAll('.tab-btn')[1].click(); // Content टैब पर ले जाना
+                    } catch(parseError) {
+                        alert("⚠️ AI sent invalid format. Please click the button and try again.");
+                    }
+                } else alert("⚠️ AI Error: " + result.reply);
+            } catch (error) { alert("⚠️ Network Error! Cannot reach AI."); } 
             finally { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
+        // 🤖 ATS REVIEWER LOGIC (NO CHANGES - IT WORKS PERFECTLY)
         async function checkATSScore() {
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
@@ -648,6 +661,7 @@
             }
         }
 
+        // 🤖 SECTION-SPECIFIC AI LOGIC (FIXED)
         async function generateSectionAI(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
@@ -656,22 +670,36 @@
             let promptText = prompt(`Details for "${sec.title}"?\nExample: Worked on React for 2 years`);
             if(!promptText) return; 
 
-            let textArea = document.getElementById(`text_${id}`);
-            let oldText = textArea.value;
-            textArea.value = "AI is thinking... 🧠";
+            // 🌟 FIX 3: TinyMCE एडिटर के अंदर डायरेक्ट टेक्स्ट सेट करना
+            const editorInstance = tinymce.get(`text_${id}`);
+            let oldText = editorInstance ? editorInstance.getContent() : sec.text;
+            
+            if(editorInstance) {
+                editorInstance.setContent("<p style='color:#3b82f6;'>AI is thinking & writing... 🧠</p>");
+            }
 
             try {
-                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write in impactful bullet points without markdown bold/italics.`;
+                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write in impactful bullet points without markdown bold/italics. Return plain text.`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
                 const data = await res.json();
-                if(data.success) { sec.text = data.reply.trim(); renderEditor(); renderResume(); } 
-                else { textArea.value = oldText; alert("⚠️ AI Error"); }
-            } catch (err) { textArea.value = oldText; alert("⚠️ Error."); }
+                
+                if(data.success) { 
+                    sec.text = data.reply.trim().replace(/\n/g, '<br>'); // Line breaks को HTML में बदलना
+                    if(editorInstance) editorInstance.setContent(sec.text); // एडिटर में असली डेटा डालना
+                    renderResume(); // A4 पेज अपडेट करना
+                } 
+                else { 
+                    if(editorInstance) editorInstance.setContent(oldText); 
+                    alert("⚠️ AI Error"); 
+                }
+            } catch (err) { 
+                if(editorInstance) editorInstance.setContent(oldText); 
+                alert("⚠️ Error connecting to AI."); 
+            }
         }
-
         window.onload = () => {
             loadDraft(); 
             renderContactFields();
