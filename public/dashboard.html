@@ -39,11 +39,13 @@
         }
         .sidebar-overlay.active { opacity: 1; visibility: visible; }
 
-        /* 🌟 2. UNIFIED SLIDE-OUT SIDEBAR 🌟 */
+        /* 🌟 2. UNIFIED SLIDE-OUT SIDEBAR (FITTED HEIGHT) 🌟 */
         .sidebar { 
-            position: fixed; left: -300px; top: 0; width: 260px; height: 100vh;
+            position: fixed; left: -300px; top: 0; width: 260px; 
+            height: auto; max-height: 100vh; /* 🌟 NAYA: सिर्फ कंटेंट जितनी जगह लेगा */
             background: #ffffff; box-shadow: 2px 0 15px rgba(0,0,0,0.2); 
             display: flex; flex-direction: column; z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom-right-radius: 20px; /* 🌟 NAYA: नीचे से प्रीमियम राउंडेड डिज़ाइन */
         }
         .sidebar.active { left: 0; }
         
@@ -51,18 +53,17 @@
         .close-sidebar { color: #ef4444; cursor: pointer; font-size: 26px; transition: 0.3s; }
         .close-sidebar:hover { transform: scale(1.1) rotate(90deg); }
         
-        .nav-links { list-style: none; padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+        .nav-links { list-style: none; padding: 15px 0; overflow-y: auto; } /* 🌟 NAYA: flex-grow हटा दिया */
         .nav-links li { padding: 15px 25px; cursor: pointer; color: #64748b; font-weight: 500; transition: 0.3s; display: block; width: 100%; border-bottom: none; }
         .nav-links li:hover, .nav-links li.active { background: #f8fafc; color: #3b82f6; border-right: 4px solid #3b82f6; }
         
-        .logout-wrapper { padding: 20px; margin-top: auto; border-top: 1px solid #e2e8f0; background: #fff;}
+        .logout-wrapper { padding: 20px; border-top: 1px solid #e2e8f0; background: transparent; border-bottom-right-radius: 20px;} /* 🌟 NAYA: margin-top: auto हटा दिया ताकि ये लिंक्स के तुरंत बाद आए */
         .logout-btn { 
             padding: 12px; text-align: center; background: #fee2e2; color: #ef4444; 
             text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px;
             border-radius: 10px; font-weight: 600; transition: all 0.3s ease; 
         }
         .logout-btn:hover { background: #ef4444; color: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239,68,68,0.3); }
-
         /* 📱 Mobile Responsiveness */
         @media (max-width: 768px) {
             .main-content { padding: 80px 15px 20px !important; }
