@@ -207,7 +207,8 @@ html, body {
 }
 .light-theme .header .logo, 
 .light-theme .header .nav-links a, 
-.light-theme #menu-icon {
+.light-theme #menu-icon,
+.light-theme .btn-login { /* 🌟 NAYA: Desktop Login button fix */
     color: #ffffff !important; /* Text White Rahega */
 }
 .light-theme .header .nav-links a:hover {
@@ -347,5 +348,6 @@ html, body {
     .dark-mode-btn { left: 15px; }
     .back-to-home-btn { right: 15px; }
 }
+
 
 
