@@ -1163,10 +1163,32 @@ localStorage.removeItem(`cm_save_${rollNo}_${examId}`);
                 let studentAns = data.result.studentAnswers[qKey] || "Skipped";
                 let correctAns = q.correctAnswer;
                 
+                // 🌟 FIX: Smart Matcher (Numerical aur MCQ dono ke liye)
                 let statusMsg = "";
-                if(studentAns === "Skipped") statusMsg = `<span class="ans-skipped">⚠️ Skipped</span>`;
-                else if(studentAns === correctAns) statusMsg = `<span class="ans-correct">✅ Correct (+${q.marks || 1} Marks)</span>`;
-                else statusMsg = `<span class="ans-wrong">❌ Wrong</span>`;
+                let isCorrect = false;
+
+                if (studentAns !== "Skipped") {
+                    if (q.type === 'numerical') {
+                        // Math लॉजिक: 124.00 और 124 को बराबर मानेगा
+                        isCorrect = (parseFloat(studentAns) === parseFloat(correctAns));
+                    } else {
+                        // MCQ लॉजिक: स्पेस और कैपिटल लेटर को इग्नोर करेगा
+                        isCorrect = (String(studentAns).trim().toLowerCase() === String(correctAns).trim().toLowerCase());
+                    }
+                }
+
+               // 🌟 FIX: Show Negative Marks in UI
+                let qMarks = parseFloat(q.marks) || 1; // सवाल के असली नंबर
+                
+                if(studentAns === "Skipped") {
+                    statusMsg = `<span class="ans-skipped">⚠️ Skipped (No Marks Deducted)</span>`;
+                } else if(isCorrect) {
+                    statusMsg = `<span class="ans-correct">✅ Correct (+${qMarks} Marks)</span>`;
+                } else {
+                    // गलत होने पर 25% पेनल्टी दिखाओ
+                    let penalty = parseFloat((qMarks * 0.25).toFixed(2)); 
+                    statusMsg = `<span class="ans-wrong">❌ Wrong (-${penalty} Marks)</span>`;
+                }
 
                 akHtml += `
                 <div class="ans-block">
