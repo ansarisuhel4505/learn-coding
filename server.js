@@ -772,16 +772,42 @@ app.post('/api/leaderboard', async (req, res) => {
 });
 
 
-// Normal Result Checker
+// 🏆 FIX: Normal Result Checker (Bcrypt Password Support)
 app.post('/api/check-result', async (req, res) => {
     try {
         const { rollNo, password } = req.body;
-        const student = await User.findOne({ rollNo, password });
-        if(!student) return res.json({ success: false, message: "Invalid Details" });
         
+        // 1. पहले सिर्फ रोल नंबर से स्टूडेंट को ढूँढो
+        const student = await User.findOne({ rollNo: rollNo });
+        if(!student) return res.json({ success: false, message: "Invalid Roll Number!" });
+        
+        // 2. अब एन्क्रिप्टेड पासवर्ड को चेक करो
+        let isMatch = false;
+        if (student.password && student.password.startsWith('$2')) {
+            isMatch = await bcrypt.compare(password, student.password); // नया Hashed Password
+        } else {
+            isMatch = (password === student.password); // पुराने टेस्टिंग अकाउंट्स के लिए
+        }
+
+        if(!isMatch) return res.json({ success: false, message: "Incorrect Password!" });
+        
+        // 3. अगर पासवर्ड सही है, तो रिजल्ट भेज दो
         const myResults = await Result.find({ rollNo: rollNo, isReleased: true });
-        res.json({ success: true, results: myResults, studentName: student.username });
-    } catch (err) { res.status(500).json({ error: "Server Error" }); }
+        
+        // 🌟 NAYA: Certificate ID generate agar nahi hai (Backward compatibility)
+        const formattedResults = myResults.map(r => {
+            if (!r.certificateId) {
+                r.certificateId = "CM-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(Math.random()*1000);
+                r.save(); // Purane results ke liye background me save kar do
+            }
+            return r;
+        });
+
+        res.json({ success: true, results: formattedResults, studentName: student.username });
+    } catch (err) { 
+        console.error("Result Check Error:", err);
+        res.status(500).json({ error: "Server Error" }); 
+    }
 });
 
 // Feedback & Admin Results
@@ -854,6 +880,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
