@@ -116,7 +116,10 @@ const Exam = mongoose.model('Exam', new mongoose.Schema({
 const Result = mongoose.model('Result', new mongoose.Schema({
     studentName: String, rollNo: String, mobile: String,
     examTitle: String, studentAnswers: Object, score: { type: Number, default: 0 },
-    isReleased: { type: Boolean, default: false } 
+    isReleased: { type: Boolean, default: false },
+    // 🌟 NAYA: Certificate System
+    certificateId: { type: String, default: () => "CM-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(Math.random()*1000) },
+    submitDate: { type: Date, default: Date.now }
 }));
 
 const Feedback = mongoose.model('Feedback', new mongoose.Schema({
@@ -851,6 +854,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
