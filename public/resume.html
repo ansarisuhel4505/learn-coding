@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -141,6 +143,12 @@
         <h2><i class="fas fa-file-pdf"></i> Pro Resume Builder</h2>
         <div style="display: flex; gap: 10px; align-items: center;">
             <span id="saveStatus" style="font-size: 12px; color: #10b981; font-weight: bold; display: none;"><i class="fas fa-check-circle"></i> Auto-Saved</span>
+            
+            <input type="file" id="importResumeInput" accept="application/pdf" style="display: none;" onchange="handleResumeImport(event)">
+            <button class="btn" id="importResumeBtn" style="background: #8b5cf6;" onclick="document.getElementById('importResumeInput').click()">
+                <i class="fas fa-upload"></i> Import Old Resume
+            </button>
+
             <button class="btn btn-warning" onclick="checkATSScore()"><i class="fas fa-robot"></i> ATS Score</button>
             <button class="btn btn-ai" onclick="askAIToWriteGlobal()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
             <button class="btn" style="background: #2563eb;" onclick="downloadWord()"><i class="fas fa-file-word"></i> Word</button>
@@ -632,6 +640,84 @@
                 } else alert("⚠️ AI Error: " + result.reply);
             } catch (error) { alert("⚠️ Network Error! Cannot reach AI."); } 
             finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
+        // 🚀 🌟 NAYA: AI RESUME PARSER LOGIC (Upload Old PDF)
+        async function handleResumeImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('importResumeBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reading PDF...';
+            btn.disabled = true;
+
+            try {
+                // 1. PDF से सारा टेक्स्ट निकालना (PDF.js की मदद से)
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    try {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        let fullText = "";
+                        
+                        // हर पेज को पढ़ना
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(" ");
+                            fullText += pageText + "\n";
+                        }
+
+                        // 2. निकाले गए टेक्स्ट को AI को भेजना ताकि वो उसे सही जगह सेट कर सके
+                        btn.innerHTML = '<i class="fas fa-brain fa-spin"></i> AI Formatting...';
+                        
+                        const aiCommand = `Extract details from this old resume text. Return ONLY a valid raw JSON object. Keys must be: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | LinkedIn), "summary", "skills", "experience". Keep the original details but format them professionally.\n\nOld Resume Text:\n${fullText.substring(0, 3500)}`;
+                        
+                        const res = await fetch('/api/ask-ai', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: aiCommand })
+                        });
+                        
+                        const result = await res.json();
+
+                        if (result.success) {
+                            // 3. AI के डेटा को UI में भरना
+                            const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
+                            
+                            document.getElementById('inpName').value = aiData.fullName || "Your Name";
+                            document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
+                            
+                            contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
+                            renderContactFields();
+
+                            sectionsData = [
+                                { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
+                                { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
+                                { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
+                            ];
+
+                            renderEditor(); 
+                            renderResume();
+                            document.querySelectorAll('.tab-btn')[1].click(); // Content टैब पर ले जाना
+                            alert("✅ Resume Imported & Beautifully Designed!");
+                        } else {
+                            alert("⚠️ AI Error: Could not format resume.");
+                        }
+                    } catch (e) {
+                        alert("⚠️ Error reading PDF format. Try 'AI Auto-Fill' instead.");
+                        console.error(e);
+                    } finally {
+                        document.getElementById('importResumeInput').value = "";
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                };
+                fileReader.readAsArrayBuffer(file);
+            } catch (error) {
+                alert("⚠️ Failed to load PDF.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // 🤖 ATS REVIEWER LOGIC (NO CHANGES - IT WORKS PERFECTLY)
