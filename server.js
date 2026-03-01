@@ -425,24 +425,30 @@ app.post('/api/reset-password', async (req, res) => {
 });
 
 // ==========================================
-// 7. COMPILER API (JDoodle)
+// 7. COMPILER API (JDoodle) - INPUT (STDIN) FIXED
 // ==========================================
 app.post('/api/compile-code', async (req, res) => {
     try {
-        const { script, language, versionIndex } = req.body;
+        // 🌟 NAYA: Yahan 'stdin' (Custom Input) ko frontend se receive kiya
+        const { script, language, versionIndex, stdin } = req.body; 
+        
         const response = await fetch('https://api.jdoodle.com/v1/execute', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 clientId: process.env.JDOODLE_CLIENT_ID, 
                 clientSecret: process.env.JDOODLE_CLIENT_SECRET, 
-                script: script, language: language, versionIndex: versionIndex
+                script: script, 
+                language: language, 
+                versionIndex: versionIndex,
+                stdin: stdin // 🌟 NAYA: Aur JDoodle API ko bhej diya!
             })
         });
         const data = await response.json();
         res.json(data);
     } catch (error) { res.status(500).json({ error: "Compiler connection failed!" }); }
 });
+           
 // 👇 🔒 ADMIN LOGIN API 👇
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
@@ -890,6 +896,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
 }
 module.exports = app;
+
 
 
 
