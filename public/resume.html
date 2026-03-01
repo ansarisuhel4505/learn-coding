@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate AI Resume Builder</title>
+    <title>Ultimate AI Resume Builder Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-        :root { --theme-color: #3b82f6; --theme-font: 'Poppins', sans-serif; }
+        :root { 
+            --theme-color: #3b82f6; 
+            --theme-font: 'Poppins', sans-serif; 
+            --res-font-size: 13.5px;
+            --res-line-height: 1.6;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--theme-font); }
         body { background: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
 
@@ -20,6 +26,7 @@
         .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white;}
         .btn-ai { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
         .btn-success { background: #10b981; }
+        .btn-warning { background: #f59e0b; color: white;}
         .btn-danger { background: #ef4444; padding: 5px 10px; font-size: 12px; }
 
         .builder-container { display: flex; width: 100%; margin-top: 70px; height: calc(100vh - 70px); }
@@ -39,154 +46,92 @@
         .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; }
         .layout-card.active { border-color: var(--theme-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .layout-img { height: 100px; background: #cbd5e1; border-radius: 5px; margin-bottom: 10px; }
 
         /* Right Panel */
         .preview-panel { width: 55%; background: #94a3b8; padding: 40px; display: flex; justify-content: center; overflow-y: auto; }
-        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; }
+        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height);}
+
+        /* Sliders CSS */
+        .slider-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .slider-container label { font-size: 14px; font-weight: 600; color: #475569; width: 40%;}
+        .slider-container input[type=range] { width: 60%; cursor: pointer; }
+
+        /* ATS Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 99999; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 500px; max-width: 90%; max-height: 80vh; overflow-y: auto; position: relative;}
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #ef4444; }
+
+        /* Resume General Elements */
+        .res-section { margin-bottom: 20px; page-break-inside: avoid; position: relative; resize: both; overflow: hidden; min-height: 50px;}
+        .res-text { white-space: pre-wrap; }
+        .resume-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
+        .resume-table th, .resume-table td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
+        .resume-table th { background-color: var(--theme-color); color: white; font-weight: bold;}
+        .skill-bar-wrapper { margin-bottom: 8px; }
+        .skill-bar-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9em; margin-bottom: 4px; }
+        .skill-bar-bg { width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; }
+        .skill-bar-fill { background: var(--theme-color); height: 100%; border-radius: 4px; }
 
         /* =========================================
-           🎨 5 PREMIUM LAYOUTS CSS
+           🎨 ALL 50 PREMIUM LAYOUTS CSS RESTORED
            ========================================= */
-        .res-section { margin-bottom: 20px; page-break-inside: avoid; }
-        .res-text { font-size: 13.5px; white-space: pre-wrap; line-height: 1.6; }
-        
-        /* 1. Classic */
-        .layout-classic { padding: 40px; }
-        .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 15px; margin-bottom: 20px; }
-        .layout-classic .sec-title { font-size: 18px; color: var(--theme-color); border-bottom: 1px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
-
-        /* 2. Modern Sidebar */
-        .layout-modern { display: flex; min-height: 297mm; }
-        .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; }
-        .layout-modern .main { width: 65%; padding: 40px; }
-        .layout-modern .sec-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--theme-color);}
-        .layout-modern .sidebar .sec-title { border-color: rgba(255,255,255,0.3); color: white; }
-
-        /* 3. Minimal */
-        .layout-minimal { padding: 50px; }
-        .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #cbd5e1; padding-bottom: 20px;}
-        .layout-minimal .res-section { display: flex; }
-        .layout-minimal .sec-title { width: 25%; font-size: 13px; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 15px; border-bottom: none;}
-        .layout-minimal .res-text { width: 75%; border-left: 1px solid #e2e8f0; padding-left: 20px; }
-
-        /* 4. Elegant Center */
-        .layout-elegant { padding: 40px; text-align: center; }
-        .layout-elegant .sec-title { font-size: 16px; font-weight: bold; color: var(--theme-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;}
-        .layout-elegant .res-section { margin-bottom: 30px; }
-
-        /* 5. Timeline Pro */
-        .layout-timeline { padding: 40px; }
-        .layout-timeline .header { background: #f8fafc; padding: 30px; border-left: 8px solid var(--theme-color); margin-bottom: 30px; }
-        .layout-timeline .sec-title { background: var(--theme-color); color: white; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;}
-   
-        /* =========================================
-           🚀 20 NEW LAYOUT CSS RULES
-           ========================================= */
-        /* 6. Corporate */ .layout-corporate { padding: 40px; border-top: 15px solid var(--theme-color); background: #fdfdfd; } .layout-corporate .header { margin-bottom: 30px; } .layout-corporate .sec-title { color: #333; background: #f1f5f9; padding: 5px 10px; border-left: 4px solid var(--theme-color); font-weight: bold; text-transform: uppercase; margin-bottom: 15px;}
-        /* 7. Split Right */ .layout-split-right { display: flex; flex-direction: row-reverse; min-height: 297mm; } .layout-split-right .sidebar { width: 35%; background: #1e293b; color: white; padding: 40px 25px; border-top: 10px solid var(--theme-color); } .layout-split-right .main { width: 65%; padding: 40px; } .layout-split-right .sec-title { color: var(--theme-color); border-bottom: 2px solid #e2e8f0; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
-        /* 8. Boxed */ .layout-boxed { padding: 40px; background: #f8fafc; } .layout-boxed .header { text-align: center; margin-bottom: 30px; } .layout-boxed .res-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-top: 3px solid var(--theme-color); margin-bottom: 20px;} .layout-boxed .sec-title { font-weight: bold; color: var(--theme-color); margin-bottom: 10px;}
-        /* 9. Bold Header */ .layout-bold-header { padding: 0; } .layout-bold-header .header { background: var(--theme-color); color: white; padding: 50px 40px; text-align: center; } .layout-bold-header .main { padding: 40px; } .layout-bold-header .sec-title { color: var(--theme-color); font-weight: bold; font-size: 18px; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid var(--theme-color); padding-bottom: 5px;}
-        /* 10. Academic */ .layout-academic { padding: 50px; font-family: 'Times New Roman', serif; } .layout-academic .header { text-align: center; border-bottom: 1px solid black; padding-bottom: 10px; margin-bottom: 20px;} .layout-academic .name { font-size: 28px; text-transform: uppercase; } .layout-academic .sec-title { font-size: 16px; font-weight: bold; text-transform: uppercase; text-align: center; margin: 20px 0 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px;}
-        /* 11. Pill Titles */ .layout-pill-titles { padding: 40px; } .layout-pill-titles .sec-title { background: var(--theme-color); color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 15px;}
-        /* 12. Accent Left */ .layout-accent-left { padding: 40px 40px 40px 60px; border-left: 20px solid var(--theme-color); } .layout-accent-left .sec-title { font-size: 20px; color: var(--theme-color); font-weight: bold; margin-bottom: 10px;}
-        /* 13. Startup */ .layout-startup { padding: 40px; } .layout-startup .header { background: linear-gradient(135deg, var(--theme-color), #0f172a); color: white; padding: 40px; border-radius: 15px; margin-bottom: 30px; } .layout-startup .sec-title { font-size: 18px; font-weight: bold; color: var(--theme-color); margin-bottom: 10px;}
-        /* 14. Clean Left */ .layout-clean-left { padding: 50px; } .layout-clean-left .header { margin-bottom: 40px; } .layout-clean-left .name { font-size: 40px; font-weight: 300; color: var(--theme-color); } .layout-clean-left .sec-title { font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;}
-        /* 15. Executive */ .layout-executive { padding: 50px; } .layout-executive .header { display: flex; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px;} .layout-executive .name { font-size: 30px; font-weight: bold; color: #0f172a;} .layout-executive .sec-title { color: #0f172a; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
-        /* 16. Portfolio */ .layout-portfolio { padding: 40px; } .layout-portfolio .name { font-size: 50px; font-weight: 700; line-height: 1; margin-bottom: 10px; color: var(--theme-color);} .layout-portfolio .sec-title { font-size: 24px; font-weight: bold; margin: 25px 0 15px 0;}
-        /* 17. Tech Hacker */ .layout-tech { padding: 40px; background: #0f172a; color: #e2e8f0; } .layout-tech .name { color: var(--theme-color); font-family: 'Courier New', monospace; font-size: 30px; } .layout-tech .sec-title { color: var(--theme-color); border-bottom: 1px dashed var(--theme-color); margin-bottom: 10px; padding-bottom: 5px; font-family: 'Courier New', monospace;} .layout-tech .res-text { color: #cbd5e1; }
-        /* 18. Divided Grid */ .layout-divided { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; } .layout-divided .header { grid-column: 1 / -1; text-align: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; } .layout-divided .sec-title { font-weight: bold; color: var(--theme-color); margin-bottom: 10px; }
-        /* 19. Soft Rounded */ .layout-soft { padding: 40px; } .layout-soft .header { background: #f8fafc; padding: 30px; border-radius: 20px; margin-bottom: 30px; text-align: center;} .layout-soft .sec-title { background: #e0e7ff; color: var(--theme-color); padding: 8px 15px; border-radius: 10px; font-weight: bold; margin-bottom: 15px;}
-        /* 20. Vibrant Text */ .layout-vibrant { padding: 40px; } .layout-vibrant .name { font-size: 40px; font-weight: 800; color: var(--theme-color); text-transform: uppercase; letter-spacing: -1px;} .layout-vibrant .sec-title { color: var(--theme-color); font-weight: 800; font-size: 20px; margin-bottom: 10px; border-bottom: 4px solid var(--theme-color); display: inline-block; padding-bottom: 2px;}
-        /* 21. Compact Pro */ .layout-compact { padding: 30px; } .layout-compact .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;} .layout-compact .res-section { margin-bottom: 15px; } .layout-compact .sec-title { font-size: 14px; font-weight: bold; color: var(--theme-color); text-transform: uppercase; margin-bottom: 5px;} .layout-compact .res-text { font-size: 12.5px; line-height: 1.4; }
-        /* 22. Elegant Serif */ .layout-elegant-serif { padding: 50px; font-family: 'Georgia', serif; } .layout-elegant-serif .name { font-size: 34px; font-style: italic; color: var(--theme-color); text-align: center; margin-bottom: 5px;} .layout-elegant-serif .sec-title { font-size: 18px; border-bottom: 1px solid #ccc; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; text-align: center;}
-        /* 23. Blocky Solid */ .layout-blocky { padding: 40px; } .layout-blocky .header { background: #1e293b; color: white; padding: 40px; margin-bottom: 30px; } .layout-blocky .sec-title { background: var(--theme-color); color: white; padding: 10px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase;}
-        /* 24. Minimal Line */ .layout-minimal-line { padding: 40px; border: 1px solid #e2e8f0; margin: 10px; } .layout-minimal-line .header { border-bottom: 1px solid #e2e8f0; padding-bottom: 30px; margin-bottom: 30px;} .layout-minimal-line .sec-title { font-weight: normal; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;}
-        /* 25. Creative Dark */ .layout-creative-dark { padding: 0; background: #1e293b; color: white; min-height: 297mm;} .layout-creative-dark .header { background: var(--theme-color); padding: 50px; color: white; } .layout-creative-dark .main { padding: 40px; } .layout-creative-dark .sec-title { color: var(--theme-color); font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;} .layout-creative-dark .res-text { color: #cbd5e1; }
-        /* =========================================
-           🚀 25 ADVANCED & PREMIUM LAYOUTS CSS
-           ========================================= */
-        .layout-ceo-clean { padding: 50px; font-family: 'Times New Roman', serif; text-align: center; } .layout-ceo-clean .name { font-size: 45px; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; } .layout-ceo-clean .sec-title { font-size: 18px; font-weight: bold; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        .layout-matrix { padding: 40px; background: #000; color: #0f0; font-family: 'Courier New', monospace; min-height: 297mm; } .layout-matrix .name { font-size: 35px; text-shadow: 0 0 5px #0f0; } .layout-matrix .sec-title { border-bottom: 1px dotted #0f0; margin-bottom: 10px; text-transform: lowercase; } .layout-matrix .res-text { color: #0a0; }
-        .layout-swiss-grid { padding: 40px; display: grid; grid-template-columns: 30% 70%; gap: 20px; font-family: 'Helvetica', sans-serif; } .layout-swiss-grid .header { grid-column: 1 / -1; border-bottom: 5px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; } .layout-swiss-grid .name { font-size: 40px; font-weight: 800; letter-spacing: -2px; } .layout-swiss-grid .sec-title { font-weight: 800; color: var(--theme-color); text-transform: uppercase; text-align: right; border-right: 3px solid #000; padding-right: 15px; } .layout-swiss-grid .res-text { padding-left: 10px; }
-        .layout-material-cards { padding: 40px; background: #f1f5f9; } .layout-material-cards .header { background: var(--theme-color); color: white; padding: 40px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); } .layout-material-cards .res-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); } .layout-material-cards .sec-title { color: var(--theme-color); font-weight: bold; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
-        .layout-brutalist { padding: 40px; border: 15px solid #000; background: #fff; } .layout-brutalist .header { border-bottom: 10px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 30px; } .layout-brutalist .name { font-size: 50px; font-weight: 900; text-transform: uppercase; line-height: 0.9; } .layout-brutalist .sec-title { background: #000; color: #fff; display: inline-block; padding: 5px 15px; font-weight: 900; text-transform: uppercase; font-size: 20px; margin-bottom: 15px; border-bottom: 5px solid var(--theme-color); }
-        .layout-notion-style { padding: 60px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; } .layout-notion-style .name { font-size: 40px; font-weight: 700; margin-bottom: 5px; } .layout-notion-style .sec-title { font-size: 20px; font-weight: 600; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 5px; } .layout-notion-style .res-text { color: #37352f; font-size: 15px; }
-        .layout-github-style { padding: 40px; border: 1px solid #d0d7de; border-radius: 6px; margin: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; } .layout-github-style .header { display: flex; align-items: center; border-bottom: 1px solid #d0d7de; padding-bottom: 20px; margin-bottom: 20px; } .layout-github-style .name { font-size: 26px; font-weight: 600; } .layout-github-style .sec-title { font-size: 16px; font-weight: 600; border-bottom: 1px solid #d0d7de; padding-bottom: 8px; margin-bottom: 15px; }
-        .layout-tech-lead { padding: 30px; display: flex; flex-wrap: wrap; } .layout-tech-lead .header { width: 100%; border-left: 5px solid var(--theme-color); padding-left: 20px; margin-bottom: 25px; } .layout-tech-lead .res-section { width: 48%; margin-right: 2%; margin-bottom: 20px; } .layout-tech-lead .sec-title { color: var(--theme-color); font-weight: bold; text-transform: uppercase; font-size: 14px; margin-bottom: 5px; }
-        .layout-terminal { background: #1e1e1e; padding: 40px; font-family: 'Consolas', monospace; color: #d4d4d4; min-height: 297mm; } .layout-terminal .name { color: #569cd6; font-size: 28px; } .layout-terminal .sec-title { color: #c586c0; margin-top: 20px; margin-bottom: 10px; } .layout-terminal .res-text { color: #ce9178; }
-        .layout-euro-cv { padding: 40px 60px; } .layout-euro-cv .header { margin-bottom: 40px; } .layout-euro-cv .name { font-size: 32px; font-weight: 300; color: var(--theme-color); border-bottom: 1px solid #ccc; padding-bottom: 10px; } .layout-euro-cv .res-section { display: flex; margin-bottom: 20px; } .layout-euro-cv .sec-title { width: 30%; font-weight: bold; color: #333; } .layout-euro-cv .res-text { width: 70%; border-left: 2px solid var(--theme-color); padding-left: 20px; }
+        .layout-classic { padding: 40px; } .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 15px; margin-bottom: 20px; } .layout-classic .sec-title { font-size: 1.3em; color: var(--theme-color); border-bottom: 1px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
+        .layout-modern { display: flex; min-height: 297mm; } .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; } .layout-modern .main { width: 65%; padding: 40px; } .layout-modern .sec-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--theme-color);} .layout-modern .sidebar .sec-title { border-color: rgba(255,255,255,0.3); color: white; }
+        .layout-minimal { padding: 50px; } .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #cbd5e1; padding-bottom: 20px;} .layout-minimal .res-section { display: flex; } .layout-minimal .sec-title { width: 25%; font-size: 1em; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 15px;} .layout-minimal .res-text { width: 75%; border-left: 1px solid #e2e8f0; padding-left: 20px; }
+        .layout-elegant { padding: 40px; text-align: center; } .layout-elegant .sec-title { font-size: 1.2em; font-weight: bold; color: var(--theme-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;} .layout-elegant .res-section { margin-bottom: 30px; }
+        .layout-timeline { padding: 40px; } .layout-timeline .header { background: #f8fafc; padding: 30px; border-left: 8px solid var(--theme-color); margin-bottom: 30px; } .layout-timeline .sec-title { background: var(--theme-color); color: white; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 1em; font-weight: bold; margin-bottom: 15px;}
+        .layout-corporate { padding: 40px; border-top: 15px solid var(--theme-color); background: #fdfdfd; } .layout-corporate .header { margin-bottom: 30px; } .layout-corporate .sec-title { color: #333; background: #f1f5f9; padding: 5px 10px; border-left: 4px solid var(--theme-color); font-weight: bold; text-transform: uppercase; margin-bottom: 15px;}
+        .layout-split-right { display: flex; flex-direction: row-reverse; min-height: 297mm; } .layout-split-right .sidebar { width: 35%; background: #1e293b; color: white; padding: 40px 25px; border-top: 10px solid var(--theme-color); } .layout-split-right .main { width: 65%; padding: 40px; } .layout-split-right .sec-title { color: var(--theme-color); border-bottom: 2px solid #e2e8f0; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
+        .layout-boxed { padding: 40px; background: #f8fafc; } .layout-boxed .header { text-align: center; margin-bottom: 30px; } .layout-boxed .res-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-top: 3px solid var(--theme-color); margin-bottom: 20px;} .layout-boxed .sec-title { font-weight: bold; color: var(--theme-color); margin-bottom: 10px;}
+        .layout-bold-header { padding: 0; } .layout-bold-header .header { background: var(--theme-color); color: white; padding: 50px 40px; text-align: center; } .layout-bold-header .main { padding: 40px; } .layout-bold-header .sec-title { color: var(--theme-color); font-weight: bold; font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid var(--theme-color); padding-bottom: 5px;}
+        .layout-academic { padding: 50px; font-family: 'Times New Roman', serif; } .layout-academic .header { text-align: center; border-bottom: 1px solid black; padding-bottom: 10px; margin-bottom: 20px;} .layout-academic .name { font-size: 2em; text-transform: uppercase; } .layout-academic .sec-title { font-size: 1.1em; font-weight: bold; text-transform: uppercase; text-align: center; margin: 20px 0 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px;}
+        .layout-pill-titles { padding: 40px; } .layout-pill-titles .sec-title { background: var(--theme-color); color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 15px;}
+        .layout-accent-left { padding: 40px 40px 40px 60px; border-left: 20px solid var(--theme-color); } .layout-accent-left .sec-title { font-size: 1.3em; color: var(--theme-color); font-weight: bold; margin-bottom: 10px;}
+        .layout-startup { padding: 40px; } .layout-startup .header { background: linear-gradient(135deg, var(--theme-color), #0f172a); color: white; padding: 40px; border-radius: 15px; margin-bottom: 30px; } .layout-startup .sec-title { font-size: 1.2em; font-weight: bold; color: var(--theme-color); margin-bottom: 10px;}
+        .layout-clean-left { padding: 50px; } .layout-clean-left .header { margin-bottom: 40px; } .layout-clean-left .name { font-size: 2.5em; font-weight: 300; color: var(--theme-color); } .layout-clean-left .sec-title { font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;}
+        .layout-executive { padding: 50px; } .layout-executive .header { display: flex; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px;} .layout-executive .name { font-size: 2em; font-weight: bold; color: #0f172a;} .layout-executive .sec-title { color: #0f172a; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
+        .layout-portfolio { padding: 40px; } .layout-portfolio .name { font-size: 3em; font-weight: 700; line-height: 1; margin-bottom: 10px; color: var(--theme-color);} .layout-portfolio .sec-title { font-size: 1.5em; font-weight: bold; margin: 25px 0 15px 0;}
+        .layout-tech { padding: 40px; background: #0f172a; color: #e2e8f0; } .layout-tech .name { color: var(--theme-color); font-family: 'Courier New', monospace; font-size: 2em; } .layout-tech .sec-title { color: var(--theme-color); border-bottom: 1px dashed var(--theme-color); margin-bottom: 10px; padding-bottom: 5px; font-family: 'Courier New', monospace;} .layout-tech .res-text { color: #cbd5e1; }
+        .layout-divided { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; } .layout-divided .header { grid-column: 1 / -1; text-align: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; } .layout-divided .sec-title { font-weight: bold; color: var(--theme-color); margin-bottom: 10px; }
+        .layout-soft { padding: 40px; } .layout-soft .header { background: #f8fafc; padding: 30px; border-radius: 20px; margin-bottom: 30px; text-align: center;} .layout-soft .sec-title { background: #e0e7ff; color: var(--theme-color); padding: 8px 15px; border-radius: 10px; font-weight: bold; margin-bottom: 15px;}
+        .layout-vibrant { padding: 40px; } .layout-vibrant .name { font-size: 2.5em; font-weight: 800; color: var(--theme-color); text-transform: uppercase; letter-spacing: -1px;} .layout-vibrant .sec-title { color: var(--theme-color); font-weight: 800; font-size: 1.3em; margin-bottom: 10px; border-bottom: 4px solid var(--theme-color); display: inline-block; padding-bottom: 2px;}
+        .layout-compact { padding: 30px; } .layout-compact .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;} .layout-compact .res-section { margin-bottom: 15px; } .layout-compact .sec-title { font-size: 1em; font-weight: bold; color: var(--theme-color); text-transform: uppercase; margin-bottom: 5px;} .layout-compact .res-text { font-size: 0.9em; line-height: 1.4; }
+        .layout-elegant-serif { padding: 50px; font-family: 'Georgia', serif; } .layout-elegant-serif .name { font-size: 2.2em; font-style: italic; color: var(--theme-color); text-align: center; margin-bottom: 5px;} .layout-elegant-serif .sec-title { font-size: 1.2em; border-bottom: 1px solid #ccc; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; text-align: center;}
+        .layout-blocky { padding: 40px; } .layout-blocky .header { background: #1e293b; color: white; padding: 40px; margin-bottom: 30px; } .layout-blocky .sec-title { background: var(--theme-color); color: white; padding: 10px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase;}
+        .layout-minimal-line { padding: 40px; border: 1px solid #e2e8f0; margin: 10px; } .layout-minimal-line .header { border-bottom: 1px solid #e2e8f0; padding-bottom: 30px; margin-bottom: 30px;} .layout-minimal-line .sec-title { font-weight: normal; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;}
+        .layout-creative-dark { padding: 0; background: #1e293b; color: white; min-height: 297mm;} .layout-creative-dark .header { background: var(--theme-color); padding: 50px; color: white; } .layout-creative-dark .main { padding: 40px; } .layout-creative-dark .sec-title { color: var(--theme-color); font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;} .layout-creative-dark .res-text { color: #cbd5e1; }
+        .layout-ceo-clean { padding: 50px; font-family: 'Times New Roman', serif; text-align: center; } .layout-ceo-clean .name { font-size: 3em; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; } .layout-ceo-clean .sec-title { font-size: 1.2em; font-weight: bold; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .layout-matrix { padding: 40px; background: #000; color: #0f0; font-family: 'Courier New', monospace; min-height: 297mm; } .layout-matrix .name { font-size: 2em; text-shadow: 0 0 5px #0f0; } .layout-matrix .sec-title { border-bottom: 1px dotted #0f0; margin-bottom: 10px; text-transform: lowercase; } .layout-matrix .res-text { color: #0a0; }
+        .layout-swiss-grid { padding: 40px; display: grid; grid-template-columns: 30% 70%; gap: 20px; font-family: 'Helvetica', sans-serif; } .layout-swiss-grid .header { grid-column: 1 / -1; border-bottom: 5px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 20px; } .layout-swiss-grid .name { font-size: 2.5em; font-weight: 800; letter-spacing: -2px; } .layout-swiss-grid .sec-title { font-weight: 800; color: var(--theme-color); text-transform: uppercase; text-align: right; border-right: 3px solid #000; padding-right: 15px; } .layout-swiss-grid .res-text { padding-left: 10px; }
+        .layout-material-cards { padding: 40px; background: #f1f5f9; } .layout-material-cards .header { background: var(--theme-color); color: white; padding: 40px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); } .layout-material-cards .res-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); } .layout-material-cards .sec-title { color: var(--theme-color); font-weight: bold; font-size: 1.2em; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
+        .layout-brutalist { padding: 40px; border: 15px solid #000; background: #fff; } .layout-brutalist .header { border-bottom: 10px solid var(--theme-color); padding-bottom: 20px; margin-bottom: 30px; } .layout-brutalist .name { font-size: 3.5em; font-weight: 900; text-transform: uppercase; line-height: 0.9; } .layout-brutalist .sec-title { background: #000; color: #fff; display: inline-block; padding: 5px 15px; font-weight: 900; text-transform: uppercase; font-size: 1.3em; margin-bottom: 15px; border-bottom: 5px solid var(--theme-color); }
+        .layout-notion-style { padding: 60px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; } .layout-notion-style .name { font-size: 2.5em; font-weight: 700; margin-bottom: 5px; } .layout-notion-style .sec-title { font-size: 1.3em; font-weight: 600; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 5px; } .layout-notion-style .res-text { color: #37352f; }
+        .layout-github-style { padding: 40px; border: 1px solid #d0d7de; border-radius: 6px; margin: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; } .layout-github-style .header { display: flex; align-items: center; border-bottom: 1px solid #d0d7de; padding-bottom: 20px; margin-bottom: 20px; } .layout-github-style .name { font-size: 1.8em; font-weight: 600; } .layout-github-style .sec-title { font-size: 1.1em; font-weight: 600; border-bottom: 1px solid #d0d7de; padding-bottom: 8px; margin-bottom: 15px; }
+        .layout-tech-lead { padding: 30px; display: flex; flex-wrap: wrap; } .layout-tech-lead .header { width: 100%; border-left: 5px solid var(--theme-color); padding-left: 20px; margin-bottom: 25px; } .layout-tech-lead .res-section { width: 48%; margin-right: 2%; margin-bottom: 20px; } .layout-tech-lead .sec-title { color: var(--theme-color); font-weight: bold; text-transform: uppercase; font-size: 1em; margin-bottom: 5px; }
+        .layout-terminal { background: #1e1e1e; padding: 40px; font-family: 'Consolas', monospace; color: #d4d4d4; min-height: 297mm; } .layout-terminal .name { color: #569cd6; font-size: 2em; } .layout-terminal .sec-title { color: #c586c0; margin-top: 20px; margin-bottom: 10px; } .layout-terminal .res-text { color: #ce9178; }
+        .layout-euro-cv { padding: 40px 60px; } .layout-euro-cv .header { margin-bottom: 40px; } .layout-euro-cv .name { font-size: 2.2em; font-weight: 300; color: var(--theme-color); border-bottom: 1px solid #ccc; padding-bottom: 10px; } .layout-euro-cv .res-section { display: flex; margin-bottom: 20px; } .layout-euro-cv .sec-title { width: 30%; font-weight: bold; color: #333; } .layout-euro-cv .res-text { width: 70%; border-left: 2px solid var(--theme-color); padding-left: 20px; }
         
         .layout-dual-sidebar { display: flex; justify-content: space-between; padding: 20px; } .layout-dual-sidebar .main { width: 50%; padding: 20px; } .layout-dual-sidebar .sidebar { width: 23%; background: #f8fafc; padding: 20px; border-radius: 8px; }
-        .layout-elegant-gold { background: #111; color: #eee; padding: 50px; } .layout-elegant-gold .name { font-family: serif; font-size: 38px; color: #d4af37; text-align: center; } .layout-elegant-gold .sec-title { color: #d4af37; border-bottom: 1px solid #d4af37; text-align: center; margin-bottom: 15px; }
-        .layout-classic-serif { font-family: Georgia, serif; padding: 50px; } .layout-timeline-right { padding: 40px; border-right: 4px solid var(--theme-color); text-align: right; }
-        .layout-creative-dots { padding: 40px; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; } .layout-creative-dots .res-section { background: white; padding: 20px; border: 2px solid #000; box-shadow: 5px 5px 0 var(--theme-color); margin-bottom: 25px; }
-        .layout-ultra-compact { padding: 20px; line-height: 1.2; font-size: 11px; } .layout-ultra-compact .sec-title { font-size: 13px; margin-bottom: 3px; }
-        .layout-accent-right { padding: 40px 60px 40px 40px; border-right: 15px solid var(--theme-color); } .layout-pastel { background: #fdfbf7; padding: 50px; } .layout-corporate-solid { padding: 40px; background: var(--theme-color); color: white; }
-        .layout-stark { padding: 40px; background: #fff; color: #000; } .layout-stark .name { background: #000; color: #fff; display: inline-block; padding: 10px 20px; }
-        .layout-glass { padding: 40px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); } .layout-glass .res-section { background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.8); margin-bottom: 20px; }
-        .layout-centered-minimal { text-align: center; padding: 60px; } .layout-wave { padding: 40px; border-top: 50px solid var(--theme-color); border-radius: 50% 50% 0 0 / 20px 20px 0 0; }
-        .layout-split-diagonal { padding: 40px; background: linear-gradient(135deg, var(--theme-color) 30%, #fff 30%); } .layout-dark-pro { background: #0f172a; color: #cbd5e1; padding: 50px; } .layout-dark-pro .name { color: white; }
-    
-    /* =========================================
-           🌟 PURE WHITE / INK SAVER OVERRIDE 🌟
-           ========================================= */
-        .force-white-theme {
-            --theme-color: #0f172a !important; 
-        }
-        .force-white-theme * {
-            background-color: transparent !important;
-            background-image: none !important;
-            color: #0f172a !important; 
-        }
-        .force-white-theme .layout-modern .sidebar,
-        .force-white-theme .layout-split-right .sidebar,
-        .force-white-theme .layout-startup .header,
-        .force-white-theme .layout-bold-header .header,
-        .force-white-theme .layout-blocky .header,
-        .force-white-theme .layout-soft .header,
-        .force-white-theme .layout-boxed .res-section,
-        .force-white-theme .layout-creative-dark .header,
-        .force-white-theme .layout-timeline .sec-title,
-        .force-white-theme .layout-pill-titles .sec-title,
-        .force-white-theme .layout-blocky .sec-title {
-            border: 1px solid #cbd5e1 !important;
-        }
-    
-   /* =========================================
-           🌟 NEW: RESIZE BLOCKS & PROFESSIONAL TABLES 🌟
-           ========================================= */
-        .res-section { 
-            position: relative; 
-            resize: both; 
-            overflow: hidden; 
-            min-height: 50px;
-        }
+        .layout-elegant-gold { background: #111; color: #eee; padding: 50px; } .layout-elegant-gold .name { font-family: serif; font-size: 2.5em; color: #d4af37; text-align: center; } .layout-elegant-gold .sec-title { color: #d4af37; border-bottom: 1px solid #d4af37; text-align: center; margin-bottom: 15px; }
+        .layout-classic-serif { font-family: Georgia, serif; padding: 50px; } .layout-classic-serif .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-timeline-right { padding: 40px; border-right: 4px solid var(--theme-color); text-align: right; } .layout-timeline-right .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-creative-dots { padding: 40px; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; } .layout-creative-dots .res-section { background: white; padding: 20px; border: 2px solid #000; box-shadow: 5px 5px 0 var(--theme-color); margin-bottom: 25px; } .layout-creative-dots .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-ultra-compact { padding: 20px; font-size: 0.8em; } .layout-ultra-compact .sec-title { font-size: 1.1em; font-weight: bold; margin-bottom: 3px; color: var(--theme-color);}
+        .layout-accent-right { padding: 40px 60px 40px 40px; border-right: 15px solid var(--theme-color); } .layout-accent-right .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-pastel { background: #fdfbf7; padding: 50px; } .layout-pastel .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-corporate-solid { padding: 40px; background: var(--theme-color); color: white; } .layout-corporate-solid .sec-title { font-weight: bold; margin-bottom: 10px; color: white;}
+        .layout-stark { padding: 40px; background: #fff; color: #000; } .layout-stark .name { background: #000; color: #fff; display: inline-block; padding: 10px 20px; } .layout-stark .sec-title { font-weight: bold; margin-bottom: 10px; color: #000;}
+        .layout-glass { padding: 40px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); } .layout-glass .res-section { background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.8); margin-bottom: 20px; } .layout-glass .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-centered-minimal { text-align: center; padding: 60px; } .layout-centered-minimal .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-wave { padding: 40px; border-top: 50px solid var(--theme-color); border-radius: 50% 50% 0 0 / 20px 20px 0 0; } .layout-wave .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-split-diagonal { padding: 40px; background: linear-gradient(135deg, var(--theme-color) 30%, #fff 30%); } .layout-split-diagonal .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        .layout-dark-pro { background: #0f172a; color: #cbd5e1; padding: 50px; } .layout-dark-pro .name { color: white; } .layout-dark-pro .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
+        
+        .force-white-theme { --theme-color: #0f172a !important; }
+        .force-white-theme * { background-color: transparent !important; background-image: none !important; color: #0f172a !important; }
+        .force-white-theme .layout-modern .sidebar, .force-white-theme .layout-split-right .sidebar, .force-white-theme .layout-startup .header, .force-white-theme .layout-bold-header .header, .force-white-theme .layout-blocky .header, .force-white-theme .layout-soft .header, .force-white-theme .layout-boxed .res-section, .force-white-theme .layout-creative-dark .header, .force-white-theme .layout-timeline .sec-title, .force-white-theme .layout-pill-titles .sec-title, .force-white-theme .layout-blocky .sec-title { border: 1px solid #cbd5e1 !important; }
 
-        .resume-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px; 
-            font-size: 13px;
-        }
-        .resume-table th, .resume-table td { 
-            border: 1px solid #cbd5e1; 
-            padding: 8px 12px; 
-            text-align: left; 
-        }
-        .resume-table th { 
-            background-color: var(--theme-color); 
-            color: white; 
-            font-weight: bold;
-        }
-
-        /* 🌟 NAYA: Home Button CSS */
-        .back-to-home-btn {
-            position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px; 
-            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-            font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s;
-            background: #ef4444; color: white; border: none; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); text-decoration: none;
-        }
+        .back-to-home-btn { position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s; background: #ef4444; color: white; border: none; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); text-decoration: none;}
         .back-to-home-btn:hover { transform: scale(1.1) translateY(-5px); color: white;}
     </style>
 </head>
@@ -194,9 +139,25 @@
 
     <div class="top-nav">
         <h2><i class="fas fa-file-pdf"></i> Pro Resume Builder</h2>
-        <div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span id="saveStatus" style="font-size: 12px; color: #10b981; font-weight: bold; display: none;"><i class="fas fa-check-circle"></i> Auto-Saved</span>
+            <button class="btn btn-warning" onclick="checkATSScore()"><i class="fas fa-robot"></i> ATS Score</button>
             <button class="btn btn-ai" onclick="askAIToWriteGlobal()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
-            <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-download"></i> Download PDF</button>
+            <button class="btn" style="background: #2563eb;" onclick="downloadWord()"><i class="fas fa-file-word"></i> Word</button>
+            <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+    </div>
+
+    <div id="atsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('atsModal').style.display='none'">✖</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-robot" style="font-size: 50px; color: #f59e0b;"></i>
+                <h2 style="color: #1e293b; margin-top: 10px;">AI ATS Review</h2>
+            </div>
+            <div id="atsResult" style="color: #334155; line-height: 1.6; font-size: 15px;">
+                <div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Analyzing your resume...</div>
+            </div>
         </div>
     </div>
 
@@ -208,6 +169,19 @@
             </div>
 
             <div id="layoutTab" class="tab-content active">
+                
+                <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
+                    <h4 style="color: #3b82f6; margin-bottom: 10px;"><i class="fas fa-compress-arrows-alt"></i> Page Fitter (Fit to 1 Page)</h4>
+                    <div class="slider-container">
+                        <label>Text Size: <span id="valSize">13.5</span>px</label>
+                        <input type="range" id="fontSizeSlider" min="10" max="18" step="0.5" value="13.5" oninput="updatePageFitter()">
+                    </div>
+                    <div class="slider-container">
+                        <label>Line Spacing: <span id="valSpace">1.6</span></label>
+                        <input type="range" id="lineHeightSlider" min="1.0" max="2.5" step="0.1" value="1.6" oninput="updatePageFitter()">
+                    </div>
+                </div>
+
                 <h3 style="margin-bottom: 15px;">Choose Layout</h3>
                 <div class="layout-grid">
                     <div class="layout-card active" onclick="changeLayout('classic', this)"><b>Classic</b></div>
@@ -263,7 +237,7 @@
                 </div>
 
                 <h3 style="margin-top: 30px; margin-bottom: 10px;">Font Style</h3>
-                <select onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
+                <select id="fontSelector" onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
                     <option value="'Poppins', sans-serif">Poppins (Modern & Clean)</option>
                     <option value="'Times New Roman', serif">Times New Roman (Formal & Academic)</option>
                     <option value="'Courier New', monospace">Courier New (Tech & Code)</option>
@@ -273,9 +247,7 @@
 
                 <h3 style="margin-bottom: 15px;">Theme Color</h3>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="changeTheme('#0f172a', true)" title="Pure White / B&W">
-                        <i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i>
-                    </div>
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="changeTheme('#0f172a', true)" title="Pure White / B&W"><i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer;" onclick="changeTheme('#3b82f6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #10b981; cursor: pointer;" onclick="changeTheme('#10b981')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #ef4444; cursor: pointer;" onclick="changeTheme('#ef4444')"></div>
@@ -287,7 +259,6 @@
            <div id="dataTab" class="tab-content">
                <div class="form-group" style="border-left: 4px solid #3b82f6;">
                     <label>Personal Details</label>
-                    
                     <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 10px;">
                         <div onclick="document.getElementById('profileImgInput').click()" style="width: 70px; height: 70px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
                             <i class="fas fa-camera" style="color: #64748b; font-size: 20px;"></i>
@@ -307,7 +278,6 @@
                             <i class="fas fa-plus"></i> Add Title & Link
                         </button>
                     </div>
-
                 </div>
 
                 <div id="editorSections"></div>
@@ -326,8 +296,70 @@
     <a href="/" class="back-to-home-btn" title="Back to Home"><i class="fas fa-home"></i></a>
 
     <script>
-        // 📸 IMAGE UPLOAD LOGIC
+        // 💾 DRAFT & AUTO-SAVE LOGIC
+        let currentLayout = 'classic';
         let userProfilePic = '';
+        let sectionsData = [
+            { id: 1, title: 'Professional Summary', text: 'A passionate developer building scalable web applications and AI tools.' },
+            { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
+            { id: 3, title: 'Experience & Projects', text: 'CodeMaster Platform (2025 - Present)\n- Built a full-stack LMS with AI integration.' }
+        ];
+        let contactFields = [
+            { label: "Email", value: "ansarisuhel4505@gmail.com" },
+            { label: "Phone", value: "+91 9335067990" },
+            { label: "LinkedIn", value: "linkedin.com/in/suhel" }
+        ];
+
+        function loadDraft() {
+            let saved = localStorage.getItem('resumeDraft');
+            if (saved) {
+                let data = JSON.parse(saved);
+                currentLayout = data.currentLayout || 'classic';
+                userProfilePic = data.userProfilePic || '';
+                sectionsData = data.sectionsData || sectionsData;
+                contactFields = data.contactFields || contactFields;
+                
+                document.getElementById('inpName').value = data.name || "SUHEL ANSARI";
+                document.getElementById('inpTitle').value = data.title || "Full Stack Developer";
+                
+                if(data.themeColor) changeTheme(data.themeColor, data.isWhite);
+                if(data.fontStyle) { document.getElementById('fontSelector').value = data.fontStyle; changeFont(data.fontStyle); }
+                if(data.fontSize) { document.getElementById('fontSizeSlider').value = data.fontSize; }
+                if(data.lineSpacing) { document.getElementById('lineHeightSlider').value = data.lineSpacing; updatePageFitter(); }
+                
+                if (userProfilePic) {
+                    document.getElementById('leftPanelImg').src = userProfilePic;
+                    document.getElementById('leftPanelImg').style.display = 'block';
+                }
+            }
+        }
+
+        function saveDraft() {
+            let data = {
+                currentLayout, userProfilePic, sectionsData, contactFields,
+                name: document.getElementById('inpName').value,
+                title: document.getElementById('inpTitle').value,
+                themeColor: document.documentElement.style.getPropertyValue('--theme-color'),
+                isWhite: document.getElementById('resumePreview').classList.contains('force-white-theme'),
+                fontStyle: document.documentElement.style.getPropertyValue('--theme-font'),
+                fontSize: document.getElementById('fontSizeSlider').value,
+                lineSpacing: document.getElementById('lineHeightSlider').value
+            };
+            localStorage.setItem('resumeDraft', JSON.stringify(data));
+            let status = document.getElementById('saveStatus');
+            status.style.display = 'inline-block';
+            setTimeout(() => { status.style.display = 'none'; }, 2000);
+        }
+
+        function updatePageFitter() {
+            let size = document.getElementById('fontSizeSlider').value;
+            let space = document.getElementById('lineHeightSlider').value;
+            document.getElementById('valSize').innerText = size;
+            document.getElementById('valSpace').innerText = space;
+            document.documentElement.style.setProperty('--res-font-size', size + 'px');
+            document.documentElement.style.setProperty('--res-line-height', space);
+            saveDraft();
+        }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
@@ -342,33 +374,15 @@
                 reader.readAsDataURL(file);
             }
         }
-        let currentLayout = 'classic';
-        
-        let sectionsData = [
-            { id: 1, title: 'Professional Summary', text: 'A passionate developer building scalable web applications and AI tools.' },
-            { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
-            { id: 3, title: 'Experience & Projects', text: 'CodeMaster Platform (2025 - Present)\n- Built a full-stack LMS with AI integration.\n- Implemented auto-grading and PDF generation.' }
-        ];
-       
-        let contactFields = [
-            { label: "Email", value: "ansarisuhel4505@gmail.com" },
-            { label: "Phone", value: "+91 9335067990" },
-            { label: "Location", value: "Gonda, UP" },
-            { label: "LinkedIn", value: "linkedin.com/in/suhel" }
-        ];
 
-       function renderContactFields() {
+        function renderContactFields() {
             let html = '';
             contactFields.forEach((field, index) => {
                 html += `
                 <div style="display:flex; gap:5px; margin-bottom:8px;">
                     <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid #cbd5e1; border-radius: 4px;">
-                    <div style="width: 60%;">
-                        <textarea id="contact_${index}" class="mini-editor" placeholder="Link / Detail">${field.value}</textarea>
-                    </div>
-                    <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div style="width: 60%;"><textarea id="contact_${index}" class="mini-editor" placeholder="Link / Detail">${field.value}</textarea></div>
+                    <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="fas fa-trash"></i></button>
                 </div>`;
             });
             document.getElementById('contactFieldsContainer').innerHTML = html;
@@ -376,15 +390,10 @@
         }
 
         function initMiniEditors() {
-            // 🌟 FIXED BUG: Sirf mini-editor hatega, sab nahi!
             tinymce.remove('.mini-editor');
             tinymce.init({
-                selector: '.mini-editor',
-                menubar: false,
-                statusbar: false,
-                forced_root_block: false, 
-                toolbar: 'bold italic underline | fontsize',
-                height: 120,
+                selector: '.mini-editor', menubar: false, statusbar: false, forced_root_block: false, 
+                toolbar: 'bold italic underline | fontsize', height: 120,
                 setup: function (editor) {
                     editor.on('input change keyup', function () {
                         editor.save();
@@ -398,146 +407,92 @@
             });
         }
 
-        function addContactField() {
-            contactFields.push({ label: "New Title", value: "" }); 
-            renderContactFields();
-            renderResume();
-        }
-
-        function updateContactField(index, key, val) {
-            contactFields[index][key] = val; 
-            renderResume();
-        }
-
-        function deleteContactField(index) {
-            contactFields.splice(index, 1); 
-            renderContactFields();
-            renderResume();
-        }
+        function addContactField() { contactFields.push({ label: "New Title", value: "" }); renderContactFields(); renderResume(); }
+        function updateContactField(index, key, val) { contactFields[index][key] = val; renderResume(); }
+        function deleteContactField(index) { contactFields.splice(index, 1); renderContactFields(); renderResume(); }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
-
-            if (tabId === 'dataTab') {
-                setTimeout(() => {
-                    initMiniEditors();
-                    renderEditor(); 
-                }, 100);
-            }
+            if (tabId === 'dataTab') { setTimeout(() => { initMiniEditors(); renderEditor(); }, 100); }
         }
 
-       // 🎨 THEME CHANGER
         function changeTheme(color, isWhite = false) {
             document.documentElement.style.setProperty('--theme-color', color);
             const paper = document.getElementById('resumePreview');
-            
-            if (isWhite) {
-                paper.classList.add('force-white-theme');
-            } else {
-                paper.classList.remove('force-white-theme');
-            }
+            isWhite ? paper.classList.add('force-white-theme') : paper.classList.remove('force-white-theme');
+            saveDraft();
         }
-
-        // 🌟 NAYA: FONT CHANGER
-        function changeFont(font) {
-            document.documentElement.style.setProperty('--theme-font', font);
-        }
-
+        function changeFont(font) { document.documentElement.style.setProperty('--theme-font', font); saveDraft(); }
         function changeLayout(layoutName, cardElem) {
             document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
-            cardElem.classList.add('active');
+            if(cardElem) cardElem.classList.add('active');
             currentLayout = layoutName;
             renderResume();
         }
 
-       function renderEditor() {
+        function renderEditor() {
             let html = '';
             sectionsData.forEach((sec, index) => {
                 html += `
                 <div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; border-left: 5px solid #cbd5e1;">
-                    
                     <div style="display: flex; align-items: center; margin-bottom:10px;">
                         <i class="fas fa-grip-vertical" style="color: #94a3b8; margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag to move"></i>
                         <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:16px; width: 60%; color: var(--theme-color);">
                     </div>
-                    
                     <div style="position:absolute; top:12px; right:12px; display:flex; gap:5px;">
                         <button onclick="moveSecUp(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Up"><i class="fas fa-arrow-up"></i></button>
                         <button onclick="moveSecDown(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Down"><i class="fas fa-arrow-down"></i></button>
                         <button class="btn-danger" onclick="deleteSec(${sec.id})" style="border-radius:4px;"><i class="fas fa-trash"></i></button>
                     </div>
-                    
-                    <div style="margin-bottom: 8px; display: flex; gap: 5px;">
-                        <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                            <i class="fas fa-magic"></i> Write with AI
-                        </button>
-                        <button onclick="addTableToSec(${sec.id})" style="background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                            <i class="fas fa-table"></i> Add Table
-                        </button>
+                    <div style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px;">
+                        <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-magic"></i> AI</button>
+                        <button onclick="addTableToSec(${sec.id})" style="background: #f59e0b; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-table"></i> Table</button>
+                        <button onclick="addSkillBarToSec(${sec.id})" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-sliders-h"></i> Skill Bar</button>
                     </div>
-                    
                     <textarea id="text_${sec.id}" class="rich-editor" style="width: 100%; min-height: 200px;">${sec.text}</textarea>
                 </div>`;
             });
             document.getElementById('editorSections').innerHTML = html;
 
             setTimeout(() => {
-                // 🌟 FIXED BUG: Sirf rich-editor hatega, taaki contact wale box delete na ho!
                 tinymce.remove('.rich-editor'); 
                 tinymce.init({
-                    selector: '.rich-editor',
-                    plugins: 'table lists advlist',
+                    selector: '.rich-editor', plugins: 'table lists advlist',
                     toolbar: 'bold italic underline | bullist numlist | table | undo redo',
-                    menubar: false,
-                    branding: false,
-                    promotion: false,
-                    height: 220,
+                    menubar: false, branding: false, promotion: false, height: 220,
                     setup: function (editor) {
                         editor.on('input change keyup', function () {
                             let id = parseInt(editor.id.split('_')[1]);
                             let sec = sectionsData.find(s => s.id === id);
-                            if(sec) {
-                                sec.text = editor.getContent();
-                                renderResume(); 
-                            }
+                            if(sec) { sec.text = editor.getContent(); renderResume(); }
                         });
                     }
                 });
             }, 100);
         }
                     
-                    
-        function addSection() {
-            sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' });
-            renderEditor(); renderResume();
-        }
-        function updateSec(id, field, val) {
-            let sec = sectionsData.find(s => s.id === id);
-            if(sec) { sec[field] = val; renderResume(); }
-        }
-        function deleteSec(id) {
-            sectionsData = sectionsData.filter(s => s.id !== id);
-            renderEditor(); renderResume();
-        }
+        function addSection() { sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' }); renderEditor(); renderResume(); }
+        function updateSec(id, field, val) { let sec = sectionsData.find(s => s.id === id); if(sec) { sec[field] = val; renderResume(); } }
+        function deleteSec(id) { sectionsData = sectionsData.filter(s => s.id !== id); renderEditor(); renderResume(); }
 
-        // 📊 ADD TABLE LOGIC
         function addTableToSec(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
-            
-            const tableHTML = `\n<table class="resume-table">\n  <tr>\n    <th>Degree / Course</th>\n    <th>Institute</th>\n    <th>Year</th>\n  </tr>\n  <tr>\n    <td>B.Tech CSE</td>\n    <td>Your University</td>\n    <td>2024 - 2028</td>\n  </tr>\n  <tr>\n    <td>Intermediate</td>\n    <td>Your School</td>\n    <td>2024</td>\n  </tr>\n</table>\n`;
-            
-            sec.text += tableHTML;
-            renderEditor();
-            renderResume();
+            sec.text += `\n<table class="resume-table">\n  <tr>\n    <th>Degree</th>\n    <th>Institute</th>\n    <th>Year</th>\n  </tr>\n  <tr>\n    <td>B.Tech CSE</td>\n    <td>Your University</td>\n    <td>2028</td>\n  </tr>\n</table>\n`;
+            renderEditor(); renderResume();
         }
 
-        // ↕️ DRAG & DROP + MOVE LOGIC
-        let draggedItemIndex = null;
+        function addSkillBarToSec(id) {
+            let sec = sectionsData.find(s => s.id === id);
+            if(!sec) return;
+            sec.text += `\n<div class="skill-bar-wrapper"><div class="skill-bar-header"><span>JavaScript / React</span><span>85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 85%;"></div></div></div>\n`;
+            renderEditor(); renderResume();
+        }
 
+        let draggedItemIndex = null;
         function handleDragStart(index) { draggedItemIndex = index; }
         function handleDragOver(e) { e.preventDefault(); }
         function handleDrop(targetIndex) {
@@ -546,155 +501,112 @@
             sectionsData.splice(targetIndex, 0, item);
             renderEditor(); renderResume();
         }
+        function moveSecUp(index) { if (index > 0) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index - 1]; sectionsData[index - 1] = temp; renderEditor(); renderResume(); } }
+        function moveSecDown(index) { if (index < sectionsData.length - 1) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index + 1]; sectionsData[index + 1] = temp; renderEditor(); renderResume(); } }
 
-        function moveSecUp(index) {
-            if (index > 0) {
-                let temp = sectionsData[index];
-                sectionsData[index] = sectionsData[index - 1];
-                sectionsData[index - 1] = temp;
-                renderEditor(); renderResume();
-            }
-        }
-        function moveSecDown(index) {
-            if (index < sectionsData.length - 1) {
-                let temp = sectionsData[index];
-                sectionsData[index] = sectionsData[index + 1];
-                sectionsData[index + 1] = temp;
-                renderEditor(); renderResume();
-            }
-        }
-
-        // ⚙️ THE MASTER RENDER ENGINE
+        // ⚙️ THE MASTER RENDER ENGINE (ALL 50 LAYOUTS RESTORED)
         function renderResume() {
             const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : document.getElementById('inpName').value;
             const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : document.getElementById('inpTitle').value;
+            const contact = contactFields.filter(f => f.value.trim() !== "").map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value).join(' | ');
             
-            const contact = contactFields
-                .filter(f => f.value.trim() !== "")
-                .map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value)
-                .join(' | ');
             let blocksHtml = '';
-            sectionsData.forEach(s => {
-                blocksHtml += `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`;
-            });
+            sectionsData.forEach(s => { blocksHtml += `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`; });
 
             let finalHtml = '';
 
-            if (currentLayout === 'classic') {
-                finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:32px; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:18px; color:var(--theme-color);">${title}</div><div style="font-size:14px; color:#475569; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`;
-            } 
-            else if (currentLayout === 'modern') {
-                finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:30px; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`;
-            }
-            else if (currentLayout === 'minimal') {
-                finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:36px; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="font-size:13px; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`;
-            }
-            else if (currentLayout === 'elegant') {
-                finalHtml = `<div class="layout-elegant"><div style="margin-bottom:40px;"><div style="font-size:28px; letter-spacing:3px; text-transform:uppercase;">${name}</div><div style="color:#64748b; margin:10px 0;">${title}</div><div style="font-size:12px; color:var(--theme-color);">${contact}</div></div>${blocksHtml}</div>`;
-            }
-            else if (currentLayout === 'timeline') {
-                finalHtml = `<div class="layout-timeline"><div class="header"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:18px;">${title}</div><div style="margin-top:10px; font-size:14px;">${contact}</div></div>${blocksHtml}</div>`;
-            }
-            // 🚀 20 NEW RENDER LOGICS
-            else if (currentLayout === 'corporate') { finalHtml = `<div class="layout-corporate"><div class="header"><div style="font-size:36px; font-weight:bold;">${name}</div><div style="font-size:18px; color:var(--theme-color);">${title}</div><div style="font-size:13px; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'split-right') { finalHtml = `<div class="layout-split-right"><div class="sidebar"><div style="font-size:30px; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; color:var(--theme-color);">${title}</div><div class="res-section"><div class="sec-title" style="color:white; border-color:white;">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
-            else if (currentLayout === 'boxed') { finalHtml = `<div class="layout-boxed"><div class="header"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="font-size:14px; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'bold-header') { finalHtml = `<div class="layout-bold-header"><div class="header"><div style="font-size:40px; font-weight:bold;">${name}</div><div style="font-size:18px; opacity:0.9;">${title}</div><div style="font-size:14px; margin-top:10px;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
+            if (currentLayout === 'classic') { finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:2.5em; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#475569; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; } 
+            else if (currentLayout === 'modern') { finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'minimal') { finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:2.8em; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="font-size:1em; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'elegant') { finalHtml = `<div class="layout-elegant"><div style="margin-bottom:40px;"><div style="font-size:2.2em; letter-spacing:3px; text-transform:uppercase;">${name}</div><div style="color:#64748b; margin:10px 0;">${title}</div><div style="font-size:1em; color:var(--theme-color);">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'timeline') { finalHtml = `<div class="layout-timeline"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'corporate') { finalHtml = `<div class="layout-corporate"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'split-right') { finalHtml = `<div class="layout-split-right"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; color:var(--theme-color);">${title}</div><div class="res-section"><div class="sec-title" style="color:white; border-color:white;">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'boxed') { finalHtml = `<div class="layout-boxed"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="font-size:1em; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'bold-header') { finalHtml = `<div class="layout-bold-header"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.4em; opacity:0.9;">${title}</div><div style="font-size:1em; margin-top:10px;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'academic') { finalHtml = `<div class="layout-academic"><div class="header"><div class="name">${name}</div><div>${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'pill-titles') { finalHtml = `<div class="layout-pill-titles"><div style="text-align:center; margin-bottom:30px;"><div style="font-size:36px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'accent-left') { finalHtml = `<div class="layout-accent-left"><div style="margin-bottom:30px;"><div style="font-size:40px; font-weight:bold; line-height:1;">${name}</div><div style="font-size:20px; color:var(--theme-color); margin-bottom:10px;">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'startup') { finalHtml = `<div class="layout-startup"><div class="header"><div style="font-size:36px; font-weight:bold;">${name}</div><div style="font-size:18px;">${title}</div><div style="font-size:14px; margin-top:10px; opacity:0.8;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'clean-left') { finalHtml = `<div class="layout-clean-left"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:18px;">${title}</div><div style="color:#64748b;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'executive') { finalHtml = `<div class="layout-executive"><div class="header"><div><div class="name">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="text-align:right; color:#475569; font-size:14px;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'portfolio') { finalHtml = `<div class="layout-portfolio"><div style="margin-bottom:40px;"><div class="name">${name}</div><div style="font-size:20px; font-weight:bold; color:#1e293b;">${title}</div><div style="color:#64748b; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'tech') { finalHtml = `<div class="layout-tech"><div style="margin-bottom:30px;"><div class="name">> ${name}_</div><div style="color:#94a3b8; margin:10px 0;">> ${title}</div><div style="color:#64748b; font-size:13px;">> ${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'divided') { finalHtml = `<div class="layout-divided"><div class="header"><div style="font-size:36px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'soft') { finalHtml = `<div class="layout-soft"><div class="header"><div style="font-size:32px; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'vibrant') { finalHtml = `<div class="layout-vibrant"><div style="margin-bottom:40px; text-align:center;"><div class="name">${name}</div><div style="font-size:20px; font-weight:bold; background:var(--theme-color); color:white; display:inline-block; padding:5px 15px; border-radius:20px;">${title}</div><div style="margin-top:10px; color:#475569;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'compact') { finalHtml = `<div class="layout-compact"><div class="header"><div><div style="font-size:28px; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div></div><div style="text-align:right; font-size:12px; color:#64748b;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'elegant-serif') { finalHtml = `<div class="layout-elegant-serif"><div style="text-align:center; margin-bottom:30px;"><div class="name">${name}</div><div style="font-weight:bold; font-size:16px;">${title}</div><div style="font-size:13px; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'blocky') { finalHtml = `<div class="layout-blocky"><div class="header"><div style="font-size:36px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:20px;">${title}</div><div style="margin-top:10px; font-size:14px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'minimal-line') { finalHtml = `<div class="layout-minimal-line"><div class="header"><div style="font-size:36px; font-weight:300; letter-spacing:2px;">${name}</div><div style="color:var(--theme-color); font-weight:bold; margin-top:5px;">${title}</div><div style="color:#94a3b8; margin-top:5px; font-size:13px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'creative-dark') { finalHtml = `<div class="layout-creative-dark"><div class="header"><div style="font-size:40px; font-weight:bold;">${name}</div><div style="font-size:20px; font-weight:bold;">${title}</div><div style="margin-top:10px; font-size:14px; opacity:0.8;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
-            // 🚀 25 ADVANCED & PREMIUM RENDER LOGICS
-            else if (currentLayout === 'ceo-clean') { finalHtml = `<div class="layout-ceo-clean"><div class="name">${name}</div><div style="font-size:16px;">${title}</div><div style="font-size:14px; margin-top:5px; color:#555;">${contact}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'pill-titles') { finalHtml = `<div class="layout-pill-titles"><div style="text-align:center; margin-bottom:30px;"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'accent-left') { finalHtml = `<div class="layout-accent-left"><div style="margin-bottom:30px;"><div style="font-size:3em; font-weight:bold; line-height:1;">${name}</div><div style="font-size:1.5em; color:var(--theme-color); margin-bottom:10px;">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'startup') { finalHtml = `<div class="layout-startup"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="font-size:1em; margin-top:10px; opacity:0.8;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'clean-left') { finalHtml = `<div class="layout-clean-left"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em;">${title}</div><div style="color:#64748b;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'executive') { finalHtml = `<div class="layout-executive"><div class="header"><div><div class="name">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="text-align:right; color:#475569; font-size:1em;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'portfolio') { finalHtml = `<div class="layout-portfolio"><div style="margin-bottom:40px;"><div class="name">${name}</div><div style="font-size:1.5em; font-weight:bold; color:#1e293b;">${title}</div><div style="color:#64748b; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'tech') { finalHtml = `<div class="layout-tech"><div style="margin-bottom:30px;"><div class="name">> ${name}_</div><div style="color:#94a3b8; margin:10px 0;">> ${title}</div><div style="color:#64748b; font-size:1em;">> ${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'divided') { finalHtml = `<div class="layout-divided"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'soft') { finalHtml = `<div class="layout-soft"><div class="header"><div style="font-size:2.5em; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'vibrant') { finalHtml = `<div class="layout-vibrant"><div style="margin-bottom:40px; text-align:center;"><div class="name">${name}</div><div style="font-size:1.5em; font-weight:bold; background:var(--theme-color); color:white; display:inline-block; padding:5px 15px; border-radius:20px;">${title}</div><div style="margin-top:10px; color:#475569;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'compact') { finalHtml = `<div class="layout-compact"><div class="header"><div><div style="font-size:2.2em; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div></div><div style="text-align:right; font-size:0.9em; color:#64748b;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'elegant-serif') { finalHtml = `<div class="layout-elegant-serif"><div style="text-align:center; margin-bottom:30px;"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.2em;">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'blocky') { finalHtml = `<div class="layout-blocky"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.5em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'minimal-line') { finalHtml = `<div class="layout-minimal-line"><div class="header"><div style="font-size:2.8em; font-weight:300; letter-spacing:2px;">${name}</div><div style="color:var(--theme-color); font-weight:bold; margin-top:5px;">${title}</div><div style="color:#94a3b8; margin-top:5px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'creative-dark') { finalHtml = `<div class="layout-creative-dark"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.5em; font-weight:bold;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.8;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'ceo-clean') { finalHtml = `<div class="layout-ceo-clean"><div class="name">${name}</div><div style="font-size:1.2em;">${title}</div><div style="font-size:1em; margin-top:5px; color:#555;">${contact}</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'matrix') { finalHtml = `<div class="layout-matrix"><div class="name">root@${name.replace(/\s+/g, '_').toLowerCase()}:~$</div><div style="margin:10px 0;">> Role: ${title}</div><div style="margin-bottom:30px;">> Contact: ${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:20px; color:var(--theme-color);">${title}</div><div>${contact}</div></div>` + sectionsData.map(s => `<div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div>`).join('') + `</div>`; }
-            else if (currentLayout === 'material-cards') { finalHtml = `<div class="layout-material-cards"><div class="header"><div style="font-size:36px; font-weight:bold;">${name}</div><div style="font-size:18px;">${title}</div><div style="margin-top:10px; font-size:14px; opacity:0.9;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'brutalist') { finalHtml = `<div class="layout-brutalist"><div class="header"><div class="name">${name}</div><div style="font-size:24px; font-weight:bold; margin-top:10px;">${title}</div><div style="font-weight:bold; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'notion-style') { finalHtml = `<div class="layout-notion-style"><div style="font-size:60px;">📄</div><div class="name">${name}</div><div style="font-size:18px; color:gray; margin-bottom:5px;">${title}</div><div style="font-size:14px; color:gray;">${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'github-style') { finalHtml = `<div class="layout-github-style"><div class="header"><img src="https://ui-avatars.com/api/?name=${name}&background=random" style="width:60px; height:60px; border-radius:50%; margin-right:15px;"><div style="flex:1;"><div class="name">${name}</div><div style="color:#57606a;">${title}</div></div><div style="font-size:12px; color:#57606a;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="font-size:16px; color:var(--theme-color);">${title}</div><div style="font-size:12px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div></div>` + sectionsData.map(s => `<div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div>`).join('') + `</div>`; }
+            else if (currentLayout === 'material-cards') { finalHtml = `<div class="layout-material-cards"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.9;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'brutalist') { finalHtml = `<div class="layout-brutalist"><div class="header"><div class="name">${name}</div><div style="font-size:1.8em; font-weight:bold; margin-top:10px;">${title}</div><div style="font-weight:bold; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'notion-style') { finalHtml = `<div class="layout-notion-style"><div style="font-size:4.5em;">📄</div><div class="name">${name}</div><div style="font-size:1.4em; color:gray; margin-bottom:5px;">${title}</div><div style="font-size:1em; color:gray;">${contact}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'github-style') { finalHtml = `<div class="layout-github-style"><div class="header"><img src="https://ui-avatars.com/api/?name=${name}&background=random" style="width:60px; height:60px; border-radius:50%; margin-right:15px;"><div style="flex:1;"><div class="name">${name}</div><div style="color:#57606a;">${title}</div></div><div style="font-size:0.9em; color:#57606a;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="font-size:1.2em; color:var(--theme-color);">${title}</div><div style="font-size:0.9em;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:18px; margin-top:10px;">${title}</div><div style="color:#666; font-size:14px;">${contact}</div></div>` + sectionsData.map(s => `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`).join('') + `</div>`; }
-            
-            // Generic Fallbacks for the rest
+            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div></div>` + sectionsData.map(s => `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`).join('') + `</div>`; }
             else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
-                finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:32px; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:18px;">${title}</div><div style="font-size:14px;">${contact}</div></div>${blocksHtml}</div>`; 
+                finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:1.4em;">${title}</div><div style="font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; 
             }
-            // 🌟 SMART IMAGE INJECTOR
-            if (userProfilePic) {
-                let imgTag = `<img src="${userProfilePic}" title="Click to change photo" onclick="document.getElementById('profileImgInput').click()" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 4px solid var(--theme-color); box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; display: block; margin-left: auto; margin-right: auto; transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`;
 
-                if (currentLayout === 'modern' || currentLayout === 'split-right' || currentLayout === 'matrix') {
-                    finalHtml = finalHtml.replace(/<div class="sidebar">/i, '<div class="sidebar">' + imgTag);
-                } 
-                else if (currentLayout === 'minimal' || currentLayout === 'clean-left' || currentLayout === 'executive' || currentLayout === 'github-style') {
-                    imgTag = imgTag.replace('margin-left: auto; margin-right: auto;', 'margin: 0;'); // Center hatana
-                    finalHtml = finalHtml.replace(/<div class="header"/i, `<div class="header" style="display:flex; align-items:center; gap:30px; text-align:left;">` + imgTag);
-                } 
-                else {
-                    finalHtml = finalHtml.replace(/<div class="name"/i, imgTag + '<div class="name"');
-                }
+            if (userProfilePic) {
+                let imgTag = `<img src="${userProfilePic}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 4px solid var(--theme-color); display: block; margin-left: auto; margin-right: auto;">`;
+                if (currentLayout === 'modern' || currentLayout === 'split-right' || currentLayout === 'matrix') finalHtml = finalHtml.replace(/<div class="sidebar">/i, '<div class="sidebar">' + imgTag);
+                else if (currentLayout === 'minimal' || currentLayout === 'clean-left' || currentLayout === 'executive' || currentLayout === 'github-style') finalHtml = finalHtml.replace(/<div class="header"/i, `<div class="header" style="display:flex; align-items:center; gap:30px; text-align:left;">` + imgTag.replace('margin: auto;', 'margin: 0;'));
+                else finalHtml = finalHtml.replace(/<div class="header"/i, `<div class="header" style="text-align:center;">` + imgTag);
             }
 
             document.getElementById('resumePreview').innerHTML = finalHtml;
             document.getElementById('resumePreview').contentEditable = "true";
             document.getElementById('resumePreview').style.outline = "none";
-        }
-       
-
-        // PDF Download
-        function downloadPDF() {
-            const element = document.getElementById('resumePreview');
-            html2pdf().set({
-                margin: 0, filename: 'Resume.pdf', image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            }).from(element).save();
+            saveDraft();
         }
         
-        // 🚀 GLOBAL AI AUTO-FILL
+        function downloadPDF() {
+            const element = document.getElementById('resumePreview');
+            html2pdf().set({ margin: 0, filename: 'CodeMaster_Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
+        }
+
+        function downloadWord() {
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume</title></head><body>";
+            const footer = "</body></html>";
+            const sourceHTML = header + document.getElementById("resumePreview").innerHTML + footer;
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            const fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = 'CodeMaster_Resume.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+
         async function askAIToWriteGlobal() {
-            const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher MERN Stack Developer looking for internship'");
-            
+            const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher React Developer'");
             if (!userPrompt) return; 
 
             const btn = document.querySelector('.btn-ai');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Auto-Filling...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Writing...';
             btn.disabled = true;
 
             try {
-                // 🌟 FIXED: JSON format (like compiler)
                 const res = await fetch('/api/generate-resume', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: userPrompt })
                 });
-
                 const result = await res.json();
 
                 if (result.success) {
                     const aiData = result.data;
-                    
                     document.getElementById('inpName').value = aiData.fullName || "Your Name";
                     document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
                     
-                    let aiContacts = (aiData.contactInfo || "Email | Phone").split('|');
-                    contactFields = aiContacts.map(s => {
-                        return { label: "", value: s.trim() };
-                    });
+                    contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
                     renderContactFields();
 
                     sectionsData = [
@@ -703,68 +615,70 @@
                         { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
                     ];
 
-                    renderEditor(); 
-                    renderResume();
-
+                    renderEditor(); renderResume();
                     document.querySelectorAll('.tab-btn')[1].click();
-                    
+                } else alert("⚠️ AI Error: " + result.message);
+            } catch (error) { alert("⚠️ Network Error!"); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
+
+        async function checkATSScore() {
+            let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
+            sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
+
+            document.getElementById('atsModal').style.display = 'flex';
+            document.getElementById('atsResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Scanning keywords... Generating ATS Score...</div>';
+
+            try {
+                const aiCommand = `Act as a strict HR Applicant Tracking System (ATS). Review this resume data. Give an 'ATS Match Score' out of 100. Then provide exactly 3 bullet points on what is good, and 3 bullet points on how to improve it to get a job. Make it short and professional.\n\nResume Data:\n${resumeText}`;
+                
+                const res = await fetch('/api/ask-ai', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: aiCommand })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    document.getElementById('atsResult').innerHTML = marked.parse(data.reply);
                 } else {
-                    alert("⚠️ AI Error: " + result.message);
+                    document.getElementById('atsResult').innerHTML = "⚠️ Failed to calculate score.";
                 }
-            } catch (error) {
-                alert("⚠️ Network Error! Cannot reach AI server.");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+            } catch (err) {
+                document.getElementById('atsResult').innerHTML = "⚠️ Server Error.";
             }
         }
 
-        // Init
-        renderContactFields();
-        renderEditor();
-        initMiniEditors();
-        renderResume();
-
-        // 🤖 SECTION-SPECIFIC AI LOGIC
         async function generateSectionAI(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
 
             let jobTitle = document.getElementById('inpTitle').value || "Professional";
-            let promptText = prompt(`What details should AI include for "${sec.title}"?\nExample: Worked on React, Node.js and MongoDB for 2 years`);
-            
+            let promptText = prompt(`Details for "${sec.title}"?\nExample: Worked on React for 2 years`);
             if(!promptText) return; 
 
             let textArea = document.getElementById(`text_${id}`);
             let oldText = textArea.value;
-            textArea.value = "AI is thinking & writing... 🧠\nPlease wait 3-4 seconds.";
+            textArea.value = "AI is thinking... 🧠";
 
             try {
-                // 🌟 FIXED: Using JSON format to prevent backend crashes
-                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write it in 3 to 4 impactful bullet points. Do NOT use markdown like ** or *. Just use plain text bullets starting with '- '. Keep it concise and ATS-friendly.`;
-                
+                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write in impactful bullet points without markdown bold/italics.`;
                 const res = await fetch('/api/ask-ai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
-                
                 const data = await res.json();
-                
-                if(data.success) {
-                    sec.text = data.reply.trim();
-                    renderEditor(); 
-                    renderResume(); 
-                } else {
-                    textArea.value = oldText;
-                    alert("⚠️ AI Error: " + data.reply);
-                }
-            } catch (err) {
-                textArea.value = oldText;
-                alert("⚠️ Failed to connect to AI server.");
-            }
+                if(data.success) { sec.text = data.reply.trim(); renderEditor(); renderResume(); } 
+                else { textArea.value = oldText; alert("⚠️ AI Error"); }
+            } catch (err) { textArea.value = oldText; alert("⚠️ Error."); }
         }
-        
+
+        window.onload = () => {
+            loadDraft(); 
+            renderContactFields();
+            renderEditor();
+            initMiniEditors();
+            renderResume();
+        };
     </script>
 </body>
 </html>
