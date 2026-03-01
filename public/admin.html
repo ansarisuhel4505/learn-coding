@@ -12,49 +12,55 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { display: flex; background: #f4f7f6; height: 100vh; overflow: hidden; }
         
-        /* Sidebar */
-        .sidebar { width: 250px; background: #0f172a; color: white; display: flex; flex-direction: column; }
-        .sidebar h2 { padding: 20px; text-align: center; border-bottom: 1px solid #1e293b; color: #3b82f6; }
-        .nav-links { list-style: none; padding: 20px 0; flex-grow: 1; }
-        .nav-links li { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; }
-        .nav-links li:hover, .nav-links li.active { background: #1e293b; border-left: 4px solid #3b82f6; }
-        .nav-links li i { margin-right: 10px; width: 20px; text-align: center;}
-       /* 🌟 NEW LOGOUT BUTTON & MOBILE SIDEBAR CSS 🌟 */
-        .logout-wrapper {
-            margin-top: auto; /* लैपटॉप में बटन को हमेशा नीचे चिपका कर रखेगा */
-            padding: 20px;
+       
+        /* 🌟 1. HAMBURGER MENU & OVERLAY CSS 🌟 */
+        .hamburger-btn {
+            position: fixed; top: 20px; left: 20px; background: #3b82f6; color: white;
+            width: 45px; height: 45px; border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; cursor: pointer; z-index: 9998; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); transition: 0.3s;
         }
+        .hamburger-btn:hover { background: #2563eb; transform: scale(1.05); }
+
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px);
+            z-index: 9999; opacity: 0; visibility: hidden; transition: 0.4s;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        /* 🌟 2. UNIFIED SLIDE-OUT SIDEBAR (FITTED HEIGHT) 🌟 */
+        .sidebar { 
+            position: fixed; left: -300px; top: 0; width: 260px; 
+            height: auto; max-height: 100vh;
+            background: #0f172a; box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
+            display: flex; flex-direction: column; z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom-right-radius: 20px; 
+        }
+        .sidebar.active { left: 0; }
+        
+        .sidebar h2 { padding: 25px 20px; color: #3b82f6; font-weight: 700; font-size: 22px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;}
+        .close-sidebar { color: #ef4444; cursor: pointer; font-size: 26px; transition: 0.3s; }
+        .close-sidebar:hover { transform: scale(1.1) rotate(90deg); }
+        
+        .nav-links { list-style: none; padding: 15px 0; overflow-y: auto; }
+        .nav-links li { padding: 15px 25px; cursor: pointer; color: #cbd5e1; font-weight: 500; transition: 0.3s; display: block; width: 100%; border-bottom: none; }
+        .nav-links li:hover, .nav-links li.active { background: #1e293b; color: #3b82f6; border-right: 4px solid #3b82f6; }
+        
+        .logout-wrapper { padding: 20px; border-top: 1px solid #1e293b; background: transparent; border-bottom-right-radius: 20px;}
         .logout-btn { 
-            padding: 12px; text-align: center; background: #ef4444; 
-            color: white; text-decoration: none; display: flex; 
-            justify-content: center; align-items: center; gap: 8px;
-            border-radius: 10px; font-weight: 600; transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+            padding: 12px; text-align: center; background: #ef4444; color: white; 
+            text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px;
+            border-radius: 10px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
         }
-        .logout-btn:hover {
-            background: #dc2626; transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+        .logout-btn:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4); }
+
+        /* 📱 Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-content { padding: 80px 15px 20px !important; }
         }
 
-        /* 📱 Mobile Responsiveness for Admin Panel */
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: auto; }
-            .sidebar { width: 100%; height: auto; flex-direction: column; }
-            .nav-links { display: flex; overflow-x: auto; white-space: nowrap; padding: 10px; border-bottom: 1px solid #1e293b; }
-            .nav-links::-webkit-scrollbar { display: none; }
-            .nav-links li { border-left: none; border-bottom: 3px solid transparent; padding: 10px 15px; }
-            .nav-links li:hover, .nav-links li.active { background: transparent; border-bottom: 3px solid #3b82f6; color: #3b82f6; }
-            .logout-wrapper { padding: 15px; width: 100%; }
-        }
-   
-        
         /* Main Content */
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        h1 { color: #1e293b; margin-bottom: 20px; font-size: 26px;}
+        .main-content { flex-grow: 1; padding: 80px 40px 40px; overflow-y: auto; width: 100vw; }      
         
         /* Forms & Cards */
         .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; overflow-x: auto; }
@@ -114,20 +120,28 @@
     </div>
     </div>
     
-    <div class="sidebar">
-        <h2>Admin Panel</h2>
+   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="hamburger-btn" onclick="toggleSidebar()" title="Open Menu">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="sidebar" id="adminSidebar">
+        <h2>Admin Panel <i class="fas fa-times close-sidebar" onclick="toggleSidebar()" title="Close"></i></h2>
+        
         <ul class="nav-links">
             <li class="active" onclick="switchTab('courses')"><i class="fas fa-video"></i> Manage Courses</li>
             <li onclick="switchTab('exams')"><i class="fas fa-file-alt"></i> Manage Exams</li>
-           <li onclick="switchTab('feedback')"><i class="fas fa-comments"></i> Student Feedback</li>
+            <li onclick="switchTab('results')"><i class="fas fa-check-double"></i> Check Copies</li>
+            <li onclick="switchTab('feedback')"><i class="fas fa-comments"></i> Student Feedback</li>
             <li onclick="switchTab('students')"><i class="fas fa-users"></i> Manage Students</li>
         </ul>
-   <div class="logout-wrapper">
+        
+        <div class="logout-wrapper">
             <a href="#" onclick="adminLogout(event)" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout Admin
             </a>
         </div>
-</div>
+    </div>
 
     <div class="main-content">
         
@@ -273,15 +287,26 @@
 
 
     <script>
-        // --- 1. TAB SWITCHING LOGIC ---
+       // 🌟 NAYA: Open / Close Sidebar Logic
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // --- 1. TAB SWITCHING LOGIC (Updated for Sidebar) ---
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
             document.getElementById(tabId + '-sec').classList.add('active');
             event.currentTarget.classList.add('active');
             
-            if(tabId === 'feedback') loadFeedback(); // Load feedback when tab clicked
-            if(tabId === 'students') loadStudents(); // 🌟 NAYA
+            // Tab select hone par sidebar automatically band ho jayega
+            document.getElementById('adminSidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            
+            if(tabId === 'results') loadResults(); 
+            if(tabId === 'feedback') loadFeedback(); 
+            if(tabId === 'students') loadStudents(); 
         }
 
         // --- 2. COURSE MANAGEMENT ---
