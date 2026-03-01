@@ -59,11 +59,25 @@
             .main-content { padding: 80px 15px 20px !important; }
         }
 
-        /* Main Content */
-        .main-content { flex-grow: 1; padding: 80px 40px 40px; overflow-y: auto; width: 100vw; }      
+        /* 🌟 FIXED: Main Content */
+        .main-content { 
+            flex-grow: 1; padding: 80px 40px 40px; overflow-y: auto; 
+            width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; 
+            z-index: 1; /* Main content सबसे पीछे रहेगा */
+        }
         
+        /* 🌟 FIXED: Sections Toggle */
+        .section { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .section.active { display: block; opacity: 1; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         /* Forms & Cards */
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e2e8f0; overflow-x: auto; }
+        .card { 
+            background: white; padding: 25px; border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; 
+            border: 1px solid #e2e8f0; overflow-x: auto; 
+            position: relative; z-index: 2; /* Sidebar (10000) से नीचे रहेगा */
+        }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #475569; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; outline: none; }
