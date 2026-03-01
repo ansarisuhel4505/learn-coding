@@ -171,10 +171,17 @@ html.dark-theme .sidebar, html.dark-theme .card,
 html.dark-theme .modal-content, html.dark-theme .exam-setup-form,
 html.dark-theme .exam-right, html.dark-theme .exam-left,
 html.dark-theme .result-box, html.dark-theme .ans-block,
-html.dark-theme table {
+html.dark-theme table, 
+html.dark-theme .toast-popup { /* 🌟 NAYA: Toast Popup Dark Mode Fix */
     background-color: #1e293b !important;
     border-color: #334155 !important;
     color: #f8fafc !important;
+}
+
+/* 🌟 NAYA: CodeMaster Student Badge Dark Mode Fix */
+html.dark-theme .student-badge {
+    background-color: #3730a3 !important;
+    color: #e0e7ff !important;
 }
 
 html.dark-theme h1, html.dark-theme h2, html.dark-theme h3, 
@@ -1615,8 +1622,8 @@ async function loadMyProfile() {
             
             document.getElementById('profileDisplay').innerHTML = `
                 <img src="${photoUrl}" class="profile-img" alt="Profile Photo">
-                <h2 style="color: #3b82f6; margin-bottom: 5px;">${u.username}</h2>
-                <span style="background: #e0e7ff; color: #4f46e5; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">🎓 CodeMaster Student</span>
+               <h2 style="color: #3b82f6; margin-bottom: 5px;">${u.username}</h2>
+                <span class="student-badge" style="background: #e0e7ff; color: #4f46e5; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block;">🎓 CodeMaster Student</span>
                 
                 <div class="profile-info">
                     <p><i class="fas fa-id-badge"></i> <b>Roll No:</b> ${u.rollNo}</p>
