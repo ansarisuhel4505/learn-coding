@@ -13,6 +13,20 @@
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        body.light-theme .btn-login { color: #0f172a !important; } /* Login Button text */
+        body.light-theme #menu-icon { color: #0f172a !important; } /* Mobile Menu Icon */
+        body.light-theme .logo { color: #0f172a !important; } /* Logo Text */
+        body.light-theme .nav-links a { color: #475569 !important; } /* Nav Links */
+        body.light-theme .nav-links a:hover, 
+        body.light-theme .nav-links a.active { color: #3b82f6 !important; } /* Hover Color */
+        
+        /* Mobile Menu Background for Light Mode */
+        @media (max-width: 768px) {
+            body.light-theme .navbar { background: #f8fafc !important; border-top: 1px solid #e2e8f0; }
+        }
+    </style>
+</head>
 </head>
 <body class="dark-theme"> <div class="evil-glow orb-1"></div>
     <div class="evil-glow orb-2"></div>
@@ -346,6 +360,7 @@
     </script>
 </body>
 </html>
+
 
 
 
