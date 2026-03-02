@@ -1449,10 +1449,10 @@ function googleTranslateElementInit() {
       layout: google.translate.TranslateElement.InlineLayout.SIMPLE
   }, 'google_translate_element');
 }
+       // ==========================================
+        // 📈 STUDENT ANALYTICS (CHART.JS) LOGIC (PERCENTAGE FIX)
         // ==========================================
-        // 📈 STUDENT ANALYTICS (CHART.JS) LOGIC
-        // ==========================================
-        let myChart = null; // पुराना ग्राफ याद रखने के लिए
+        let myChart = null; 
 
         async function loadAnalytics() {
             const roll = document.getElementById('analyticsRollNo').value;
@@ -1460,7 +1460,6 @@ function googleTranslateElementInit() {
             
             if(!roll || !pass) return alert("Please enter Roll No and Password to view graph!");
 
-            // रिजल्ट वाली पुरानी API का ही इस्तेमाल कर रहे हैं
             const res = await fetch('/api/check-result', { 
                 method: 'POST', headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ rollNo: roll, password: pass }) 
@@ -1473,29 +1472,32 @@ function googleTranslateElementInit() {
                 return alert("No exams given yet! Graph cannot be generated.");
             }
 
-            // ग्राफ के लिए डेटा तैयार करना (x-axis: Exam Name, y-axis: Score)
+            // 🌟 NAYA LOGIC: Percentage Calculate Karna
             const examNames = data.results.map(r => r.examTitle);
-            const scores = data.results.map(r => r.score);
+            const percentages = data.results.map(r => {
+                // अगर API से totalMarks आ रहा है तो उसे यूज़ करो, वरना 100 मान लो
+                let total = r.totalMarks ? r.totalMarks : 100;
+                let perc = (r.score / total) * 100;
+                return parseFloat(perc.toFixed(2)); // .toFixed(2) से 85.50% जैसा फॉर्मेट आएगा
+            });
 
-            // अगर पहले से कोई ग्राफ बना है, तो उसे डिलीट करो
             if(myChart) {
                 myChart.destroy();
             }
 
-            // नया ग्राफ बनाना
             const ctx = document.getElementById('performanceChart').getContext('2d');
             myChart = new Chart(ctx, {
-                type: 'line', // 'bar' भी कर सकते हैं अगर बार ग्राफ चाहिए
+                type: 'line', 
                 data: {
                     labels: examNames,
                     datasets: [{
-                        label: 'Marks Obtained',
-                        data: scores,
-                        borderColor: '#8b5cf6', // पर्पल लाइन
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)', // पर्पल शैडो
+                        label: 'Performance (%)', // Label Change
+                        data: percentages, // Percentage data pass kiya
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
                         borderWidth: 3,
                         fill: true,
-                        tension: 0.4, // लाइन को स्मूथ (Curved) करने के लिए
+                        tension: 0.4,
                         pointBackgroundColor: '#10b981',
                         pointRadius: 5
                     }]
@@ -1503,11 +1505,34 @@ function googleTranslateElementInit() {
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { 
+                            beginAtZero: true,
+                            max: 100, // Y-axis ab hamesha 100% tak jayegi
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'; // Y-axis par % ka sign lagayega
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Score: ' + context.raw + '%'; // Hover karne par % dikhayega
+                                }
+                            }
+                        }
                     }
                 }
             });
         }
+            
+            
+
+            
+            
+                       
         // ==========================================
 // 🤖 CHATBOT UI LOGIC (STEP 1)
 // ==========================================
@@ -1737,24 +1762,25 @@ async function saveProfile() {
 }
 
         // ==========================================
-        // 🎓 PDF CERTIFICATE GENERATOR LOGIC
+        // 🎓 PDF CERTIFICATE GENERATOR LOGIC (DARK MODE FIX)
         // ==========================================
         function generateCertificate(studentName, examTitle, score, certId, submitDate) {
-            // 1. Template में डेटा भरना
             document.getElementById('certStudentName').innerText = studentName;
             document.getElementById('certExamName').innerText = examTitle;
             document.getElementById('certScore').innerText = score;
             document.getElementById('certId').innerText = certId;
             
-            // Date format (DD/MM/YYYY)
             let d = new Date(submitDate);
             document.getElementById('certDate').innerText = d.toLocaleDateString('en-GB');
 
-            // 2. HTML को PDF में कन्वर्ट करना
             const element = document.getElementById('certBox');
-            
-            // पहले से छिपा हुआ डिब्बा PDF बनाने के लिए 1 सेकंड के लिए show करना पड़ेगा
             document.getElementById('certificateWrapper').style.display = 'block';
+
+            // 🌟 NAYA TRICK: PDF banne se pehle Dark Mode hatayein
+            const isDarkHtml = document.documentElement.classList.contains('dark-theme');
+            const isDarkBody = document.body.classList.contains('dark-theme');
+            if (isDarkHtml) document.documentElement.classList.remove('dark-theme');
+            if (isDarkBody) document.body.classList.remove('dark-theme');
 
             alert("⏳ Generating your Professional Certificate... Please wait!");
 
@@ -1762,16 +1788,21 @@ async function saveProfile() {
                 margin:       0,
                 filename:     `${studentName.replace(/\s+/g, '_')}_Certificate.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 3, useCORS: true }, // High Quality
+                html2canvas:  { scale: 3, useCORS: true }, 
                 jsPDF:        { unit: 'px', format: [800, 550], orientation: 'landscape' }
             };
 
-            // 3. Download Trigger
             html2pdf().set(opt).from(element).save().then(() => {
-                // डाउनलोड होने के बाद वापस छिपा दो
                 document.getElementById('certificateWrapper').style.display = 'none';
+                
+                // 🌟 NAYA TRICK: PDF banne ke baad Dark Mode wapas laga dein
+                if (isDarkHtml) document.documentElement.classList.add('dark-theme');
+                if (isDarkBody) document.body.classList.add('dark-theme');
             });
         }
+            
+            
+               
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <div id="certificateWrapper" style="display: none; position: absolute; top: -9999px; left: -9999px;">
