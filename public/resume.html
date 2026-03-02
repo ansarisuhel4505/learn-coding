@@ -21,49 +21,69 @@
             --res-line-height: 1.6;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--theme-font); }
-        body { background: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
+        body { background: #f1f5f9; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        /* Navbar & Layouts */
-        .top-nav { position: absolute; top: 0; width: 100%; background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; font-family: 'Poppins', sans-serif;}
-        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white;}
+        /* 🌟 NAYA: Responsive Navbar */
+        .top-nav { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0;}
+        .top-nav h2 { font-size: 18px; color: #1e293b; display: flex; align-items: center; gap: 8px;}
+        
+        .btn { padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white; display: flex; align-items: center; gap: 8px; justify-content: center;}
         .btn-ai { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
         .btn-success { background: #10b981; }
         .btn-warning { background: #f59e0b; color: white;}
         .btn-danger { background: #ef4444; padding: 5px 10px; font-size: 12px; }
 
-        .builder-container { display: flex; width: 100%; margin-top: 70px; height: calc(100vh - 70px); }
+        /* 🌟 NAYA: Hamburger Menu Button */
+        .hamburger-btn { background: #1e293b; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+
+        /* 🌟 NAYA: Slide-out Action Menu (Drawer) */
+        .action-menu { 
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; 
+            background: white; box-shadow: -2px 0 15px rgba(0,0,0,0.1); 
+            z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: flex; flex-direction: column; padding: 20px;
+        }
+        .action-menu.active { right: 0; }
+        .action-menu-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;}
+        .action-menu-header h3 { color: #1e293b; font-size: 18px;}
+        .close-menu { cursor: pointer; font-size: 24px; color: #ef4444; }
+        .action-buttons { display: flex; flex-direction: column; gap: 15px; }
+        .action-buttons .btn { width: 100%; justify-content: flex-start; padding: 12px 15px;}
+
+        /* Menu Overlay */
+        .menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .menu-overlay.active { opacity: 1; visibility: visible; }
+
+        /* 🌟 NAYA: Responsive Builder Container */
+        .builder-container { display: flex; flex-grow: 1; overflow: hidden; }
         .left-panel { width: 45%; background: white; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
-        .tabs { display: flex; border-bottom: 1px solid #e2e8f0; }
-        .tab-btn { flex: 1; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; }
+        
+        .tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex-shrink: 0;}
+        .tab-btn { flex: 1; padding: 15px 5px; text-align: center; font-weight: bold; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; font-size: 14px;}
         .tab-btn.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; background: #f8fafc; }
-        .tab-content { padding: 30px; overflow-y: auto; flex-grow: 1; display: none; }
+        .tab-content { padding: 20px; overflow-y: auto; flex-grow: 1; display: none; }
         .tab-content.active { display: block; }
 
-        /* Form Controls */
         .form-group { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; position: relative;}
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif;}
         .form-group input:focus, .form-group textarea:focus { border-color: var(--theme-color); }
         
-        /* Layout Grid */
-        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; }
+        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; font-size: 13px;}
         .layout-card.active { border-color: var(--theme-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-        /* Right Panel */
-        .preview-panel { width: 55%; background: #94a3b8; padding: 40px; display: flex; justify-content: center; overflow-y: auto; }
+        /* Right Panel (A4 Preview) */
+        .preview-panel { width: 55%; background: #94a3b8; padding: 30px; display: flex; justify-content: center; overflow-y: auto; }
         .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height);}
 
-        /* Sliders CSS */
         .slider-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .slider-container label { font-size: 14px; font-weight: 600; color: #475569; width: 40%;}
+        .slider-container label { font-size: 13px; font-weight: 600; color: #475569; width: 40%;}
         .slider-container input[type=range] { width: 60%; cursor: pointer; }
 
-        /* ATS Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 99999; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 30px; border-radius: 15px; width: 500px; max-width: 90%; max-height: 80vh; overflow-y: auto; position: relative;}
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #ef4444; }
 
-        /* Resume General Elements */
         .res-section { margin-bottom: 20px; page-break-inside: avoid; position: relative; resize: both; overflow: hidden; min-height: 50px;}
         .res-text { white-space: pre-wrap; }
         .resume-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
@@ -75,8 +95,29 @@
         .skill-bar-fill { background: var(--theme-color); height: 100%; border-radius: 4px; }
 
         /* =========================================
-           🎨 ALL 50 PREMIUM LAYOUTS CSS RESTORED
+           📱 MOBILE RESPONSIVENESS LOGIC 
            ========================================= */
+        @media (max-width: 850px) {
+            .builder-container { flex-direction: column; overflow-y: auto; height: auto;}
+            
+            /* Panels Stack on top of each other */
+            .left-panel { width: 100%; border-right: none; border-bottom: 2px solid #cbd5e1; min-height: 60vh; flex-shrink: 0;}
+            
+            /* A4 preview adjustment */
+            .preview-panel { width: 100%; padding: 15px; overflow: visible;}
+            .a4-paper { 
+                width: 100%; /* Take full width of phone */
+                max-width: 210mm; /* But max limit is A4 */
+                transform-origin: top center; /* Shrink to fit if needed */
+            }
+
+            .layout-grid { grid-template-columns: 1fr 1fr 1fr; } /* Show 3 layouts per row on mobile */
+            
+            /* Hide 'Back to Home' text, only show icon */
+            .back-to-home-btn { width: 45px; height: 45px; bottom: 20px; right: 20px; font-size: 20px;}
+        }
+
+        /* 50 Premium Layouts CSS (Compressed) */
         .layout-classic { padding: 40px; } .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 15px; margin-bottom: 20px; } .layout-classic .sec-title { font-size: 1.3em; color: var(--theme-color); border-bottom: 1px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
         .layout-modern { display: flex; min-height: 297mm; } .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; } .layout-modern .main { width: 65%; padding: 40px; } .layout-modern .sec-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--theme-color);} .layout-modern .sidebar .sec-title { border-color: rgba(255,255,255,0.3); color: white; }
         .layout-minimal { padding: 50px; } .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #cbd5e1; padding-bottom: 20px;} .layout-minimal .res-section { display: flex; } .layout-minimal .sec-title { width: 25%; font-size: 1em; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 15px;} .layout-minimal .res-text { width: 75%; border-left: 1px solid #e2e8f0; padding-left: 20px; }
@@ -112,7 +153,6 @@
         .layout-tech-lead { padding: 30px; display: flex; flex-wrap: wrap; } .layout-tech-lead .header { width: 100%; border-left: 5px solid var(--theme-color); padding-left: 20px; margin-bottom: 25px; } .layout-tech-lead .res-section { width: 48%; margin-right: 2%; margin-bottom: 20px; } .layout-tech-lead .sec-title { color: var(--theme-color); font-weight: bold; text-transform: uppercase; font-size: 1em; margin-bottom: 5px; }
         .layout-terminal { background: #1e1e1e; padding: 40px; font-family: 'Consolas', monospace; color: #d4d4d4; min-height: 297mm; } .layout-terminal .name { color: #569cd6; font-size: 2em; } .layout-terminal .sec-title { color: #c586c0; margin-top: 20px; margin-bottom: 10px; } .layout-terminal .res-text { color: #ce9178; }
         .layout-euro-cv { padding: 40px 60px; } .layout-euro-cv .header { margin-bottom: 40px; } .layout-euro-cv .name { font-size: 2.2em; font-weight: 300; color: var(--theme-color); border-bottom: 1px solid #ccc; padding-bottom: 10px; } .layout-euro-cv .res-section { display: flex; margin-bottom: 20px; } .layout-euro-cv .sec-title { width: 30%; font-weight: bold; color: #333; } .layout-euro-cv .res-text { width: 70%; border-left: 2px solid var(--theme-color); padding-left: 20px; }
-        
         .layout-dual-sidebar { display: flex; justify-content: space-between; padding: 20px; } .layout-dual-sidebar .main { width: 50%; padding: 20px; } .layout-dual-sidebar .sidebar { width: 23%; background: #f8fafc; padding: 20px; border-radius: 8px; }
         .layout-elegant-gold { background: #111; color: #eee; padding: 50px; } .layout-elegant-gold .name { font-family: serif; font-size: 2.5em; color: #d4af37; text-align: center; } .layout-elegant-gold .sec-title { color: #d4af37; border-bottom: 1px solid #d4af37; text-align: center; margin-bottom: 15px; }
         .layout-classic-serif { font-family: Georgia, serif; padding: 50px; } .layout-classic-serif .sec-title { font-weight: bold; margin-bottom: 10px; color: var(--theme-color);}
@@ -140,19 +180,30 @@
 <body>
 
     <div class="top-nav">
-        <h2><i class="fas fa-file-pdf"></i> Pro Resume Builder</h2>
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <h2><i class="fas fa-file-pdf" style="color: #3b82f6;"></i> Pro Resume Builder</h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
             <span id="saveStatus" style="font-size: 12px; color: #10b981; font-weight: bold; display: none;"><i class="fas fa-check-circle"></i> Auto-Saved</span>
-            
+            <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <div class="action-menu" id="actionMenu">
+        <div class="action-menu-header">
+            <h3><i class="fas fa-tools"></i> Pro Features</h3>
+            <span class="close-menu" onclick="toggleMenu()">✖</span>
+        </div>
+        
+        <div class="action-buttons">
             <input type="file" id="importResumeInput" accept="application/pdf" style="display: none;" onchange="handleResumeImport(event)">
             <button class="btn" id="importResumeBtn" style="background: #8b5cf6;" onclick="document.getElementById('importResumeInput').click()">
                 <i class="fas fa-upload"></i> Import Old Resume
             </button>
 
-            <button class="btn btn-warning" onclick="checkATSScore()"><i class="fas fa-robot"></i> ATS Score</button>
+            <button class="btn btn-warning" onclick="checkATSScore()"><i class="fas fa-robot"></i> AI ATS Score</button>
             <button class="btn btn-ai" onclick="askAIToWriteGlobal()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
-            <button class="btn" style="background: #2563eb;" onclick="downloadWord()"><i class="fas fa-file-word"></i> Word</button>
-            <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn" style="background: #2563eb;" onclick="downloadWord()"><i class="fas fa-file-word"></i> Download Word</button>
+            <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
         </div>
     </div>
 
@@ -173,7 +224,7 @@
         <div class="left-panel">
             <div class="tabs">
                 <div class="tab-btn active" onclick="switchTab('layoutTab', this)">1. Layout & Theme</div>
-                <div class="tab-btn" onclick="switchTab('dataTab', this)">2. Content & Sections</div>
+                <div class="tab-btn" onclick="switchTab('dataTab', this)">2. Content</div>
             </div>
 
             <div id="layoutTab" class="tab-content active">
@@ -190,7 +241,7 @@
                     </div>
                 </div>
 
-                <h3 style="margin-bottom: 15px;">Choose Layout</h3>
+                <h3 style="margin-bottom: 15px; font-size: 16px;">Choose Layout</h3>
                 <div class="layout-grid">
                     <div class="layout-card active" onclick="changeLayout('classic', this)"><b>Classic</b></div>
                     <div class="layout-card" onclick="changeLayout('modern', this)"><b>Modern Sidebar</b></div>
@@ -244,7 +295,7 @@
                     <div class="layout-card" onclick="changeLayout('dark-pro', this)"><b>Dark Mode Pro</b></div>
                 </div>
 
-                <h3 style="margin-top: 30px; margin-bottom: 10px;">Font Style</h3>
+                <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 16px;">Font Style</h3>
                 <select id="fontSelector" onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
                     <option value="'Poppins', sans-serif">Poppins (Modern & Clean)</option>
                     <option value="'Times New Roman', serif">Times New Roman (Formal & Academic)</option>
@@ -253,8 +304,8 @@
                     <option value="'Georgia', serif">Georgia (Elegant Serif)</option>
                 </select>
 
-                <h3 style="margin-bottom: 15px;">Theme Color</h3>
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 16px;">Theme Color</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="changeTheme('#0f172a', true)" title="Pure White / B&W"><i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer;" onclick="changeTheme('#3b82f6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #10b981; cursor: pointer;" onclick="changeTheme('#10b981')"></div>
@@ -268,8 +319,8 @@
                <div class="form-group" style="border-left: 4px solid #3b82f6;">
                     <label>Personal Details</label>
                     <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 10px;">
-                        <div onclick="document.getElementById('profileImgInput').click()" style="width: 70px; height: 70px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
-                            <i class="fas fa-camera" style="color: #64748b; font-size: 20px;"></i>
+                        <div onclick="document.getElementById('profileImgInput').click()" style="width: 60px; height: 60px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
+                            <i class="fas fa-camera" style="color: #64748b; font-size: 16px;"></i>
                             <img id="leftPanelImg" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
                         </div>
                         <div style="flex-grow: 1;">
@@ -283,14 +334,14 @@
                         <label style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 10px; display: block;">Contact & Links</label>
                         <div id="contactFieldsContainer"></div>
                         <button onclick="addContactField()" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px;">
-                            <i class="fas fa-plus"></i> Add Title & Link
+                            <i class="fas fa-plus"></i> Add Link
                         </button>
                     </div>
                 </div>
 
                 <div id="editorSections"></div>
 
-                <button class="btn" onclick="addSection()" style="width: 100%; background: #3b82f6; margin-top: 10px;">
+                <button class="btn" onclick="addSection()" style="width: 100%; background: #3b82f6; margin-top: 10px; justify-content: center;">
                     <i class="fas fa-plus"></i> Add New Section
                 </button>
             </div>
@@ -304,6 +355,12 @@
     <a href="/" class="back-to-home-btn" title="Back to Home"><i class="fas fa-home"></i></a>
 
     <script>
+        // 🌟 NAYA: Menu Toggle Logic
+        function toggleMenu() {
+            document.getElementById('actionMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
+        }
+
         // 💾 DRAFT & AUTO-SAVE LOGIC
         let currentLayout = 'classic';
         let userProfilePic = '';
@@ -387,10 +444,10 @@
             let html = '';
             contactFields.forEach((field, index) => {
                 html += `
-                <div style="display:flex; gap:5px; margin-bottom:8px;">
-                    <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid #cbd5e1; border-radius: 4px;">
-                    <div style="width: 60%;"><textarea id="contact_${index}" class="mini-editor" placeholder="Link / Detail">${field.value}</textarea></div>
-                    <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="fas fa-trash"></i></button>
+                <div style="display:flex; gap:5px; margin-bottom:8px; align-items: flex-start;">
+                    <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px;">
+                    <div style="width: 60%;"><textarea id="contact_${index}" class="mini-editor" placeholder="Link">${field.value}</textarea></div>
+                    <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 8px;"><i class="fas fa-trash"></i></button>
                 </div>`;
             });
             document.getElementById('contactFieldsContainer').innerHTML = html;
@@ -448,7 +505,7 @@
                 <div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; border-left: 5px solid #cbd5e1;">
                     <div style="display: flex; align-items: center; margin-bottom:10px;">
                         <i class="fas fa-grip-vertical" style="color: #94a3b8; margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag to move"></i>
-                        <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:16px; width: 60%; color: var(--theme-color);">
+                        <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:15px; width: 60%; color: var(--theme-color);">
                     </div>
                     <div style="position:absolute; top:12px; right:12px; display:flex; gap:5px;">
                         <button onclick="moveSecUp(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Up"><i class="fas fa-arrow-up"></i></button>
@@ -458,7 +515,7 @@
                     <div style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px;">
                         <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-magic"></i> AI</button>
                         <button onclick="addTableToSec(${sec.id})" style="background: #f59e0b; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-table"></i> Table</button>
-                        <button onclick="addSkillBarToSec(${sec.id})" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-sliders-h"></i> Skill Bar</button>
+                        <button onclick="addSkillBarToSec(${sec.id})" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-sliders-h"></i> Bar</button>
                     </div>
                     <textarea id="text_${sec.id}" class="rich-editor" style="width: 100%; min-height: 200px;">${sec.text}</textarea>
                 </div>`;
@@ -512,7 +569,6 @@
         function moveSecUp(index) { if (index > 0) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index - 1]; sectionsData[index - 1] = temp; renderEditor(); renderResume(); } }
         function moveSecDown(index) { if (index < sectionsData.length - 1) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index + 1]; sectionsData[index + 1] = temp; renderEditor(); renderResume(); } }
 
-        // ⚙️ THE MASTER RENDER ENGINE (ALL 50 LAYOUTS RESTORED)
         function renderResume() {
             const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : document.getElementById('inpName').value;
             const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : document.getElementById('inpTitle').value;
@@ -578,6 +634,7 @@
         function downloadPDF() {
             const element = document.getElementById('resumePreview');
             html2pdf().set({ margin: 0, filename: 'CodeMaster_Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
+            toggleMenu(); // Menu close karna auto
         }
 
         function downloadWord() {
@@ -591,9 +648,9 @@
             fileDownload.download = 'CodeMaster_Resume.doc';
             fileDownload.click();
             document.body.removeChild(fileDownload);
+            toggleMenu();
         }
 
-       // 🚀 GLOBAL AI AUTO-FILL (FIXED)
         async function askAIToWriteGlobal() {
             const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher React Developer'");
             if (!userPrompt) return; 
@@ -604,21 +661,16 @@
             btn.disabled = true;
 
             try {
-                // 🌟 FIX 1: Using your working /api/ask-ai endpoint
                 const aiCommand = `Write a professional resume for: ${userPrompt}. Return ONLY a valid raw JSON object (without any markdown like \`\`\`json). The JSON must have these exact keys: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | Link), "summary", "skills", "experience".`;
-                
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
-                
                 const result = await res.json();
 
                 if (result.success) {
                     try {
-                        // 🌟 FIX 2: AI के जवाब को JSON में बदलना 
                         const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
-                        
                         document.getElementById('inpName').value = aiData.fullName || "Your Name";
                         document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
                         
@@ -631,17 +683,15 @@
                             { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
                         ];
 
-                        renderEditor(); 
-                        renderResume();
-                        document.querySelectorAll('.tab-btn')[1].click(); // Content टैब पर ले जाना
-                    } catch(parseError) {
-                        alert("⚠️ AI sent invalid format. Please click the button and try again.");
-                    }
+                        renderEditor(); renderResume();
+                        document.querySelectorAll('.tab-btn')[1].click();
+                        toggleMenu(); // Menu close
+                    } catch(parseError) { alert("⚠️ AI sent invalid format."); }
                 } else alert("⚠️ AI Error: " + result.reply);
-            } catch (error) { alert("⚠️ Network Error! Cannot reach AI."); } 
+            } catch (error) { alert("⚠️ Network Error!"); } 
             finally { btn.innerHTML = originalText; btn.disabled = false; }
         }
-        // 🚀 🌟 NAYA: AI RESUME PARSER LOGIC (Upload Old PDF)
+
         async function handleResumeImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -652,15 +702,12 @@
             btn.disabled = true;
 
             try {
-                // 1. PDF से सारा टेक्स्ट निकालना (PDF.js की मदद से)
                 const fileReader = new FileReader();
                 fileReader.onload = async function() {
                     try {
                         const typedarray = new Uint8Array(this.result);
                         const pdf = await pdfjsLib.getDocument(typedarray).promise;
                         let fullText = "";
-                        
-                        // हर पेज को पढ़ना
                         for (let i = 1; i <= pdf.numPages; i++) {
                             const page = await pdf.getPage(i);
                             const textContent = await page.getTextContent();
@@ -668,25 +715,19 @@
                             fullText += pageText + "\n";
                         }
 
-                        // 2. निकाले गए टेक्स्ट को AI को भेजना ताकि वो उसे सही जगह सेट कर सके
                         btn.innerHTML = '<i class="fas fa-brain fa-spin"></i> AI Formatting...';
-                        
-                        const aiCommand = `Extract details from this old resume text. Return ONLY a valid raw JSON object. Keys must be: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | LinkedIn), "summary", "skills", "experience". Keep the original details but format them professionally.\n\nOld Resume Text:\n${fullText.substring(0, 3500)}`;
+                        const aiCommand = `Extract details from this old resume text. Return ONLY a valid raw JSON object. Keys must be: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | LinkedIn), "summary", "skills", "experience". Keep original details but format professionally.\n\nOld Resume:\n${fullText.substring(0, 3500)}`;
                         
                         const res = await fetch('/api/ask-ai', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ message: aiCommand })
                         });
-                        
                         const result = await res.json();
 
                         if (result.success) {
-                            // 3. AI के डेटा को UI में भरना
                             const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
-                            
                             document.getElementById('inpName').value = aiData.fullName || "Your Name";
                             document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                            
                             contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
                             renderContactFields();
 
@@ -695,33 +736,20 @@
                                 { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
                                 { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
                             ];
-
-                            renderEditor(); 
-                            renderResume();
-                            document.querySelectorAll('.tab-btn')[1].click(); // Content टैब पर ले जाना
-                            alert("✅ Resume Imported & Beautifully Designed!");
-                        } else {
-                            alert("⚠️ AI Error: Could not format resume.");
-                        }
-                    } catch (e) {
-                        alert("⚠️ Error reading PDF format. Try 'AI Auto-Fill' instead.");
-                        console.error(e);
-                    } finally {
-                        document.getElementById('importResumeInput').value = "";
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }
+                            renderEditor(); renderResume();
+                            document.querySelectorAll('.tab-btn')[1].click();
+                            toggleMenu();
+                            alert("✅ Resume Imported & Designed!");
+                        } else { alert("⚠️ AI Error."); }
+                    } catch (e) { alert("⚠️ Error parsing PDF."); } 
+                    finally { document.getElementById('importResumeInput').value = ""; btn.innerHTML = originalText; btn.disabled = false; }
                 };
                 fileReader.readAsArrayBuffer(file);
-            } catch (error) {
-                alert("⚠️ Failed to load PDF.");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            } catch (error) { alert("⚠️ Load Error."); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
-        // 🤖 ATS REVIEWER LOGIC (NO CHANGES - IT WORKS PERFECTLY)
         async function checkATSScore() {
+            toggleMenu(); // Menu band karo modal dikhane ke liye
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
 
@@ -737,17 +765,11 @@
                 });
                 const data = await res.json();
                 
-                if(data.success) {
-                    document.getElementById('atsResult').innerHTML = marked.parse(data.reply);
-                } else {
-                    document.getElementById('atsResult').innerHTML = "⚠️ Failed to calculate score.";
-                }
-            } catch (err) {
-                document.getElementById('atsResult').innerHTML = "⚠️ Server Error.";
-            }
+                if(data.success) { document.getElementById('atsResult').innerHTML = marked.parse(data.reply); } 
+                else { document.getElementById('atsResult').innerHTML = "⚠️ Failed to calculate score."; }
+            } catch (err) { document.getElementById('atsResult').innerHTML = "⚠️ Server Error."; }
         }
 
-        // 🤖 SECTION-SPECIFIC AI LOGIC (FIXED)
         async function generateSectionAI(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
@@ -756,13 +778,9 @@
             let promptText = prompt(`Details for "${sec.title}"?\nExample: Worked on React for 2 years`);
             if(!promptText) return; 
 
-            // 🌟 FIX 3: TinyMCE एडिटर के अंदर डायरेक्ट टेक्स्ट सेट करना
             const editorInstance = tinymce.get(`text_${id}`);
             let oldText = editorInstance ? editorInstance.getContent() : sec.text;
-            
-            if(editorInstance) {
-                editorInstance.setContent("<p style='color:#3b82f6;'>AI is thinking & writing... 🧠</p>");
-            }
+            if(editorInstance) { editorInstance.setContent("<p style='color:#3b82f6;'>AI is thinking & writing... 🧠</p>"); }
 
             try {
                 const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write in impactful bullet points without markdown bold/italics. Return plain text.`;
@@ -773,19 +791,14 @@
                 const data = await res.json();
                 
                 if(data.success) { 
-                    sec.text = data.reply.trim().replace(/\n/g, '<br>'); // Line breaks को HTML में बदलना
-                    if(editorInstance) editorInstance.setContent(sec.text); // एडिटर में असली डेटा डालना
-                    renderResume(); // A4 पेज अपडेट करना
+                    sec.text = data.reply.trim().replace(/\n/g, '<br>');
+                    if(editorInstance) editorInstance.setContent(sec.text);
+                    renderResume(); 
                 } 
-                else { 
-                    if(editorInstance) editorInstance.setContent(oldText); 
-                    alert("⚠️ AI Error"); 
-                }
-            } catch (err) { 
-                if(editorInstance) editorInstance.setContent(oldText); 
-                alert("⚠️ Error connecting to AI."); 
-            }
+                else { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ AI Error"); }
+            } catch (err) { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ Error connecting to AI."); }
         }
+
         window.onload = () => {
             loadDraft(); 
             renderContactFields();
