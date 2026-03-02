@@ -208,7 +208,11 @@
         <div class="modal-content" style="width: 700px;">
             <span class="close-modal" onclick="document.getElementById('cvModal').style.display='none'">✖</span>
             <h2 style="color: #1e293b; margin-bottom: 20px;"><i class="fas fa-envelope-open-text" style="color: #ec4899;"></i> AI Cover Letter</h2>
-            <div id="cvResult" style="color: #334155; line-height: 1.6; font-size: 15px; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; min-height: 200px;"></div>
+            
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 10px;">✏️ Click inside the box to edit your Cover Letter before downloading.</p>
+            
+            <div id="cvResult" contenteditable="true" style="color: #334155; line-height: 1.6; font-size: 15px; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; min-height: 200px; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='#3b82f6';"></div>
+            
             <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="downloadCoverLetterWord()"><i class="fas fa-download"></i> Download as Word</button>
         </div>
     </div>
@@ -561,7 +565,6 @@
         function moveSecUp(index) { if (index > 0) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index - 1]; sectionsData[index - 1] = temp; renderEditor(); renderResume(); } }
         function moveSecDown(index) { if (index < sectionsData.length - 1) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index + 1]; sectionsData[index + 1] = temp; renderEditor(); renderResume(); } }
 
-        // 🌟 NAYA: Smart Icons Generator
         function getTitleIcon(title) {
             const t = title.toLowerCase();
             if(t.includes('edu')) return '<i class="fas fa-graduation-cap" style="margin-right:8px;"></i>';
@@ -580,7 +583,6 @@
             const contact = contactFields.filter(f => f.value.trim() !== "").map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value).join(' | ');
             
             let blocksHtml = '';
-            // 🌟 NAYA: Title me Icons Lag gaye hain!
             sectionsData.forEach(s => { 
                 blocksHtml += `<div class="res-section"><div class="sec-title">${getTitleIcon(s.title)}${s.title}</div><div class="res-text">${s.text}</div></div>`; 
             });
@@ -614,14 +616,14 @@
             else if (currentLayout === 'creative-dark') { finalHtml = `<div class="layout-creative-dark"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.5em; font-weight:bold;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.8;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'ceo-clean') { finalHtml = `<div class="layout-ceo-clean"><div class="name">${name}</div><div style="font-size:1.2em;">${title}</div><div style="font-size:1em; margin-top:5px; color:#555;">${contact}</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'matrix') { finalHtml = `<div class="layout-matrix"><div class="name">root@${name.replace(/\s+/g, '_').toLowerCase()}:~$</div><div style="margin:10px 0;">> Role: ${title}</div><div style="margin-bottom:30px;">> Contact: ${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div></div>` + sectionsData.map(s => `<div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div>`).join('') + `</div>`; }
             else if (currentLayout === 'material-cards') { finalHtml = `<div class="layout-material-cards"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.9;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'brutalist') { finalHtml = `<div class="layout-brutalist"><div class="header"><div class="name">${name}</div><div style="font-size:1.8em; font-weight:bold; margin-top:10px;">${title}</div><div style="font-weight:bold; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'notion-style') { finalHtml = `<div class="layout-notion-style"><div style="font-size:4.5em;">📄</div><div class="name">${name}</div><div style="font-size:1.4em; color:gray; margin-bottom:5px;">${title}</div><div style="font-size:1em; color:gray;">${contact}</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'github-style') { finalHtml = `<div class="layout-github-style"><div class="header"><img src="https://ui-avatars.com/api/?name=${name}&background=random" style="width:60px; height:60px; border-radius:50%; margin-right:15px;"><div style="flex:1;"><div class="name">${name}</div><div style="color:#57606a;">${title}</div></div><div style="font-size:0.9em; color:#57606a;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="font-size:1.2em; color:var(--theme-color);">${title}</div><div style="font-size:0.9em;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div></div>` + sectionsData.map(s => `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`).join('') + `</div>`; }
             else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
                 finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:1.4em;">${title}</div><div style="font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; 
             }
@@ -778,7 +780,6 @@
             } catch (err) { document.getElementById('atsResult').innerHTML = "⚠️ Server Error."; }
         }
 
-        // 🌟 NAYA: MAKE IT PRO (Rewriter)
         async function makeItPro(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
@@ -806,7 +807,6 @@
             } catch (err) { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ Error connecting to AI."); }
         }
 
-        // 🌟 NAYA: COVER LETTER GENERATOR
         async function generateCoverLetter() {
             toggleMenu();
             let companyInfo = prompt("Enter Target Company and Job Role:\nExample: 'Google, Frontend Developer'");
@@ -848,7 +848,7 @@
             document.body.removeChild(fileDownload);
         }
 
-        // 🌟 NAYA: TRANSLATE RESUME
+        // 🌟 FIXED: SMARTER TRANSLATION LOGIC (REGEX JSON PARSER)
         async function translateResume() {
             toggleMenu();
             let lang = prompt("Which language do you want to translate your resume into?\nExample: Hindi, Spanish, German, French");
@@ -862,11 +862,11 @@
                 name: document.getElementById('inpName').value,
                 title: document.getElementById('inpTitle').value,
                 contactFields: contactFields,
-                sections: sectionsData.map(s => ({ id: s.id, title: s.title, text: s.text.replace(/<[^>]*>?/gm, '') })) // Strip HTML for translation
+                sections: sectionsData.map(s => ({ id: s.id, title: s.title, text: s.text.replace(/<[^>]*>?/gm, '') }))
             };
 
             try {
-                const aiCommand = `Translate the following JSON object into ${lang}. Translate ALL string values (name, title, labels, and text), but KEEP the EXACT SAME JSON structure and keys. Return ONLY valid raw JSON without markdown.\n\nJSON:\n${JSON.stringify(dataToTranslate)}`;
+                const aiCommand = `You are a professional translator. Translate the values of this JSON object into ${lang}. Return ONLY a valid JSON object starting with { and ending with }. Do not add any other text.\n\n${JSON.stringify(dataToTranslate)}`;
                 
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -875,26 +875,33 @@
                 const result = await res.json();
                 
                 if(result.success) {
-                    const translatedData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
+                    // 🌟 FIX: Regex se sirf JSON nikalna taaki fältu text na aaye
+                    const jsonMatch = result.reply.match(/\{[\s\S]*\}/);
                     
-                    document.getElementById('inpName').value = translatedData.name || dataToTranslate.name;
-                    document.getElementById('inpTitle').value = translatedData.title || dataToTranslate.title;
-                    contactFields = translatedData.contactFields || contactFields;
-                    
-                    translatedData.sections.forEach(ts => {
-                        let sec = sectionsData.find(s => s.id === ts.id);
-                        if(sec) {
-                            sec.title = ts.title;
-                            sec.text = ts.text.replace(/\n/g, '<br>');
-                            const editor = tinymce.get(`text_${sec.id}`);
-                            if(editor) editor.setContent(sec.text);
-                        }
-                    });
-                    
-                    renderContactFields();
-                    renderEditor();
-                    renderResume();
-                    alert(`✅ Resume successfully translated to ${lang}!`);
+                    if(jsonMatch) {
+                        const translatedData = JSON.parse(jsonMatch[0]);
+                        
+                        document.getElementById('inpName').value = translatedData.name || dataToTranslate.name;
+                        document.getElementById('inpTitle').value = translatedData.title || dataToTranslate.title;
+                        contactFields = translatedData.contactFields || contactFields;
+                        
+                        translatedData.sections.forEach(ts => {
+                            let sec = sectionsData.find(s => s.id === ts.id);
+                            if(sec) {
+                                sec.title = ts.title;
+                                sec.text = ts.text.replace(/\n/g, '<br>');
+                                const editor = tinymce.get(`text_${sec.id}`);
+                                if(editor) editor.setContent(sec.text);
+                            }
+                        });
+                        
+                        renderContactFields();
+                        renderEditor();
+                        renderResume();
+                        alert(`✅ Resume successfully translated to ${lang}!`);
+                    } else {
+                        alert("⚠️ Translation failed: AI did not return a valid JSON format.");
+                    }
                 } else { alert("⚠️ Translation failed."); }
             } catch(e) { alert("⚠️ Translation Error. Try again."); } 
             finally { btn.innerHTML = originalHTML; }
