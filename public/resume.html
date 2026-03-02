@@ -23,7 +23,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--theme-font); }
         body { background: #f1f5f9; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        /* 🌟 NAYA: Responsive Navbar */
         .top-nav { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0;}
         .top-nav h2 { font-size: 18px; color: #1e293b; display: flex; align-items: center; gap: 8px;}
         
@@ -33,28 +32,24 @@
         .btn-warning { background: #f59e0b; color: white;}
         .btn-danger { background: #ef4444; padding: 5px 10px; font-size: 12px; }
 
-        /* 🌟 NAYA: Hamburger Menu Button */
         .hamburger-btn { background: #1e293b; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 18px; cursor: pointer; }
 
-        /* 🌟 NAYA: Slide-out Action Menu (Drawer) */
         .action-menu { 
-            position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; 
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; 
             background: white; box-shadow: -2px 0 15px rgba(0,0,0,0.1); 
             z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            display: flex; flex-direction: column; padding: 20px;
+            display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
         }
         .action-menu.active { right: 0; }
         .action-menu-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;}
         .action-menu-header h3 { color: #1e293b; font-size: 18px;}
         .close-menu { cursor: pointer; font-size: 24px; color: #ef4444; }
-        .action-buttons { display: flex; flex-direction: column; gap: 15px; }
+        .action-buttons { display: flex; flex-direction: column; gap: 12px; }
         .action-buttons .btn { width: 100%; justify-content: flex-start; padding: 12px 15px;}
 
-        /* Menu Overlay */
         .menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; }
         .menu-overlay.active { opacity: 1; visibility: visible; }
 
-        /* 🌟 NAYA: Responsive Builder Container */
         .builder-container { display: flex; flex-grow: 1; overflow: hidden; }
         .left-panel { width: 45%; background: white; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
         
@@ -72,7 +67,6 @@
         .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; font-size: 13px;}
         .layout-card.active { border-color: var(--theme-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-        /* Right Panel (A4 Preview) */
         .preview-panel { width: 55%; background: #94a3b8; padding: 30px; display: flex; justify-content: center; overflow-y: auto; }
         .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height);}
 
@@ -94,30 +88,16 @@
         .skill-bar-bg { width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; }
         .skill-bar-fill { background: var(--theme-color); height: 100%; border-radius: 4px; }
 
-        /* =========================================
-           📱 MOBILE RESPONSIVENESS LOGIC 
-           ========================================= */
         @media (max-width: 850px) {
             .builder-container { flex-direction: column; overflow-y: auto; height: auto;}
-            
-            /* Panels Stack on top of each other */
             .left-panel { width: 100%; border-right: none; border-bottom: 2px solid #cbd5e1; min-height: 60vh; flex-shrink: 0;}
-            
-            /* A4 preview adjustment */
             .preview-panel { width: 100%; padding: 15px; overflow: visible;}
-            .a4-paper { 
-                width: 100%; /* Take full width of phone */
-                max-width: 210mm; /* But max limit is A4 */
-                transform-origin: top center; /* Shrink to fit if needed */
-            }
-
-            .layout-grid { grid-template-columns: 1fr 1fr 1fr; } /* Show 3 layouts per row on mobile */
-            
-            /* Hide 'Back to Home' text, only show icon */
+            .a4-paper { width: 100%; max-width: 210mm; transform-origin: top center; }
+            .layout-grid { grid-template-columns: 1fr 1fr 1fr; } 
             .back-to-home-btn { width: 45px; height: 45px; bottom: 20px; right: 20px; font-size: 20px;}
         }
 
-        /* 50 Premium Layouts CSS (Compressed) */
+        /* 50 Premium Layouts CSS */
         .layout-classic { padding: 40px; } .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 15px; margin-bottom: 20px; } .layout-classic .sec-title { font-size: 1.3em; color: var(--theme-color); border-bottom: 1px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
         .layout-modern { display: flex; min-height: 297mm; } .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; } .layout-modern .main { width: 65%; padding: 40px; } .layout-modern .sec-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--theme-color);} .layout-modern .sidebar .sec-title { border-color: rgba(255,255,255,0.3); color: white; }
         .layout-minimal { padding: 50px; } .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #cbd5e1; padding-bottom: 20px;} .layout-minimal .res-section { display: flex; } .layout-minimal .sec-title { width: 25%; font-size: 1em; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 15px;} .layout-minimal .res-text { width: 75%; border-left: 1px solid #e2e8f0; padding-left: 20px; }
@@ -195,6 +175,10 @@
         </div>
         
         <div class="action-buttons">
+            <button class="btn" style="background: #ec4899;" onclick="generateCoverLetter()"><i class="fas fa-envelope-open-text"></i> Cover Letter</button>
+            <button class="btn" style="background: #14b8a6;" onclick="translateResume()"><i class="fas fa-language"></i> Translate Resume</button>
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">
+
             <input type="file" id="importResumeInput" accept="application/pdf" style="display: none;" onchange="handleResumeImport(event)">
             <button class="btn" id="importResumeBtn" style="background: #8b5cf6;" onclick="document.getElementById('importResumeInput').click()">
                 <i class="fas fa-upload"></i> Import Old Resume
@@ -217,6 +201,15 @@
             <div id="atsResult" style="color: #334155; line-height: 1.6; font-size: 15px;">
                 <div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Analyzing your resume...</div>
             </div>
+        </div>
+    </div>
+
+    <div id="cvModal" class="modal">
+        <div class="modal-content" style="width: 700px;">
+            <span class="close-modal" onclick="document.getElementById('cvModal').style.display='none'">✖</span>
+            <h2 style="color: #1e293b; margin-bottom: 20px;"><i class="fas fa-envelope-open-text" style="color: #ec4899;"></i> AI Cover Letter</h2>
+            <div id="cvResult" style="color: #334155; line-height: 1.6; font-size: 15px; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; min-height: 200px;"></div>
+            <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="downloadCoverLetterWord()"><i class="fas fa-download"></i> Download as Word</button>
         </div>
     </div>
 
@@ -355,13 +348,11 @@
     <a href="/" class="back-to-home-btn" title="Back to Home"><i class="fas fa-home"></i></a>
 
     <script>
-        // 🌟 NAYA: Menu Toggle Logic
         function toggleMenu() {
             document.getElementById('actionMenu').classList.toggle('active');
             document.getElementById('menuOverlay').classList.toggle('active');
         }
 
-        // 💾 DRAFT & AUTO-SAVE LOGIC
         let currentLayout = 'classic';
         let userProfilePic = '';
         let sectionsData = [
@@ -513,6 +504,7 @@
                         <button class="btn-danger" onclick="deleteSec(${sec.id})" style="border-radius:4px;"><i class="fas fa-trash"></i></button>
                     </div>
                     <div style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px;">
+                        <button onclick="makeItPro(${sec.id})" style="background: #ec4899; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-wand-magic-sparkles"></i> Pro</button>
                         <button onclick="generateSectionAI(${sec.id})" style="background: linear-gradient(135deg, #8b5cf6, #d946ef); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-magic"></i> AI</button>
                         <button onclick="addTableToSec(${sec.id})" style="background: #f59e0b; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-table"></i> Table</button>
                         <button onclick="addSkillBarToSec(${sec.id})" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-sliders-h"></i> Bar</button>
@@ -569,23 +561,39 @@
         function moveSecUp(index) { if (index > 0) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index - 1]; sectionsData[index - 1] = temp; renderEditor(); renderResume(); } }
         function moveSecDown(index) { if (index < sectionsData.length - 1) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index + 1]; sectionsData[index + 1] = temp; renderEditor(); renderResume(); } }
 
+        // 🌟 NAYA: Smart Icons Generator
+        function getTitleIcon(title) {
+            const t = title.toLowerCase();
+            if(t.includes('edu')) return '<i class="fas fa-graduation-cap" style="margin-right:8px;"></i>';
+            if(t.includes('exp') || t.includes('work') || t.includes('employ')) return '<i class="fas fa-briefcase" style="margin-right:8px;"></i>';
+            if(t.includes('skill') || t.includes('tech')) return '<i class="fas fa-tools" style="margin-right:8px;"></i>';
+            if(t.includes('proj')) return '<i class="fas fa-project-diagram" style="margin-right:8px;"></i>';
+            if(t.includes('cert')) return '<i class="fas fa-certificate" style="margin-right:8px;"></i>';
+            if(t.includes('lang')) return '<i class="fas fa-language" style="margin-right:8px;"></i>';
+            if(t.includes('sum') || t.includes('obj') || t.includes('prof') || t.includes('about')) return '<i class="fas fa-user-tie" style="margin-right:8px;"></i>';
+            return '<i class="fas fa-star" style="margin-right:8px;"></i>'; 
+        }
+
         function renderResume() {
             const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : document.getElementById('inpName').value;
             const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : document.getElementById('inpTitle').value;
             const contact = contactFields.filter(f => f.value.trim() !== "").map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value).join(' | ');
             
             let blocksHtml = '';
-            sectionsData.forEach(s => { blocksHtml += `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`; });
+            // 🌟 NAYA: Title me Icons Lag gaye hain!
+            sectionsData.forEach(s => { 
+                blocksHtml += `<div class="res-section"><div class="sec-title">${getTitleIcon(s.title)}${s.title}</div><div class="res-text">${s.text}</div></div>`; 
+            });
 
             let finalHtml = '';
 
             if (currentLayout === 'classic') { finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:2.5em; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#475569; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; } 
-            else if (currentLayout === 'modern') { finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'modern') { finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'minimal') { finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:2.8em; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="font-size:1em; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'elegant') { finalHtml = `<div class="layout-elegant"><div style="margin-bottom:40px;"><div style="font-size:2.2em; letter-spacing:3px; text-transform:uppercase;">${name}</div><div style="color:#64748b; margin:10px 0;">${title}</div><div style="font-size:1em; color:var(--theme-color);">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'timeline') { finalHtml = `<div class="layout-timeline"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'corporate') { finalHtml = `<div class="layout-corporate"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'split-right') { finalHtml = `<div class="layout-split-right"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; color:var(--theme-color);">${title}</div><div class="res-section"><div class="sec-title" style="color:white; border-color:white;">Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'split-right') { finalHtml = `<div class="layout-split-right"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; color:var(--theme-color);">${title}</div><div class="res-section"><div class="sec-title" style="color:white; border-color:white;"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'boxed') { finalHtml = `<div class="layout-boxed"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="font-size:1em; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'bold-header') { finalHtml = `<div class="layout-bold-header"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.4em; opacity:0.9;">${title}</div><div style="font-size:1em; margin-top:10px;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'academic') { finalHtml = `<div class="layout-academic"><div class="header"><div class="name">${name}</div><div>${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
@@ -606,14 +614,14 @@
             else if (currentLayout === 'creative-dark') { finalHtml = `<div class="layout-creative-dark"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.5em; font-weight:bold;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.8;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'ceo-clean') { finalHtml = `<div class="layout-ceo-clean"><div class="name">${name}</div><div style="font-size:1.2em;">${title}</div><div style="font-size:1em; margin-top:5px; color:#555;">${contact}</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'matrix') { finalHtml = `<div class="layout-matrix"><div class="name">root@${name.replace(/\s+/g, '_').toLowerCase()}:~$</div><div style="margin:10px 0;">> Role: ${title}</div><div style="margin-bottom:30px;">> Contact: ${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div></div>` + sectionsData.map(s => `<div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div>`).join('') + `</div>`; }
+            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'material-cards') { finalHtml = `<div class="layout-material-cards"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.9;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'brutalist') { finalHtml = `<div class="layout-brutalist"><div class="header"><div class="name">${name}</div><div style="font-size:1.8em; font-weight:bold; margin-top:10px;">${title}</div><div style="font-weight:bold; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'notion-style') { finalHtml = `<div class="layout-notion-style"><div style="font-size:4.5em;">📄</div><div class="name">${name}</div><div style="font-size:1.4em; color:gray; margin-bottom:5px;">${title}</div><div style="font-size:1em; color:gray;">${contact}</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'github-style') { finalHtml = `<div class="layout-github-style"><div class="header"><img src="https://ui-avatars.com/api/?name=${name}&background=random" style="width:60px; height:60px; border-radius:50%; margin-right:15px;"><div style="flex:1;"><div class="name">${name}</div><div style="color:#57606a;">${title}</div></div><div style="font-size:0.9em; color:#57606a;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="font-size:1.2em; color:var(--theme-color);">${title}</div><div style="font-size:0.9em;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div></div>` + sectionsData.map(s => `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`).join('') + `</div>`; }
+            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
             else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
                 finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:1.4em;">${title}</div><div style="font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; 
             }
@@ -634,7 +642,7 @@
         function downloadPDF() {
             const element = document.getElementById('resumePreview');
             html2pdf().set({ margin: 0, filename: 'CodeMaster_Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
-            toggleMenu(); // Menu close karna auto
+            toggleMenu();
         }
 
         function downloadWord() {
@@ -685,7 +693,7 @@
 
                         renderEditor(); renderResume();
                         document.querySelectorAll('.tab-btn')[1].click();
-                        toggleMenu(); // Menu close
+                        toggleMenu();
                     } catch(parseError) { alert("⚠️ AI sent invalid format."); }
                 } else alert("⚠️ AI Error: " + result.reply);
             } catch (error) { alert("⚠️ Network Error!"); } 
@@ -749,7 +757,7 @@
         }
 
         async function checkATSScore() {
-            toggleMenu(); // Menu band karo modal dikhane ke liye
+            toggleMenu();
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
 
@@ -768,6 +776,128 @@
                 if(data.success) { document.getElementById('atsResult').innerHTML = marked.parse(data.reply); } 
                 else { document.getElementById('atsResult').innerHTML = "⚠️ Failed to calculate score."; }
             } catch (err) { document.getElementById('atsResult').innerHTML = "⚠️ Server Error."; }
+        }
+
+        // 🌟 NAYA: MAKE IT PRO (Rewriter)
+        async function makeItPro(id) {
+            let sec = sectionsData.find(s => s.id === id);
+            if(!sec) return;
+
+            const editorInstance = tinymce.get(`text_${id}`);
+            let oldText = editorInstance ? editorInstance.getContent() : sec.text;
+            if(!oldText.trim()) return alert("Please write some text first!");
+
+            if(editorInstance) editorInstance.setContent("<p style='color:#ec4899;'><i class='fas fa-wand-magic-sparkles'></i> Enhancing text like a PRO... ✨</p>");
+
+            try {
+                const aiCommand = `Rewrite the following resume section to make it sound highly professional, impactful, and ATS-friendly. Use strong action verbs and Harvard-style phrasing. Do NOT use markdown bold/italics (like **). Return ONLY the rewritten text.\n\nText to improve:\n${oldText}`;
+                const res = await fetch('/api/ask-ai', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: aiCommand })
+                });
+                const data = await res.json();
+                
+                if(data.success) { 
+                    sec.text = data.reply.trim().replace(/\n/g, '<br>');
+                    if(editorInstance) editorInstance.setContent(sec.text);
+                    renderResume(); 
+                } 
+                else { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ AI Error"); }
+            } catch (err) { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ Error connecting to AI."); }
+        }
+
+        // 🌟 NAYA: COVER LETTER GENERATOR
+        async function generateCoverLetter() {
+            toggleMenu();
+            let companyInfo = prompt("Enter Target Company and Job Role:\nExample: 'Google, Frontend Developer'");
+            if(!companyInfo) return;
+
+            let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
+            sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
+
+            document.getElementById('cvModal').style.display = 'flex';
+            document.getElementById('cvResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Writing your Cover Letter...</div>';
+
+            try {
+                const aiCommand = `Write a highly professional and persuasive Cover Letter for the role of ${companyInfo}. Use my resume details provided below to highlight relevant skills and experience. Do not use markdown like **. Keep it standard letter format.\n\nMy Resume:\n${resumeText}`;
+                const res = await fetch('/api/ask-ai', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: aiCommand })
+                });
+                const data = await res.json();
+                
+                if(data.success) { document.getElementById('cvResult').innerText = data.reply.trim(); } 
+                else { document.getElementById('cvResult').innerHTML = "⚠️ Failed to generate cover letter."; }
+            } catch (err) { document.getElementById('cvResult').innerHTML = "⚠️ Server Error."; }
+        }
+
+        function downloadCoverLetterWord() {
+            const text = document.getElementById('cvResult').innerText;
+            if(!text || text.includes('Writing your Cover')) return;
+            
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Cover Letter</title></head><body>";
+            const footer = "</body></html>";
+            const sourceHTML = header + text.replace(/\n/g, '<br>') + footer;
+            
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            const fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = 'CodeMaster_CoverLetter.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+
+        // 🌟 NAYA: TRANSLATE RESUME
+        async function translateResume() {
+            toggleMenu();
+            let lang = prompt("Which language do you want to translate your resume into?\nExample: Hindi, Spanish, German, French");
+            if(!lang) return;
+
+            const btn = document.querySelector('.hamburger-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            let dataToTranslate = {
+                name: document.getElementById('inpName').value,
+                title: document.getElementById('inpTitle').value,
+                contactFields: contactFields,
+                sections: sectionsData.map(s => ({ id: s.id, title: s.title, text: s.text.replace(/<[^>]*>?/gm, '') })) // Strip HTML for translation
+            };
+
+            try {
+                const aiCommand = `Translate the following JSON object into ${lang}. Translate ALL string values (name, title, labels, and text), but KEEP the EXACT SAME JSON structure and keys. Return ONLY valid raw JSON without markdown.\n\nJSON:\n${JSON.stringify(dataToTranslate)}`;
+                
+                const res = await fetch('/api/ask-ai', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: aiCommand })
+                });
+                const result = await res.json();
+                
+                if(result.success) {
+                    const translatedData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
+                    
+                    document.getElementById('inpName').value = translatedData.name || dataToTranslate.name;
+                    document.getElementById('inpTitle').value = translatedData.title || dataToTranslate.title;
+                    contactFields = translatedData.contactFields || contactFields;
+                    
+                    translatedData.sections.forEach(ts => {
+                        let sec = sectionsData.find(s => s.id === ts.id);
+                        if(sec) {
+                            sec.title = ts.title;
+                            sec.text = ts.text.replace(/\n/g, '<br>');
+                            const editor = tinymce.get(`text_${sec.id}`);
+                            if(editor) editor.setContent(sec.text);
+                        }
+                    });
+                    
+                    renderContactFields();
+                    renderEditor();
+                    renderResume();
+                    alert(`✅ Resume successfully translated to ${lang}!`);
+                } else { alert("⚠️ Translation failed."); }
+            } catch(e) { alert("⚠️ Translation Error. Try again."); } 
+            finally { btn.innerHTML = originalHTML; }
         }
 
         async function generateSectionAI(id) {
