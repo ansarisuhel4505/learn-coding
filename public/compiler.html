@@ -66,8 +66,13 @@
         .btn-ai { background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 5px;}
         .btn-ai:hover { background: #8b5cf6; color: white; box-shadow: 0 0 10px rgba(139, 92, 246, 0.4); }
 
+        /* 🌟 NAYA: Run & Terminal Buttons Container */
+        .run-group { display: flex; gap: 8px; }
         .run-btn { background: #10b981; color: white; border: none; padding: 6px 20px; border-radius: 5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s;}
         .run-btn:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        
+        .terminal-btn { background: #3b82f6; color: white; border: none; padding: 6px 15px; border-radius: 5px; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s;}
+        .terminal-btn:hover { background: #2563eb; }
 
         #monacoEditor { flex-grow: 1; width: 100%; text-align: left; }
 
@@ -82,40 +87,44 @@
         
         .text-success { color: #10b981; } .text-error { color: #ef4444; } .text-warning { color: #f59e0b; } .text-info { color: #3b82f6; }
         .terminal-output pre { background: #1e293b; padding: 10px; border-radius: 5px; border: 1px solid #334155; margin: 10px 0; overflow-x: auto;}
+        
+        .close-terminal-mobile { display: none; cursor: pointer; color: #cbd5e1; font-size: 18px;}
 
         /* 🌟 MOBILE RESPONSIVENESS (SMART LAYOUT) 🌟 */
         @media (max-width: 850px) {
-            /* Navbar Adjustments */
             .navbar { padding: 10px 15px; }
             .navbar h2 { font-size: 18px; }
             .mode-btn { padding: 8px 10px; font-size: 12px; }
             .exit-btn span { display: none; } 
             .mobile-menu-btn { display: block; } 
 
-            /* Web Mode Stack */
             .web-editors { flex-direction: column; height: auto; flex-grow: 1; overflow-y: auto; }
             .editor-box { min-height: 150px; border-right: none; border-bottom: 2px solid #334155; }
             .web-preview-area { height: 40%; flex-shrink: 0; border-top: 2px solid #3b82f6;}
 
-            /* Pro Mode Stack */
             .code-workspace { flex-direction: column; }
             
-            /* Hidden File Explorer (Drawer) */
-            .file-explorer { 
-                position: absolute; left: -250px; height: 100%; box-shadow: 2px 0 10px rgba(0,0,0,0.5); 
-                transition: left 0.3s ease-in-out;
-            }
+            .file-explorer { position: absolute; left: -250px; height: 100%; box-shadow: 2px 0 10px rgba(0,0,0,0.5); transition: left 0.3s ease-in-out;}
             .file-explorer.active { left: 0; }
 
-            /* Editor Area */
-            .coding-left { height: 60%; border-right: none; border-bottom: 2px solid #3b82f6; }
+            .coding-left { height: 100%; border-right: none; } /* Editor takes full height initially */
             .coding-controls { padding: 10px; gap: 5px; }
-            .action-btns .btn-ai span { display: none; } /* 🌟 Hide Text, Show Icons in Mobile */
+            .action-btns .btn-ai span { display: none; } 
+            
+            /* 🌟 NAYA: Terminal Button visible on Mobile */
+            .terminal-btn { display: flex; }
 
-            /* Terminal Area (Tabs Logic for Input/Output) */
-            .coding-right { width: 100%; height: 40%; }
-            .custom-input-area { height: 50%; }
+            /* 🌟 NAYA: Terminal Slides up as a Drawer */
+            .coding-right { 
+                position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; 
+                z-index: 50; transform: translateY(100%); transition: transform 0.3s ease-in-out;
+                box-shadow: 0 -5px 15px rgba(0,0,0,0.5); border-top: 2px solid #3b82f6;
+            }
+            .coding-right.active { transform: translateY(0); }
+            
+            .custom-input-area { height: 40%; }
             .terminal-header { font-size: 12px; padding: 8px 10px; }
+            .close-terminal-mobile { display: block; } /* Show close arrow on mobile */
         }
     </style>
 </head>
@@ -160,10 +169,8 @@
                 <span>EXPLORER</span>
                 <div class="explorer-actions">
                     <i class="fas fa-file-medical" onclick="createNewFile()" title="New File"></i>
-                    
                     <label for="fileUpload" title="Upload File"><i class="fas fa-file-upload"></i></label>
                     <input type="file" id="fileUpload" style="display:none;" multiple onchange="uploadFiles(event)">
-                    
                     <label for="folderUpload" title="Open Folder"><i class="fas fa-folder-open"></i></label>
                     <input type="file" id="folderUpload" style="display:none;" webkitdirectory directory multiple onchange="uploadFiles(event)">
                 </div>
@@ -182,22 +189,27 @@
                 <div class="action-btns">
                     <button class="btn-ai" onclick="askAI('fix')" title="AI Fix Bugs"><i class="fas fa-bug"></i> <span>Fix</span></button>
                     <button class="btn-ai" onclick="askAI('explain')" title="AI Explain"><i class="fas fa-brain"></i> <span>Explain</span></button>
-                    <button class="btn-ai" onclick="downloadCurrentFile()" style="color: #eab308; border-color: #eab308;" title="Save / Download File"><i class="fas fa-download"></i> <span>Save</span></button>
+                    <button class="btn-ai" onclick="downloadCurrentFile()" style="color: #eab308; border-color: #eab308;" title="Save / Download"><i class="fas fa-download"></i> <span>Save</span></button>
                 </div>
 
-                <button class="run-btn" id="runBtn" onclick="executeCode()"><i class="fas fa-play"></i> Run</button>
+                <div class="run-group">
+                    <button class="terminal-btn" onclick="toggleMobileTerminal()"><i class="fas fa-terminal"></i> Input/Out</button>
+                    <button class="run-btn" id="runBtn" onclick="executeCode()"><i class="fas fa-play"></i> Run</button>
+                </div>
             </div>
             
             <div id="monacoEditor"></div>
         </div>
         
-        <div class="coding-right">
+        <div class="coding-right" id="terminalDrawer">
             <div class="custom-input-area">
                 <div class="terminal-header" style="background: #0f172a; border-bottom: none;">
                     <span><i class="fas fa-keyboard"></i> Custom Input (stdin)</span>
+                    <i class="fas fa-chevron-down close-terminal-mobile" title="Close Terminal" onclick="toggleMobileTerminal()"></i>
                 </div>
-                <textarea id="customInput" placeholder="Enter inputs here before running code..."></textarea>
+                <textarea id="customInput" placeholder="If your code needs input (cin, scanf, input()), enter it here before clicking Run..."></textarea>
             </div>
+            
             <div class="terminal-header">
                 <span><i class="fas fa-terminal"></i> Output</span>
                 <i class="fas fa-trash" style="cursor:pointer; color:#ef4444;" title="Clear Output" onclick="document.getElementById('terminalOutput').innerHTML=''"></i>
@@ -210,23 +222,42 @@ Ready to execute code.
     </div>
 
     <script>
-        // 🌟 MOBILE EXPLORER TOGGLE
+        // 🌟 MOBILE TOGGLES
         function toggleFileExplorer() {
             document.getElementById('mobileExplorer').classList.toggle('active');
         }
+        function toggleMobileTerminal() {
+            document.getElementById('terminalDrawer').classList.toggle('active');
+        }
 
-        // 🌟 1. LANGUAGES DATA
+        // 🌟 1. TOP 20 LANGUAGES DATA (WITH BOILERPLATES) 🌟
         const popularLangs = {
-            "python3": { name: "Python 3", v: "4", ext: "py", monaco: "python", boiler: "print('Hello CodeMaster! 🚀')" },
-            "java": { name: "Java", v: "4", ext: "java", monaco: "java", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello Java!\");\n    }\n}" },
-            "cpp17": { name: "C++", v: "0", ext: "cpp", monaco: "cpp", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello C++!\" << endl;\n    return 0;\n}" },
-            "c": { name: "C", v: "5", ext: "c", monaco: "c", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello C!\\n\");\n    return 0;\n}" },
-            "nodejs": { name: "JavaScript", v: "4", ext: "js", monaco: "javascript", boiler: "console.log('Hello Node.js!');" },
-            "sql": { name: "SQL", v: "4", ext: "sql", monaco: "sql", boiler: "CREATE TABLE hello (message TEXT);\nINSERT INTO hello VALUES ('Hello SQL Developer!');\nSELECT * FROM hello;" }
+            "python3": { name: "1. Python 3", v: "4", ext: "py", monaco: "python", boiler: "print('Hello CodeMaster! 🚀')" },
+            "java": { name: "2. Java", v: "4", ext: "java", monaco: "java", boiler: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello CodeMaster! 🚀\");\n    }\n}" },
+            "cpp17": { name: "3. C++", v: "0", ext: "cpp", monaco: "cpp", boiler: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello CodeMaster! 🚀\" << endl;\n    return 0;\n}" },
+            "c": { name: "4. C", v: "5", ext: "c", monaco: "c", boiler: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello CodeMaster! 🚀\\n\");\n    return 0;\n}" },
+            "nodejs": { name: "5. JavaScript", v: "4", ext: "js", monaco: "javascript", boiler: "console.log('Hello CodeMaster! 🚀');" },
+            "csharp": { name: "6. C#", v: "4", ext: "cs", monaco: "csharp", boiler: "using System;\nclass Program {\n  static void Main() {\n    Console.WriteLine(\"Hello CodeMaster! 🚀\");\n  }\n}" },
+            "php": { name: "7. PHP", v: "4", ext: "php", monaco: "php", boiler: "<?php\n  echo \"Hello CodeMaster! 🚀\";\n?>" },
+            "go": { name: "8. Go", v: "4", ext: "go", monaco: "go", boiler: "package main\nimport \"fmt\"\nfunc main() {\n  fmt.Println(\"Hello CodeMaster! 🚀\")\n}" },
+            "ruby": { name: "9. Ruby", v: "4", ext: "rb", monaco: "ruby", boiler: "puts \"Hello CodeMaster! 🚀\"" },
+            "rust": { name: "10. Rust", v: "4", ext: "rs", monaco: "rust", boiler: "fn main() {\n  println!(\"Hello CodeMaster! 🚀\");\n}" },
+            "swift": { name: "11. Swift", v: "4", ext: "swift", monaco: "swift", boiler: "print(\"Hello CodeMaster! 🚀\")" },
+            "kotlin": { name: "12. Kotlin", v: "3", ext: "kt", monaco: "kotlin", boiler: "fun main() {\n  println(\"Hello CodeMaster! 🚀\")\n}" },
+            "scala": { name: "13. Scala", v: "4", ext: "scala", monaco: "scala", boiler: "object Main {\n  def main(args: Array[String]): Unit = {\n    println(\"Hello CodeMaster! 🚀\")\n  }\n}" },
+            "dart": { name: "14. Dart", v: "4", ext: "dart", monaco: "dart", boiler: "void main() {\n  print('Hello CodeMaster! 🚀');\n}" },
+            "r": { name: "15. R", v: "4", ext: "r", monaco: "r", boiler: "print(\"Hello CodeMaster! 🚀\")" },
+            "sql": { name: "16. SQL", v: "4", ext: "sql", monaco: "sql", boiler: "CREATE TABLE hello (message TEXT);\nINSERT INTO hello VALUES ('Hello CodeMaster! 🚀');\nSELECT * FROM hello;" },
+            "bash": { name: "17. Bash", v: "4", ext: "sh", monaco: "shell", boiler: "echo \"Hello CodeMaster! 🚀\"" },
+            "perl": { name: "18. Perl", v: "4", ext: "pl", monaco: "perl", boiler: "print \"Hello CodeMaster! 🚀\\n\";" },
+            "lua": { name: "19. Lua", v: "3", ext: "lua", monaco: "lua", boiler: "print(\"Hello CodeMaster! 🚀\")" },
+            "haskell": { name: "20. Haskell", v: "4", ext: "hs", monaco: "plaintext", boiler: "main = putStrLn \"Hello CodeMaster! 🚀\"" }
         };
 
         const extraLangsData = [
-            ['php','PHP','4','php','php'], ['go','Go','4','go','go'], ['ruby','Ruby','4','rb','ruby'], ['rust','Rust','4','rs','rust'], ['swift','Swift','4','swift','swift']
+            ['ada', 'Ada', '4', 'ada', 'ada'], ['awk', 'AWK', '4', 'awk', 'plaintext'], ['cobol', 'COBOL', '3', 'cob', 'cobol'], 
+            ['elixir', 'Elixir', '4', 'ex', 'elixir'], ['erlang', 'Erlang', '0', 'erl', 'plaintext'], ['fsharp', 'F#', '2', 'fs', 'fsharp'], 
+            ['julia', 'Julia', '4', 'jl', 'julia'], ['objective-c', 'Objective-C', '4', 'm', 'objective-c'], ['pascal', 'Pascal', '3', 'pas', 'pascal']
         ];
 
         const otherLangs = {};
@@ -264,8 +295,10 @@ Ready to execute code.
 
         function updateDropdownUI() {
             const select = document.getElementById('langSelect');
-            let selectHTML = `<optgroup label="Languages">`;
-            for(let key in allLangs) { selectHTML += `<option value="${key}">${allLangs[key].name}</option>`; }
+            let selectHTML = `<optgroup label="🔥 Top 20 Languages">`;
+            for(let key in popularLangs) { selectHTML += `<option value="${key}">${popularLangs[key].name}</option>`; }
+            selectHTML += `</optgroup><optgroup label="Other Languages">`;
+            for(let key in otherLangs) { selectHTML += `<option value="${key}">${otherLangs[key].name}</option>`; }
             selectHTML += `</optgroup>`;
             select.innerHTML = selectHTML;
             select.value = fileSystem[activeFile].lang;
@@ -309,6 +342,7 @@ Ready to execute code.
                 if(filename.endsWith('.py')) icon = 'fa-python';
                 else if(filename.endsWith('.js')) icon = 'fa-js';
                 else if(filename.endsWith('.java')) icon = 'fa-java';
+                else if(filename.endsWith('.cpp') || filename.endsWith('.c')) icon = 'fa-cuttlefish';
                 
                 list.innerHTML += `
                     <div class="file-item ${filename === activeFile ? 'active' : ''}" onclick="switchFile('${filename}')">
@@ -392,10 +426,15 @@ Ready to execute code.
             const langCode = document.getElementById('langSelect').value;
             fileSystem[activeFile].lang = langCode;
             monaco.editor.setModelLanguage(editorInstance.getModel(), allLangs[langCode].monaco);
+            
+            // Set Boilerplate if file is empty
+            if(editorInstance.getValue().trim() === "") {
+                editorInstance.setValue(allLangs[langCode].boiler);
+            }
+            
             localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
         }
 
-        // 🌟 FIXED: Save / Download Function Restored
         function downloadCurrentFile() {
             const code = editorInstance.getValue();
             if(!code.trim()) return;
@@ -406,7 +445,7 @@ Ready to execute code.
             window.URL.revokeObjectURL(url);
         }
 
-        // 🌟 5. EXECUTION LOGIC (WITH CUSTOM INPUT)
+        // 🌟 5. EXECUTION LOGIC
         async function executeCode() {
             const langCode = document.getElementById('langSelect').value;
             const code = editorInstance.getValue();
@@ -417,6 +456,11 @@ Ready to execute code.
             const runBtn = document.getElementById('runBtn');
 
             if (!code.trim()) return terminal.innerHTML = `<span class="text-error">Error: Code is empty!</span>`;
+
+            // 🌟 Mobile auto-open terminal on Run
+            if(window.innerWidth <= 850) {
+                document.getElementById('terminalDrawer').classList.add('active');
+            }
 
             runBtn.disabled = true; runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             terminal.innerHTML = `<span class="text-warning">➜ Executing on CodeMaster Cloud Engine...</span>\n`;
@@ -436,12 +480,17 @@ Ready to execute code.
             runBtn.disabled = false; runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
         }
 
-        // 🌟 6. AI LOGIC (JSON FIXED)
+        // 🌟 6. AI LOGIC
         async function askAI(action) {
             const code = editorInstance.getValue();
             const terminal = document.getElementById('terminalOutput');
             
             if(!code.trim()) return alert("Please write some code first!");
+            
+            if(window.innerWidth <= 850) {
+                document.getElementById('terminalDrawer').classList.add('active');
+            }
+
             terminal.innerHTML = `<span class="text-info"><i class="fas fa-brain fa-spin"></i> CodeMaster AI is analyzing...</span>\n`;
 
             let prompt = action === 'fix' 
