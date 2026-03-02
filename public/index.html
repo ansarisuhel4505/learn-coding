@@ -23,125 +23,7 @@
 </head>
 </head>
 <body class="dark-theme"> <div class="evil-glow orb-1"></div>
-    <div class="evil-glow orb-2"></div>
-
-    <style>
-        .ramadan-banner {
-            position: relative;
-            background: linear-gradient(90deg, #0f172a, #2e1065, #0f172a);
-            padding: 12px 20px;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Space Grotesk', sans-serif;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            z-index: 100000; /* Sabse upar dikhega */
-            border-bottom: 2px solid #d4af37;
-            width: 100%;
-        }
-        
-        /* Twinkling Stars Background */
-        .ramadan-stars {
-            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
-            background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px);
-            background-size: 90px 90px;
-            opacity: 0.3;
-            animation: twinkle 3s infinite alternate;
-            pointer-events: none;
-        }
-
-        .banner-content { z-index: 2; display: flex; align-items: center; gap: 12px; }
-
-        /* 3D Gold Text Effect */
-        .banner-content strong {
-            color: #ffd700;
-            text-shadow: 1px 1px 0px #b8860b, 2px 2px 0px #b8860b, 3px 3px 5px rgba(0,0,0,0.6);
-            font-size: 16px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .banner-content .banner-text { color: #f8fafc; font-size: 14px; font-weight: 500;}
-        .banner-content .banner-offer { background: #10b981; color: white; padding: 3px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 5px rgba(16,185,129,0.4); animation: pulse 2s infinite;}
-
-        /* Swinging Lanterns */
-        .lantern {
-            font-size: 26px;
-            position: absolute;
-            top: -8px;
-            transform-origin: top center;
-            animation: swing 3s infinite ease-in-out;
-            filter: drop-shadow(0 5px 15px rgba(255, 215, 0, 0.8));
-        }
-        .left-lantern { left: 10%; animation-delay: 0s; }
-        .right-lantern { right: 10%; animation-delay: 1.5s; }
-
-        /* Glowing Moon */
-        .moon { font-size: 24px; animation: glowMoon 2s infinite alternate; }
-
-        .close-banner {
-            position: absolute; right: 15px; background: transparent; border: none;
-            color: #cbd5e1; font-size: 20px; cursor: pointer; transition: 0.3s; z-index: 3;
-        }
-        .close-banner:hover { color: #ef4444; transform: scale(1.2); }
-
-        /* Animations */
-        @keyframes swing { 0% { transform: rotate(15deg); } 50% { transform: rotate(-15deg); } 100% { transform: rotate(15deg); } }
-        @keyframes glowMoon { 0% { filter: drop-shadow(0 0 5px #ffd700); transform: scale(1); } 100% { filter: drop-shadow(0 0 15px #ffd700); transform: scale(1.1); } }
-        @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 0.7; } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-        /* Mobile View Fix */
-        @media (max-width: 768px) {
-            .left-lantern, .right-lantern { display: none; } 
-            .banner-content strong { font-size: 14px; }
-            .banner-content .banner-text { font-size: 12px; }
-            .ramadan-banner { padding: 10px 30px 10px 10px; }
-        }
-    </style>
-
-    <div id="ramadanBanner" class="ramadan-banner" style="display: none;">
-        <div class="ramadan-stars"></div>
-        <div class="lantern left-lantern">🏮</div>
-        
-        <div class="banner-content">
-            <span class="moon">🌙</span>
-            <div>
-                <strong>Ramadan Mubarak!</strong> 
-                <span class="banner-text"> May this holy month bring you knowledge & success.</span> 
-                <span class="banner-offer">FLAT 50% OFF</span>
-            </div>
-        </div>
-
-        <div class="lantern right-lantern">🏮</div>
-        <button class="close-banner" onclick="closeRamadanBanner()" title="Close">✖</button>
-    </div>
-
-    <script>
-        function checkRamadanBanner() {
-            // Set Expiry Date: 20th March 2026, 11:59:59 PM
-            const expiryDate = new Date('2026-03-20T23:59:59'); 
-            const now = new Date();
-            const banner = document.getElementById('ramadanBanner');
-            
-            // Check agar user ne pehle hi ise 'Cut (✖)' kar diya ho
-            const isDismissed = localStorage.getItem('ramadanBannerDismissed');
-
-            // Agar aaj ki date 20 March se pehle ki hai aur dismiss nahi hua hai, to dikhao
-            if (now <= expiryDate && !isDismissed) {
-                banner.style.display = 'flex';
-            }
-        }
-
-        function closeRamadanBanner() {
-            document.getElementById('ramadanBanner').style.display = 'none';
-            localStorage.setItem('ramadanBannerDismissed', 'true'); // Browser ko yaad rahega
-        }
-
-        // Page load hote hi check karega
-        window.addEventListener('DOMContentLoaded', checkRamadanBanner);
-    </script>
+    <div class="evil-glow orb-2"></div>           
     <header class="header">
         <a href="/" class="logo">
             <i class='bx bx-code-block'></i> Code<span class="neon-text">Master</span>
@@ -469,8 +351,167 @@
             }
         }
     </script>
+    <style>
+        /* 3D Viewport Setup */
+        .ad-3d-container {
+            perspective: 1000px; /* 3D Space create karta hai */
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 999999;
+            display: none; /* JS se show hoga */
+        }
+
+        /* The 3D Card */
+        .ad-3d-card {
+            width: 320px;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b, #0f172a);
+            border: 2px solid #d4af37;
+            border-radius: 20px;
+            padding: 25px 20px;
+            color: white;
+            position: relative;
+            transform-style: preserve-3d; /* 3D Elements ko allow karta hai */
+            box-shadow: -15px 15px 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(212, 175, 55, 0.2);
+            animation: float3D 6s ease-in-out infinite; /* Hawa me tairne ka animation */
+            transition: transform 0.5s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Hover karne par Card sidha ho jayega */
+        .ad-3d-card:hover {
+            transform: translateY(-10px) rotateX(0deg) rotateY(0deg) scale(1.05) !important;
+            animation-play-state: paused;
+        }
+
+        /* 🌟 Laser/Shine Effect jo card par chalega */
+        .ad-3d-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            animation: laserShine 4s infinite;
+            z-index: 1;
+        }
+
+        /* Floating 3D Animation */
+        @keyframes float3D {
+            0%, 100% { transform: translateY(0) rotateX(15deg) rotateY(20deg); }
+            50% { transform: translateY(-20px) rotateX(5deg) rotateY(10deg); }
+        }
+
+        @keyframes laserShine {
+            0% { left: -150%; }
+            50% { left: 200%; }
+            100% { left: 200%; }
+        }
+
+        /* Elements inside card jumping out (3D pop effect) */
+        .ad-content {
+            transform: translateZ(40px); /* Text bahar ki taraf niklega */
+            position: relative;
+            z-index: 2;
+        }
+
+        .ad-title {
+            color: #ffd700;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            text-shadow: 0 4px 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .ad-desc {
+            font-size: 14px;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .ad-btn {
+            background: linear-gradient(45deg, #d4af37, #f59e0b);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+            transform: translateZ(60px); /* Button aur bhi aage niklega */
+            transition: 0.3s;
+            width: 100%;
+        }
+        .ad-btn:hover { background: linear-gradient(45deg, #f59e0b, #d4af37); transform: translateZ(60px) scale(1.05); }
+
+        .close-ad-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none; color: white;
+            border-radius: 50%; width: 25px; height: 25px;
+            font-size: 14px; cursor: pointer;
+            z-index: 10; transform: translateZ(30px);
+        }
+        .close-ad-btn:hover { background: #ef4444; }
+
+        /* Mobile View: Center the ad */
+        @media (max-width: 768px) {
+            .ad-3d-container {
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 20px;
+            }
+            .ad-3d-card { width: 90vw; max-width: 320px; }
+        }
+    </style>
+
+    <div class="ad-3d-container" id="ramadan3DAd">
+        <div class="ad-3d-card">
+            <button class="close-ad-btn" onclick="close3DAd()">✖</button>
+            <div class="ad-content">
+                <div style="font-size: 45px; margin-bottom: -10px; animation: pulse 2s infinite;">🌙</div>
+                <h2 class="ad-title">Ramadan Offer</h2>
+                <p class="ad-desc">Unlock premium coding courses & Pro IDE features at <b>Flat 50% OFF</b>.</p>
+                <button class="ad-btn" onclick="window.location.href='/signup.html'">Claim Discount Now 🚀</button>
+                <p style="font-size: 11px; color: #64748b; margin-top: 10px;">Valid till 20 March 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function init3DAd() {
+            const expiryDate = new Date('2026-03-20T23:59:59'); 
+            const now = new Date();
+            const adContainer = document.getElementById('ramadan3DAd');
+            
+            const isDismissed = localStorage.getItem('ramadan3DAdClosed');
+
+            // Agar 20 March se pehle ka time hai aur user ne cut nahi kiya hai
+            if (now <= expiryDate && !isDismissed) {
+                // Thodi der baad ad dikhane ke liye (page load hone ke 2 second baad)
+                setTimeout(() => {
+                    adContainer.style.display = 'block';
+                }, 2000);
+            }
+        }
+
+        function close3DAd() {
+            const adContainer = document.getElementById('ramadan3DAd');
+            adContainer.style.display = 'none';
+            localStorage.setItem('ramadan3DAdClosed', 'true'); // Browser ko yaad rahega
+        }
+
+        window.addEventListener('DOMContentLoaded', init3DAd);
+    </script>
 </body>
 </html>
+
 
 
 
