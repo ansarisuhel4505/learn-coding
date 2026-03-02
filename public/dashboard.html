@@ -382,6 +382,17 @@ html.dark-theme .profile-info b { color: #f8fafc; }
         html.dark-theme #certExamName { color: #10b981 !important; }
         html.dark-theme #certScore { color: #10b981 !important; }
         html.dark-theme .gold-text { color: #d4af37 !important; }
+        /* 🌟 NAYA: HEATMAP CSS 🌟 */
+        .streak-container { margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .heat-box { width: 14px; height: 14px; border-radius: 3px; background: #e2e8f0; transition: 0.2s; cursor: pointer; }
+        .heat-box:hover { transform: scale(1.2); }
+        .heat-box.lvl-1 { background: #9be9a8; }
+        .heat-box.lvl-2 { background: #40c463; }
+        .heat-box.lvl-3 { background: #30a14e; }
+        .heat-box.lvl-4 { background: #216e39; }
+        
+        html.dark-theme .streak-container { border-color: #334155; }
+        html.dark-theme .heat-box { background: #334155; }
         
     </style>
 </head>
@@ -1751,7 +1762,15 @@ async function loadMyProfile() {
                     <p><i class="fas fa-phone"></i> <b>Mobile:</b> ${u.mobile || '<span style="color:#94a3b8; font-style:italic;">Not Provided</span>'}</p>
                 </div>
                 <button onclick="openEditProfile('${u.mobile || ''}')" class="btn btn-warning" style="margin-top: 20px; width: 100%; color: white; background: #8b5cf6;"><i class="fas fa-user-edit"></i> Edit Profile</button>
+                <div class="streak-container">
+                    <h3 style="color: #1e293b; margin-bottom: 10px; font-size: 18px; text-align: left;">
+                        <i class="fas fa-fire" style="color: #f59e0b;"></i> Daily Streak: <span id="streakCount" style="color: #f59e0b; font-weight: bold;">0</span> Days
+                    </h3>
+                    <div id="heatmap-grid" style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-start;">
+                        </div>
+                </div>
             `;
+            initHeatmap();
         } else {
             document.getElementById('profileDisplay').innerHTML = `<p style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Error: ${data.message}</p>`;
         }
@@ -1760,6 +1779,61 @@ async function loadMyProfile() {
         document.getElementById('profileDisplay').innerHTML = `<p style="color:#ef4444;">Network Error. Cannot load profile.</p>`;
     }
 }
+
+        // ==========================================
+        // 🟩 GITHUB/LEETCODE STYLE HEATMAP LOGIC
+        // ==========================================
+        function initHeatmap() {
+            const today = new Date().toISOString().split('T')[0];
+            const rollNo = localStorage.getItem('cm_roll');
+            const key = `cm_activity_${rollNo}`;
+            
+            let activity = JSON.parse(localStorage.getItem(key)) || {};
+            
+            // Aaj ke din login record karna (Activity count badhana)
+            activity[today] = (activity[today] || 0) + 1;
+            localStorage.setItem(key, JSON.stringify(activity));
+
+            // Streak Calculate karna
+            let streak = 0;
+            let d = new Date();
+            while(true) {
+                let dateStr = d.toISOString().split('T')[0];
+                if(activity[dateStr]) {
+                    streak++;
+                    d.setDate(d.getDate() - 1); // Pichla din check karo
+                } else {
+                    break; // Chain tut gayi
+                }
+            }
+            if(document.getElementById('streakCount')) {
+                document.getElementById('streakCount').innerText = streak;
+            }
+
+            // Pichle 60 din ka Graph banana
+            let html = '';
+            for(let i=59; i>=0; i--) {
+                let pastDate = new Date();
+                pastDate.setDate(pastDate.getDate() - i);
+                let dateStr = pastDate.toISOString().split('T')[0];
+                let count = activity[dateStr] || 0;
+
+                let level = '';
+                if(count > 0 && count <= 2) level = 'lvl-1';
+                else if(count > 2 && count <= 4) level = 'lvl-2';
+                else if(count > 4 && count <= 6) level = 'lvl-3';
+                else if(count > 6) level = 'lvl-4';
+
+                // Format Date for Hover Tooltip (e.g., 24 Mar)
+                let showDate = pastDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+                html += `<div class="heat-box ${level}" title="${showDate}: ${count} Logins/Activity"></div>`;
+            }
+            
+            if(document.getElementById('heatmap-grid')) {
+                document.getElementById('heatmap-grid').innerHTML = html;
+            }
+        }
         // ==========================================
 // ✏️ EDIT PROFILE LOGIC
 // ==========================================
