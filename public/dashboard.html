@@ -1450,7 +1450,7 @@ function googleTranslateElementInit() {
   }, 'google_translate_element');
 }
        // ==========================================
-        // 📈 STUDENT ANALYTICS (CHART.JS) LOGIC (PERCENTAGE FIX)
+        // 📈 STUDENT ANALYTICS (CHART.JS) LOGIC (EXACT PERCENTAGE FIX)
         // ==========================================
         let myChart = null; 
 
@@ -1460,73 +1460,111 @@ function googleTranslateElementInit() {
             
             if(!roll || !pass) return alert("Please enter Roll No and Password to view graph!");
 
-            const res = await fetch('/api/check-result', { 
-                method: 'POST', headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ rollNo: roll, password: pass }) 
-            });
-            const data = await res.json();
-            
-            if(!data.success) return alert(data.message);
-            
-            if(data.results.length === 0) {
-                return alert("No exams given yet! Graph cannot be generated.");
-            }
+            const btn = document.querySelector('button[onclick="loadAnalytics()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating...`;
+            btn.disabled = true;
 
-            // 🌟 NAYA LOGIC: Percentage Calculate Karna
-            const examNames = data.results.map(r => r.examTitle);
-            const percentages = data.results.map(r => {
-                // अगर API से totalMarks आ रहा है तो उसे यूज़ करो, वरना 100 मान लो
-                let total = r.totalMarks ? r.totalMarks : 100;
-                let perc = (r.score / total) * 100;
-                return parseFloat(perc.toFixed(2)); // .toFixed(2) से 85.50% जैसा फॉर्मेट आएगा
-            });
+            try {
+                // 1. Student ka result fetch karo
+                const res = await fetch('/api/check-result', { 
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ rollNo: roll, password: pass }) 
+                });
+                const data = await res.json();
+                
+                if(!data.success) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return alert(data.message);
+                }
+                if(data.results.length === 0) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return alert("No exams given yet! Graph cannot be generated.");
+                }
 
-            if(myChart) {
-                myChart.destroy();
-            }
+                // 🌟 2. NAYA JUGAD: Exams ki list fetch karo taaki har exam ka asli "Total Marks" pata chal sake
+                const examsRes = await fetch('/api/exams');
+                const allExams = await examsRes.json();
+                
+                // Ek dictionary bana lo { "Exam Name": Total Marks }
+                const examTotalMarksMap = {};
+                allExams.forEach(e => {
+                    examTotalMarksMap[e.title] = parseFloat(e.totalMarks) || 100;
+                });
 
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'line', 
-                data: {
-                    labels: examNames,
-                    datasets: [{
-                        label: 'Performance (%)', // Label Change
-                        data: percentages, // Percentage data pass kiya
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#10b981',
-                        pointRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            max: 100, // Y-axis ab hamesha 100% tak jayegi
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%'; // Y-axis par % ka sign lagayega
+                // 🌟 3. Asli Percentage Calculation (Score / Total Marks * 100)
+                const examNames = data.results.map(r => r.examTitle);
+                const percentages = data.results.map(r => {
+                    let obtainedScore = parseFloat(r.score) || 0;
+                    
+                    // Map se total marks nikalo (agar exam delete ho gaya ho to 100 maan lo)
+                    let totalMarks = examTotalMarksMap[r.examTitle] || parseFloat(r.totalMarks) || 100;
+                    
+                    // Percentage Formula: (Obtained / Total) * 100
+                    let perc = (obtainedScore / totalMarks) * 100;
+                    
+                    return parseFloat(perc.toFixed(2)); // Jaise 5/5 = 100%, 5/50 = 10%
+                });
+
+                if(myChart) {
+                    myChart.destroy();
+                }
+
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                myChart = new Chart(ctx, {
+                    type: 'line', 
+                    data: {
+                        labels: examNames,
+                        datasets: [{
+                            label: 'Performance (%)',
+                            data: percentages, // Asli Percentage Data Pass kiya
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#10b981',
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                max: 100, // Y-axis ab hamesha 100% tak jayegi
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%'; // Y-axis par % ka sign lagayega
+                                    }
                                 }
                             }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' Score: ' + context.raw + '%'; // Hover karne par % dikhayega
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' Score: ' + context.raw + '%'; // Hover karne par % dikhayega
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+
+            } catch (error) {
+                console.error(error);
+                alert("Error loading graph data!");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
+            
+               
+                
             
             
 
