@@ -1,2 +1,2 @@
-# learn-coding
-develope your skill through coding
+# CodeMaster
+develope your skill through CodeMaster
