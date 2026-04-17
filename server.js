@@ -633,6 +633,7 @@ const model = genAI.getGenerativeModel({
             });
         }
     }
+});
 // ==========================================
 // 📄 AI RESUME GENERATOR API
 // ==========================================
