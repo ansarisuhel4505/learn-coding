@@ -618,13 +618,21 @@ const model = genAI.getGenerativeModel({
         res.json({ success: true, reply: text });
 
     } catch (error) {
-        console.error("AI Error Details:", error); // टर्मिनल में पूरा एरर देखने के लिए
-        res.json({ 
-            success: false, 
-            reply: "⚠️ AI Brain Error: Please check if GEMINI_API_KEY is set in Vercel/Local environment variables." 
-        });
+        console.error("AI Error Details:", error.message); 
+        
+        // 🌟 स्मार्ट एरर हैंडलिंग: अब AI असली दिक्कत बताएगा
+        if (error.status === 503) {
+            res.json({ 
+                success: false, 
+                reply: "🤖 CodeMaster AI अभी बहुत सारे सवालों के जवाब दे रहा है (सर्वर बिज़ी है)। कृपया 1-2 मिनट बाद दोबारा पूछें!" 
+            });
+        } else {
+            res.json({ 
+                success: false, 
+                reply: `⚠️ AI Brain Error: (Real Error: ${error.message})` 
+            });
+        }
     }
-});
 // ==========================================
 // 📄 AI RESUME GENERATOR API
 // ==========================================
