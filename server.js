@@ -597,7 +597,7 @@ app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
         // 1.5-flash सबसे लेटेस्ट और स्टेबल मॉडल है
         // मॉडल का नाम इस तरह से देने पर v1beta वाला एरर खत्म हो जाएगा
 const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash-8b" 
+    model: "gemini-1.5-flash" 
 });
         
         let result;
