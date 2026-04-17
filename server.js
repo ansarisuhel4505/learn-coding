@@ -648,7 +648,7 @@ app.post('/api/generate-resume', async (req, res) => {
         Make the summary impactful and experience detailed. Do not include any markdown formatting like \`\`\`json.`;
 
         // Gemini 2.5 Flash का इस्तेमाल (या जो भी मॉडल आप यूज़ कर रहे हैं)
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(aiPrompt);
         const responseText = result.response.text();
 
