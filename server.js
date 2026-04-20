@@ -899,13 +899,15 @@ app.put('/api/admin/students/toggle-block/:id', checkAdmin, async (req, res) => 
     }
 });
 // ==========================================
-// VERCEL EXPORT (Server Start)
+// VERCEL EXPORT (Server Start) - FIXED 🚀
 // ==========================================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
+if (process.env.NODE_ENV !== 'production') {
+    const LOCAL_PORT = process.env.PORT || 8080;
+    app.listen(LOCAL_PORT, () => {
+        console.log(`💻 Local Server running on port ${LOCAL_PORT}`);
+    });
+}
+module.exports = app;
 
 
 
