@@ -901,10 +901,10 @@ app.put('/api/admin/students/toggle-block/:id', checkAdmin, async (req, res) => 
 // ==========================================
 // VERCEL EXPORT (Server Start)
 // ==========================================
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, "0.0.0.0", () => { console.log(`🚀 Server is running beautifully on port ${PORT}`); });
-}
-module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
 
 
