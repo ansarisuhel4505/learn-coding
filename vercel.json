@@ -4,20 +4,12 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "fronted/**/*",
-      "use": "@vercel/static"
     }
   ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/server.js"
-    },
+  "routes": [
     {
       "source": "/(.*)",
-      "destination": "/fronted/$1"
+      "destination": "/server.js"
     }
   ]
 }
