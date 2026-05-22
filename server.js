@@ -133,6 +133,16 @@ const Feedback = mongoose.model('Feedback', new mongoose.Schema({
     date: { type: Date, default: Date.now }
 }));
 
+// 🌟 NAYA: Secure OTP Schema (Auto-delete after 10 mins)
+const OTPSchema = new mongoose.Schema({
+    email: String,
+    otp: String,
+    userData: Object, 
+    type: String, 
+    createdAt: { type: Date, default: Date.now, expires: 600 } // 600 seconds = 10 mins me OTP auto-delete
+});
+const OTP = mongoose.model('OTP', OTPSchema);
+
 // ==========================================
 // 4. PROFESSIONAL EMAIL SYSTEM (Nodemailer)
 // ==========================================
@@ -206,8 +216,6 @@ passport.deserializeUser(async (id, done) => {
 // 🚀 SECURE SIGNUP (OTP VERIFICATION SYSTEM)
 // ==========================================
 
-const pendingSignups = {}; // जो बच्चे OTP का इंतज़ार कर रहे हैं, उनका डेटा यहाँ सेव होगा
-
 // 1️⃣ Step 1: फॉर्म सबमिट करने पर OTP भेजना
 app.post('/api/signup-init', async (req, res) => {
     try {
@@ -233,13 +241,13 @@ app.post('/api/signup-init', async (req, res) => {
         // 3. 6-digit का OTP बनाओ
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         
-        // 4. बच्चे का डेटा 10 मिनट के लिए टेम्परेरी मेमोरी में सेव करो
-        pendingSignups[email] = {
-            userData: { username, email, password, mobile, rollNo },
-            otp: otp,
-            expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
-        };
-
+                // 4. बच्चे का डेटा MongoDB में सुरक्षित सेव करो
+        await OTP.findOneAndUpdate(
+            { email: email, type: 'signup' }, 
+            { email, otp, userData: { username, email, password, mobile, rollNo }, type: 'signup' }, 
+            { upsert: true, new: true }
+        );
+        
         // 5. ईमेल पर OTP भेजो
         const mailOptions = {
             from: `"CodeMaster Verification" <${process.env.EMAIL_USER}>`,
@@ -262,11 +270,11 @@ app.post('/api/signup-init', async (req, res) => {
 // 2️⃣ Step 2: OTP चेक करके असली अकाउंट बनाना
 app.post('/api/signup-verify', async (req, res) => {
     try {
-        const { email, otp } = req.body;
-        const pending = pendingSignups[email];
+                const { email, otp } = req.body;
+        const pending = await OTP.findOne({ email: email, otp: otp, type: 'signup' });
 
-        // चेक करो कि OTP सही है और टाइम एक्सपायर नहीं हुआ है
-        if (pending && pending.otp === otp && pending.expiresAt > Date.now()) {
+        // चेक करो कि OTP डेटाबेस में है या नहीं
+        if (pending) {
             
             const { username, password, mobile, rollNo } = pending.userData;
             
@@ -276,8 +284,9 @@ app.post('/api/signup-verify', async (req, res) => {
             // डेटाबेस में असली अकाउंट बनाओ!
             await User.create({ username, email, password: hashedPassword, mobile, rollNo });
             
-            // मेमोरी से कचरा साफ करो
-            delete pendingSignups[email];
+                        // MongoDB से इस्तेमाल हो चुका OTP डिलीट करो
+            await OTP.deleteOne({ _id: pending._id });
+            
             
             // वेलकम ईमेल भेजो
             sendWelcomeEmail(email, username);
@@ -349,9 +358,9 @@ app.post('/api/reset-password', async (req, res) => {
     try {
         // 🌟 NAYA: Naye password ko bhi encrypt karke save karo
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        
-        await User.updateOne({ email: email }, { password: hashedPassword });
-        delete otpStore[email]; 
+              await User.updateOne({ email: email }, { password: hashedPassword });
+        await OTP.deleteOne({ email: email, type: 'reset' }); 
+  
         
         res.json({ success: true, message: 'Password updated successfully!' });
     } catch (error) {
@@ -363,8 +372,6 @@ app.post('/api/reset-password', async (req, res) => {
 // 🌟 6.5 FORGOT PASSWORD & OTP SYSTEM
 // ==========================================
 
-// OTP को टेम्परेरी मेमोरी में सेव करने के लिए
-const otpStore = {}; 
 
 // 1️⃣ Send OTP API (Email पर OTP भेजना)
 app.post('/api/send-otp', async (req, res) => {
@@ -377,8 +384,13 @@ app.post('/api/send-otp', async (req, res) => {
     // 6-digit random OTP बनाना
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // OTP को 5 मिनट (300000 ms) के लिए सेव करना
-    otpStore[email] = { otp, expiresAt: Date.now() + 300000 }; 
+            // OTP को MongoDB में सेव करना
+    await OTP.findOneAndUpdate(
+        { email: email, type: 'reset' }, 
+        { email, otp, type: 'reset' }, 
+        { upsert: true, new: true }
+    );
+
 
     // Email का डिज़ाइन (आपके पहले से बने transporter का इस्तेमाल करके)
     const mailOptions = {
@@ -401,34 +413,19 @@ app.post('/api/send-otp', async (req, res) => {
 });
 
 // 2️⃣ Verify OTP API (OTP चेक करना)
-app.post('/api/verify-otp', (req, res) => {
+app.post('/api/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
-    const record = otpStore[email];
+    const record = await OTP.findOne({ email: email, otp: otp, type: 'reset' });
 
-    // चेक करें कि OTP मौजूद है, मैच कर रहा है, और टाइम खत्म नहीं हुआ है
-    if (record && record.otp === otp && record.expiresAt > Date.now()) {
+    // चेक करें कि OTP मौजूद है और मैच कर रहा है
+    if (record) {
         res.json({ success: true, message: 'OTP Verified!' });
     } else {
         res.json({ success: false, message: '❌ Invalid or Expired OTP.' });
     }
 });
 
-// 3️⃣ Reset Password API (नया पासवर्ड डेटाबेस में सेव करना)
-app.post('/api/reset-password', async (req, res) => {
-    const { email, newPassword } = req.body;
-    
-    try {
-        // MongoDB में बच्चे का नया पासवर्ड अपडेट करना
-        await User.updateOne({ email: email }, { password: newPassword });
-        
-        // सिक्योरिटी के लिए इस्तेमाल हो चुके OTP को डिलीट कर देना
-        delete otpStore[email]; 
-        
-        res.json({ success: true, message: 'Password updated successfully!' });
-    } catch (error) {
-        res.json({ success: false, message: 'Database error occurred while resetting password.' });
-    }
-});
+
 
 // ==========================================
 // 7. COMPILER API (JDoodle) - INPUT (STDIN) FIXED
