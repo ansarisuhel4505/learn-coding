@@ -489,6 +489,38 @@ app.post('/api/compile-code', async (req, res) => {
         res.json(data);
     } catch (error) { res.status(500).json({ error: "Compiler connection failed!" }); }
 });
+
+           
+// 👇 🔒 ADMIN LOGIN API 👇
+app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    
+    // Vercel का पासवर्ड या लोकल पासवर्ड (Suhel@123)
+        if (password === process.env.ADMIN_PASSWORD) {
+        req.session.isAdmin = true; // 🌟 MAGIC FIX: अब गार्ड आपको नहीं रोकेगा!
+        req.session.save(() => {
+            res.json({ success: true, message: "Welcome Admin!" });
+        });
+        } else {
+        res.json({ success: false, message: "Incorrect Password!" });
+    }
+});
+
+// ==========================================
+// 🛡️ SECURITY GUARD (IsAdmin Middleware)
+// ==========================================
+const checkAdmin = (req, res, next) => {
+    // अगर Session में Admin है, तो ही आगे जाने दो
+    if (req.session && req.session.isAdmin) {
+        return next();
+    }
+    // वरना सीधा हैकर को एरर फेंक कर मारो!
+    return res.status(403).json({ success: false, message: "🚨 Unauthorized! Admin access required." });
+};
+// 🌟 NAYA: UI को बताने के लिए कि असली एडमिन कौन है
+app.get('/api/admin/check-session', checkAdmin, (req, res) => {
+    res.json({ success: true, message: "Real Admin Verified" });
+});
 // ==========================================
 // 🚀 ENTERPRISE BIOMETRIC LOGIN (FINGERPRINT/FACE-ID)
 // ==========================================
@@ -589,38 +621,6 @@ app.post('/api/admin/webauthn/login-verify', async (req, res) => {
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
-});
-
-           
-// 👇 🔒 ADMIN LOGIN API 👇
-app.post('/api/admin/login', (req, res) => {
-    const { password } = req.body;
-    
-    // Vercel का पासवर्ड या लोकल पासवर्ड (Suhel@123)
-        if (password === process.env.ADMIN_PASSWORD) {
-        req.session.isAdmin = true; // 🌟 MAGIC FIX: अब गार्ड आपको नहीं रोकेगा!
-        req.session.save(() => {
-            res.json({ success: true, message: "Welcome Admin!" });
-        });
-        } else {
-        res.json({ success: false, message: "Incorrect Password!" });
-    }
-});
-
-// ==========================================
-// 🛡️ SECURITY GUARD (IsAdmin Middleware)
-// ==========================================
-const checkAdmin = (req, res, next) => {
-    // अगर Session में Admin है, तो ही आगे जाने दो
-    if (req.session && req.session.isAdmin) {
-        return next();
-    }
-    // वरना सीधा हैकर को एरर फेंक कर मारो!
-    return res.status(403).json({ success: false, message: "🚨 Unauthorized! Admin access required." });
-};
-// 🌟 NAYA: UI को बताने के लिए कि असली एडमिन कौन है
-app.get('/api/admin/check-session', checkAdmin, (req, res) => {
-    res.json({ success: true, message: "Real Admin Verified" });
 });
 
 
