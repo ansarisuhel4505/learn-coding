@@ -36,6 +36,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
 app.set('trust proxy', 1); 
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '-1');
+    next();
+});
 
 // 🌟 VERCEL SESSION FIX (MongoDB Store) 🌟
 const MongoStore = require('connect-mongo');
