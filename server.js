@@ -43,7 +43,7 @@ app.set('trust proxy', 1);
 const RateLimitMongo = require('rate-limit-mongo');
 
 const otpLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 मिनट
+    windowMs: 20 * 60 * 1000, // 10 मिनट
     max: 3, // 3 बार से ज़्यादा नहीं
     store: new RateLimitMongo({
         uri: process.env.MONGO_URI, // वही डेटाबेस जो आप यूज़ कर रहे हैं
