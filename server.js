@@ -38,23 +38,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
 app.set('trust proxy', 1); 
-// 🌟 NAYA: OTP Rate Limiter (Vercel Fix के साथ)
-// 🌟 NAYA: OTP Rate Limiter (Email-Based 100% Secure)
+
+// 🌟 NAYA: OTP Rate Limiter (Email-Based, 20 Minutes Block)
 const otpLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 मिनट
-    max: 3, // सिर्फ 3 OTP अलाउड
-    // 👇 MASTER STROKE: IP के बजाय सीधे 'Email' को ट्रैक करेगा
-    keyGenerator: (req, res) => {
-        // अगर फॉर्म में email है तो ईमेल ट्रैक करो, वरना असली IP निकालो
-        if (req.body && req.body.email) {
-            return req.body.email.toLowerCase(); // ईमेल के बेस पर ब्लॉक
-        }
-        return req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.ip;
+    windowMs: 20 * 60 * 1000, // 20 मिनट (20 * 60 * 1000 ms)
+    max: 3, // 20 मिनट में सिर्फ 3 OTP रिक्वेस्ट अलाउड हैं
+    
+    store: new RateLimitMongo({
+        uri: process.env.MONGO_URI,
+        collectionName: 'otp_rate_limits',
+        expireTimeSeconds: 1200 // 20 मिनट बाद डेटाबेस से रिकॉर्ड डिलीट हो जाएगा
+    }),
+    
+    keyGenerator: (req) => {
+        return req.body.email ? req.body.email.toLowerCase() : req.ip;
     },
-    message: { success: false, message: "⚠️ Too many OTP requests for this Email! Please try again after 10 minutes." }
+    
+    message: { success: false, message: "⚠️ Too many OTP requests for this Email! Please try again after 20 minutes." }
 });
-
-
 
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
