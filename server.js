@@ -259,6 +259,21 @@ passport.deserializeUser(async (id, done) => {
 app.post('/api/signup-init', otpLimiter, async (req, res) => {
     try {
         const { username, email, password, mobile, rollNo } = req.body; 
+                // 🌟 NAYA: Block Temporary Emails (Only Real & College Emails Allowed)
+        const emailLower = email.toLowerCase();
+        const allowedStandardDomains = ['@gmail.com', '@yahoo.com', '@outlook.com'];
+        
+        // चेक करें कि क्या ईमेल स्टैण्डर्ड है या कॉलेज की (.edu / .ac.in) है
+        const isStandardEmail = allowedStandardDomains.some(domain => emailLower.endsWith(domain));
+        const isCollegeEmail = emailLower.endsWith('.edu') || emailLower.endsWith('.ac.in') || emailLower.endsWith('.edu.in');
+        
+        if (!isStandardEmail && !isCollegeEmail) {
+            return res.json({ 
+                success: false, 
+                message: '❌ Temporary emails not allowed! Please use a valid Gmail, Yahoo, Outlook, or College (.edu / .ac.in) email ID.' 
+            });
+        }
+        
         
         // 1. Roll No चेक करो
         const rNum = parseInt(rollNo);
