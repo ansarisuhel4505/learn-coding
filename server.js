@@ -10,6 +10,8 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const nodemailer = require('nodemailer');
+const rateLimit = require('express-rate-limit');
+
 
 // 🌟 Google AI & Multer Setup 🌟
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -36,6 +38,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
 app.set('trust proxy', 1); 
+// 🌟 NAYA: OTP Rate Limiter (हैकर से बचाने के लिए)
+const otpLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 मिनट का टाइम
+    max: 3, // 10 मिनट में सिर्फ 3 OTP रिक्वेस्ट अलाउड हैं
+    message: { success: false, message: "⚠️ Too many requests from your device. Please try again after 10 minutes." }
+});
+
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
     res.set('Pragma', 'no-cache');
@@ -217,7 +226,7 @@ passport.deserializeUser(async (id, done) => {
 // ==========================================
 
 // 1️⃣ Step 1: फॉर्म सबमिट करने पर OTP भेजना
-app.post('/api/signup-init', async (req, res) => {
+app.post('/api/signup-init', otpLimiter, async (req, res) => {
     try {
         const { username, email, password, mobile, rollNo } = req.body; 
         
@@ -372,9 +381,8 @@ app.post('/api/reset-password', async (req, res) => {
 // 🌟 6.5 FORGOT PASSWORD & OTP SYSTEM
 // ==========================================
 
-
 // 1️⃣ Send OTP API (Email पर OTP भेजना)
-app.post('/api/send-otp', async (req, res) => {
+app.post('/api/send-otp', otpLimiter, async (req, res) => {
     const { email } = req.body;
     
     // चेक करें कि बच्चा डेटाबेस में रजिस्टर है या नहीं
