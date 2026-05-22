@@ -955,7 +955,15 @@ function adminLogout(event) {
     event.preventDefault(); 
     sessionStorage.removeItem('admin_auth'); 
     
-    window.location.href = '/admin-logout'; 
+    // 1. बैकग्राउंड में एडमिन का सेशन डिलीट करें
+    fetch('/admin-logout', { method: 'GET' })
+    .then(() => {
+        // 2. हिस्ट्री से एडमिन पेज डिलीट करके होम पेज पर फेंकें
+        window.location.replace('/'); 
+    })
+    .catch(err => {
+        window.location.replace('/'); 
+    });
 }
        </script>
 </body>
