@@ -486,6 +486,11 @@ const checkAdmin = (req, res, next) => {
     // वरना सीधा हैकर को एरर फेंक कर मारो!
     return res.status(403).json({ success: false, message: "🚨 Unauthorized! Admin access required." });
 };
+// 🌟 NAYA: UI को बताने के लिए कि असली एडमिन कौन है
+app.get('/api/admin/check-session', checkAdmin, (req, res) => {
+    res.json({ success: true, message: "Real Admin Verified" });
+});
+
 
 // 🌟 NAYA: Edit/Update Exam API 🌟
 app.put('/api/exams/:id', checkAdmin, async (req, res) => {
@@ -496,6 +501,7 @@ app.put('/api/exams/:id', checkAdmin, async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+
 
 // ==========================================
 // 8. ADMIN & STUDENT APIs
