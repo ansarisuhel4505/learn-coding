@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - CodeMaster</title>
+    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -136,6 +138,17 @@
         
         <button onclick="checkAdminLogin()" class="btn btn-success" style="width: 100%; font-size: 16px; padding: 12px;">Login Securely</button>
         <button onclick="window.location.href='/'" class="btn btn-danger" style="width: 100%; margin-top: 10px; font-size: 14px; padding: 10px; background: transparent; color: #ef4444; border: 1px solid #ef4444;">Back to Home</button>
+                <!-- 🌟 NAYA: Enterprise Biometric Button -->
+        <div style="margin-top: 25px; display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <hr style="flex: 1; border: none; border-top: 1px solid #cbd5e1;">
+            <span style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase;">Or Access With</span>
+            <hr style="flex: 1; border: none; border-top: 1px solid #cbd5e1;">
+        </div>
+        
+        <button onclick="loginWithBiometric()" class="btn" style="width: 100%; margin-top: 15px; background: #0f172a; color: white; border-radius: 10px; padding: 12px; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s; border: 1px solid #334155;">
+            <i class="fas fa-fingerprint" style="font-size: 24px; color: #3b82f6; animation: pulse 2s infinite;"></i> Biometric / Face ID
+        </button>
+
     </div>
     </div>
     
@@ -170,6 +183,10 @@
                 <p style="color: #64748b; font-size: 18px; max-width: 500px; line-height: 1.6;">
                     System is secure and ready. Click the <b>Menu Icon (☰)</b> at the top left to manage courses, live exams, students, and results.
                 </p>
+                <button onclick="registerBiometric()" class="btn btn-warning" style="margin-top: 25px; background: #0f172a; color: white; padding: 12px 25px; border-radius: 8px; font-size: 16px; border: 1px solid #3b82f6; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);">
+    <i class="fas fa-fingerprint" style="color: #3b82f6;"></i> Setup Fingerprint / Face ID
+                </button>
+                
             </div>
         </div>
 
@@ -913,6 +930,67 @@ function toggleAdminPassword() {
         eyeIcon.classList.add('fa-eye'); // Icon change (ankh khuli)
     }
 }
+        // ==========================================
+// 🚀 ENTERPRISE BIOMETRIC LOGIC
+// ==========================================
+const { startRegistration, startAuthentication } = SimpleWebAuthnBrowser;
+
+// 1. Dashboard ke andar aakar pehli baar setup karna
+async function registerBiometric() {
+    try {
+        const resp = await fetch('/api/admin/webauthn/register-options');
+        const options = await resp.json();
+        
+        const attResp = await startRegistration(options);
+        
+        const verificationResp = await fetch('/api/admin/webauthn/register-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(attResp),
+        });
+        
+        const verificationJSON = await verificationResp.json();
+        if (verificationJSON.success) {
+            alert('✅ Biometric Device Linked! You can now login using Fingerprint/Face ID.');
+        } else {
+            alert('❌ Registration failed: ' + verificationJSON.message);
+        }
+    } catch (error) {
+        if (error.name === 'NotAllowedError') return; 
+        alert('⚠️ Device not supported or error: ' + error.message);
+    }
+}
+
+// 2. Login Screen se bina password andar aana
+async function loginWithBiometric() {
+    try {
+        const resp = await fetch('/api/admin/webauthn/login-options');
+        const options = await resp.json();
+        
+        if (options.success === false) {
+            return alert('❌ No Biometric linked! Please login with Master Password first and click "Setup Fingerprint".');
+        }
+
+        const asseResp = await startAuthentication(options);
+        
+        const verificationResp = await fetch('/api/admin/webauthn/login-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(asseResp),
+        });
+        
+        const verificationJSON = await verificationResp.json();
+        if (verificationJSON.success) {
+            document.getElementById('adminLoginOverlay').style.display = 'none';
+        } else {
+            alert('❌ Fingerprint mismatch or blocked!');
+        }
+    } catch (error) {
+        if (error.name === 'NotAllowedError') return; 
+        console.error(error);
+    }
+}
+
 
 // 👉 NAYA LOGIC: Ab password backend se check hoga
 async function checkAdminLogin() {
