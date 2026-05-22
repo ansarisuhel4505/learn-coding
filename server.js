@@ -39,15 +39,21 @@ app.use(express.urlencoded({ extended: true }));
 // 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
 app.set('trust proxy', 1); 
 // 🌟 NAYA: OTP Rate Limiter (Vercel Fix के साथ)
+// 🌟 NAYA: OTP Rate Limiter (Email-Based 100% Secure)
 const otpLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000, 
-    max: 3, 
-    // 👇 यह लाइन रेट लिमिटर को Vercel के पीछे से असली यूज़र का IP ढूँढने में मदद करेगी
+    windowMs: 10 * 60 * 1000, // 10 मिनट
+    max: 3, // सिर्फ 3 OTP अलाउड
+    // 👇 MASTER STROKE: IP के बजाय सीधे 'Email' को ट्रैक करेगा
     keyGenerator: (req, res) => {
-        return req.headers['x-forwarded-for'] || req.ip;
+        // अगर फॉर्म में email है तो ईमेल ट्रैक करो, वरना असली IP निकालो
+        if (req.body && req.body.email) {
+            return req.body.email.toLowerCase(); // ईमेल के बेस पर ब्लॉक
+        }
+        return req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.ip;
     },
-    message: { success: false, message: "⚠️ Too many requests from your device. Please try again after 10 minutes." }
+    message: { success: false, message: "⚠️ Too many OTP requests for this Email! Please try again after 10 minutes." }
 });
+
 
 
 app.use((req, res, next) => {
