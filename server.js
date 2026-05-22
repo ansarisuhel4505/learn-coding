@@ -69,7 +69,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ==========================================
 app.post('/admin-login', (req, res) => {
     const enteredPassword = req.body.password;
-    const adminPassword = "Suhel@123"; 
+        const adminPassword = process.env.ADMIN_PASSWORD;
     if (enteredPassword === adminPassword) {
         req.session.isAdmin = true; 
         res.redirect('/admin.html');
@@ -460,12 +460,12 @@ app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     
     // Vercel का पासवर्ड या लोकल पासवर्ड (Suhel@123)
-    if (password === (process.env.ADMIN_PASSWORD || "Suhel@123")) {
+        if (password === process.env.ADMIN_PASSWORD) {
         req.session.isAdmin = true; // 🌟 MAGIC FIX: अब गार्ड आपको नहीं रोकेगा!
         req.session.save(() => {
             res.json({ success: true, message: "Welcome Admin!" });
         });
-    } else {
+        } else {
         res.json({ success: false, message: "Incorrect Password!" });
     }
 });
