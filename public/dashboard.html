@@ -1203,13 +1203,25 @@ localStorage.removeItem(`cm_save_${rollNo}_${examId}`);
             }
         }
 
-       function logoutUser(event) {
+        // ==========================================
+// 🔴 SECURE STUDENT LOGOUT LOGIC (HISTORY FIX)
+// ==========================================
+function logoutUser(event) {
     event.preventDefault(); 
-    localStorage.clear(); // सिक्योरिटी के लिए डेटा डिलीट
+    localStorage.clear(); // फ्रंटएंड से डेटा डिलीट
     
-    // 🌟 NAYA: Seedha Home Page (index.html) par bhejo
-    window.location.href = "/"; 
+    // 1. बैकग्राउंड में सर्वर से सेशन डिलीट करें
+    fetch('/logout', { method: 'GET' })
+    .then(() => {
+        // 2. हिस्ट्री से डैशबोर्ड डिलीट करके होम पेज पर फेंकें
+        window.location.replace('/'); 
+    })
+    .catch(err => {
+        // बैकअप
+        window.location.replace('/'); 
+    });
 }
+        
                 // ==========================================
         // 🌟 ANSWER KEY, RANK & DOWNLOAD LOGIC
         // ==========================================
