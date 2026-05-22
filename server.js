@@ -40,22 +40,23 @@ app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', 1); 
 
 // 🌟 NAYA: OTP Rate Limiter (Email-Based, 20 Minutes Block)
+const RateLimitMongo = require('rate-limit-mongo');
+
 const otpLimiter = rateLimit({
-    windowMs: 20 * 60 * 1000, // 20 मिनट (20 * 60 * 1000 ms)
-    max: 3, // 20 मिनट में सिर्फ 3 OTP रिक्वेस्ट अलाउड हैं
-    
+    windowMs: 10 * 60 * 1000, // 10 मिनट
+    max: 3, // 3 बार से ज़्यादा नहीं
     store: new RateLimitMongo({
-        uri: process.env.MONGO_URI,
+        uri: process.env.MONGO_URI, // वही डेटाबेस जो आप यूज़ कर रहे हैं
         collectionName: 'otp_rate_limits',
-        expireTimeSeconds: 1200 // 20 मिनट बाद डेटाबेस से रिकॉर्ड डिलीट हो जाएगा
+        expireTimeSeconds: 600 // 10 मिनट
     }),
-    
     keyGenerator: (req) => {
+        // ईमेल के बेस पर ब्लॉक करेगा, चाहे IP कुछ भी हो
         return req.body.email ? req.body.email.toLowerCase() : req.ip;
     },
-    
-    message: { success: false, message: "⚠️ Too many OTP requests for this Email! Please try again after 20 minutes." }
+    message: { success: false, message: "⚠️ Too many attempts! Please try again after 10 minutes." }
 });
+
 
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
