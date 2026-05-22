@@ -54,7 +54,7 @@ const otpLimiter = rateLimit({
         // ईमेल के बेस पर ब्लॉक करेगा, चाहे IP कुछ भी हो
         return req.body.email ? req.body.email.toLowerCase() : req.ip;
     },
-    message: { success: false, message: "⚠️ Too many attempts! Please try again after 10 minutes." }
+    message: { success: false, message: "⚠️ Too many attempts! Please try again after 20 minutes." }
 });
 
 
