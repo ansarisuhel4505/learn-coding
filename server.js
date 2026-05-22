@@ -521,6 +521,7 @@ const checkAdmin = (req, res, next) => {
 app.get('/api/admin/check-session', checkAdmin, (req, res) => {
     res.json({ success: true, message: "Real Admin Verified" });
 });
+
 // ==========================================
 // 🚀 ENTERPRISE BIOMETRIC LOGIN (FINGERPRINT/FACE-ID)
 // ==========================================
@@ -529,7 +530,7 @@ const rpName = 'CodeMaster Enterprise Security';
 
 // 1️⃣ Fingerprint Setup: Options Generate Karna
 app.get('/api/admin/webauthn/register-options', checkAdmin, async (req, res) => {
-    const rpID = new URL(req.headers.origin || 'http://localhost:8080').hostname;
+    const rpID = req.hostname; // 🌟 FIX: Vercel par automatically 'suhelansari.tech' utha lega
     const options = await generateRegistrationOptions({
         rpName,
         rpID,
@@ -546,8 +547,9 @@ app.get('/api/admin/webauthn/register-options', checkAdmin, async (req, res) => 
 app.post('/api/admin/webauthn/register-verify', checkAdmin, async (req, res) => {
     try {
         const expectedChallenge = req.session.currentChallenge;
-        const expectedOrigin = req.headers.origin;
-        const expectedRPID = new URL(expectedOrigin).hostname;
+        // 🌟 FIX: Asli Origin aur Domain pata karne ka 100% sahi tareeqa
+        const expectedOrigin = req.headers.origin || `${req.protocol}://${req.get('host')}`; 
+        const expectedRPID = req.hostname; 
 
         const verification = await verifyRegistrationResponse({
             response: req.body,
@@ -578,7 +580,7 @@ app.get('/api/admin/webauthn/login-options', async (req, res) => {
     const device = await AdminDevice.findOne();
     if (!device) return res.status(400).json({ success: false, message: "No Biometric Device Registered!" });
 
-    const rpID = new URL(req.headers.origin || 'http://localhost:8080').hostname;
+    const rpID = req.hostname; // 🌟 FIX
     const options = await generateAuthenticationOptions({
         rpID,
         allowCredentials: [{
@@ -601,8 +603,8 @@ app.post('/api/admin/webauthn/login-verify', async (req, res) => {
         const verification = await verifyAuthenticationResponse({
             response: req.body,
             expectedChallenge: req.session.currentChallenge,
-            expectedOrigin: req.headers.origin,
-            expectedRPID: new URL(req.headers.origin).hostname,
+            expectedOrigin: req.headers.origin || `${req.protocol}://${req.get('host')}`, // 🌟 FIX
+            expectedRPID: req.hostname, // 🌟 FIX
             authenticator: {
                 credentialID: Buffer.from(device.credentialID, 'base64url'),
                 credentialPublicKey: device.credentialPublicKey,
