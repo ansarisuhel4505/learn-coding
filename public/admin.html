@@ -882,13 +882,21 @@ function processCSV() {
       // ==========================================
 // 🔒 SECURE ADMIN LOGIN LOGIC (Backend Verification)
 // ==========================================
-
-// 👉 MAIN CHANGE: Yahan se MASTER_PASSWORD wali line hamesha ke liye delete kar di gayi hai! 👈
-
-// Check karo ki pehle se login hai ya nahi
-if (sessionStorage.getItem('admin_auth') === 'verified') {
-    document.getElementById('adminLoginOverlay').style.display = 'none';
+// 👉 🌟 NAYA: Backend se Asli Session Check karo
+async function verifyAdminSession() {
+    try {
+        const res = await fetch('/api/admin/check-session');
+        const data = await res.json();
+        // अगर बैकएंड ने कहा 'हाँ असली एडमिन है', तभी पर्दा हटेगा
+        if (data.success) {
+            document.getElementById('adminLoginOverlay').style.display = 'none';
+        }
+    } catch (e) {
+        // कुछ मत करो, हैकर को पासवर्ड वाली स्क्रीन ही दिखने दो
+    }
 }
+verifyAdminSession(); // पेज लोड होते ही चेक करो
+        
 
 // Password Show/Hide karne ka function (Yeh same rahega)
 function toggleAdminPassword() {
@@ -930,11 +938,11 @@ async function checkAdminLogin() {
         
         const data = await res.json();
         
-        if (data.success) {
-            // Password sahi nikla
-            sessionStorage.setItem('admin_auth', 'verified');
+                if (data.success) {
+            // Password sahi nikla, Backend ne HTTP-Only Cookie bhej di hai
             document.getElementById('adminLoginOverlay').style.display = 'none'; // Parda hata do
         } else {
+                    
             // Password galat nikla
             alert("❌ Incorrect Password! Try again.");
             document.getElementById('adminPassInput').value = ''; // Input khali kar do
