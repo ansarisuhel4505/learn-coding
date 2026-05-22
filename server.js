@@ -11,6 +11,23 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
+// 🌟 NAYA: Enterprise Biometric Login (WebAuthn)
+const {
+    generateRegistrationOptions,
+    verifyRegistrationResponse,
+    generateAuthenticationOptions,
+    verifyAuthenticationResponse
+} = require('@simplewebauthn/server');
+
+// 🌟 NAYA: Admin Fingerprint Save karne ka Schema
+const AdminDeviceSchema = new mongoose.Schema({
+    credentialID: String,
+    credentialPublicKey: Buffer,
+    counter: { type: Number, default: 0 },
+    transports: [String]
+});
+const AdminDevice = mongoose.model('AdminDevice', AdminDeviceSchema);
+
 
 
 // 🌟 Google AI & Multer Setup 🌟
@@ -472,6 +489,108 @@ app.post('/api/compile-code', async (req, res) => {
         res.json(data);
     } catch (error) { res.status(500).json({ error: "Compiler connection failed!" }); }
 });
+// ==========================================
+// 🚀 ENTERPRISE BIOMETRIC LOGIN (FINGERPRINT/FACE-ID)
+// ==========================================
+
+const rpName = 'CodeMaster Enterprise Security';
+
+// 1️⃣ Fingerprint Setup: Options Generate Karna
+app.get('/api/admin/webauthn/register-options', checkAdmin, async (req, res) => {
+    const rpID = new URL(req.headers.origin || 'http://localhost:8080').hostname;
+    const options = await generateRegistrationOptions({
+        rpName,
+        rpID,
+        userID: 'admin_suhel_001',
+        userName: 'Admin',
+        attestationType: 'none',
+        authenticatorSelection: { userVerification: 'preferred' },
+    });
+    req.session.currentChallenge = options.challenge;
+    res.json(options);
+});
+
+// 2️⃣ Fingerprint Setup: Verify & Save to DB
+app.post('/api/admin/webauthn/register-verify', checkAdmin, async (req, res) => {
+    try {
+        const expectedChallenge = req.session.currentChallenge;
+        const expectedOrigin = req.headers.origin;
+        const expectedRPID = new URL(expectedOrigin).hostname;
+
+        const verification = await verifyRegistrationResponse({
+            response: req.body,
+            expectedChallenge,
+            expectedOrigin,
+            expectedRPID,
+        });
+
+        if (verification.verified) {
+            const { credentialPublicKey, credentialID } = verification.registrationInfo;
+            await AdminDevice.deleteMany({}); // Purane devices delete karke naya add karo
+            await AdminDevice.create({
+                credentialID: Buffer.from(credentialID).toString('base64url'),
+                credentialPublicKey: Buffer.from(credentialPublicKey),
+                counter: verification.registrationInfo.counter
+            });
+            res.json({ success: true, message: "Biometric Registered Successfully!" });
+        } else {
+            res.status(400).json({ success: false, message: "Verification failed!" });
+        }
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+
+// 3️⃣ Login: Fingerprint maangne ke options
+app.get('/api/admin/webauthn/login-options', async (req, res) => {
+    const device = await AdminDevice.findOne();
+    if (!device) return res.status(400).json({ success: false, message: "No Biometric Device Registered!" });
+
+    const rpID = new URL(req.headers.origin || 'http://localhost:8080').hostname;
+    const options = await generateAuthenticationOptions({
+        rpID,
+        allowCredentials: [{
+            id: Buffer.from(device.credentialID, 'base64url'),
+            type: 'public-key',
+            transports: device.transports,
+        }],
+        userVerification: 'preferred',
+    });
+    req.session.currentChallenge = options.challenge;
+    res.json(options);
+});
+
+// 4️⃣ Login: Fingerprint Verify karna aur Parda hatana!
+app.post('/api/admin/webauthn/login-verify', async (req, res) => {
+    try {
+        const device = await AdminDevice.findOne();
+        if (!device) return res.status(400).json({ success: false });
+
+        const verification = await verifyAuthenticationResponse({
+            response: req.body,
+            expectedChallenge: req.session.currentChallenge,
+            expectedOrigin: req.headers.origin,
+            expectedRPID: new URL(req.headers.origin).hostname,
+            authenticator: {
+                credentialID: Buffer.from(device.credentialID, 'base64url'),
+                credentialPublicKey: device.credentialPublicKey,
+                counter: device.counter,
+            },
+        });
+
+        if (verification.verified) {
+            device.counter = verification.authenticationInfo.newCounter;
+            await device.save();
+            req.session.isAdmin = true;
+            req.session.save(() => {
+                res.json({ success: true, message: "Welcome Master!" });
+            });
+        }
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+
            
 // 👇 🔒 ADMIN LOGIN API 👇
 app.post('/api/admin/login', (req, res) => {
