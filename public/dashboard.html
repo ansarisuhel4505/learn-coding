@@ -16,6 +16,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    
     <script>
     // Ye code check karega ki Home Page par Dark mode ON tha ya nahi
     if (localStorage.getItem('theme') === 'dark') {
@@ -525,8 +527,14 @@ html.dark-theme .profile-info b { color: #f8fafc; }
     <button onclick="handleNext()" class="btn btn-success" id="nextBtn" style="flex: 1;">Next <i class="fas fa-arrow-right"></i></button>
                     </div>
                     
-                </div>
-                <div class="exam-right">
+                                <div class="exam-right">
+                    <!-- 🌟 NAYA: AI Proctoring Camera -->
+                    <div id="cameraContainer" style="margin-bottom: 20px; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #000; text-align: center; position: relative; height: 160px; display: flex; justify-content: center; align-items: center;">
+                        <video id="proctorVideo" autoplay muted playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                        <div id="aiStatus" style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: #10b981; font-size: 13px; padding: 5px; font-weight: bold;">AI Guard: Connecting...</div>
+                    </div>
+                    <div id="timerDisplay" class="timer-box">⏳ 00:00</div>
+                                    
                     <div id="timerDisplay" class="timer-box">⏳ 00:00</div>
                     <div class="stats-box">
                         <div class="stat-line"><span class="stat-green">Attempted:</span> <span id="statAttempted">0</span></div>
@@ -806,10 +814,9 @@ html.dark-theme .profile-info b { color: #f8fafc; }
         // EXAM ENGINE LOGIC (Pagination & Palette)
         // ==========================================
 
-        // 👇 🚨 NAYA ANTI-CHEAT CODE YAHAN SE SHURU 👇
+        // 👇 🚨 NAYA ANTI-CHEAT CODE (3 STRIKES) YAHAN SE SHURU 👇
 let isExamActive = false;
 let warningCount = 0;
-const maxWarnings = 3;
 
 document.addEventListener('contextmenu', e => { if(isExamActive) { e.preventDefault(); alert("⚠️ Right-click is disabled during the exam!"); }});
 document.addEventListener('copy', e => { if(isExamActive) e.preventDefault(); });
@@ -819,41 +826,37 @@ document.addEventListener('paste', e => { if(isExamActive) e.preventDefault(); }
 document.addEventListener('visibilitychange', function() {
     if (isExamActive && document.visibilityState === 'hidden') {
         warningCount++;
-        if (warningCount >= maxWarnings) {
-            alert("❌ Warning limit crossed! Your exam is auto-submitting.");
-            confirmSubmission(); // Aapke Submit function ko direct call kar diya!
+        if (warningCount >= 3) {
+            alert("❌ 3rd Warning! You switched tabs again. Exam is Auto-Submitting.");
+            confirmSubmission();
         } else {
-            alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease do not switch tabs! Your exam will auto-submit after max warnings.`);
+            alert(`⚠️ WARNING ${warningCount} of 2 ⚠️\n\nPlease do not switch tabs or open other apps! On the 3rd attempt, the exam will auto-submit.`);
         }
     }
 });
-// 👆 🚨 NAYA ANTI-CHEAT CODE YAHAN KHATAM 👆
-        // 👇 🚨 STRICT SCREEN & KEYBOARD LOCK 👇
 
-// 1. Agar koi Full Screen se bahar aane ki koshish kare (Esc dabaye)
 document.addEventListener('fullscreenchange', () => {
     if (isExamActive && !document.fullscreenElement) {
         warningCount++;
-        if(warningCount >= maxWarnings) {
-            alert("❌ You exited Full Screen too many times! Auto-submitting.");
+        if(warningCount >= 3) {
+            alert("❌ 3rd Warning! You exited Full Screen too many times. Auto-submitting.");
             confirmSubmission();
         } else {
-            alert(`⚠️ WARNING ${warningCount} of ${maxWarnings} ⚠️\n\nPlease stay in Full Screen mode! Click OK to go back.`);
-            document.documentElement.requestFullscreen(); // Wapas full screen me bhejo
+            alert(`⚠️ WARNING ${warningCount} of 2 ⚠️\n\nPlease stay in Full Screen mode! On the 3rd attempt, the exam will auto-submit.`);
+            document.documentElement.requestFullscreen(); 
         }
     }
 });
 
-// 2. Keyboard ke saare shortcut block karna (F12, Esc, Ctrl, Alt)
 document.addEventListener('keydown', (e) => {
     if (isExamActive) {
-        // Ctrl, Alt, Meta (Windows tab) ya F-keys ko block karo
         if (e.ctrlKey || e.altKey || e.metaKey || e.key.startsWith('F')) {
             e.preventDefault();
             alert("⚠️ Keyboard shortcuts are disabled during the exam!");
         }
     }
 });
+
 // 👆 🚨 STRICT SCREEN LOCK KHATAM 👆
         // 👇 💾 NAYA FEATURE: AUTO-SAVE PROGRESS 👇
 function autoSaveExam(timeRemaining) {
@@ -913,12 +916,6 @@ function autoSaveExam(timeRemaining) {
         }
 
         async function startExam() {
-    // 🌟 NAYA: Force Desktop Mode Check
-    // Agar screen chhoti hai (Mobile view), toh exam chalne hi mat do
-    if (window.innerWidth < 800) {
-        alert("🚫 Exam cannot be started in Mobile View!\n\nPlease click the 3 dots in your browser (Chrome/Safari) and check 'Desktop site', or use a Laptop/PC.");
-        return; // Exam yahi ruk jayega
-    }
 
     isExamActive = true;
     warningCount = 0;
@@ -958,6 +955,8 @@ function autoSaveExam(timeRemaining) {
     document.getElementById('examSetupForm').style.display = "none";
     document.getElementById('examQuestionsArea').style.display = "flex";
     renderQuestionUI();
+                startAIProctoring(); // 🌟 CALLING AI PROCTORING ENGINE
+            
 
     examTimer = setInterval(() => {
         time--;
@@ -975,6 +974,55 @@ function autoSaveExam(timeRemaining) {
         }
     }, 1000);
         }
+                // ==========================================
+        // 👁️ AI WEBCAM PROCTORING ENGINE
+        // ==========================================
+        let proctorInterval;
+        let localStream;
+
+        async function startAIProctoring() {
+            const video = document.getElementById('proctorVideo');
+            const aiStatus = document.getElementById('aiStatus');
+
+            try {
+                // 1. Request Camera Permission
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                video.srcObject = localStream;
+                
+                aiStatus.innerText = "Loading AI Brain... 🧠";
+                aiStatus.style.color = "#f59e0b";
+                
+                await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights');
+                
+                aiStatus.innerText = "AI Guard: Active 🟢";
+                aiStatus.style.color = "#10b981";
+
+                proctorInterval = setInterval(async () => {
+                    if (!isExamActive) {
+                        clearInterval(proctorInterval);
+                        if (localStream) localStream.getTracks().forEach(track => track.stop());
+                        return;
+                    }
+                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+                    
+                    if (detections.length === 0) {
+                        aiStatus.innerText = "⚠️ Warning: Face Not Visible!";
+                        aiStatus.style.color = "#ef4444";
+                    } else if (detections.length > 1) {
+                        aiStatus.innerText = "🚨 Alert: Multiple Faces Detected!";
+                        aiStatus.style.color = "#ef4444";
+                    } else {
+                        aiStatus.innerText = "AI Guard: Active 🟢";
+                        aiStatus.style.color = "#10b981";
+                    }
+                }, 2000);
+
+            } catch (err) {
+                alert("⚠️ Camera Access Denied! You MUST allow camera to start the exam.");
+                confirmSubmission();
+            }
+        }
+        
         
 
         function renderQuestionUI() {
@@ -1118,6 +1166,9 @@ function markForReview() {
     else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
             closeConfirmPopup();
             clearInterval(examTimer);
+                        clearInterval(proctorInterval); // AI Engine band
+            if (localStream) localStream.getTracks().forEach(track => track.stop()); // Camera ki light band
+            
             
             let formattedAnswers = {};
             examData.questions.forEach((q, i) => {
