@@ -161,7 +161,7 @@ async function sendLoginAlertEmail(toEmail, userName) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://learn-coding-jade.vercel.app/auth/google/callback",
+    callbackURL: "https://learn-coding-jet.vercel.app/auth/google/callback",
     proxy:true
 },
   async function(accessToken, refreshToken, profile, done) {
