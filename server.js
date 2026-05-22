@@ -38,12 +38,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // 🌟 यह लाइन Vercel के लिए बहुत ज़रूरी है
 app.set('trust proxy', 1); 
-// 🌟 NAYA: OTP Rate Limiter (हैकर से बचाने के लिए)
+// 🌟 NAYA: OTP Rate Limiter (Vercel Fix के साथ)
 const otpLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 मिनट का टाइम
-    max: 3, // 10 मिनट में सिर्फ 3 OTP रिक्वेस्ट अलाउड हैं
+    windowMs: 10 * 60 * 1000, 
+    max: 3, 
+    // 👇 यह लाइन रेट लिमिटर को Vercel के पीछे से असली यूज़र का IP ढूँढने में मदद करेगी
+    keyGenerator: (req, res) => {
+        return req.headers['x-forwarded-for'] || req.ip;
+    },
     message: { success: false, message: "⚠️ Too many requests from your device. Please try again after 10 minutes." }
 });
+
 
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
