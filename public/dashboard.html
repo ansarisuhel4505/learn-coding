@@ -1385,58 +1385,59 @@ function downloadAnswerKey() {
 }
 
 
+// 2. Question Paper Download (Blank PDF Fix - Direct HTML to PDF)
 function downloadQuestionPaper() {
     let exam = window.currentExamForPDF;
-    if (!exam || !exam.questions.length) return alert("No questions found!");
+    if (!exam || !exam.questions || exam.questions.length === 0) {
+        return alert("Oops! Question paper data not found.");
+    }
 
-    let printDiv = document.createElement('div');
-    printDiv.style.width = '800px';
-    printDiv.style.padding = '30px';
-    printDiv.style.background = 'white';
-
-    // 🌟 1. Header (ID, Duration, Subject)
+    // 🌟 NAYA: DOM में कुछ भी नहीं जोड़ेंगे, सीधा HTML String बनाएंगे!
     let paperHTML = `
-        <div style="border-bottom: 2px solid #3b82f6; padding-bottom: 10px; margin-bottom: 20px;">
-            <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">Paper ID: #${exam._id.toString().slice(-6).toUpperCase()}</div>
-            
-            <h1 style="color: #1e293b;">${exam.title}</h1>
-            <div style="display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold;">
-                <span>Marks: ${exam.totalMarks}</span>
-                <span>Duration: ${exam.duration} Mins</span>
+        <div style="padding: 30px; background: white; color: black; font-family: Arial, sans-serif;">
+            <div style="text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px;">
+                <h1 style="color: #1e293b; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px;">CodeMaster Official Question Paper</h1>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 15px; font-weight: bold; color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <span>📝 Exam: <span style="color:#3b82f6;">${exam.title}</span></span>
+                    <span>⏳ Duration: <span style="color:#ef4444;">${exam.duration} Mins</span></span>
+                    <span>💯 Total Marks: <span style="color:#10b981;">${exam.totalMarks}</span></span>
+                </div>
             </div>
-        </div>
     `;
 
-    // 🌟 2. Question Loop (Table Layout to prevent blur/cuts)
     exam.questions.forEach((q, index) => {
+        let subjBadge = (q.subject && q.subject !== 'General') ? `<span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #475569; float: right; border: 1px solid #cbd5e1;">${q.subject}</span>` : '';
+        
         paperHTML += `
-            <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                <div style="font-weight: bold;">Q${index + 1}. ${q.questionText} <span style="font-size: 10px; background:#eee; padding:2px 5px;">${q.subject}</span></div>
-                <div style="margin-left: 20px; margin-top: 5px;">
+            <div style="margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px;">
+                <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #0f172a;">Q${index + 1}. ${q.questionText} ${subjBadge}</div>
+                <ul style="margin-left: 20px; list-style-type: none; padding: 0;">
         `;
         
         if (q.type === 'numerical') {
-            paperHTML += `<div>Answer: __________________</div>`;
-        } else {
+            paperHTML += `<li style="margin-top: 15px; font-size: 16px; color: #334155;"><b>Answer:</b> ______________________________</li>`;
+        } else if (q.options && q.options.length > 0) {
             q.options.forEach(opt => {
-                paperHTML += `<div style="margin-bottom: 3px;">( ) ${opt}</div>`;
+                paperHTML += `<li style="margin-bottom: 8px; font-size: 15px; color: #334155;">( ) &nbsp; ${opt}</li>`; 
             });
         }
-        paperHTML += `</div></div>`;
+        paperHTML += `</ul></div>`;
     });
+    paperHTML += `</div>`; // Main div closed
 
-    printDiv.innerHTML = paperHTML;
-    document.body.appendChild(printDiv);
+    alert("⏳ Generating HD Question Paper... Please wait!");
 
     const opt = {
         margin:       10,
-        filename:     `${exam.title}_Paper.pdf`,
-        image:        { type: 'jpeg', quality: 1 },
-        html2canvas:  { scale: 2, useCORS: true },
+        filename:     `${exam.title.replace(/\s+/g, '_')}_Paper.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 }, 
+        html2canvas:  { scale: 2, useCORS: true }, 
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, 
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(printDiv).save().then(() => document.body.removeChild(printDiv));
+    // 🌟 MAGIC FIX: HTML String को डायरेक्ट PDF में बदल दो (No Blank Pages!)
+    html2pdf().set(opt).from(paperHTML).save();
 }
 
 
