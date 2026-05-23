@@ -971,7 +971,10 @@ function autoSaveExam(timeRemaining) {
     renderQuestionUI();
                 startAIProctoring(); // 🌟 CALLING AI PROCTORING ENGINE
             
-
+    // 🌟 NAYA: Hide Chatbot during Exam
+    document.getElementById('chatbotToggleBtn').style.display = "none";
+    document.getElementById('chatbotWindow').style.display = "none";
+            
     examTimer = setInterval(() => {
         time--;
         let mins = Math.floor(time/60);
@@ -1198,6 +1201,8 @@ function markForReview() {
             clearInterval(examTimer);
                         clearInterval(proctorInterval); // AI Engine band
             if (localStream) localStream.getTracks().forEach(track => track.stop()); // Camera ki light band
+                // 🌟 NAYA: Show Chatbot again after Exam
+    document.getElementById('chatbotToggleBtn').style.display = "block";
             
             
             let formattedAnswers = {};
@@ -1379,41 +1384,30 @@ function downloadAnswerKey() {
     window.print(); 
 }
 
-// 2. Question Paper Download (HD PDF with Headers & PageBreak Fix)
+
+// 2. Question Paper Download (Blank PDF Fix - Direct HTML to PDF)
 function downloadQuestionPaper() {
     let exam = window.currentExamForPDF;
     if (!exam || !exam.questions || exam.questions.length === 0) {
         return alert("Oops! Question paper data not found.");
     }
 
-    // 🌟 एक छुपा हुआ डब्बा (Hidden Container) - FIX: No -9999px 
-    let printDiv = document.createElement('div');
-    printDiv.style.padding = '40px';
-    printDiv.style.background = 'white';
-    printDiv.style.color = 'black';
-    printDiv.style.fontFamily = 'Arial, sans-serif';
-    printDiv.style.width = '800px'; 
-    printDiv.style.position = 'absolute'; 
-    printDiv.style.top = '0';
-    printDiv.style.left = '0';
-    printDiv.style.zIndex = '-9999'; // मेन पेज के पीछे छिप जाएगा, लेकिन कटेगा नहीं!
-
-    // 🌟 NAYA: Detailed Professional Header
+    // 🌟 NAYA: DOM में कुछ भी नहीं जोड़ेंगे, सीधा HTML String बनाएंगे!
     let paperHTML = `
-        <div style="text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px;">
-            <h1 style="color: #1e293b; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px;">CodeMaster Official Question Paper</h1>
-            <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 15px; font-weight: bold; color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <span>📝 Exam: <span style="color:#3b82f6;">${exam.title}</span></span>
-                <span>⏳ Duration: <span style="color:#ef4444;">${exam.duration} Mins</span></span>
-                <span>💯 Total Marks: <span style="color:#10b981;">${exam.totalMarks}</span></span>
+        <div style="padding: 30px; background: white; color: black; font-family: Arial, sans-serif;">
+            <div style="text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px;">
+                <h1 style="color: #1e293b; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px;">CodeMaster Official Question Paper</h1>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 15px; font-weight: bold; color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <span>📝 Exam: <span style="color:#3b82f6;">${exam.title}</span></span>
+                    <span>⏳ Duration: <span style="color:#ef4444;">${exam.duration} Mins</span></span>
+                    <span>💯 Total Marks: <span style="color:#10b981;">${exam.totalMarks}</span></span>
+                </div>
             </div>
-        </div>
     `;
 
     exam.questions.forEach((q, index) => {
-        let subjBadge = (q.subject && q.subject !== 'General') ? `<span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #475569; float: right; border: 1px solid #cbd5e1;"><i class="fas fa-layer-group"></i> ${q.subject}</span>` : '';
+        let subjBadge = (q.subject && q.subject !== 'General') ? `<span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #475569; float: right; border: 1px solid #cbd5e1;">${q.subject}</span>` : '';
         
-        // 🌟 page-break-inside: avoid -> यह सवाल को आधा कटने से रोकेगा!
         paperHTML += `
             <div style="margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px;">
                 <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #0f172a;">Q${index + 1}. ${q.questionText} ${subjBadge}</div>
@@ -1429,25 +1423,21 @@ function downloadQuestionPaper() {
         }
         paperHTML += `</ul></div>`;
     });
-
-    printDiv.innerHTML = paperHTML;
-    document.body.appendChild(printDiv);
+    paperHTML += `</div>`; // Main div closed
 
     alert("⏳ Generating HD Question Paper... Please wait!");
 
-    // 🌟 HD Scaling & Page Break Config (Fix for Blank PDF)
     const opt = {
         margin:       10,
         filename:     `${exam.title.replace(/\s+/g, '_')}_Paper.pdf`,
         image:        { type: 'jpeg', quality: 0.98 }, 
-        html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, // 🌟 Scale 2 से मोबाइल क्रैश नहीं होगा!
+        html2canvas:  { scale: 2, useCORS: true }, 
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, 
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(printDiv).save().then(() => {
-        document.body.removeChild(printDiv);
-    });
+    // 🌟 MAGIC FIX: HTML String को डायरेक्ट PDF में बदल दो (No Blank Pages!)
+    html2pdf().set(opt).from(paperHTML).save();
 }
 
         
