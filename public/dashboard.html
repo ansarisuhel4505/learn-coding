@@ -1386,7 +1386,7 @@ function downloadQuestionPaper() {
         return alert("Oops! Question paper data not found.");
     }
 
-    // 🌟 एक छुपा हुआ डब्बा (Hidden Container)
+    // 🌟 एक छुपा हुआ डब्बा (Hidden Container) - FIX: No -9999px 
     let printDiv = document.createElement('div');
     printDiv.style.padding = '40px';
     printDiv.style.background = 'white';
@@ -1394,7 +1394,9 @@ function downloadQuestionPaper() {
     printDiv.style.fontFamily = 'Arial, sans-serif';
     printDiv.style.width = '800px'; 
     printDiv.style.position = 'absolute'; 
-    printDiv.style.left = '-9999px'; // स्क्रीन से बाहर ताकि UI खराब न हो
+    printDiv.style.top = '0';
+    printDiv.style.left = '0';
+    printDiv.style.zIndex = '-9999'; // मेन पेज के पीछे छिप जाएगा, लेकिन कटेगा नहीं!
 
     // 🌟 NAYA: Detailed Professional Header
     let paperHTML = `
@@ -1433,13 +1435,13 @@ function downloadQuestionPaper() {
 
     alert("⏳ Generating HD Question Paper... Please wait!");
 
-    // 🌟 HD Scaling & Page Break Config
+    // 🌟 HD Scaling & Page Break Config (Fix for Blank PDF)
     const opt = {
         margin:       10,
         filename:     `${exam.title.replace(/\s+/g, '_')}_Paper.pdf`,
-        image:        { type: 'jpeg', quality: 1 }, 
-        html2canvas:  { scale: 3, useCORS: true }, // Scale 3 से Blur 100% ख़त्म!
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, // 🌟 यह PDF को सही जगह से काटेगा
+        image:        { type: 'jpeg', quality: 0.98 }, 
+        html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, // 🌟 Scale 2 से मोबाइल क्रैश नहीं होगा!
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, 
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -1447,7 +1449,7 @@ function downloadQuestionPaper() {
         document.body.removeChild(printDiv);
     });
 }
-        
+
         
                 // ==========================================
         // 🏆 LEADERBOARD & EXCEL DOWNLOAD LOGIC
