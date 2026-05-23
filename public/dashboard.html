@@ -193,16 +193,20 @@ html.dark-theme body, body.dark-theme {
 }
 
 html.dark-theme .sidebar, html.dark-theme .card, 
-html.dark-theme .modal-content, html.dark-theme .exam-setup-form,
-html.dark-theme .exam-right, html.dark-theme .exam-left,
+html.dark-theme .modal-content, html.dark-theme .modal-header, html.dark-theme .modal-body,
+html.dark-theme .exam-setup-form, html.dark-theme .exam-right, html.dark-theme .exam-left,
 html.dark-theme .result-box, html.dark-theme .ans-block,
-html.dark-theme table, 
-html.dark-theme .toast-popup,
-html.dark-theme .popup-modal { /* 🌟 FIX: Edit Profile & Confirm Popup Background */
+html.dark-theme table, html.dark-theme .toast-popup, html.dark-theme .popup-modal { 
     background-color: #1e293b !important;
     border-color: #334155 !important;
     color: #f8fafc !important;
 }
+
+/* 🌟 FIX: Answer Key & Rank List Text Blur in Dark Mode */
+html.dark-theme .ans-block h4, html.dark-theme #akExamTitle, html.dark-theme .ans-block p {
+    color: #e2e8f0 !important;
+}
+        
 
 /* 🌟 FIX: Rank List Alternating Rows Dark Mode */
 html.dark-theme .leaderboard-table tr:nth-child(even) { background-color: #0f172a !important; }
@@ -1367,7 +1371,7 @@ function downloadAnswerKey() {
     window.print(); 
 }
 
-// 2. Question Paper Download (बिना आंसर के, एकदम फ्रेश पेपर)
+// 2. Question Paper Download (100% Working PDF Generator)
 function downloadQuestionPaper() {
     let questionsToPrint = window.examQuestionsForDownload;
     
@@ -1376,61 +1380,58 @@ function downloadQuestionPaper() {
         return;
     }
 
-    let printWindow = window.open('', '_blank');
-    
+    // 🌟 एक छुपा हुआ (Hidden) डब्बा बनाएँ
+    let printDiv = document.createElement('div');
+    printDiv.style.padding = '30px';
+    printDiv.style.background = 'white';
+    printDiv.style.color = 'black';
+    printDiv.style.fontFamily = 'Arial, sans-serif';
+
     let paperHTML = `
-        <html>
-        <head>
-            <title>Question Paper - CodeMaster</title>
-            <style>
-                body { font-family: 'Arial', sans-serif; padding: 40px; color: #333; line-height: 1.6; }
-                .header { text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px; }
-                .question-box { margin-bottom: 25px; page-break-inside: avoid; }
-                .question-text { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-                .options-list { margin-left: 20px; list-style-type: none; padding: 0; }
-                .options-list li { margin-bottom: 8px; font-size: 16px; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1 style="color: #3b82f6; margin: 0;">CodeMaster</h1>
-                <h2>Question Paper</h2>
-            </div>
+        <div style="text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px;">
+            <h1 style="color: #3b82f6; margin: 0;">CodeMaster</h1>
+            <h2>Question Paper</h2>
+        </div>
     `;
 
-        questionsToPrint.forEach((q, index) => {
+    questionsToPrint.forEach((q, index) => {
         paperHTML += `
-            <div class="question-box">
-                <div class="question-text">Q${index + 1}. ${q.questionText}</div>
-                <ul class="options-list">
+            <div style="margin-bottom: 25px;">
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Q${index + 1}. ${q.questionText}</div>
+                <ul style="margin-left: 20px; list-style-type: none; padding: 0;">
         `;
         
-        // 🌟 FIX: Smart Logic for MCQ and Numerical Questions
+        // 🌟 Smart Logic for MCQ and Numerical Questions
         if (q.type === 'numerical') {
-            // अगर सवाल न्यूमेरिकल है, तो खाली डब्बा/लाइन दें
             paperHTML += `<li style="margin-top: 15px; font-size: 18px;"><b>Answer:</b> ______________________________</li>`;
         } else if (q.options && q.options.length > 0) {
-            // अगर MCQ है, तो ऑप्शंस प्रिंट करें
             q.options.forEach(opt => {
-                paperHTML += `<li>( ) &nbsp; ${opt}</li>`; 
+                paperHTML += `<li style="margin-bottom: 8px; font-size: 16px;">( ) &nbsp; ${opt}</li>`; 
             });
         }
         
         paperHTML += `</ul></div>`;
     });
-    
 
-    paperHTML += `
-            <script>
-                window.onload = function() { window.print(); window.close(); }
-            <\/script>
-        </body>
-        </html>
-    `;
+    printDiv.innerHTML = paperHTML;
+    document.body.appendChild(printDiv);
 
-    printWindow.document.write(paperHTML);
-    printWindow.document.close();
+    alert("⏳ Generating Question Paper PDF... Please wait!");
+
+    // 🌟 html2pdf.js का जादू!
+    const opt = {
+        margin:       10,
+        filename:     `Question_Paper.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 }, 
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(printDiv).save().then(() => {
+        document.body.removeChild(printDiv); // डाउनलोड होने के बाद छुपा हुआ डब्बा हटा दें
+    });
 }
+        
                 // ==========================================
         // 🏆 LEADERBOARD & EXCEL DOWNLOAD LOGIC
         // ==========================================
