@@ -1047,10 +1047,18 @@ function autoSaveExam(timeRemaining) {
         
         
 
-        function renderQuestionUI() {
+                function renderQuestionUI() {
             const q = examData.questions[currentQIndex];
-            let qHtml = `<h3>Q${currentQIndex + 1}. ${q.questionText}</h3>`;
             
+            // 🌟 NAYA: Subject Banner UI
+            let subjName = q.subject && q.subject.trim() !== '' ? q.subject : 'General Section';
+            let qHtml = `
+                <div style="background: #e0f2fe; color: #1e40af; border: 1px solid #bfdbfe; padding: 6px 15px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; display: inline-block; font-size: 13px; letter-spacing: 0.5px;">
+                    <i class="fas fa-book-open"></i> Subject: ${subjName}
+                </div>
+                <h3 style="margin-bottom: 20px;">Q${currentQIndex + 1}. ${q.questionText}</h3>
+            `;
+                    
             // 🌟 NAYA: MCQ hai ya Numerical, wo check karega 🌟
             if (q.type === 'mcq' || !q.type) { // (Purane questions jinme type nahi hai wo MCQ mane jayenge)
                 q.options.forEach(opt => {
@@ -1361,8 +1369,8 @@ function logoutUser(event) {
             });
 
             document.getElementById('answerKeyList').innerHTML = akHtml;
-// 🌟 NAYA: Question paper download karne ke liye questions ko save kar rahe hain
-            window.examQuestionsForDownload = data.exam.questions;
+// 🌟 NAYA: Pura exam data save kar rahe hain taaki PDF header me details daal sakein
+            window.currentExamForPDF = data.exam;
             document.getElementById('answerKeyModal').style.display = 'flex';
         }
 
@@ -1371,66 +1379,75 @@ function downloadAnswerKey() {
     window.print(); 
 }
 
-// 2. Question Paper Download (100% Working PDF Generator)
+// 2. Question Paper Download (HD PDF with Headers & PageBreak Fix)
 function downloadQuestionPaper() {
-    let questionsToPrint = window.examQuestionsForDownload;
-    
-    if (!questionsToPrint || questionsToPrint.length === 0) {
-        alert("Oops! Question paper data not found.");
-        return;
+    let exam = window.currentExamForPDF;
+    if (!exam || !exam.questions || exam.questions.length === 0) {
+        return alert("Oops! Question paper data not found.");
     }
 
-    // 🌟 एक छुपा हुआ (Hidden) डब्बा बनाएँ
+    // 🌟 एक छुपा हुआ डब्बा (Hidden Container)
     let printDiv = document.createElement('div');
-    printDiv.style.padding = '30px';
+    printDiv.style.padding = '40px';
     printDiv.style.background = 'white';
     printDiv.style.color = 'black';
     printDiv.style.fontFamily = 'Arial, sans-serif';
+    printDiv.style.width = '800px'; 
+    printDiv.style.position = 'absolute'; 
+    printDiv.style.left = '-9999px'; // स्क्रीन से बाहर ताकि UI खराब न हो
 
+    // 🌟 NAYA: Detailed Professional Header
     let paperHTML = `
-        <div style="text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px;">
-            <h1 style="color: #3b82f6; margin: 0;">CodeMaster</h1>
-            <h2>Question Paper</h2>
+        <div style="text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px;">
+            <h1 style="color: #1e293b; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px;">CodeMaster Official Question Paper</h1>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 15px; font-weight: bold; color: #475569; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <span>📝 Exam: <span style="color:#3b82f6;">${exam.title}</span></span>
+                <span>⏳ Duration: <span style="color:#ef4444;">${exam.duration} Mins</span></span>
+                <span>💯 Total Marks: <span style="color:#10b981;">${exam.totalMarks}</span></span>
+            </div>
         </div>
     `;
 
-    questionsToPrint.forEach((q, index) => {
+    exam.questions.forEach((q, index) => {
+        let subjBadge = (q.subject && q.subject !== 'General') ? `<span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #475569; float: right; border: 1px solid #cbd5e1;"><i class="fas fa-layer-group"></i> ${q.subject}</span>` : '';
+        
+        // 🌟 page-break-inside: avoid -> यह सवाल को आधा कटने से रोकेगा!
         paperHTML += `
-            <div style="margin-bottom: 25px;">
-                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Q${index + 1}. ${q.questionText}</div>
+            <div style="margin-bottom: 30px; page-break-inside: avoid; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px;">
+                <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #0f172a;">Q${index + 1}. ${q.questionText} ${subjBadge}</div>
                 <ul style="margin-left: 20px; list-style-type: none; padding: 0;">
         `;
         
-        // 🌟 Smart Logic for MCQ and Numerical Questions
         if (q.type === 'numerical') {
-            paperHTML += `<li style="margin-top: 15px; font-size: 18px;"><b>Answer:</b> ______________________________</li>`;
+            paperHTML += `<li style="margin-top: 15px; font-size: 16px; color: #334155;"><b>Answer:</b> ______________________________</li>`;
         } else if (q.options && q.options.length > 0) {
             q.options.forEach(opt => {
-                paperHTML += `<li style="margin-bottom: 8px; font-size: 16px;">( ) &nbsp; ${opt}</li>`; 
+                paperHTML += `<li style="margin-bottom: 8px; font-size: 15px; color: #334155;">( ) &nbsp; ${opt}</li>`; 
             });
         }
-        
         paperHTML += `</ul></div>`;
     });
 
     printDiv.innerHTML = paperHTML;
     document.body.appendChild(printDiv);
 
-    alert("⏳ Generating Question Paper PDF... Please wait!");
+    alert("⏳ Generating HD Question Paper... Please wait!");
 
-    // 🌟 html2pdf.js का जादू!
+    // 🌟 HD Scaling & Page Break Config
     const opt = {
         margin:       10,
-        filename:     `Question_Paper.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 }, 
+        filename:     `${exam.title.replace(/\s+/g, '_')}_Paper.pdf`,
+        image:        { type: 'jpeg', quality: 1 }, 
+        html2canvas:  { scale: 3, useCORS: true }, // Scale 3 से Blur 100% ख़त्म!
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, // 🌟 यह PDF को सही जगह से काटेगा
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     html2pdf().set(opt).from(printDiv).save().then(() => {
-        document.body.removeChild(printDiv); // डाउनलोड होने के बाद छुपा हुआ डब्बा हटा दें
+        document.body.removeChild(printDiv);
     });
 }
+        
         
                 // ==========================================
         // 🏆 LEADERBOARD & EXCEL DOWNLOAD LOGIC
