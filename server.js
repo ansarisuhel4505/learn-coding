@@ -147,11 +147,11 @@ const Exam = mongoose.model('Exam', new mongoose.Schema({
     // 🌟 NAYA: scheduleTime add kiya gaya
     scheduleTime: { type: Date, default: null }, 
     // 🌟 NAYA: question me 'type' add kiya gaya (mcq ya numerical)
-    questions: [{ 
+        questions: [{ 
         type: { type: String, default: 'mcq' }, 
+        subject: { type: String, default: 'General' }, // 🌟 NAYA: Subject Name
         questionText: String, 
-        options: [String], 
-        correctAnswer: String, 
+        options: [String],
         marks: Number 
     }],
     isActive: { type: Boolean, default: true },
