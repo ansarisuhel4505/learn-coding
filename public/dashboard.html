@@ -186,8 +186,7 @@
         .rank-1 { color: #d97706; font-weight: bold; font-size: 18px; } /* Gold */
         .rank-2 { color: #64748b; font-weight: bold; font-size: 17px; } /* Silver */
         .rank-3 { color: #b45309; font-weight: bold; font-size: 16px; } /* Bronze */
-        
-        /* 🌟 DARK THEME STYLES (NO BUTTON NEEDED HERE) 🌟 */
+                /* 🌟 DARK THEME STYLES (NO BUTTON NEEDED HERE) 🌟 */
 html.dark-theme body, body.dark-theme {
     background-color: #0f172a !important; 
     color: #f8fafc !important;
@@ -198,21 +197,31 @@ html.dark-theme .modal-content, html.dark-theme .exam-setup-form,
 html.dark-theme .exam-right, html.dark-theme .exam-left,
 html.dark-theme .result-box, html.dark-theme .ans-block,
 html.dark-theme table, 
-html.dark-theme .toast-popup { /* 🌟 NAYA: Toast Popup Dark Mode Fix */
+html.dark-theme .toast-popup,
+html.dark-theme .popup-modal { /* 🌟 FIX: Edit Profile & Confirm Popup Background */
     background-color: #1e293b !important;
     border-color: #334155 !important;
     color: #f8fafc !important;
 }
+
+/* 🌟 FIX: Rank List Alternating Rows Dark Mode */
+html.dark-theme .leaderboard-table tr:nth-child(even) { background-color: #0f172a !important; }
+html.dark-theme .leaderboard-table tr:hover { background-color: #334155 !important; }
+
 /* 🌟 NAYA FIX: Result Card & Score in Dark Mode */
 html.dark-theme .result-card-item { background-color: #0f172a !important; border-color: #334155 !important; }
 html.dark-theme .result-card-item b { color: #f8fafc !important; }
 html.dark-theme .result-score { color: #10b981 !important; text-shadow: 0 0 5px rgba(16, 185, 129, 0.4) !important; }
 
 /* 🌟 NAYA: CodeMaster Student Badge Dark Mode Fix */
-html.dark-theme .student-badge {
-    background-color: #3730a3 !important;
-    color: #e0e7ff !important;
-}
+html.dark-theme .student-badge { background-color: #3730a3 !important; color: #e0e7ff !important; }
+
+/* 🌟 FIX: Answer Key Correct Answer Highlight in Dark Mode */
+html.dark-theme p[style*="background: #ecfdf5"] { background-color: #064e3b !important; color: #a7f3d0 !important; }
+
+/* 🌟 FIX: Chatbot Icons (Upload & Mic) Clearer in Dark Mode */
+html.dark-theme .upload-btn, html.dark-theme .mic-btn { color: #94a3b8 !important; }
+html.dark-theme .upload-btn:hover, html.dark-theme .mic-btn:hover { color: #60a5fa !important; }
 
 html.dark-theme h1, html.dark-theme h2, html.dark-theme h3, 
 html.dark-theme h4, html.dark-theme p, html.dark-theme span, 
@@ -226,6 +235,7 @@ html.dark-theme input, html.dark-theme select, html.dark-theme textarea {
     color: #f8fafc !important;
     border-color: #334155 !important;
 }
+        
         /* ==========================================
    🤖 AI CHATBOT STYLES 🌟
 ========================================== */
@@ -1388,17 +1398,27 @@ function downloadQuestionPaper() {
             </div>
     `;
 
-    questionsToPrint.forEach((q, index) => {
+        questionsToPrint.forEach((q, index) => {
         paperHTML += `
             <div class="question-box">
                 <div class="question-text">Q${index + 1}. ${q.questionText}</div>
                 <ul class="options-list">
         `;
-        q.options.forEach(opt => {
-            paperHTML += `<li>( ) &nbsp; ${opt}</li>`; 
-        });
+        
+        // 🌟 FIX: Smart Logic for MCQ and Numerical Questions
+        if (q.type === 'numerical') {
+            // अगर सवाल न्यूमेरिकल है, तो खाली डब्बा/लाइन दें
+            paperHTML += `<li style="margin-top: 15px; font-size: 18px;"><b>Answer:</b> ______________________________</li>`;
+        } else if (q.options && q.options.length > 0) {
+            // अगर MCQ है, तो ऑप्शंस प्रिंट करें
+            q.options.forEach(opt => {
+                paperHTML += `<li>( ) &nbsp; ${opt}</li>`; 
+            });
+        }
+        
         paperHTML += `</ul></div>`;
     });
+    
 
     paperHTML += `
             <script>
