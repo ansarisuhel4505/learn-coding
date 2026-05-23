@@ -996,7 +996,7 @@ function autoSaveExam(timeRemaining) {
                 aiStatus.innerText = "AI Guard: Active 🟢";
                 aiStatus.style.color = "#10b981";
 
-                proctorInterval = setInterval(async () => {
+                                proctorInterval = setInterval(async () => {
                     if (!isExamActive) {
                         clearInterval(proctorInterval);
                         if (localStream) localStream.getTracks().forEach(track => track.stop());
@@ -1004,17 +1004,25 @@ function autoSaveExam(timeRemaining) {
                     }
                     const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
                     
-                    if (detections.length === 0) {
-                        aiStatus.innerText = "⚠️ Warning: Face Not Visible!";
-                        aiStatus.style.color = "#ef4444";
-                    } else if (detections.length > 1) {
-                        aiStatus.innerText = "🚨 Alert: Multiple Faces Detected!";
-                        aiStatus.style.color = "#ef4444";
+                    // 🌟 NAYA: 3-Strike Face Monitoring Logic
+                    if (detections.length === 0 || detections.length > 1) {
+                        warningCount++; 
+                        
+                        if (warningCount >= 3) {
+                            aiStatus.innerText = "❌ 3rd Warning! Auto-Submitting...";
+                            alert("❌ 3rd Warning: Face issue or multiple faces. Auto-submitting exam!");
+                            confirmSubmission();
+                        } else {
+                            aiStatus.innerText = `⚠️ Warning ${warningCount}/3: Face issue!`;
+                            aiStatus.style.color = "#ef4444";
+                            alert(`⚠️ WARNING ${warningCount}/3: Face not visible or multiple faces detected! Please fix your position.`);
+                        }
                     } else {
                         aiStatus.innerText = "AI Guard: Active 🟢";
                         aiStatus.style.color = "#10b981";
                     }
                 }, 2000);
+                
 
             } catch (err) {
                 alert("⚠️ Camera Access Denied! You MUST allow camera to start the exam.");
