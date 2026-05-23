@@ -229,9 +229,10 @@
                     </div>
                     <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #3b82f6;">
                       <h4 style="color: #1e3a8a; margin-bottom: 10px;"><i class="fas fa-file-excel"></i> Bulk Upload Questions (CSV)</h4>
-                                            <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
-                      Excel me 8 columns banayein: <b>Question, OptA, OptB, OptC, OptD, Correct Answer, Marks, Type (mcq/numerical)</b> aur file ko <b>.csv</b> format me save karein. Numerical ke liye options khali chhod dein.
-                                            </p>
+                                                                  <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
+                      Excel me 9 columns banayein: <b>Question, OptA, OptB, OptC, OptD, Correct Answer, Marks, Type (mcq/numerical), Subject (e.g. Physics)</b> aur file ko <b>.csv</b> format me save karein.
+                                                                  </p>
+                        
                         
                       <input type="file" id="csvFileInput" accept=".csv" style="margin-bottom: 10px;">
                       <button type="button" class="btn btn-warning" onclick="processCSV()"><i class="fas fa-upload"></i> Load from File</button>
@@ -389,10 +390,11 @@
 let qCount = 0;
 
 // 👇 SMART QUESTION FIELD (MCQ + Numerical) 👇
-function addQuestionField(q = '', o1 = '', o2 = '', o3 = '', o4 = '', ans = '', marks = '', type = 'mcq') {
+
+        function addQuestionField(q = '', o1 = '', o2 = '', o3 = '', o4 = '', ans = '', marks = '', type = 'mcq', subject = 'General') {
     qCount++;
     const div = document.createElement('div');
-    div.className = 'question-block'; // Data nikalne ke liye
+    div.className = 'question-block'; 
     div.style.background = "#f8fafc";
     div.style.padding = "15px"; div.style.marginBottom = "15px";
     div.style.borderRadius = "8px"; div.style.border = "1px solid #e2e8f0";
@@ -400,10 +402,13 @@ function addQuestionField(q = '', o1 = '', o2 = '', o3 = '', o4 = '', ans = '', 
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <label style="font-weight: bold; color: #3b82f6;">Question ${qCount}</label>
-            <select class="qType" onchange="toggleQuestionOptions(this)" style="padding: 5px; border-radius: 4px; border: 1px solid #cbd5e1;">
-                <option value="mcq" ${type === 'mcq' ? 'selected' : ''}>Multiple Choice (MCQ)</option>
-                <option value="numerical" ${type === 'numerical' ? 'selected' : ''}>Numerical Answer</option>
-            </select>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" class="qSubject" placeholder="Subject (e.g. Physics)" value="${subject}" style="padding: 5px; border-radius: 4px; border: 1px solid #cbd5e1; width: 150px;">
+                <select class="qType" onchange="toggleQuestionOptions(this)" style="padding: 5px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                    <option value="mcq" ${type === 'mcq' ? 'selected' : ''}>MCQ</option>
+                    <option value="numerical" ${type === 'numerical' ? 'selected' : ''}>Numerical</option>
+                </select>
+            </div>
         </div>
         
         <div class="form-group"><input type="text" class="qText" placeholder="Write question here..." value="${q}" required></div>
@@ -473,9 +478,10 @@ function processCSV() {
                 // 🌟 NAYA: 8वाँ कॉलम चेक करो कि 'mcq' है या 'numerical'
                 // अगर 8वाँ कॉलम नहीं डाला है, तो डिफ़ॉल्ट 'mcq' मान लो
                 let qType = (cols[7] && cols[7].toLowerCase() === 'numerical') ? 'numerical' : 'mcq';
+                let qSubject = cols[8] ? cols[8].trim() : 'General'; // 🌟 NAYA: 9th Column
                 
-                // addQuestionField को 8वाँ पैरामीटर (qType) भेज दो
-                addQuestionField(cols[0], cols[1], cols[2], cols[3], cols[4], cols[5], cols[6], qType);
+                addQuestionField(cols[0], cols[1], cols[2], cols[3], cols[4], cols[5], cols[6], qType, qSubject);
+                
                 addedCount++;
             }
         }
@@ -492,12 +498,13 @@ function processCSV() {
             e.preventDefault();
             const questions = [];
             const qBlocks = document.querySelectorAll('.question-block'); 
-            
-            for(let block of qBlocks) {
+                        for(let block of qBlocks) {
                 const type = block.querySelector('.qType').value;
                 questions.push({
                     type: type,
+                    subject: block.querySelector('.qSubject').value || 'General', // 🌟 NAYA
                     questionText: block.querySelector('.qText').value,
+                    
                     options: type === 'mcq' ? [
                         block.querySelector('.qOpt1').value, 
                         block.querySelector('.qOpt2').value, 
