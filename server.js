@@ -1065,6 +1065,53 @@ app.put('/api/admin/students/toggle-block/:id', checkAdmin, async (req, res) => 
     }
 });
 // ==========================================
+// ☁️ NAYA: CLOUD SYNC APIs
+// ==========================================
+const Workspace = mongoose.model('Workspace', new mongoose.Schema({
+    rollNo: { type: String, unique: true, required: true },
+    files: Object,
+    updatedAt: { type: Date, default: Date.now }
+}));
+
+// 1. Verify user for cloud access
+app.post('/api/cloud-auth', async (req, res) => {
+    try {
+        const { rollNo, password } = req.body;
+        const user = await User.findOne({ rollNo });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+        let ok = false;
+        if (user.password && user.password.startsWith('$2')) {
+            ok = await bcrypt.compare(password, user.password);
+        } else {
+            ok = (password === user.password);
+        }
+        res.json({ success: ok, message: ok ? "Authenticated" : "Wrong password!" });
+    } catch (err) { res.json({ success: false, message: "Server error" }); }
+});
+
+// 2. Save workspace to cloud
+app.post('/api/workspace/save', async (req, res) => {
+    try {
+        const { rollNo, files } = req.body;
+        if (!rollNo) return res.json({ success: false, message: "Missing rollNo" });
+        await Workspace.findOneAndUpdate(
+            { rollNo },
+            { files, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+        res.json({ success: true, message: "Synced to cloud!" });
+    } catch (err) { res.json({ success: false, message: err.message }); }
+});
+
+// 3. Load workspace from cloud
+app.post('/api/workspace/load', async (req, res) => {
+    try {
+        const { rollNo } = req.body;
+        const ws = await Workspace.findOne({ rollNo });
+        res.json({ success: true, files: ws?.files || {}, updatedAt: ws?.updatedAt || null });
+    } catch (err) { res.json({ success: false, message: err.message }); }
+});
+// ==========================================
 // VERCEL EXPORT (Server Start) - FIXED 🚀
 // ==========================================
 if (process.env.NODE_ENV !== 'production') {
@@ -1074,36 +1121,3 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 module.exports = app;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
