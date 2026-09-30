@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ultimate AI Resume Builder Pro - 50+ templates, AI writing, ATS score, multi-language">
     <meta name="theme-color" content="#3b82f6">
-    <title>Ultimate AI Resume Builder Pro v2</title>
+    <title>Ultimate AI Resume Builder Pro v3</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -14,9 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- NEW: Sanitize user content (XSS protection) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <!-- NEW: QR Code generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
@@ -32,21 +29,16 @@
             --text-muted: #64748b;
             --border-color: #e2e8f0;
         }
-        /* 🌙 Dark Mode for Builder UI */
         body.dark-mode {
-            --bg-app: #0f172a;
-            --bg-panel: #1e293b;
-            --bg-input: #0f172a;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
+            --bg-app: #0f172a; --bg-panel: #1e293b; --bg-input: #0f172a;
+            --text-main: #f1f5f9; --text-muted: #94a3b8; --border-color: #334155;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--theme-font); }
         body { background: var(--bg-app); display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: var(--text-main); transition: 0.3s; }
 
-        .top-nav { background: var(--bg-panel); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0; border-bottom: 1px solid var(--border-color);}
-        .top-nav h2 { font-size: 18px; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
-        .top-nav-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .top-nav { background: var(--bg-panel); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;}
+        .top-nav h2 { font-size: 17px; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        .top-nav-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         
         .btn { padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white; display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 13px;}
         .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
@@ -59,16 +51,14 @@
 
         .hamburger-btn { background: #1e293b; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 18px; cursor: pointer; }
 
-        /* Profile Selector */
         .profile-selector { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color);}
         .profile-selector select { background: transparent; border: none; color: var(--text-main); font-weight: 600; cursor: pointer; outline: none; font-size: 13px; max-width: 130px;}
 
-        .action-menu { 
-            position: fixed; top: 0; right: -340px; width: 320px; height: 100vh; 
-            background: var(--bg-panel); box-shadow: -2px 0 15px rgba(0,0,0,0.1); 
-            z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
-        }
+        .view-toggle { display: flex; background: var(--bg-input); border-radius: 8px; padding: 3px; border: 1px solid var(--border-color);}
+        .view-toggle button { padding: 6px 12px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: 0.2s;}
+        .view-toggle button.active { background: var(--theme-color); color: white;}
+
+        .action-menu { position: fixed; top: 0; right: -340px; width: 320px; height: 100vh; background: var(--bg-panel); box-shadow: -2px 0 15px rgba(0,0,0,0.1); z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 20px; overflow-y: auto;}
         .action-menu.active { right: 0; }
         .action-menu-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;}
         .action-menu-header h3 { color: var(--text-main); font-size: 18px;}
@@ -98,18 +88,31 @@
         .layout-card.active { border-color: var(--theme-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .layout-card .thumb { width: 100%; height: 45px; border-radius: 4px; margin-bottom: 6px; background: linear-gradient(135deg, #e2e8f0, #f8fafc); display: flex; align-items: center; justify-content: center; color: var(--theme-color); font-size: 20px;}
 
-        .preview-panel { width: 55%; background: #94a3b8; padding: 30px; display: flex; justify-content: center; overflow-y: auto; }
-        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height); position: relative;}
+        .preview-panel { width: 55%; background: #94a3b8; padding: 30px; display: flex; justify-content: center; overflow-y: auto; flex-direction: column; align-items: center; gap: 20px;}
+        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height); position: relative; flex-shrink: 0;}
+
+        /* Original Look Mode */
+        .original-look-container { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%;}
+        .original-page { box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; max-width: 210mm; width: 100%;}
+        .original-page img { width: 100%; display: block; }
+        .original-look-badge { background: #10b981; color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; position: sticky; top: 0; z-index: 10;}
 
         .slider-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .slider-container label { font-size: 13px; font-weight: 600; color: var(--text-muted); width: 40%;}
         .slider-container input[type=range] { width: 60%; cursor: pointer; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 99999; justify-content: center; align-items: center; }
-        .modal-content { background: var(--bg-panel); padding: 30px; border-radius: 15px; width: 600px; max-width: 90%; max-height: 85vh; overflow-y: auto; position: relative; color: var(--text-main);}
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 99999; justify-content: center; align-items: center; padding: 15px;}
+        .modal-content { background: var(--bg-panel); padding: 30px; border-radius: 15px; width: 600px; max-width: 100%; max-height: 90vh; overflow-y: auto; position: relative; color: var(--text-main);}
         .modal-content.wide { width: 800px; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #ef4444; }
         .modal h2 { color: var(--text-main); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;}
+
+        .choice-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;}
+        .choice-card { padding: 25px 20px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; text-align: center; transition: 0.3s; background: var(--bg-input);}
+        .choice-card:hover { border-color: var(--theme-color); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(59,130,246,0.15);}
+        .choice-card i { font-size: 40px; color: var(--theme-color); margin-bottom: 12px; display: block;}
+        .choice-card h4 { font-size: 15px; margin-bottom: 8px; color: var(--text-main);}
+        .choice-card p { font-size: 12px; color: var(--text-muted); line-height: 1.5;}
 
         .res-section { margin-bottom: 20px; page-break-inside: avoid; position: relative; }
         .res-text { white-space: pre-wrap; }
@@ -121,50 +124,46 @@
         .skill-bar-bg { width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; }
         .skill-bar-fill { background: var(--theme-color); height: 100%; border-radius: 4px; }
 
-        /* Toast Notifications */
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
         .toast { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease; min-width: 250px; max-width: 400px; pointer-events: auto; border-left: 4px solid var(--theme-color); color: #1e293b;}
-        .toast.success { border-left-color: #10b981; }
-        .toast.error { border-left-color: #ef4444; }
-        .toast.warning { border-left-color: #f59e0b; }
-        .toast.info { border-left-color: #3b82f6; }
+        .toast.success { border-left-color: #10b981; } .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; } .toast.info { border-left-color: #3b82f6; }
         @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
 
-        /* Section visibility toggle */
         .sec-visibility-btn { background: transparent; border: none; cursor: pointer; color: #64748b; padding: 5px; font-size: 14px;}
         .sec-visibility-btn.hidden-section { color: #ef4444; }
-
-        /* Word count badge */
         .word-count-badge { position: absolute; bottom: 8px; right: 12px; font-size: 11px; color: var(--text-muted); background: var(--bg-panel); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border-color);}
-
-        /* Keyword highlighter */
         .keyword-highlight { background: #fef08a; padding: 0 2px; border-radius: 2px; font-weight: bold; }
-
-        /* Undo/Redo buttons */
         .history-controls { display: flex; gap: 5px; }
+
+        .ats-score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 20px auto; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
+
+        /* ATS Real-time overlay */
+        .ats-overlay { position: sticky; top: 0; background: rgba(255,255,255,0.95); padding: 8px 15px; border-radius: 8px; font-size: 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); margin-bottom: 10px; z-index: 100; backdrop-filter: blur(10px);}
+        .ats-overlay .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981;}
 
         @media (max-width: 850px) {
             .builder-container { flex-direction: column; overflow-y: auto; height: auto;}
             .left-panel { width: 100%; border-right: none; border-bottom: 2px solid #cbd5e1; min-height: 60vh; flex-shrink: 0;}
             .preview-panel { width: 100%; padding: 15px; overflow: visible;}
-            .a4-paper { width: 100%; max-width: 210mm; transform-origin: top center; }
+            .a4-paper { width: 100%; max-width: 210mm; }
             .layout-grid { grid-template-columns: 1fr 1fr 1fr; } 
             .back-to-home-btn { width: 45px; height: 45px; bottom: 20px; right: 20px; font-size: 20px;}
             .top-nav-actions .profile-selector { display: none; }
-            .modal-content { padding: 20px; }
+            .choice-cards { grid-template-columns: 1fr;}
         }
 
-        /* Print Styles */
         @media print {
             body { background: white !important; overflow: visible !important; height: auto !important; }
-            .top-nav, .left-panel, .action-menu, .menu-overlay, .back-to-home-btn, .toast-container, .modal { display: none !important; }
+            .top-nav, .left-panel, .action-menu, .menu-overlay, .back-to-home-btn, .toast-container, .modal, .ats-overlay { display: none !important; }
             .builder-container { display: block; overflow: visible; height: auto;}
             .preview-panel { width: 100%; padding: 0; background: white; display: block; overflow: visible;}
-            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 0; }
+            .a4-paper { width: 210mm; box-shadow: none; margin: 0 auto; padding: 0; min-height: auto; }
+            .res-section { page-break-inside: avoid !important; }
         }
 
-        /* 50 Premium Layouts CSS */
+        /* 50 Layouts CSS */
         .layout-classic { padding: 40px; } .layout-classic .header { text-align: center; border-bottom: 3px solid var(--theme-color); padding-bottom: 15px; margin-bottom: 20px; } .layout-classic .sec-title { font-size: 1.3em; color: var(--theme-color); border-bottom: 1px solid var(--theme-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase;}
         .layout-modern { display: flex; min-height: 297mm; } .layout-modern .sidebar { width: 35%; background: var(--theme-color); color: white; padding: 40px 25px; } .layout-modern .main { width: 65%; padding: 40px; } .layout-modern .sec-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--theme-color);} .layout-modern .sidebar .sec-title { border-color: rgba(255,255,255,0.3); color: white; }
         .layout-minimal { padding: 50px; } .layout-minimal .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #cbd5e1; padding-bottom: 20px;} .layout-minimal .res-section { display: flex; } .layout-minimal .sec-title { width: 25%; font-size: 1em; color: var(--theme-color); font-weight: bold; text-transform: uppercase; padding-right: 15px;} .layout-minimal .res-text { width: 75%; border-left: 1px solid #e2e8f0; padding-left: 20px; }
@@ -223,30 +222,27 @@
         .back-to-home-btn { position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s; background: #ef4444; color: white; border: none; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); text-decoration: none;}
         .back-to-home-btn:hover { transform: scale(1.1) translateY(-5px); color: white;}
 
-        /* QR Code container in resume */
         .qr-code-container { text-align: center; margin: 10px 0; }
         .qr-code-container canvas, .qr-code-container img { display: inline-block; border: 3px solid var(--theme-color); border-radius: 8px; padding: 5px; background: white;}
-
-        /* JD match result */
-        .ats-score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 20px auto; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
     </style>
 </head>
 <body>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <div class="top-nav">
-        <h2><i class="fas fa-file-pdf" style="color: #3b82f6;"></i> Pro Resume Builder v2</h2>
+        <h2><i class="fas fa-file-pdf" style="color: #3b82f6;"></i> Pro Resume Builder v3</h2>
         <div class="top-nav-actions">
-            <!-- Profile Selector -->
+            <div class="view-toggle" id="viewToggle">
+                <button class="active" data-view="design" onclick="switchView('design')"><i class="fas fa-paint-brush"></i> Design</button>
+                <button data-view="original" onclick="switchView('original')"><i class="fas fa-file-image"></i> Original</button>
+            </div>
             <div class="profile-selector" title="Switch Resume Profile">
                 <i class="fas fa-user-circle" style="color: var(--theme-color);"></i>
                 <select id="profileSelector" onchange="switchProfile(this.value)"></select>
                 <button class="btn-icon" style="padding: 5px 8px;" onclick="createNewProfile()" title="New Profile"><i class="fas fa-plus"></i></button>
                 <button class="btn-icon" style="padding: 5px 8px;" onclick="deleteCurrentProfile()" title="Delete Profile"><i class="fas fa-trash"></i></button>
             </div>
-            <!-- History Controls -->
             <div class="history-controls">
                 <button class="btn-icon" onclick="undo()" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
                 <button class="btn-icon" onclick="redo()" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
@@ -274,12 +270,14 @@
             <button class="btn" id="importResumeBtn" style="background: #8b5cf6;" onclick="document.getElementById('importResumeInput').click()">
                 <i class="fas fa-upload"></i> Import PDF Resume
             </button>
+            <button class="btn" style="background: #0077b5;" onclick="importFromLinkedIn()"><i class="fab fa-linkedin"></i> Import LinkedIn PDF</button>
             <button class="btn" style="background: #0ea5e9;" onclick="document.getElementById('jsonImportInput').click()"><i class="fas fa-file-import"></i> Import JSON Backup</button>
             <input type="file" id="jsonImportInput" accept=".json" style="display: none;" onchange="importJSON(event)">
 
             <button class="btn btn-warning" onclick="checkATSScore()"><i class="fas fa-robot"></i> AI ATS Score</button>
             <button class="btn btn-ai" onclick="askAIToWriteGlobal()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
             <button class="btn" style="background: #0284c7;" onclick="checkGrammar()"><i class="fas fa-spell-check"></i> AI Grammar Check</button>
+            <button class="btn" style="background: #7c3aed;" onclick="getInterviewQuestions()"><i class="fas fa-comments"></i> AI Interview Q&A</button>
             <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 5px 0;">
             <button class="btn" style="background: #475569;" onclick="exportJSON()"><i class="fas fa-file-export"></i> Export JSON Backup</button>
             <button class="btn" style="background: #2563eb;" onclick="downloadWord()"><i class="fas fa-file-word"></i> Download Word</button>
@@ -311,18 +309,50 @@
         </div>
     </div>
 
-    <!-- JD Tailoring Modal -->
+    <!-- JD Modal -->
     <div id="jdModal" class="modal">
         <div class="modal-content wide">
             <span class="close-modal" onclick="closeModal('jdModal')">✖</span>
             <h2><i class="fas fa-bullseye" style="color: #6366f1;"></i> Tailor Resume to Job Description</h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Paste the Job Description below. AI will optimize your resume, highlight missing keywords, and improve matching.</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Paste the Job Description. AI will optimize your resume & highlight missing keywords.</p>
             <textarea id="jdInput" placeholder="Paste Job Description here..." style="width: 100%; height: 200px; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: 'Poppins', sans-serif; resize: vertical; outline: none;"></textarea>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn btn-ai" style="flex: 1;" onclick="analyzeJDMatch()"><i class="fas fa-search"></i> Scan Keywords</button>
                 <button class="btn" style="flex: 1; background: #6366f1;" onclick="tailorResumeWithAI()"><i class="fas fa-magic"></i> AI Optimize</button>
             </div>
             <div id="jdResult" style="margin-top: 15px; color: var(--text-main); line-height: 1.6; font-size: 14px;"></div>
+        </div>
+    </div>
+
+    <!-- Interview Q&A Modal -->
+    <div id="iqModal" class="modal">
+        <div class="modal-content wide">
+            <span class="close-modal" onclick="closeModal('iqModal')">✖</span>
+            <h2><i class="fas fa-comments" style="color: #7c3aed;"></i> AI Predicted Interview Questions</h2>
+            <div id="iqResult" style="color: var(--text-main); line-height: 1.6; font-size: 14px;">
+                <div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Preparing questions...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Choice Modal -->
+    <div id="importChoiceModal" class="modal">
+        <div class="modal-content wide">
+            <span class="close-modal" onclick="closeModal('importChoiceModal')">✖</span>
+            <h2><i class="fas fa-file-import" style="color: var(--theme-color);"></i> How do you want to import?</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">Choose how your uploaded resume should be handled:</p>
+            <div class="choice-cards">
+                <div class="choice-card" onclick="importAsNewDesign()">
+                    <i class="fas fa-magic"></i>
+                    <h4>Import as New Design</h4>
+                    <p>AI extracts your content (name, skills, experience) and applies your currently selected layout & theme. Content stays, design changes.</p>
+                </div>
+                <div class="choice-card" onclick="importKeepOriginalLook()">
+                    <i class="fas fa-file-image"></i>
+                    <h4>Keep Original Look</h4>
+                    <p>Your PDF is rendered page-by-page as-is. Original fonts, colors, layout — everything preserved. Download as PDF in same format.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -345,12 +375,14 @@
                         <label>Line Spacing: <span id="valSpace">1.6</span></label>
                         <input type="range" id="lineHeightSlider" min="1.0" max="2.5" step="0.1" value="1.6" oninput="updatePageFitter()">
                     </div>
+                    <div class="slider-container">
+                        <label>Page Margins: <span id="valMargin">40</span>px</label>
+                        <input type="range" id="marginSlider" min="20" max="70" step="5" value="40" oninput="updateMargins()">
+                    </div>
                 </div>
 
                 <h3 style="margin-bottom: 15px; font-size: 16px;">Choose Layout</h3>
-                <div class="layout-grid" id="layoutGrid">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="layout-grid" id="layoutGrid"></div>
 
                 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 16px;">Font Style</h3>
                 <select id="fontSelector" onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif; background: var(--bg-panel); color: var(--text-main);">
@@ -373,9 +405,13 @@
 
                 <h3 style="margin-bottom: 10px; font-size: 16px;">QR Code (Portfolio/LinkedIn)</h3>
                 <input type="url" id="qrUrlInput" placeholder="https://yourportfolio.com" oninput="updateQRCode(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; margin-bottom: 10px;">
-                <label style="font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-muted);">
+                <label style="font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-muted); margin-bottom: 20px;">
                     <input type="checkbox" id="showQR" onchange="toggleQR(this.checked)"> Show QR on resume
                 </label>
+
+                <h3 style="margin-bottom: 10px; font-size: 16px;">Real-time ATS Checker</h3>
+                <input type="text" id="atsKeywordInput" placeholder="Paste job keywords (comma separated)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; margin-bottom: 8px;" oninput="realtimeATSCheck(this.value)">
+                <div id="atsRealtimeResult" style="font-size: 12px; color: var(--text-muted);"></div>
             </div>
 
            <div id="dataTab" class="tab-content">
@@ -411,7 +447,12 @@
         </div>
 
         <div class="preview-panel">
+            <div id="atsOverlay" class="ats-overlay" style="display:none;">
+                <span class="dot"></span>
+                <span id="atsOverlayText">ATS Match: 0%</span>
+            </div>
             <div class="a4-paper" id="resumePreview"></div>
+            <div id="originalPreview" class="original-look-container" style="display:none;"></div>
         </div>
     </div>
 
@@ -421,7 +462,6 @@
         /* ============ CONSTANTS & STATE ============ */
         const LAYOUTS = ['classic','modern','minimal','elegant','timeline','corporate','split-right','boxed','bold-header','academic','pill-titles','accent-left','startup','clean-left','executive','portfolio','tech','divided','soft','vibrant','compact','elegant-serif','blocky','minimal-line','creative-dark','ceo-clean','matrix','swiss-grid','material-cards','dual-sidebar','brutalist','elegant-gold','tech-lead','notion-style','github-style','classic-serif','timeline-right','euro-cv','creative-dots','terminal','ultra-compact','accent-right','pastel','corporate-blue','stark','glass','centered-minimal','wave','split-diagonal','dark-pro'];
         const LAYOUT_ICONS = { classic:'fa-file-alt', modern:'fa-columns', minimal:'fa-minus', elegant:'fa-feather', timeline:'fa-stream', corporate:'fa-briefcase', 'split-right':'fa-exchange-alt', boxed:'fa-square', 'bold-header':'fa-bold', academic:'fa-graduation-cap', 'pill-titles':'fa-capsules', 'accent-left':'fa-align-left', startup:'fa-rocket', 'clean-left':'fa-align-left', executive:'fa-user-tie', portfolio:'fa-briefcase', tech:'fa-terminal', divided:'fa-th-large', soft:'fa-circle', vibrant:'fa-palette', compact:'fa-compress', 'elegant-serif':'fa-book', blocky:'fa-square', 'minimal-line':'fa-minus', 'creative-dark':'fa-moon', 'ceo-clean':'fa-crown', matrix:'fa-code', 'swiss-grid':'fa-th', 'material-cards':'fa-layer-group', 'dual-sidebar':'fa-columns', brutalist:'fa-hammer', 'elegant-gold':'fa-star', 'tech-lead':'fa-users-cog', 'notion-style':'fa-sticky-note', 'github-style':'fa-github', 'classic-serif':'fa-book', 'timeline-right':'fa-stream', 'euro-cv':'fa-flag', 'creative-dots':'fa-braille', terminal:'fa-terminal', 'ultra-compact':'fa-compress-alt', 'accent-right':'fa-align-right', pastel:'fa-paint-brush', 'corporate-blue':'fa-building', stark:'fa-adjust', glass:'fa-glass', 'centered-minimal':'fa-align-center', wave:'fa-water', 'split-diagonal':'fa-columns', 'dark-pro':'fa-moon' };
-        const CONTACT_ICONS = { email:'fa-envelope', phone:'fa-phone', linkedin:'fa-linkedin', github:'fa-github', website:'fa-globe', portfolio:'fa-briefcase', twitter:'fa-twitter', location:'fa-map-marker-alt', address:'fa-map-marker-alt' };
 
         let currentLayout = 'classic';
         let userProfilePic = '';
@@ -432,6 +472,9 @@
         let historyIndex = -1;
         let isUndoRedoAction = false;
         let sectionVisibility = {};
+        let currentView = 'design'; // 'design' or 'original'
+        let originalPdfPages = []; // dataURLs for "keep original look"
+        let currentMargin = 40;
         
         let sectionsData = [
             { id: 1, title: 'Professional Summary', text: 'A passionate developer building scalable web applications and AI tools.' },
@@ -444,7 +487,7 @@
             { label: "LinkedIn", value: "linkedin.com/in/suhel" }
         ];
 
-        /* ============ TOAST NOTIFICATIONS ============ */
+        /* ============ TOAST ============ */
         function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -459,7 +502,7 @@
             }, duration);
         }
 
-        /* ============ XSS PROTECTION ============ */
+        /* ============ XSS ============ */
         function escapeHtml(str) {
             if (typeof str !== 'string') return str;
             const div = document.createElement('div');
@@ -473,95 +516,353 @@
             return html;
         }
 
-        /* ============ UNDO / REDO ============ */
-        function captureState() {
-            return JSON.stringify({
-                currentLayout, userProfilePic, sectionsData, contactFields,
-                name: document.getElementById('inpName')?.value || '',
-                title: document.getElementById('inpTitle')?.value || '',
-                sectionVisibility
-            });
-        }
-        function pushHistory() {
-            if (isUndoRedoAction) return;
-            const state = captureState();
-            if (historyStack[historyIndex] === state) return;
-            historyStack = historyStack.slice(0, historyIndex + 1);
-            historyStack.push(state);
-            if (historyStack.length > 30) historyStack.shift();
-            historyIndex = historyStack.length - 1;
-        }
-        function undo() {
-            if (historyIndex <= 0) { showToast('Nothing to undo', 'info'); return; }
-            historyIndex--;
-            applyState(historyStack[historyIndex]);
-            showToast('Undo', 'info', 1500);
-        }
-        function redo() {
-            if (historyIndex >= historyStack.length - 1) { showToast('Nothing to redo', 'info'); return; }
-            historyIndex++;
-            applyState(historyStack[historyIndex]);
-            showToast('Redo', 'info', 1500);
-        }
-        function applyState(stateStr) {
-            isUndoRedoAction = true;
-            try {
-                const state = JSON.parse(stateStr);
-                currentLayout = state.currentLayout;
-                userProfilePic = state.userProfilePic;
-                sectionsData = state.sectionsData;
-                contactFields = state.contactFields;
-                sectionVisibility = state.sectionVisibility || {};
-                document.getElementById('inpName').value = state.name;
-                document.getElementById('inpTitle').value = state.title;
-                renderContactFields();
-                renderEditor();
-                renderResume();
-                updateLayoutGridActive();
-            } finally {
-                setTimeout(() => { isUndoRedoAction = false; }, 100);
+        /* ============ VIEW TOGGLE (Design / Original) ============ */
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('#viewToggle button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+            if (view === 'original') {
+                document.getElementById('resumePreview').style.display = 'none';
+                document.getElementById('originalPreview').style.display = 'flex';
+                document.getElementById('atsOverlay').style.display = 'none';
+                if (originalPdfPages.length === 0) {
+                    showToast('No original PDF uploaded yet. Import a PDF to use this view.', 'info');
+                }
+            } else {
+                document.getElementById('resumePreview').style.display = 'block';
+                document.getElementById('originalPreview').style.display = 'none';
             }
         }
 
-        /* ============ MULTIPLE PROFILES ============ */
+        /* ============ IMPORT CHOICE FLOW ============ */
+        let pendingImportFile = null;
+        function handleResumeImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            pendingImportFile = file;
+            document.getElementById('importChoiceModal').style.display = 'flex';
+        }
+
+        async function importAsNewDesign() {
+            closeModal('importChoiceModal');
+            const file = pendingImportFile;
+            if (!file) return;
+            const btn = document.getElementById('importResumeBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reading PDF...';
+            btn.disabled = true;
+            showToast('Reading PDF...', 'info');
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    try {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        let fullText = "";
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(" ");
+                            fullText += pageText + "\n";
+                        }
+                        btn.innerHTML = '<i class="fas fa-brain fa-spin"></i> AI Formatting...';
+                        const aiCommand = `Extract details from this old resume. Return ONLY valid JSON object. Keys: "fullName", "jobTitle", "contactInfo" (Email | Phone | LinkedIn), "summary", "skills", "experience". Format professionally.\n\nOld Resume:\n${fullText.substring(0, 3500)}`;
+                        const res = await fetch('/api/ask-ai', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: aiCommand })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
+                            document.getElementById('inpName').value = aiData.fullName || "Your Name";
+                            document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
+                            contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
+                            renderContactFields();
+                            sectionsData = [
+                                { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
+                                { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
+                                { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
+                            ];
+                            renderEditor(); renderResume();
+                            document.querySelectorAll('.tab-btn')[1].click();
+                            toggleMenu();
+                            showToast('Resume imported with new design!', 'success');
+                        } else showToast('AI Error.', 'error');
+                    } catch (e) { showToast('Error parsing PDF.', 'error'); } 
+                    finally { document.getElementById('importResumeInput').value = ""; pendingImportFile = null; btn.innerHTML = originalText; btn.disabled = false; }
+                };
+                fileReader.readAsArrayBuffer(file);
+            } catch (error) { showToast('Load error.', 'error'); btn.innerHTML = originalText; btn.disabled = false; }
+        }
+
+        async function importKeepOriginalLook() {
+            closeModal('importChoiceModal');
+            const file = pendingImportFile;
+            if (!file) return;
+            showToast('Rendering original PDF pages...', 'info');
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    try {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        originalPdfPages = [];
+                        const container = document.getElementById('originalPreview');
+                        container.innerHTML = '<div class="original-look-badge">📄 Original Look Mode — Every page rendered as-is</div>';
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const viewport = page.getViewport({ scale: 2 });
+                            const canvas = document.createElement('canvas');
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            const ctx = canvas.getContext('2d');
+                            await page.render({ canvasContext: ctx, viewport }).promise;
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                            originalPdfPages.push(dataUrl);
+                            const pageDiv = document.createElement('div');
+                            pageDiv.className = 'original-page';
+                            pageDiv.innerHTML = `<img src="${dataUrl}" alt="Page ${i}">`;
+                            container.appendChild(pageDiv);
+                        }
+                        toggleMenu();
+                        switchView('original');
+                        showToast(`Original look ready! ${pdf.numPages} page(s) preserved.`, 'success');
+                        saveDraft(true);
+                    } catch (e) { showToast('Error rendering PDF pages.', 'error'); } 
+                    finally { document.getElementById('importResumeInput').value = ""; pendingImportFile = null; }
+                };
+                fileReader.readAsArrayBuffer(file);
+            } catch (error) { showToast('Load error.', 'error'); }
+        }
+
+        /* ============ LINKEDIN IMPORT ============ */
+        async function importFromLinkedIn() {
+            toggleMenu();
+            showToast('Open your LinkedIn → Me → Settings → Data Privacy → Get a copy of your data. Or use "Save to PDF" from your profile. Then upload that PDF.', 'info', 8000);
+            setTimeout(() => {
+                document.getElementById('importResumeInput').click();
+            }, 1500);
+        }
+
+        /* ============ IMPROVED PDF DOWNLOAD (Proper A4 formatting) ============ */
+        function downloadPDF() {
+            toggleMenu();
+            showToast('Generating PDF with proper A4 formatting...', 'info');
+            
+            if (currentView === 'original' && originalPdfPages.length > 0) {
+                // Download original look as PDF (rebuild from images)
+                const { jsPDF } = window.jspdf || {};
+                if (!jsPDF) {
+                    // Use html2pdf on original preview
+                    const element = document.getElementById('originalPreview');
+                    html2pdf().set({
+                        margin: 0, filename: `${currentProfileName.replace(/\s+/g,'_')}_Original.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: 'css' }
+                    }).from(element).save().then(() => showToast('PDF downloaded!', 'success'));
+                }
+                return;
+            }
+            
+            // Proper A4 design PDF
+            const element = document.getElementById('resumePreview');
+            const prevStyle = element.style.cssText;
+            // Ensure exact A4 dimensions for export
+            element.style.width = '210mm';
+            element.style.minHeight = '297mm';
+            element.style.padding = '0';
+            element.style.margin = '0';
+            element.style.boxShadow = 'none';
+            
+            html2pdf().set({ 
+                margin: [0, 0, 0, 0],
+                filename: `${currentProfileName.replace(/\s+/g,'_')}_Resume.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { 
+                    scale: 3, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: '.res-section' }
+            }).from(element).save().then(() => {
+                element.style.cssText = prevStyle;
+                showToast('PDF downloaded!', 'success');
+            }).catch(() => {
+                element.style.cssText = prevStyle;
+                showToast('PDF generation failed', 'error');
+            });
+        }
+
+        /* ============ IMPROVED WORD DOWNLOAD (Proper structure) ============ */
+        function downloadWord() {
+            toggleMenu();
+            if (currentView === 'original' && originalPdfPages.length > 0) {
+                showToast('Word export not available in Original Look mode. Switch to Design view.', 'warning');
+                return;
+            }
+            const resumeHTML = document.getElementById('resumePreview').innerHTML;
+            
+            // Word-friendly HTML with proper page setup
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Resume</title>
+            <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
+            <style>
+                @page { size: A4; margin: 2cm 1.5cm; }
+                body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; line-height: 1.4; color: #1e293b; }
+                h1, h2, h3 { margin: 8pt 0 4pt; }
+                .res-section { page-break-inside: avoid; margin-bottom: 12pt; }
+                .sec-title { font-size: 13pt; font-weight: bold; margin-bottom: 4pt; border-bottom: 1pt solid #cbd5e1; padding-bottom: 2pt; }
+                .res-text { font-size: 11pt; line-height: 1.4; }
+                table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
+                th, td { border: 1pt solid #999; padding: 4pt 8pt; text-align: left; font-size: 10pt; }
+                th { background: #e2e8f0; font-weight: bold; }
+                .skill-bar-wrapper { margin-bottom: 4pt; }
+                .skill-bar-bg { background: #e2e8f0; height: 6pt; }
+                .skill-bar-fill { background: #3b82f6; height: 6pt; }
+                p { margin: 4pt 0; }
+            </style></head><body>`;
+            const footer = "</body></html>";
+            
+            // Clean up inline styles that break Word
+            let cleanHTML = resumeHTML
+                .replace(/contenteditable="true"/g, '')
+                .replace(/style="([^"]*)"/g, (m, styles) => {
+                    // Keep important styles, filter layout-breaking ones
+                    const keep = ['color','font-size','font-weight','text-align','text-transform','letter-spacing','margin','padding','border-bottom','background'];
+                    const filtered = styles.split(';').filter(s => keep.some(k => s.trim().toLowerCase().startsWith(k))).join(';');
+                    return filtered ? `style="${filtered}"` : '';
+                });
+            
+            const sourceHTML = header + cleanHTML + footer;
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            const fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = `${currentProfileName.replace(/\s+/g,'_')}_Resume.doc`;
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+            showToast('Word downloaded with proper A4 structure!', 'success');
+        }
+
+        /* ============ PDF + COVER COMBINED ============ */
+        function downloadPDFWithCover() {
+            toggleMenu();
+            const cvText = document.getElementById('cvResult').innerText.trim();
+            if (!cvText || cvText.includes('Writing your Cover')) {
+                showToast('Generate a cover letter first!', 'warning');
+                return;
+            }
+            if (currentView === 'original') {
+                showToast('Switch to Design view first to combine.', 'warning');
+                return;
+            }
+            showToast('Building combined PDF...', 'info');
+            
+            // Build cover letter page + resume pages in one container
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'background:white; width:210mm; font-family:Poppins,sans-serif; color:#1e293b;';
+            
+            const cvPage = document.createElement('div');
+            cvPage.style.cssText = 'padding: 25mm 20mm; min-height: 297mm; box-sizing: border-box; page-break-after: always;';
+            cvPage.innerHTML = `
+                <h1 style="font-size: 24pt; border-bottom: 2pt solid #3b82f6; padding-bottom: 8pt; margin-bottom: 20pt; color: #1e293b;">Cover Letter</h1>
+                <div style="font-size: 11pt; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(cvText)}</div>
+            `;
+            wrapper.appendChild(cvPage);
+            
+            // Resume clone
+            const resumeClone = document.getElementById('resumePreview').cloneNode(true);
+            resumeClone.style.cssText = 'width:210mm; min-height:297mm; page-break-before: always;';
+            wrapper.appendChild(resumeClone);
+            
+            document.body.appendChild(wrapper);
+            wrapper.style.position = 'absolute';
+            wrapper.style.left = '-9999px';
+            
+            html2pdf().set({ 
+                margin: 0, filename: `${currentProfileName.replace(/\s+/g,'_')}_Resume_And_CoverLetter.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+                pagebreak: { mode: ['css', 'legacy'], before: '.page-break' }
+            }).from(wrapper).save().then(() => {
+                document.body.removeChild(wrapper);
+                showToast('Combined PDF downloaded!', 'success');
+            }).catch(() => {
+                document.body.removeChild(wrapper);
+                showToast('Failed to build PDF', 'error');
+            });
+        }
+
+        /* ============ PRINT ============ */
+        function printResume() {
+            toggleMenu();
+            window.print();
+        }
+
+        /* ============ REAL-TIME ATS ============ */
+        function realtimeATSCheck(keywordsStr) {
+            const overlay = document.getElementById('atsOverlay');
+            const overlayText = document.getElementById('atsOverlayText');
+            const resultDiv = document.getElementById('atsRealtimeResult');
+            if (!keywordsStr.trim()) {
+                overlay.style.display = 'none';
+                resultDiv.innerHTML = '';
+                return;
+            }
+            const keywords = keywordsStr.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+            const resumeText = (document.getElementById('inpName').value + ' ' + document.getElementById('inpTitle').value + ' ' + sectionsData.map(s => s.title + ' ' + s.text.replace(/<[^>]+>/g,'')).join(' ')).toLowerCase();
+            let found = 0;
+            keywords.forEach(k => { if (resumeText.includes(k)) found++; });
+            const pct = Math.round((found / keywords.length) * 100);
+            const color = pct >= 70 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+            overlay.style.display = 'flex';
+            overlayText.innerHTML = `ATS Match: <b style="color:${color};">${pct}%</b> (${found}/${keywords.length} keywords)`;
+            resultDiv.innerHTML = `<span style="color:${color}; font-weight: bold;">${pct}% match</span> — ${found} of ${keywords.length} keywords found`;
+        }
+
+        /* ============ PROFILE SYSTEM ============ */
         function getProfileList() {
             try { return JSON.parse(localStorage.getItem('resumeProfiles') || '["Default"]'); }
             catch(e) { return ['Default']; }
         }
-        function saveProfileList(list) {
-            localStorage.setItem('resumeProfiles', JSON.stringify(list));
-        }
+        function saveProfileList(list) { localStorage.setItem('resumeProfiles', JSON.stringify(list)); }
         function loadProfileList() {
             const list = getProfileList();
             const sel = document.getElementById('profileSelector');
+            if (!list.includes(currentProfileName)) currentProfileName = list[0];
             sel.innerHTML = list.map(p => `<option value="${escapeHtml(p)}" ${p === currentProfileName ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('');
         }
         function switchProfile(name) {
             saveDraft(true);
             currentProfileName = name;
             loadDraft();
-            showToast(`Switched to profile: ${name}`, 'success');
+            showToast(`Profile: ${name}`, 'success');
         }
         function createNewProfile() {
-            const name = prompt("Enter profile name (e.g., 'Google Resume', 'Startup Resume'):");
+            const name = prompt("Profile name (e.g., 'Google Resume'):");
             if (!name || !name.trim()) return;
             const trimmed = name.trim();
             const list = getProfileList();
-            if (list.includes(trimmed)) { showToast('Profile already exists!', 'warning'); return; }
+            if (list.includes(trimmed)) { showToast('Already exists!', 'warning'); return; }
             list.push(trimmed);
             saveProfileList(list);
-            saveDraft(true); // save current
+            saveDraft(true);
             currentProfileName = trimmed;
-            // Reset to defaults for new profile
             localStorage.removeItem(profileKey());
             resetToDefaults();
             loadProfileList();
-            showToast(`Created profile: ${trimmed}`, 'success');
+            showToast(`Created: ${trimmed}`, 'success');
         }
         function deleteCurrentProfile() {
             const list = getProfileList();
-            if (list.length <= 1) { showToast('Cannot delete last profile!', 'error'); return; }
-            if (!confirm(`Delete profile "${currentProfileName}"?`)) return;
+            if (list.length <= 1) { showToast('Cannot delete last!', 'error'); return; }
+            if (!confirm(`Delete "${currentProfileName}"?`)) return;
             localStorage.removeItem(profileKey());
             const idx = list.indexOf(currentProfileName);
             list.splice(idx, 1);
@@ -569,7 +870,7 @@
             currentProfileName = list[0];
             loadProfileList();
             loadDraft();
-            showToast('Profile deleted', 'success');
+            showToast('Deleted', 'success');
         }
         function profileKey() { return 'resumeDraft_' + currentProfileName; }
         function resetToDefaults() {
@@ -582,16 +883,15 @@
             ];
             contactFields = [{ label: "Email", value: "" }, { label: "Phone", value: "" }];
             sectionVisibility = {};
+            originalPdfPages = [];
             document.getElementById('inpName').value = '';
             document.getElementById('inpTitle').value = '';
-            renderContactFields();
-            renderEditor();
-            renderResume();
+            renderContactFields(); renderEditor(); renderResume();
         }
 
-        /* ============ SAVE / LOAD DRAFT ============ */
+        /* ============ LOAD / SAVE ============ */
         function loadDraft() {
-            let saved = localStorage.getItem(profileKey()) || localStorage.getItem('resumeDraft');
+            let saved = localStorage.getItem(profileKey());
             if (saved) {
                 try {
                     let data = JSON.parse(saved);
@@ -600,9 +900,12 @@
                     sectionsData = data.sectionsData || sectionsData;
                     contactFields = data.contactFields || contactFields;
                     sectionVisibility = data.sectionVisibility || {};
+                    currentMargin = data.margin || 40;
                     
-                    document.getElementById('inpName').value = data.name || "SUHEL ANSARI";
-                    document.getElementById('inpTitle').value = data.title || "Full Stack Developer";
+                    document.getElementById('inpName').value = data.name || "";
+                    document.getElementById('inpTitle').value = data.title || "";
+                    document.getElementById('marginSlider').value = currentMargin;
+                    updateMargins();
                     
                     if (data.themeColor) changeTheme(data.themeColor, data.isWhite);
                     if (data.fontStyle) { document.getElementById('fontSelector').value = data.fontStyle; changeFont(data.fontStyle); }
@@ -616,12 +919,24 @@
                         document.getElementById('leftPanelImg').src = userProfilePic;
                         document.getElementById('leftPanelImg').style.display = 'block';
                     }
-                    // restore checkbox
-                    const qrCheck = document.getElementById('showQR');
-                    if (qrCheck) qrCheck.checked = !!showQRCode;
+                    if (data.originalPdfPages && data.originalPdfPages.length > 0) {
+                        originalPdfPages = data.originalPdfPages;
+                        renderOriginalPreview();
+                    }
                 } catch(e) { console.error('Load failed:', e); }
             }
             updateLayoutGridActive();
+        }
+
+        function renderOriginalPreview() {
+            const container = document.getElementById('originalPreview');
+            container.innerHTML = '<div class="original-look-badge">📄 Original Look Mode — Every page rendered as-is</div>';
+            originalPdfPages.forEach((dataUrl, i) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'original-page';
+                pageDiv.innerHTML = `<img src="${dataUrl}" alt="Page ${i+1}">`;
+                container.appendChild(pageDiv);
+            });
         }
 
         function saveDraft(silent = false) {
@@ -634,9 +949,11 @@
                 fontStyle: document.documentElement.style.getPropertyValue('--theme-font').trim(),
                 fontSize: document.getElementById('fontSizeSlider').value,
                 lineSpacing: document.getElementById('lineHeightSlider').value,
+                margin: currentMargin,
                 qrUrl: document.getElementById('qrUrlInput')?.value || '',
                 showQRCode,
-                darkMode: document.body.classList.contains('dark-mode')
+                darkMode: document.body.classList.contains('dark-mode'),
+                originalPdfPages: originalPdfPages.slice(0, 3) // limit for storage
             };
             try {
                 localStorage.setItem(profileKey(), JSON.stringify(data));
@@ -647,17 +964,15 @@
                     status._t = setTimeout(() => { status.style.display = 'none'; }, 2000);
                 }
             } catch(e) {
-                showToast('Storage full! Clear old profiles.', 'error');
+                showToast('Storage full! Delete a profile or reduce image size.', 'warning');
             }
             pushHistory();
         }
 
-        /* ============ JSON EXPORT / IMPORT ============ */
+        /* ============ JSON ============ */
         function exportJSON() {
             const data = {
-                version: 2,
-                exportedAt: new Date().toISOString(),
-                profileName: currentProfileName,
+                version: 3, exportedAt: new Date().toISOString(), profileName: currentProfileName,
                 content: JSON.parse(captureState())
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -686,10 +1001,8 @@
                     if (content.sectionVisibility) sectionVisibility = content.sectionVisibility;
                     renderContactFields(); renderEditor(); renderResume(); updateLayoutGridActive();
                     saveDraft();
-                    showToast('Backup imported successfully!', 'success');
-                } catch(err) {
-                    showToast('Invalid JSON file!', 'error');
-                }
+                    showToast('Backup imported!', 'success');
+                } catch(err) { showToast('Invalid JSON!', 'error'); }
             };
             reader.readAsText(file);
             event.target.value = '';
@@ -704,26 +1017,23 @@
             showToast(isDark ? 'Dark mode on' : 'Light mode on', 'info', 1500);
         }
 
-        /* ============ QR CODE ============ */
+        /* ============ QR ============ */
         function updateQRCode(url) {
-            if (!url || !url.trim()) { qrCodeDataUrl = ''; renderResume(); return; }
+            if (!url || !url.trim()) { qrCodeDataUrl = ''; if (showQRCode) renderResume(); return; }
             const tempDiv = document.createElement('div');
             try {
-                new QRCode(tempDiv, { text: url, width: 100, height: 100, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+                new QRCode(tempDiv, { text: url, width: 120, height: 120, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M });
                 setTimeout(() => {
                     const canvas = tempDiv.querySelector('canvas');
                     if (canvas) {
                         qrCodeDataUrl = canvas.toDataURL('image/png');
                         if (showQRCode) renderResume();
+                        saveDraft(true);
                     }
                 }, 100);
-            } catch(e) { console.error('QR error:', e); }
+            } catch(e) {}
         }
-        function toggleQR(checked) {
-            showQRCode = checked;
-            renderResume();
-            saveDraft();
-        }
+        function toggleQR(checked) { showQRCode = checked; renderResume(); saveDraft(); }
 
         /* ============ JD TAILORING ============ */
         function openJDTailorModal() {
@@ -732,16 +1042,15 @@
             document.getElementById('jdResult').innerHTML = '';
         }
         function extractKeywords(jd) {
-            const stopWords = new Set(['the','a','an','and','or','but','if','then','else','for','of','to','in','on','at','by','with','from','up','about','into','over','after','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','shall','should','may','might','must','can','could','this','that','these','those','i','you','he','she','it','we','they','as','not','no','yes','so','than','too','very','just','only','also','our','your','their','its']);
+            const stop = new Set(['the','a','an','and','or','but','if','then','else','for','of','to','in','on','at','by','with','from','up','about','into','over','after','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','shall','should','may','might','must','can','could','this','that','these','those','i','you','he','she','it','we','they','as','not','no','yes','so','than','too','very','just','only','also','our','your','their','its']);
             const words = jd.toLowerCase().match(/\b[a-z][a-z+#.-]{2,}\b/g) || [];
             const counts = {};
-            words.forEach(w => { if (!stopWords.has(w) && w.length > 3) counts[w] = (counts[w] || 0) + 1; });
-            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 25).map(x => x[0]);
-            return sorted;
+            words.forEach(w => { if (!stop.has(w) && w.length > 3) counts[w] = (counts[w] || 0) + 1; });
+            return Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 25).map(x => x[0]);
         }
         function analyzeJDMatch() {
             const jd = document.getElementById('jdInput').value;
-            if (!jd.trim()) { showToast('Please paste a Job Description!', 'warning'); return; }
+            if (!jd.trim()) { showToast('Paste a JD!', 'warning'); return; }
             const keywords = extractKeywords(jd);
             const resumeText = (document.getElementById('inpName').value + ' ' + document.getElementById('inpTitle').value + ' ' + sectionsData.map(s => s.title + ' ' + s.text).join(' ')).toLowerCase();
             const found = [], missing = [];
@@ -753,17 +1062,16 @@
                 <p style="text-align: center; color: var(--text-muted); margin-bottom: 15px;">Keyword Match Score</p>
                 <div style="margin-bottom: 10px;"><b style="color: #10b981;">✅ Found (${found.length}):</b><br><span style="font-size: 13px;">${found.map(k => `<span class="keyword-highlight">${escapeHtml(k)}</span>`).join(' ')}</span></div>
                 <div><b style="color: #ef4444;">❌ Missing (${missing.length}):</b><br><span style="font-size: 13px;">${missing.map(k => `<span style="background:#fee2e2; padding: 2px 6px; border-radius: 3px; margin: 2px; display: inline-block;">${escapeHtml(k)}</span>`).join(' ')}</span></div>
-                <p style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">💡 Add missing keywords to your Skills/Experience sections to improve ATS score.</p>
             `;
         }
         async function tailorResumeWithAI() {
             const jd = document.getElementById('jdInput').value;
-            if (!jd.trim()) { showToast('Please paste a Job Description!', 'warning'); return; }
+            if (!jd.trim()) { showToast('Paste a JD!', 'warning'); return; }
             const resultDiv = document.getElementById('jdResult');
-            resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin fa-2x" style="color: #6366f1;"></i><br><br>AI is optimizing your resume...</div>';
+            resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin fa-2x" style="color: #6366f1;"></i><br><br>AI is optimizing...</div>';
             const resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n` + sectionsData.map(s => `${s.title}:\n${s.text}`).join('\n\n');
             try {
-                const aiCommand = `You are an expert resume optimizer. Rewrite and tailor the following resume to match the given Job Description. Emphasize matching skills, use relevant keywords, keep it ATS-friendly, and return ONLY valid JSON in this exact format: {"summary": "...", "skills": "...", "experience": "..."}. Do not add markdown.\n\nJob Description:\n${jd.substring(0, 2000)}\n\nCurrent Resume:\n${resumeText.substring(0, 3000)}`;
+                const aiCommand = `You are an expert resume optimizer. Rewrite/tailor this resume for the JD. Return ONLY valid JSON: {"summary":"...","skills":"...","experience":"..."}.\n\nJD:\n${jd.substring(0, 2000)}\n\nResume:\n${resumeText.substring(0, 3000)}`;
                 const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const result = await res.json();
                 if (result.success) {
@@ -777,40 +1085,49 @@
                         if (skillsSec && aiData.skills) skillsSec.text = aiData.skills;
                         if (expSec && aiData.experience) expSec.text = aiData.experience;
                         renderEditor(); renderResume(); saveDraft();
-                        resultDiv.innerHTML = '<p style="color: #10b981; font-weight: bold; text-align: center; padding: 15px;"><i class="fas fa-check-circle"></i> Resume optimized! Check the preview.</p>';
-                        showToast('Resume tailored to JD!', 'success');
-                    } else { resultDiv.innerHTML = '<p style="color:#ef4444;">AI response invalid format.</p>'; }
-                } else { resultDiv.innerHTML = '<p style="color:#ef4444;">AI Error.</p>'; }
+                        resultDiv.innerHTML = '<p style="color: #10b981; font-weight: bold; text-align: center; padding: 15px;"><i class="fas fa-check-circle"></i> Optimized! Check preview.</p>';
+                        showToast('Resume tailored!', 'success');
+                    } else resultDiv.innerHTML = '<p style="color:#ef4444;">Invalid AI format.</p>';
+                } else resultDiv.innerHTML = '<p style="color:#ef4444;">AI Error.</p>';
             } catch(e) { resultDiv.innerHTML = '<p style="color:#ef4444;">Network error.</p>'; }
         }
 
-        /* ============ GRAMMAR CHECK ============ */
+        /* ============ GRAMMAR ============ */
         async function checkGrammar() {
             toggleMenu();
-            if (sectionsData.length === 0) { showToast('No content to check', 'warning'); return; }
             const allText = sectionsData.map(s => s.text.replace(/<[^>]+>/g, '')).join('\n\n');
-            if (!allText.trim()) { showToast('Add some content first', 'warning'); return; }
+            if (!allText.trim()) { showToast('Add content first!', 'warning'); return; }
             showToast('Checking grammar...', 'info');
             try {
-                const aiCommand = `Proofread the following resume content. Fix grammar, spelling, and punctuation errors. Return ONLY the corrected text (no explanation, no markdown).\n\n${allText.substring(0, 3000)}`;
+                const aiCommand = `Proofread this resume content. Fix grammar, spelling, punctuation. Return ONLY corrected text.\n\n${allText.substring(0, 3000)}`;
                 const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const data = await res.json();
                 if (data.success) {
-                    const corrected = data.reply.trim();
-                    sectionsData.forEach((s, i) => {
-                        if (i < sectionsData.length - 1) return;
-                    });
-                    // Simple approach: replace whole content into a single AI Review section
                     const existing = sectionsData.find(s => s.title === 'Grammar Review');
-                    if (existing) { existing.text = corrected; }
-                    else { sectionsData.push({ id: Date.now(), title: 'Grammar Review', text: corrected }); }
-                    renderEditor(); renderResume();
-                    showToast('Grammar check complete! See "Grammar Review" section.', 'success');
+                    if (existing) existing.text = data.reply.trim();
+                    else sectionsData.push({ id: Date.now(), title: 'Grammar Review', text: data.reply.trim() });
+                    renderEditor(); renderResume(); saveDraft();
+                    showToast('Grammar review added!', 'success');
                 } else showToast('AI error', 'error');
             } catch(e) { showToast('Network error', 'error'); }
         }
 
-        /* ============ MODAL HELPERS ============ */
+        /* ============ INTERVIEW Q&A ============ */
+        async function getInterviewQuestions() {
+            toggleMenu();
+            const resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n` + sectionsData.map(s => `${s.title}:\n${s.text.replace(/<[^>]+>/g,'')}`).join('\n\n');
+            document.getElementById('iqModal').style.display = 'flex';
+            document.getElementById('iqResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Preparing questions...</div>';
+            try {
+                const aiCommand = `Based on this resume, generate 8 likely interview questions with brief model answers. Format as numbered list. Keep concise.\n\nResume:\n${resumeText.substring(0, 3000)}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
+                const data = await res.json();
+                if (data.success) document.getElementById('iqResult').innerHTML = marked.parse(data.reply);
+                else document.getElementById('iqResult').innerHTML = "⚠️ Failed.";
+            } catch(e) { document.getElementById('iqResult').innerHTML = "⚠️ Server Error."; }
+        }
+
+        /* ============ MODAL HELPER ============ */
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         /* ============ LAYOUT GRID ============ */
@@ -826,17 +1143,14 @@
             }).join('');
         }
         function updateLayoutGridActive() {
-            document.querySelectorAll('.layout-card').forEach(c => {
-                c.classList.toggle('active', c.dataset.layout === currentLayout);
-            });
+            document.querySelectorAll('.layout-card').forEach(c => c.classList.toggle('active', c.dataset.layout === currentLayout));
         }
 
-        /* ============ EXISTING FUNCTIONS (enhanced) ============ */
+        /* ============ EXISTING HELPERS ============ */
         function toggleMenu() {
             document.getElementById('actionMenu').classList.toggle('active');
             document.getElementById('menuOverlay').classList.toggle('active');
         }
-
         function updatePageFitter() {
             let size = document.getElementById('fontSizeSlider').value;
             let space = document.getElementById('lineHeightSlider').value;
@@ -846,28 +1160,37 @@
             document.documentElement.style.setProperty('--res-line-height', space);
             saveDraft(true);
         }
-
+        function updateMargins() {
+            const m = document.getElementById('marginSlider').value;
+            currentMargin = parseInt(m);
+            document.getElementById('valMargin').innerText = m;
+            // Apply margin to the layout container via CSS variable
+            document.querySelectorAll('.a4-paper > div').forEach(el => {
+                // Only apply to layouts using padding class pattern
+            });
+            // Inject a style for current margin
+            let styleEl = document.getElementById('marginStyle');
+            if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'marginStyle'; document.head.appendChild(styleEl); }
+            styleEl.textContent = `.a4-paper .layout-classic, .a4-paper .layout-modern .main, .a4-paper .layout-modern .sidebar, .a4-paper .layout-minimal, .a4-paper .layout-elegant, .a4-paper .layout-timeline, .a4-paper .layout-corporate, .a4-paper .layout-boxed, .a4-paper .layout-bold-header .main, .a4-paper .layout-academic, .a4-paper .layout-pill-titles, .a4-paper .layout-accent-left, .a4-paper .layout-startup, .a4-paper .layout-clean-left, .a4-paper .layout-executive, .a4-paper .layout-portfolio, .a4-paper .layout-tech, .a4-paper .layout-divided, .a4-paper .layout-soft, .a4-paper .layout-vibrant, .a4-paper .layout-compact, .a4-paper .layout-elegant-serif, .a4-paper .layout-blocky, .a4-paper .layout-minimal-line, .a4-paper .layout-creative-dark .main, .a4-paper .layout-ceo-clean, .a4-paper .layout-matrix, .a4-paper .layout-swiss-grid, .a4-paper .layout-material-cards, .a4-paper .layout-brutalist, .a4-paper .layout-notion-style, .a4-paper .layout-github-style, .a4-paper .layout-tech-lead, .a4-paper .layout-terminal, .a4-paper .layout-euro-cv { padding: ${currentMargin}px !important; }`;
+            saveDraft(true);
+        }
         function handleImageUpload(event) {
             const file = event.target.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) { showToast('Image too large (max 2MB)', 'warning'); return; }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    userProfilePic = e.target.result;
-                    document.getElementById('leftPanelImg').src = userProfilePic;
-                    document.getElementById('leftPanelImg').style.display = 'block';
-                    renderResume();
-                    saveDraft();
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { showToast('Image too large (max 2MB)', 'warning'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                userProfilePic = e.target.result;
+                document.getElementById('leftPanelImg').src = userProfilePic;
+                document.getElementById('leftPanelImg').style.display = 'block';
+                renderResume(); saveDraft();
+            };
+            reader.readAsDataURL(file);
         }
-
         function renderContactFields() {
             let html = '';
             contactFields.forEach((field, index) => {
-                html += `
-                <div style="display:flex; gap:5px; margin-bottom:8px; align-items: flex-start;">
+                html += `<div style="display:flex; gap:5px; margin-bottom:8px; align-items: flex-start;">
                     <input type="text" value="${escapeHtml(field.label)}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; background: var(--bg-panel); color: var(--text-main);">
                     <div style="width: 60%;"><textarea id="contact_${index}" class="mini-editor" placeholder="Link" style="width:100%;">${escapeHtml(field.value)}</textarea></div>
                     <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 8px;"><i class="fas fa-trash"></i></button>
@@ -876,7 +1199,6 @@
             document.getElementById('contactFieldsContainer').innerHTML = html;
             setTimeout(() => { initMiniEditors(); }, 100);
         }
-
         function initMiniEditors() {
             tinymce.remove('.mini-editor');
             tinymce.init({
@@ -891,17 +1213,14 @@
                             let idx = parseInt(editor.id.split('_')[1]);
                             contactFields[idx].value = editor.getContent();
                         }
-                        renderResume(); 
-                        saveDraft(true);
+                        renderResume(); saveDraft(true);
                     });
                 }
             });
         }
-
         function addContactField() { contactFields.push({ label: "New Title", value: "" }); renderContactFields(); renderResume(); saveDraft(); }
         function updateContactField(index, key, val) { contactFields[index][key] = val; renderResume(); saveDraft(true); }
         function deleteContactField(index) { contactFields.splice(index, 1); renderContactFields(); renderResume(); saveDraft(); }
-
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -909,7 +1228,6 @@
             btn.classList.add('active');
             if (tabId === 'dataTab') { setTimeout(() => { initMiniEditors(); renderEditor(); }, 100); }
         }
-
         function changeTheme(color, isWhite = false) {
             document.documentElement.style.setProperty('--theme-color', color);
             const paper = document.getElementById('resumePreview');
@@ -921,27 +1239,25 @@
             document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
             if(cardElem) cardElem.classList.add('active');
             currentLayout = layoutName;
-            renderResume();
-            saveDraft();
+            renderResume(); saveDraft();
         }
 
         function renderEditor() {
             let html = '';
             sectionsData.forEach((sec, index) => {
                 const isHidden = sectionVisibility[sec.id] === false;
-                const wordCount = (sec.text || '').replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(w => w).length;
-                html += `
-                <div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; border-left: 5px solid ${isHidden ? '#ef4444' : 'var(--theme-color)'}; ${isHidden ? 'opacity: 0.6;' : ''}">
+                const wc = (sec.text || '').replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(w => w).length;
+                html += `<div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; border-left: 5px solid ${isHidden ? '#ef4444' : 'var(--theme-color)'}; ${isHidden ? 'opacity: 0.6;' : ''}">
                     <div style="display: flex; align-items: center; margin-bottom:10px;">
-                        <i class="fas fa-grip-vertical" style="color: var(--text-muted); margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag to move"></i>
+                        <i class="fas fa-grip-vertical" style="color: var(--text-muted); margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag"></i>
                         <input type="text" value="${escapeHtml(sec.title)}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:15px; width: 55%; color: var(--theme-color); outline: none;">
-                        <button class="sec-visibility-btn ${isHidden ? 'hidden-section' : ''}" onclick="toggleSectionVisibility(${sec.id})" title="${isHidden ? 'Show' : 'Hide'} section">
+                        <button class="sec-visibility-btn ${isHidden ? 'hidden-section' : ''}" onclick="toggleSectionVisibility(${sec.id})" title="${isHidden ? 'Show' : 'Hide'}">
                             <i class="fas ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i>
                         </button>
                     </div>
                     <div style="position:absolute; top:12px; right:12px; display:flex; gap:5px;">
-                        <button onclick="moveSecUp(${index})" style="background: var(--border-color); color: var(--text-main); border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Up"><i class="fas fa-arrow-up"></i></button>
-                        <button onclick="moveSecDown(${index})" style="background: var(--border-color); color: var(--text-main); border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Down"><i class="fas fa-arrow-down"></i></button>
+                        <button onclick="moveSecUp(${index})" style="background: var(--border-color); color: var(--text-main); border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><i class="fas fa-arrow-up"></i></button>
+                        <button onclick="moveSecDown(${index})" style="background: var(--border-color); color: var(--text-main); border:none; padding:5px 8px; border-radius:4px; cursor:pointer;"><i class="fas fa-arrow-down"></i></button>
                         <button class="btn-danger" onclick="deleteSec(${sec.id})" style="border-radius:4px;"><i class="fas fa-trash"></i></button>
                     </div>
                     <div style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px;">
@@ -951,11 +1267,10 @@
                         <button onclick="addSkillBarToSec(${sec.id})" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-sliders-h"></i> Bar</button>
                     </div>
                     <textarea id="text_${sec.id}" class="rich-editor" style="width: 100%; min-height: 200px;">${sec.text}</textarea>
-                    <span class="word-count-badge"><i class="fas fa-file-word"></i> ${wordCount} words</span>
+                    <span class="word-count-badge"><i class="fas fa-file-word"></i> ${wc} words</span>
                 </div>`;
             });
             document.getElementById('editorSections').innerHTML = html;
-
             setTimeout(() => {
                 tinymce.remove('.rich-editor'); 
                 tinymce.init({
@@ -969,9 +1284,7 @@
                             let id = parseInt(editor.id.split('_')[1]);
                             let sec = sectionsData.find(s => s.id === id);
                             if(sec) { 
-                                sec.text = editor.getContent(); 
-                                renderResume(); 
-                                // update word count badge
+                                sec.text = editor.getContent(); renderResume();
                                 const parent = editor.getContainer().closest('.form-group');
                                 const badge = parent?.querySelector('.word-count-badge');
                                 if (badge) {
@@ -986,28 +1299,12 @@
             }, 100);
         }
 
-        function toggleSectionVisibility(id) {
-            sectionVisibility[id] = sectionVisibility[id] === false ? true : false;
-            renderEditor(); renderResume(); saveDraft();
-        }
-
+        function toggleSectionVisibility(id) { sectionVisibility[id] = sectionVisibility[id] === false ? true : false; renderEditor(); renderResume(); saveDraft(); }
         function addSection() { sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' }); renderEditor(); renderResume(); saveDraft(); }
         function updateSec(id, field, val) { let sec = sectionsData.find(s => s.id === id); if(sec) { sec[field] = val; renderResume(); saveDraft(true); } }
         function deleteSec(id) { if(!confirm('Delete this section?')) return; sectionsData = sectionsData.filter(s => s.id !== id); renderEditor(); renderResume(); saveDraft(); }
-
-        function addTableToSec(id) {
-            let sec = sectionsData.find(s => s.id === id);
-            if(!sec) return;
-            sec.text += `\n<table class="resume-table">\n  <tr>\n    <th>Degree</th>\n    <th>Institute</th>\n    <th>Year</th>\n  </tr>\n  <tr>\n    <td>B.Tech CSE</td>\n    <td>Your University</td>\n    <td>2028</td>\n  </tr>\n</table>\n`;
-            renderEditor(); renderResume(); saveDraft();
-        }
-
-        function addSkillBarToSec(id) {
-            let sec = sectionsData.find(s => s.id === id);
-            if(!sec) return;
-            sec.text += `\n<div class="skill-bar-wrapper"><div class="skill-bar-header"><span>JavaScript / React</span><span>85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 85%;"></div></div></div>\n`;
-            renderEditor(); renderResume(); saveDraft();
-        }
+        function addTableToSec(id) { let sec = sectionsData.find(s => s.id === id); if(!sec) return; sec.text += `\n<table class="resume-table">\n  <tr><th>Degree</th><th>Institute</th><th>Year</th></tr>\n  <tr><td>B.Tech CSE</td><td>Your University</td><td>2028</td></tr>\n</table>\n`; renderEditor(); renderResume(); saveDraft(); }
+        function addSkillBarToSec(id) { let sec = sectionsData.find(s => s.id === id); if(!sec) return; sec.text += `\n<div class="skill-bar-wrapper"><div class="skill-bar-header"><span>JavaScript / React</span><span>85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 85%;"></div></div></div>\n`; renderEditor(); renderResume(); saveDraft(); }
 
         let draggedItemIndex = null;
         function handleDragStart(index) { draggedItemIndex = index; }
@@ -1034,6 +1331,7 @@
             return '<i class="fas fa-star" style="margin-right:8px;"></i>'; 
         }
 
+        /* ============ RENDER RESUME ============ */
         function renderResume() {
             const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : (document.getElementById('inpName')?.value || '');
             const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : (document.getElementById('inpTitle')?.value || '');
@@ -1047,11 +1345,10 @@
 
             let qrBlock = '';
             if (showQRCode && qrCodeDataUrl) {
-                qrBlock = `<div class="qr-code-container"><img src="${qrCodeDataUrl}" alt="QR Code" style="width: 100px; height: 100px;"><div style="font-size: 0.75em; color: #64748b; margin-top: 3px;">Scan to connect</div></div>`;
+                qrBlock = `<div class="qr-code-container"><img src="${qrCodeDataUrl}" alt="QR Code" style="width: 110px; height: 110px;"><div style="font-size: 0.75em; color: #64748b; margin-top: 3px;">Scan to connect</div></div>`;
             }
 
             let finalHtml = '';
-
             if (currentLayout === 'classic') { finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:2.5em; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#475569; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; } 
             else if (currentLayout === 'modern') { finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div>${qrBlock}<div class="res-section"><div class="sec-title"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
             else if (currentLayout === 'minimal') { finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:2.8em; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div>${qrBlock}</div><div style="font-size:1em; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
@@ -1087,7 +1384,7 @@
             else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="font-size:1.2em; color:var(--theme-color);">${title}</div><div style="font-size:0.9em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
             else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${qrBlock}${blocksHtml}</div>`; }
             else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div>${qrBlock}</div>` + sectionsData.filter(s => sectionVisibility[s.id] !== false).map(s => `<div class="res-section"><div class="sec-title">${escapeHtml(s.title)}</div><div class="res-text">${sanitizeHtml(s.text)}</div></div>`).join('') + `</div>`; }
-            else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
+            else if (['dual-sidebar','elegant-gold','classic-serif','timeline-right','creative-dots','ultra-compact','accent-right','pastel','corporate-blue','stark','glass','centered-minimal','wave','split-diagonal','dark-pro'].includes(currentLayout)) { 
                 finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:1.4em;">${title}</div><div style="font-size:1em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; 
             }
 
@@ -1102,83 +1399,16 @@
             document.getElementById('resumePreview').contentEditable = "true";
             document.getElementById('resumePreview').style.outline = "none";
         }
-        
-        function downloadPDF() {
-            toggleMenu();
-            showToast('Generating PDF...', 'info');
-            const element = document.getElementById('resumePreview');
-            html2pdf().set({ 
-                margin: 0, filename: `${currentProfileName.replace(/\s+/g,'_')}_Resume.pdf`, 
-                image: { type: 'jpeg', quality: 0.98 }, 
-                html2canvas: { scale: 2, useCORS: true }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(element).save().then(() => showToast('PDF downloaded!', 'success'));
-        }
 
-        function downloadPDFWithCover() {
-            toggleMenu();
-            const cvText = document.getElementById('cvResult').innerText.trim();
-            if (!cvText || cvText.includes('Writing your Cover')) {
-                showToast('Generate a cover letter first!', 'warning');
-                return;
-            }
-            showToast('Generating combined PDF...', 'info');
-            // Create temp container with resume + cover letter
-            const temp = document.createElement('div');
-            temp.style.background = 'white';
-            temp.style.padding = '20mm';
-            temp.style.fontFamily = 'Poppins, sans-serif';
-            temp.style.fontSize = '12px';
-            temp.style.color = '#1e293b';
-            temp.style.lineHeight = '1.5';
-            temp.innerHTML = `<h1 style="border-bottom:2px solid #3b82f6; padding-bottom:10px; margin-bottom:20px;">Cover Letter</h1><div style="white-space:pre-wrap;">${escapeHtml(cvText)}</div><div style="page-break-after: always;"></div>`;
-            const resumeClone = document.getElementById('resumePreview').cloneNode(true);
-            temp.appendChild(resumeClone);
-            document.body.appendChild(temp);
-            html2pdf().set({ 
-                margin: 0, filename: `${currentProfileName.replace(/\s+/g,'_')}_Resume_CV.pdf`, 
-                image: { type: 'jpeg', quality: 0.98 }, 
-                html2canvas: { scale: 2, useCORS: true }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css', 'legacy'] }
-            }).from(temp).save().then(() => {
-                document.body.removeChild(temp);
-                showToast('Combined PDF downloaded!', 'success');
-            });
-        }
-
-        function downloadWord() {
-            toggleMenu();
-            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume</title></head><body>";
-            const footer = "</body></html>";
-            const sourceHTML = header + document.getElementById("resumePreview").innerHTML + footer;
-            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-            const fileDownload = document.createElement("a");
-            document.body.appendChild(fileDownload);
-            fileDownload.href = source;
-            fileDownload.download = `${currentProfileName.replace(/\s+/g,'_')}_Resume.doc`;
-            fileDownload.click();
-            document.body.removeChild(fileDownload);
-            showToast('Word downloaded!', 'success');
-        }
-
-        function printResume() {
-            toggleMenu();
-            window.print();
-        }
-
+        /* ============ AI ACTIONS ============ */
         async function askAIToWriteGlobal() {
-            const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher React Developer'");
+            const userPrompt = prompt("What kind of resume?\nExample: 'A fresher React Developer'");
             if (!userPrompt) return; 
-            showToast('AI is writing your resume...', 'info');
+            showToast('AI writing your resume...', 'info');
             try {
-                const aiCommand = `Write a professional resume for: ${userPrompt}. Return ONLY a valid raw JSON object (without any markdown). Keys: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | Link), "summary", "skills", "experience".`;
-                const res = await fetch('/api/ask-ai', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: aiCommand })
-                });
+                const aiCommand = `Write a professional resume for: ${userPrompt}. Return ONLY valid raw JSON. Keys: "fullName", "jobTitle", "contactInfo" (Email | Phone | Link), "summary", "skills", "experience".`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const result = await res.json();
-
                 if (result.success) {
                     try {
                         const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
@@ -1193,65 +1423,11 @@
                         ];
                         renderEditor(); renderResume();
                         document.querySelectorAll('.tab-btn')[1].click();
-                        toggleMenu();
+                        toggleMenu(); saveDraft();
                         showToast('AI resume generated!', 'success');
                     } catch(parseError) { showToast('AI sent invalid format.', 'error'); }
                 } else showToast("AI Error: " + result.reply, 'error');
             } catch (error) { showToast('Network error!', 'error'); } 
-        }
-
-        async function handleResumeImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const btn = document.getElementById('importResumeBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reading PDF...';
-            btn.disabled = true;
-            showToast('Reading PDF...', 'info');
-
-            try {
-                const fileReader = new FileReader();
-                fileReader.onload = async function() {
-                    try {
-                        const typedarray = new Uint8Array(this.result);
-                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                        let fullText = "";
-                        for (let i = 1; i <= pdf.numPages; i++) {
-                            const page = await pdf.getPage(i);
-                            const textContent = await page.getTextContent();
-                            const pageText = textContent.items.map(item => item.str).join(" ");
-                            fullText += pageText + "\n";
-                        }
-
-                        btn.innerHTML = '<i class="fas fa-brain fa-spin"></i> AI Formatting...';
-                        const aiCommand = `Extract details from this old resume text. Return ONLY a valid raw JSON object. Keys: "fullName", "jobTitle", "contactInfo" (Email | Phone | LinkedIn), "summary", "skills", "experience".\n\nOld Resume:\n${fullText.substring(0, 3500)}`;
-                        const res = await fetch('/api/ask-ai', {
-                            method: 'POST', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ message: aiCommand })
-                        });
-                        const result = await res.json();
-
-                        if (result.success) {
-                            const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
-                            document.getElementById('inpName').value = aiData.fullName || "Your Name";
-                            document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                            contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
-                            renderContactFields();
-                            sectionsData = [
-                                { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
-                                { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
-                                { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
-                            ];
-                            renderEditor(); renderResume();
-                            document.querySelectorAll('.tab-btn')[1].click();
-                            toggleMenu();
-                            showToast('Resume imported!', 'success');
-                        } else { showToast('AI Error.', 'error'); }
-                    } catch (e) { showToast('Error parsing PDF.', 'error'); } 
-                    finally { document.getElementById('importResumeInput').value = ""; btn.innerHTML = originalText; btn.disabled = false; }
-                };
-                fileReader.readAsArrayBuffer(file);
-            } catch (error) { showToast('Load error.', 'error'); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
         async function checkATSScore() {
@@ -1259,17 +1435,13 @@
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
             document.getElementById('atsModal').style.display = 'flex';
-            document.getElementById('atsResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Scanning keywords... Generating ATS Score...</div>';
-
+            document.getElementById('atsResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Analyzing...</div>';
             try {
-                const aiCommand = `Act as a strict HR Applicant Tracking System (ATS). Review this resume. Give an 'ATS Match Score' out of 100. Then provide exactly 3 bullet points on what is good, and 3 bullet points on how to improve it. Make it short and professional.\n\nResume:\n${resumeText}`;
-                const res = await fetch('/api/ask-ai', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: aiCommand })
-                });
+                const aiCommand = `Act as a strict ATS. Review this resume. Give 'ATS Match Score' out of 100. Then 3 bullets on what's good, 3 bullets on how to improve.\n\nResume:\n${resumeText}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const data = await res.json();
                 if(data.success) { document.getElementById('atsResult').innerHTML = marked.parse(data.reply); } 
-                else { document.getElementById('atsResult').innerHTML = "⚠️ Failed to calculate score."; }
+                else { document.getElementById('atsResult').innerHTML = "⚠️ Failed."; }
             } catch (err) { document.getElementById('atsResult').innerHTML = "⚠️ Server Error."; }
         }
 
@@ -1278,39 +1450,32 @@
             if(!sec) return;
             const editorInstance = tinymce.get(`text_${id}`);
             let oldText = editorInstance ? editorInstance.getContent() : sec.text;
-            if(!oldText.trim()) { showToast('Please write some text first!', 'warning'); return; }
+            if(!oldText.trim()) { showToast('Write some text first!', 'warning'); return; }
             if(editorInstance) editorInstance.setContent("<p style='color:#ec4899;'><i class='fas fa-wand-magic-sparkles'></i> Enhancing... ✨</p>");
             try {
-                const aiCommand = `Rewrite this resume section to be highly professional, impactful, and ATS-friendly. Use strong action verbs. Do NOT use markdown bold/italics. Return ONLY the rewritten text.\n\nText:\n${oldText}`;
-                const res = await fetch('/api/ask-ai', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: aiCommand })
-                });
+                const aiCommand = `Rewrite this resume section to be highly professional, impactful, ATS-friendly. Use strong action verbs. Do NOT use markdown bold/italics. Return ONLY the rewritten text.\n\nText:\n${oldText}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const data = await res.json();
                 if(data.success) { 
                     sec.text = data.reply.trim().replace(/\n/g, '<br>');
                     if(editorInstance) editorInstance.setContent(sec.text);
                     renderResume(); saveDraft();
-                    showToast('Section enhanced!', 'success');
-                } 
-                else { if(editorInstance) editorInstance.setContent(oldText); showToast('AI Error', 'error'); }
+                    showToast('Enhanced!', 'success');
+                } else { if(editorInstance) editorInstance.setContent(oldText); showToast('AI Error', 'error'); }
             } catch (err) { if(editorInstance) editorInstance.setContent(oldText); showToast('Network error.', 'error'); }
         }
 
         async function generateCoverLetter() {
             toggleMenu();
-            let companyInfo = prompt("Enter Target Company and Job Role:\nExample: 'Google, Frontend Developer'");
+            let companyInfo = prompt("Target Company and Job Role:\nExample: 'Google, Frontend Developer'");
             if(!companyInfo) return;
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
             document.getElementById('cvModal').style.display = 'flex';
-            document.getElementById('cvResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Writing your Cover Letter...</div>';
+            document.getElementById('cvResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Writing Cover Letter...</div>';
             try {
-                const aiCommand = `Write a highly professional and persuasive Cover Letter for the role of ${companyInfo}. Use my resume details below. Do not use markdown like **. Standard letter format.\n\nMy Resume:\n${resumeText}`;
-                const res = await fetch('/api/ask-ai', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: aiCommand })
-                });
+                const aiCommand = `Write a highly professional & persuasive Cover Letter for the role of ${companyInfo}. Use my resume details. Do NOT use markdown. Standard letter format.\n\nMy Resume:\n${resumeText}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const data = await res.json();
                 if(data.success) { document.getElementById('cvResult').innerText = data.reply.trim(); } 
                 else { document.getElementById('cvResult').innerHTML = "⚠️ Failed."; }
@@ -1319,23 +1484,23 @@
 
         function downloadCoverLetterWord() {
             const text = document.getElementById('cvResult').innerText;
-            if(!text || text.includes('Writing your Cover')) { showToast('Generate a cover letter first!', 'warning'); return; }
-            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Cover Letter</title></head><body>";
+            if(!text || text.includes('Writing your Cover')) { showToast('Generate first!', 'warning'); return; }
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Cover Letter</title><style>@page{size:A4;margin:2.5cm 2cm;} body{font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.6;color:#1e293b;} p{margin:8pt 0;}</style></head><body>`;
             const footer = "</body></html>";
-            const sourceHTML = header + text.replace(/\n/g, '<br>') + footer;
+            const sourceHTML = header + text.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('') + footer;
             const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-            const fileDownload = document.createElement("a");
-            document.body.appendChild(fileDownload);
-            fileDownload.href = source;
-            fileDownload.download = `${currentProfileName.replace(/\s+/g,'_')}_CoverLetter.doc`;
-            fileDownload.click();
-            document.body.removeChild(fileDownload);
-            showToast('Cover letter downloaded!', 'success');
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            a.href = source;
+            a.download = `${currentProfileName.replace(/\s+/g,'_')}_CoverLetter.doc`;
+            a.click();
+            document.body.removeChild(a);
+            showToast('Cover Letter downloaded!', 'success');
         }
 
         async function translateResume() {
             toggleMenu();
-            let lang = prompt("Which language?\nExample: Hindi, Spanish, German, French");
+            let lang = prompt("Target language?\nExample: Hindi, Spanish, German, French");
             if(!lang) return;
             showToast(`Translating to ${lang}...`, 'info');
             let dataToTranslate = {
@@ -1345,11 +1510,8 @@
                 sections: sectionsData.map(s => ({ id: s.id, title: s.title, text: s.text.replace(/<[^>]*>?/gm, '') }))
             };
             try {
-                const aiCommand = `Translate the values of this JSON object into ${lang}. Return ONLY a valid JSON object starting with { and ending with }.\n\n${JSON.stringify(dataToTranslate)}`;
-                const res = await fetch('/api/ask-ai', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: aiCommand })
-                });
+                const aiCommand = `Translate the values of this JSON into ${lang}. Return ONLY valid JSON starting with { and ending with }.\n\n${JSON.stringify(dataToTranslate)}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const result = await res.json();
                 if(result.success) {
                     const jsonMatch = result.reply.match(/\{[\s\S]*\}/);
@@ -1369,7 +1531,7 @@
                         });
                         renderContactFields(); renderEditor(); renderResume(); saveDraft();
                         showToast(`Translated to ${lang}!`, 'success');
-                    } else { showToast("AI didn't return valid JSON.", 'error'); }
+                    } else showToast("AI didn't return valid JSON.", 'error');
                 } else showToast("Translation failed.", 'error');
             } catch(e) { showToast("Translation error.", 'error'); }
         }
@@ -1382,22 +1544,63 @@
             if(!promptText) return;
             const editorInstance = tinymce.get(`text_${id}`);
             let oldText = editorInstance ? editorInstance.getContent() : sec.text;
-            if(editorInstance) { editorInstance.setContent("<p style='color:#3b82f6;'>AI is thinking... 🧠</p>"); }
+            if(editorInstance) editorInstance.setContent("<p style='color:#3b82f6;'>AI thinking... 🧠</p>");
             try {
-                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details: ${promptText}. Write in impactful bullet points. Return plain text.`;
-                const res = await fetch('/api/ask-ai', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: aiCommand })
-                });
+                const aiCommand = `Write highly professional resume content for section "${sec.title}". I am a ${jobTitle}. Details: ${promptText}. Use impactful bullet points. Return plain text.`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
                 const data = await res.json();
                 if(data.success) { 
                     sec.text = data.reply.trim().replace(/\n/g, '<br>');
                     if(editorInstance) editorInstance.setContent(sec.text);
                     renderResume(); saveDraft();
-                    showToast('Content generated!', 'success');
-                } 
-                else { if(editorInstance) editorInstance.setContent(oldText); showToast('AI Error', 'error'); }
+                    showToast('Generated!', 'success');
+                } else { if(editorInstance) editorInstance.setContent(oldText); showToast('AI Error', 'error'); }
             } catch (err) { if(editorInstance) editorInstance.setContent(oldText); showToast('Network error.', 'error'); }
+        }
+
+        /* ============ UNDO / REDO ============ */
+        function captureState() {
+            return JSON.stringify({
+                currentLayout, userProfilePic, sectionsData, contactFields, sectionVisibility,
+                name: document.getElementById('inpName')?.value || '',
+                title: document.getElementById('inpTitle')?.value || ''
+            });
+        }
+        function pushHistory() {
+            if (isUndoRedoAction) return;
+            const state = captureState();
+            if (historyStack[historyIndex] === state) return;
+            historyStack = historyStack.slice(0, historyIndex + 1);
+            historyStack.push(state);
+            if (historyStack.length > 30) historyStack.shift();
+            historyIndex = historyStack.length - 1;
+        }
+        function undo() {
+            if (historyIndex <= 0) { showToast('Nothing to undo', 'info'); return; }
+            historyIndex--;
+            applyState(historyStack[historyIndex]);
+            showToast('Undo', 'info', 1500);
+        }
+        function redo() {
+            if (historyIndex >= historyStack.length - 1) { showToast('Nothing to redo', 'info'); return; }
+            historyIndex++;
+            applyState(historyStack[historyIndex]);
+            showToast('Redo', 'info', 1500);
+        }
+        function applyState(stateStr) {
+            isUndoRedoAction = true;
+            try {
+                const state = JSON.parse(stateStr);
+                currentLayout = state.currentLayout;
+                userProfilePic = state.userProfilePic;
+                sectionsData = state.sectionsData;
+                contactFields = state.contactFields;
+                sectionVisibility = state.sectionVisibility || {};
+                document.getElementById('inpName').value = state.name;
+                document.getElementById('inpTitle').value = state.title;
+                renderContactFields(); renderEditor(); renderResume();
+                updateLayoutGridActive();
+            } finally { setTimeout(() => { isUndoRedoAction = false; }, 100); }
         }
 
         /* ============ KEYBOARD SHORTCUTS ============ */
@@ -1421,6 +1624,13 @@
             }
         });
 
+        /* ============ PWA ============ */
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Optional: register a service worker here for offline mode
+            });
+        }
+
         /* ============ INIT ============ */
         window.onload = () => {
             renderLayoutGrid();
@@ -1430,16 +1640,12 @@
             renderEditor();
             initMiniEditors();
             renderResume();
-            // Set initial history
+            updateMargins();
             historyStack = [captureState()];
             historyIndex = 0;
-            
-            // Restore dark mode icon
             if (document.body.classList.contains('dark-mode')) {
                 document.getElementById('darkModeBtn').innerHTML = '<i class="fas fa-sun"></i>';
             }
-            
-            // Welcome toast
             setTimeout(() => showToast('Welcome! Press Ctrl+S to save, Ctrl+P to print.', 'info', 4000), 800);
         };
     </script>
