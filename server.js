@@ -1111,54 +1111,7 @@ app.post('/api/workspace/load', async (req, res) => {
         res.json({ success: true, files: ws?.files || {}, updatedAt: ws?.updatedAt || null });
     } catch (err) { res.json({ success: false, message: err.message }); }
 });
-// ==========================================
-// ✨ NAYA: SERVER-SIDE CODE FORMATTER (Judge0)
-// ==========================================
-const languageMap = {
-    'python3': 71, 'java': 62, 'cpp17': 54, 'c': 50, 'csharp': 51,
-    'php': 68, 'ruby': 72, 'go': 60, 'rust': 73, 'swift': 83,
-    'kotlin': 78, 'scala': 81, 'dart': 84, 'r': 80, 'bash': 46,
-    'perl': 85, 'lua': 64, 'haskell': 61, 'sql': 82, 'elixir': 57,
-    'erlang': 58, 'fsharp': 87, 'julia': 88, 'objective-c': 79,
-    'pascal': 67, 'cobol': 77, 'ada': 42, 'awk': 44
-};
 
-app.post('/api/format-code', async (req, res) => {
-    const { code, language } = req.body;
-
-    if (!code || !language) {
-        return res.json({ success: false, message: "Code and language are required." });
-    }
-
-    const languageId = languageMap[language];
-    if (!languageId) {
-        return res.json({ success: false, message: `Formatting not supported for language: ${language}` });
-    }
-
-    try {
-        // Judge0 API का उपयोग करके कोड को फॉर्मेट करें
-        const response = await fetch('https://ce.judge0.com/submissions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                source_code: code,
-                language_id: languageId,
-                // यह ट्रिक फॉर्मेटिंग के लिए है
-                stdin: '',
-                expected_output: ''
-            })
-        });
-
-        const data = await response.json();
-        res.json({ success: true, formattedCode: data.stdout || code });
-
-    } catch (error) {
-        console.error("Formatting API error:", error);
-        res.json({ success: false, message: "Formatting service is temporarily unavailable." });
-    }
-});
 // ==========================================
 // VERCEL EXPORT (Server Start) - FIXED 🚀
 // ==========================================
