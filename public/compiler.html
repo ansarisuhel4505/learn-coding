@@ -30,9 +30,24 @@
 
 <style>
 /* ============ GLOBAL ============ */
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-body { background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; transition: background .3s, color .3s; }
-
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+html, body {
+    background: #0f172a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;                    /* ✅ Viewport width fix */
+    overflow: hidden;                /* ✅ कोई scroll बाहर नहीं */
+    -webkit-tap-highlight-color: transparent;
+    transition: background .3s, color .3s;
+    max-width: 100vw;                /* ✅ Horizontal overflow रोक */
+}
 /* ============ LIGHT THEME OVERRIDE ============ */
 body.light-theme { background: #f1f5f9 !important; color: #0f172a !important; }
 body.light-theme .navbar,
@@ -116,7 +131,26 @@ button { font-family: inherit; }
 .explorer-actions i { cursor: pointer; padding: 4px; transition: .2s; font-size: 12px; }
 .explorer-actions i:hover { color: #f8fafc; background: #1e293b; border-radius: 4px; }
 .file-list { flex-grow: 1; overflow-y: auto; padding: 6px 0; }
-.file-item { padding: 7px 12px; font-size: 12px; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 6px; border-left: 3px solid transparent; }
+.file-item {
+    padding: 7px 12px;
+    font-size: 12px;
+    color: #cbd5e1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 3px solid transparent;
+    overflow: hidden;                /* ✅ बाहर न निकले */
+    text-overflow: ellipsis;         /* ✅ ... दिखे */
+    white-space: nowrap;             /* ✅ एक line में */
+}
+.file-item span {
+    overflow: hidden;                /* ✅ नाम wrap न हो */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;                    /* ✅ Flex में shrink हो */
+    flex: 1;
+}
 .file-item:hover { background: #1e293b; }
 .file-item.active { background: #1e293b; color: #3b82f6; border-left: 3px solid #3b82f6; font-weight: 500; }
 .file-item .fa-times { opacity: 0; transition: .2s; }
@@ -158,7 +192,15 @@ select optgroup { background: #0f172a; color: #94a3b8; }
 .stop-btn.visible { display: flex; }
 .terminal-btn { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 5px; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 5px; font-size: 11px; }
 
-#monacoEditor { flex-grow: 1; width: 100%; text-align: left; min-height: 0; }
+#monacoEditor {
+    flex-grow: 1;
+    width: 100%;
+    text-align: left;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;                /* ✅ Monaco के अंदर scroll रहे */
+    position: relative;
+}
 
 /* SPLITTER */
 .splitter { width: 5px; background: #334155; cursor: col-resize; flex-shrink: 0; transition: background .2s; position: relative; }
@@ -168,16 +210,75 @@ select optgroup { background: #0f172a; color: #94a3b8; }
 /* TERMINAL */
 .coding-right { width: 35%; display: flex; flex-direction: column; background: #000; flex-shrink: 0; min-width: 220px; }
 .custom-input-area { height: 30%; border-bottom: 2px solid #334155; display: flex; flex-direction: column; flex-shrink: 0; }
-.custom-input-area textarea { flex-grow: 1; background: #0f172a; color: #f8fafc; border: none; padding: 8px 10px; outline: none; font-family: 'JetBrains Mono', monospace; resize: none; font-size: 12px; }
+.custom-input-area textarea {
+    flex-grow: 1;
+    background: #0f172a;
+    color: #f8fafc;
+    border: none;
+    padding: 8px 10px;
+    outline: none;
+    font-family: 'JetBrains Mono', monospace;
+    resize: none;
+    font-size: 12px;
+    white-space: pre-wrap;           /* ✅ Wrap हो */
+    word-break: break-word;
+    overflow-wrap: anywhere;         /* ✅ Long text भी wrap */
+    overflow-y: auto;                /* ✅ Vertical scroll */
+    overflow-x: hidden;              /* ✅ Horizontal scroll नहीं */
+    max-width: 100%;                 /* ✅ Parent के अंदर */
+}
 .terminal-header { background: #1e293b; padding: 7px 12px; font-size: 11px; color: #e2e8f0; font-weight: 600; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; gap: 8px; }
 .terminal-tabs { display: flex; gap: 3px; }
 .terminal-tab { padding: 3px 9px; font-size: 10px; background: #0f172a; color: #94a3b8; border-radius: 4px; cursor: pointer; font-weight: 600; }
 .terminal-tab.active { background: #3b82f6; color: white; }
-.terminal-output { flex-grow: 1; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #e2e8f0; overflow-y: auto; white-space: pre-wrap; background: #000; line-height: 1.6; word-break: break-word; }
+.terminal-output {
+    flex-grow: 1; padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: #e2e8f0;
+    overflow-y: auto;
+    overflow-x: hidden;              /* ✅ Horizontal scroll हटाओ */
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;         /* ✅ Long words भी wrap हों */
+    background: #000;
+    line-height: 1.6;
+    max-width: 100%;                 /* ✅ Parent से बाहर न निकले */
+}
 .text-success { color: #10b981; } .text-error { color: #ef4444; } .text-warning { color: #f59e0b; } .text-info { color: #3b82f6; } .text-muted { color: #64748b; } .text-purple { color: #8b5cf6; }
-.terminal-output pre { background: #1e293b; padding: 10px; border-radius: 5px; border: 1px solid #334155; margin: 8px 0; overflow-x: auto; font-size: 11px; }
+.terminal-output pre {
+    background: #1e293b;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #334155;
+    margin: 8px 0;
+    overflow-x: auto;                /* ✅ लंबे code के लिए scroll */
+    overflow-y: hidden;
+    font-size: 11px;
+    white-space: pre;                /* ✅ Code align रहे */
+    max-width: 100%;                 /* ✅ बाहर न निकले */
+    word-break: normal;              /* ✅ Code word न तोड़ो */
+}
 .terminal-output code { background: #1e293b; padding: 2px 5px; border-radius: 3px; font-size: 11px; }
-.terminal-output .ai-card { background: #1e293b; padding: 14px; border-radius: 8px; margin-top: 10px; border-left: 3px solid #8b5cf6; }
+.terminal-output .ai-card {
+    background: #1e293b;
+    padding: 14px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border-left: 3px solid #8b5cf6;
+    overflow-wrap: anywhere;         /* ✅ Long words wrap */
+    word-break: break-word;
+    max-width: 100%;
+}
+.terminal-output .ai-card pre {
+    white-space: pre-wrap;           /* ✅ Code blocks भी wrap */
+    word-break: break-word;
+    overflow-x: auto;                /* ✅ बहुत लंबे code के लिए scroll */
+    max-width: 100%;
+}
+.terminal-output .ai-card img {
+    max-width: 100%;                 /* ✅ Image भी बाहर न निकले */
+    height: auto;
+}
 .terminal-output .ai-card h1, .terminal-output .ai-card h2, .terminal-output .ai-card h3 { color: #3b82f6; margin: 10px 0 6px; font-size: 14px; }
 .terminal-output .ai-card p { margin: 6px 0; }
 .terminal-output .ai-card ul, .terminal-output .ai-card ol { margin-left: 18px; }
@@ -853,6 +954,9 @@ require(['vs/editor/editor.main'], function() {
         quickSuggestions: true,
         multiCursorModifier: 'ctrlCmd',
         scrollBeyondLastLine: false,
+        wordWrap: 'on',                    // ✅ लंबी lines wrap होंगी
+        wordWrapColumn: 120,               // ✅ 120 chars बाद wrap
+        wrappingIndent: 'indent',          // ✅ Indent सही रहेगा
         smoothScrolling: true,
         cursorBlinking: 'smooth',
         cursorSmoothCaretAnimation: 'on',
