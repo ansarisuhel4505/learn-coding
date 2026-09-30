@@ -42,7 +42,7 @@ if (!GROQ_API_KEY) {
 }
 
 // Helper function to call Groq API
-async function callGroq(messages, model = 'llama-3.1-8b-instant') {
+async function callGroq(messages, model = 'openai/gpt-oss-120b') {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -790,14 +790,14 @@ app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
             }];
             
             // Groq का vision model
-            reply = await callGroq(messages, 'llama-3.2-11b-vision-preview');
+            reply = await callGroq(messages, 'openai/gpt-oss-120b');
         } else {
             // ✅ Text-only query
             const messages = [
                 { role: 'system', content: 'You are CodeMaster AI, a helpful coding assistant. Answer in Hinglish mix when appropriate.' },
                 { role: 'user', content: prompt }
             ];
-            reply = await callGroq(messages, 'llama-3.1-8b-instant');
+            reply = await callGroq(messages, 'openai/gpt-oss-120b');
         }
         
         res.json({ success: true, reply: reply });
@@ -835,7 +835,7 @@ app.post('/api/generate-resume', async (req, res) => {
             { role: 'user', content: aiPrompt }
         ];
         
-        const responseText = await callGroq(messages, 'llama-3.1-8b-instant');
+        const responseText = await callGroq(messages, 'openai/gpt-oss-120b');
 
         // AI कभी-कभी ```json लगा देता है, उसे साफ करना
         const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -870,7 +870,7 @@ app.post('/api/upload-resume', upload.single('resumePdf'), async (req, res) => {
             { role: 'user', content: aiPrompt }
         ];
         
-        const responseText = await callGroq(messages, 'llama-3.1-8b-instant');
+        const responseText = await callGroq(messages, 'openai/gpt-oss-120b');
         
         const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
         const resumeData = JSON.parse(cleanJsonText);
