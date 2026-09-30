@@ -15,11 +15,44 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/standalone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/babel.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/estree.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/postcss.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/html.js"></script>
 
 <style>
 /* ============ GLOBAL ============ */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-body { background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+body { background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; transition: background .3s, color .3s; }
+
+/* ============ LIGHT THEME OVERRIDE ============ */
+body.light-theme { background: #f1f5f9 !important; color: #0f172a !important; }
+body.light-theme .navbar,
+body.light-theme .coding-controls,
+body.light-theme .terminal-header,
+body.light-theme .status-bar,
+body.light-theme .editor-header { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+body.light-theme .file-explorer,
+body.light-theme .tab-bar,
+body.light-theme .custom-input-area,
+body.light-theme .custom-input-area textarea { background: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+body.light-theme .file-item { color: #334155 !important; }
+body.light-theme .file-item:hover { background: #e2e8f0 !important; }
+body.light-theme .file-item.active { background: #dbeafe !important; color: #2563eb !important; }
+body.light-theme .tab { background: #f1f5f9 !important; color: #64748b !important; }
+body.light-theme .tab.active { background: #ffffff !important; color: #0f172a !important; }
+body.light-theme .editor-box { background: #ffffff !important; }
+body.light-theme .editor-box textarea { background: #ffffff !important; color: #0f172a !important; }
+body.light-theme #monacoEditor { border-top: 1px solid #cbd5e1; }
+body.light-theme .terminal-output { background: #f8fafc !important; color: #0f172a !important; }
+body.light-theme .modal { background: #ffffff !important; color: #0f172a !important; }
+body.light-theme .cmd-palette { background: #ffffff !important; }
+body.light-theme .cmd-palette input { background: #f1f5f9 !important; color: #0f172a !important; }
+body.light-theme .cmd-item { color: #334155 !important; }
+body.light-theme .cmd-item:hover, body.light-theme .cmd-item.selected { background: #e2e8f0 !important; color: #0f172a !important; }
+body.light-theme h2 { color: #2563eb !important; }
+body.light-theme h2 span { color: #0f172a !important; }
 body.zen-mode .navbar, body.zen-mode .file-explorer, body.zen-mode .coding-controls, body.zen-mode .coding-right, body.zen-mode .status-bar, body.zen-mode .splitter { display: none !important; }
 body.zen-mode .coding-left { height: 100% !important; flex: 1 1 100% !important; }
 
@@ -289,6 +322,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
     <div class="nav-actions">
         <button class="icon-btn" onclick="openCommandPalette()" title="Command Palette (Ctrl+Shift+P)"><i class="fas fa-search"></i></button>
         <button class="icon-btn" onclick="openModal('themesModal')" title="Themes"><i class="fas fa-palette"></i></button>
+        <button class="icon-btn" onclick="toggleUILightTheme()" title="Toggle Light/Dark UI"><i class="fas fa-sun" id="uiThemeIcon"></i></button>
         <button class="icon-btn" onclick="toggleZenMode()" title="Zen Mode (Ctrl+Shift+Z)"><i class="fas fa-expand"></i></button>
         <button class="icon-btn" onclick="openModal('historyModal')" title="Version History"><i class="fas fa-history"></i></button>
         <button class="icon-btn" onclick="openModal('snippetsModal')" title="Snippet Library"><i class="fas fa-code"></i></button>
@@ -296,6 +330,8 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         <button class="icon-btn" onclick="exportZip()" title="Export ZIP"><i class="fas fa-file-archive"></i></button>
         <button class="icon-btn" onclick="openModal('testsModal')" title="Test Cases"><i class="fas fa-vial"></i></button>
         <button class="icon-btn" onclick="openAIImageSolver()" title="AI Image Doubt Solver"><i class="fas fa-camera"></i></button>
+        <button class="icon-btn" onclick="cloudSave()" title="Save to Cloud"><i class="fas fa-cloud-upload-alt"></i></button>
+<button class="icon-btn" onclick="cloudLoad()" title="Load from Cloud"><i class="fas fa-cloud-download-alt"></i></button>
         <a href="/" class="exit-btn"><i class="fas fa-power-off"></i> <span>Exit</span></a>
     </div>
 </div>
@@ -412,7 +448,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
                 <span><i class="fas fa-keyboard"></i> Custom Input (stdin)</span>
                 <i class="fas fa-chevron-down close-terminal-mobile" onclick="toggleMobileTerminal()" title="Close"></i>
             </div>
-            <textarea id="customInput" placeholder="Enter input here for cin/scanf/input()..."></textarea>
+            <textarea id="customInput" placeholder="Enter input here for cin/scanf/input()...&#10;&#10;💡 Multiple input() calls? Each on new line:&#10;5&#10;10&#10;hello"></textarea>
         </div>
         <div class="terminal-header">
             <div class="terminal-tabs">
@@ -541,6 +577,21 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         <div class="modal-footer">
             <button class="btn-secondary" onclick="closeModal('aiInputModal')">Cancel</button>
             <button class="btn-primary" onclick="submitAIInput()">Generate</button>
+        </div>
+    </div>
+</div>
+    <!-- CLOUD AUTH MODAL -->
+<div class="modal-overlay" id="cloudAuthModal">
+    <div class="modal">
+        <div class="modal-header"><h3><i class="fas fa-cloud"></i> Cloud Sync Login</h3><span class="modal-close" onclick="closeModal('cloudAuthModal')">&times;</span></div>
+        <div class="modal-body">
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">अपना CodeMaster Roll No और password डालें। Files cloud में save होंगी।</p>
+            <div class="form-group"><label>Roll No</label><input type="text" id="cloudRoll" placeholder="1001"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="cloudPass" placeholder="••••••••"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('cloudAuthModal')">Cancel</button>
+            <button class="btn-primary" onclick="cloudAuthThenRun()">Continue</button>
         </div>
     </div>
 </div>
@@ -1008,6 +1059,10 @@ function switchExplorerTab(tab, el) {
 }
 
 function searchInFiles() {
+    // Use Worker if available, else sync fallback
+    if (typeof searchWorker !== 'undefined' && searchWorker) {
+        return searchInFilesWorker();
+    }
     const q = document.getElementById('searchInput').value.toLowerCase();
     const results = document.getElementById('searchResults');
     if (!q.trim()) { results.innerHTML = ''; return; }
@@ -1102,17 +1157,10 @@ function loadFromURL() {
 /* ============================================================
    FORMAT CODE
 ============================================================ */
-async function formatCode() {
-    if (!editorInstance) return;
-    try {
-        await editorInstance.getAction('editor.action.formatDocument').run();
-        showToast('Code formatted!', 'success');
-    } catch(e) {
-        showToast('Format not available for this language', 'warning');
-    }
+    async function formatCode() {
+    return formatCodeReal();
 }
-
-/* ============================================================
+/*=======================================================
    SNAPSHOTS
 ============================================================ */
 function saveSnapshot() {
@@ -1271,8 +1319,10 @@ async function executeCode() {
             terminal.innerHTML += `<span class="text-error">Server Error: ${escapeHtml(data.error)}</span>`;
         } else if (data.statusCode !== 200) {
             terminal.innerHTML += `<span class="text-error">Compilation Error:\n${escapeHtml(data.output)}</span>`;
-        } else {
-            terminal.innerHTML += `<span class="text-success">✓ Output:</span>\n${escapeHtml(data.output)}\n<span class="text-info">Memory: ${data.memory || 'N/A'} KB | CPU: ${data.cpuTime || 'N/A'} Sec</span>`;
+                } else {
+            // ✅ Real typewriter streaming effect
+            const memCpu = `<span class="text-info">Memory: ${data.memory || 'N/A'} KB | CPU: ${data.cpuTime || 'N/A'} Sec</span>`;
+            await typewriterOutput(terminal, escapeHtml(data.output || '(no output)'), '\n' + memCpu);
         }
     } catch(error) {
         if (error.name === 'AbortError') terminal.innerHTML += '\n<span class="text-warning">⚠️ Execution stopped by user</span>';
@@ -1629,6 +1679,331 @@ function installPWA() {
         });
     }
 }
+    /* ============================================================
+   ☁️ CLOUD SYNC (Real MongoDB)
+============================================================ */
+let cloudAction = null;
+
+function getCloudCreds() {
+    return JSON.parse(localStorage.getItem('cm_cloud_creds') || 'null');
+}
+
+function cloudSave() {
+    const creds = getCloudCreds();
+    if (!creds) { cloudAction = 'save'; openModal('cloudAuthModal'); return; }
+    doCloudSave(creds);
+}
+
+function cloudLoad() {
+    const creds = getCloudCreds();
+    if (!creds) { cloudAction = 'load'; openModal('cloudAuthModal'); return; }
+    doCloudLoad(creds);
+}
+
+async function cloudAuthThenRun() {
+    const rollNo = document.getElementById('cloudRoll').value.trim();
+    const password = document.getElementById('cloudPass').value;
+    if (!rollNo || !password) return showToast('Enter roll & password', 'warning');
+
+    try {
+        const res = await fetch('/api/cloud-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rollNo, password })
+        });
+        const data = await res.json();
+        if (!data.success) return showToast(data.message || 'Auth failed', 'error');
+
+        const creds = { rollNo, password };
+        localStorage.setItem('cm_cloud_creds', JSON.stringify(creds));
+        closeModal('cloudAuthModal');
+        showToast('Logged in!', 'success');
+
+        if (cloudAction === 'save') doCloudSave(creds);
+        else if (cloudAction === 'load') doCloudLoad(creds);
+    } catch(e) { showToast('Network error', 'error'); }
+}
+
+async function doCloudSave(creds) {
+    showToast('Saving to cloud...', 'info');
+    try {
+        // Include unsaved editor content
+        if (activeFile && editorInstance) fileSystem[activeFile].code = editorInstance.getValue();
+        const res = await fetch('/api/workspace/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rollNo: creds.rollNo, files: fileSystem })
+        });
+        const data = await res.json();
+        if (data.success) showToast('✓ Saved to cloud!', 'success');
+        else showToast(data.message || 'Save failed', 'error');
+    } catch(e) { showToast('Network error', 'error'); }
+}
+
+async function doCloudLoad(creds) {
+    showToast('Loading from cloud...', 'info');
+    try {
+        const res = await fetch('/api/workspace/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rollNo: creds.rollNo })
+        });
+        const data = await res.json();
+        if (!data.success) return showToast('Load failed', 'error');
+        if (!data.files || !Object.keys(data.files).length) return showToast('No cloud files found', 'warning');
+        if (!confirm('Current files will be replaced by cloud files. Continue?')) return;
+
+        fileSystem = data.files;
+        localStorage.setItem('cm_filesystem', JSON.stringify(fileSystem));
+        openTabs = [Object.keys(fileSystem)[0]];
+        activeFile = openTabs[0];
+        switchFile(activeFile);
+        renderFileList();
+        renderTabs();
+        updateDropdownUI();
+        showToast('✓ Loaded from cloud!', 'success');
+    } catch(e) { showToast('Network error', 'error'); }
+}
+
+/* ============================================================
+   🎨 FULL UI THEME TOGGLE
+============================================================ */
+function toggleUILightTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    document.getElementById('uiThemeIcon').className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+    // Sync Monaco theme too
+    if (editorInstance) monaco.editor.setTheme(isLight ? 'vs' : (userSettings.theme === 'vs' ? 'vs-dark' : userSettings.theme));
+    userSettings.uiLight = isLight;
+    localStorage.setItem('cm_settings', JSON.stringify(userSettings));
+    showToast(isLight ? '☀️ Light theme' : '🌙 Dark theme', 'info');
+}
+// Restore on load
+if (userSettings.uiLight) {
+    document.body.classList.add('light-theme');
+    setTimeout(() => { const i = document.getElementById('uiThemeIcon'); if (i) i.className = 'fas fa-moon'; }, 100);
+}
+
+/* ============================================================
+   🎨 REAL PRETTIER FORMATTER
+============================================================ */
+async function formatCodeReal() {
+    if (!editorInstance) return;
+    const lang = document.getElementById('langSelect').value;
+    const code = editorInstance.getValue();
+    if (!code.trim()) return showToast('Code is empty', 'warning');
+
+    // Map our languages to Prettier parsers
+    const parserMap = {
+        'nodejs': 'babel',
+        'javascript': 'babel',
+        // For web mode HTML/CSS handled separately below
+    };
+
+    try {
+        if (lang === 'nodejs') {
+            if (typeof prettier === 'undefined' || !prettier.format) throw new Error('Prettier not loaded');
+            const formatted = await prettier.format(code, {
+                parser: 'babel',
+                plugins: prettier.plugins || [],
+                semi: true, singleQuote: true, tabWidth: 2
+            });
+            editorInstance.setValue(formatted);
+            showToast('✓ JavaScript formatted', 'success');
+            return;
+        }
+
+        // Python — use simple structural fixer (regex-based, no external 30MB download)
+        if (lang === 'python3') {
+            const fixed = code.split('\n').map(line => {
+                // Fix common indentation issue: replace tabs with 4 spaces
+                return line.replace(/\t/g, '    ').replace(/\s+$/, '');
+            }).join('\n');
+            // Remove extra blank lines (max 2 consecutive)
+            const cleaned = fixed.replace(/\n{3,}/g, '\n\n');
+            editorInstance.setValue(cleaned);
+            showToast('✓ Python cleaned (tabs→spaces, blank lines fixed)', 'success');
+            return;
+        }
+
+        // Try Monaco's built-in for others
+        const action = editorInstance.getAction('editor.action.formatDocument');
+        if (action) {
+            await action.run();
+            showToast('✓ Formatted', 'success');
+            return;
+        }
+        showToast('⚠️ Formatting not available for ' + lang, 'warning');
+    } catch (e) {
+        // Fallback
+        try {
+            const action = editorInstance.getAction('editor.action.formatDocument');
+            if (action) { await action.run(); showToast('✓ Formatted', 'success'); return; }
+        } catch(e2) {}
+        showToast('⚠️ Formatting failed: ' + e.message, 'error');
+    }
+}
+
+/* ============================================================
+   ⚡ WEB WORKER FOR FILE SEARCH (Real)
+============================================================ */
+let searchWorker = null;
+
+function initSearchWorker() {
+    // Inline worker using Blob (no extra file needed)
+    const workerCode = `
+        self.onmessage = function(e) {
+            const { files, query } = e.data;
+            const results = [];
+            const q = query.toLowerCase();
+            for (const [filename, data] of Object.entries(files)) {
+                const lines = data.code.split('\\n');
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].toLowerCase().includes(q)) {
+                        results.push({
+                            file: filename,
+                            line: i,
+                            text: lines[i].trim().substring(0, 100)
+                        });
+                        if (results.length >= 200) {
+                            self.postMessage({ done: true, results });
+                            return;
+                        }
+                    }
+                }
+            }
+            self.postMessage({ done: true, results });
+        };
+    `;
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    searchWorker = new Worker(URL.createObjectURL(blob));
+}
+
+function searchInFilesWorker() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const results = document.getElementById('searchResults');
+    if (!q.trim()) { results.innerHTML = ''; return; }
+    if (!searchWorker) return searchInFiles(); // fallback
+
+    results.innerHTML = '<div style="padding:10px;color:#64748b;font-size:12px;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+
+    searchWorker.onmessage = (e) => {
+        const { results: hits } = e.data;
+        if (!hits.length) { results.innerHTML = '<div style="padding:10px;color:#64748b;font-size:12px;">No results</div>'; return; }
+        const q2 = document.getElementById('searchInput').value;
+        results.innerHTML = hits.map(h => {
+            const hl = h.text.replace(new RegExp(q2.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => '<span style="background:#f59e0b;color:#000;">' + m + '</span>');
+            return '<div class="search-result" onclick="jumpToLine(\'' + h.file + '\', ' + h.line + ')">' +
+                '<div class="file-name">' + h.file + ' : Line ' + (h.line + 1) + '</div>' +
+                '<div class="line-info">' + hl + '</div></div>';
+        }).join('');
+    };
+    searchWorker.postMessage({ files: fileSystem, query: q });
+}
+
+/* ============================================================
+   🤖 REAL INLINE AI COPILOT (Ctrl+Space)
+============================================================ */
+let inlineAICache = {};
+let inlineAIDebounce = null;
+
+function registerInlineAICopilot() {
+    if (!editorInstance || typeof monaco === 'undefined') return;
+
+    ['python', 'cpp', 'java', 'javascript'].forEach(langId => {
+        monaco.languages.registerInlineCompletionsProvider(langId, {
+            provideInlineCompletions: async (model, position, context, token) => {
+                // Only trigger on Ctrl+Space or after typing
+                const before = model.getValueInRange({
+                    startLineNumber: Math.max(1, position.lineNumber - 8),
+                    startColumn: 1,
+                    endLineNumber: position.lineNumber,
+                    endColumn: position.column
+                });
+                if (before.trim().length < 5) return { items: [] };
+
+                const cacheKey = langId + ':' + before.slice(-200);
+                if (inlineAICache[cacheKey]) {
+                    return { items: inlineAICache[cacheKey] };
+                }
+
+                // Debounce to avoid API spam
+                return new Promise(resolve => {
+                    clearTimeout(inlineAIDebounce);
+                    inlineAIDebounce = setTimeout(async () => {
+                        try {
+                            const res = await fetch('/api/ask-ai', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: `Complete this ${langId} code. Return ONLY the next 1-2 lines of code. No explanation, no markdown:\n\n${before}`
+                                })
+                            });
+                            const data = await res.json();
+                            if (!data.success) return resolve({ items: [] });
+                            let suggestion = (data.reply || '').replace(/```[\w]*\n?/g, '').replace(/```/g, '').trim();
+                            // Take only first line
+                            suggestion = suggestion.split('\n')[0] || '';
+                            if (!suggestion || suggestion.length > 200) return resolve({ items: [] });
+
+                            const items = [{
+                                insertText: suggestion,
+                                range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+                            }];
+                            inlineAICache[cacheKey] = items;
+                            resolve({ items });
+                        } catch (err) { resolve({ items: [] }); }
+                    }, 700);
+                });
+            },
+            freeInlineCompletions: () => {}
+        });
+    });
+}
+
+/* ============================================================
+   📡 REAL STREAMING OUTPUT (Typewriter UX)
+============================================================ */
+async function typewriterOutput(container, text, doneHtml) {
+    // Save prefix
+    const prefix = container.innerHTML;
+    container.innerHTML = prefix + '<span class="text-success">✓ Output:</span>\n<span id="streamTarget"></span>';
+    const target = document.getElementById('streamTarget');
+    target.textContent = '';
+    const chunk = 3;
+    for (let i = 0; i < text.length; i += chunk) {
+        target.textContent += text.substring(i, i + chunk);
+        container.scrollTop = container.scrollHeight;
+        await new Promise(r => setTimeout(r, 12));
+    }
+    if (doneHtml) container.innerHTML += doneHtml;
+    container.scrollTop = container.scrollHeight;
+}
+
+/* ============================================================
+   ⌨️ STDIN HELPER (multi-input line support)
+============================================================ */
+function prepMultiStdin() {
+    const raw = document.getElementById('customInput').value;
+    // Already a textarea - multi-line inputs work for multiple input() calls
+    // Just show hint about how it works
+    const lines = raw.split('\n');
+    showToast(lines.length + ' input line(s) ready', 'info');
+}
+
+/* ============================================================
+   📱 REAL PWA REGISTRATION
+============================================================ */
+function registerPWA() {
+    if (!('serviceWorker' in navigator)) return;
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+            console.log('✅ SW registered:', reg.scope);
+            // Check for updates
+            reg.addEventListener('updatefound', () => console.log('🔄 SW update found'));
+        })
+        .catch(err => console.warn('⚠️ SW register failed:', err.message));
+}
 
 /* ============================================================
    INIT
@@ -1640,15 +2015,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('jsCode').value = `console.log('Web mode ready! 🚀');\nconsole.log('Try editing HTML, CSS, or JS');`;
     compileWeb();
 
-    renderThemes();
+        renderThemes();
     updateStatusBar();
 
     if (window.innerWidth <= 850) document.querySelector('.mobile-menu-btn').style.display = 'block';
 
-    // Register service worker for PWA (optional — only if /sw.js exists)
-    if ('serviceWorker' in navigator && location.protocol === 'https:') {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-    }
+    // ✅ Real PWA registration
+    registerPWA();
+
+    // ✅ Init search worker
+    initSearchWorker();
+
+    // ✅ Register Inline AI Copilot after editor ready
+    const waitEditor = setInterval(() => {
+        if (editorInstance) {
+            clearInterval(waitEditor);
+            registerInlineAICopilot();
+
+            // Add Ctrl+Space shortcut for inline AI trigger
+            editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
+                editorInstance.trigger('keyboard', 'editor.action.inlineSuggest.trigger', {});
+            });
+        }
+    }, 300);
 });
 </script>
 </body>
