@@ -822,8 +822,12 @@ async function askWebAI() {
     const css = document.getElementById('cssCode').value;
     const js = document.getElementById('jsCode').value;
     const prompt = `Review this web code and suggest improvements. Return only short bullet points:\n\nHTML:\n${html}\n\nCSS:\n${css}\n\nJS:\n${js}`;
+
+    // ✅ हमेशा Pro mode में switch करो ताकि terminal दिखे
+    switchMode('code');
+    if (window.innerWidth <= 850) document.getElementById('terminalDrawer').classList.add('active');
+
     document.getElementById('terminalOutput').innerHTML = '<span class="text-info"><i class="fas fa-brain fa-spin"></i> AI analyzing web code...</span>\n';
-    if (window.innerWidth <= 850) { switchMode('code'); document.getElementById('terminalDrawer').classList.add('active'); }
     await callAI(prompt);
 }
 
@@ -1800,46 +1804,84 @@ async function formatCodeReal() {
 
     try {
         let formattedCode = null;
-        const indentSize = 4; // आप इसे सेटिंग्स से बदल सकते हैं
 
-        // 1. क्लाइंट-साइड फ़ॉर्मेटर (JS, CSS, HTML, SQL)
-        if (lang === 'nodejs' || lang === 'javascript') {
-            formattedCode = js_beautify(code, { indent_size: 2 });
-        } else if (lang === 'css') {
-            formattedCode = css_beautify(code, { indent_size: 2 });
-        } else if (lang === 'html') {
-            formattedCode = html_beautify(code, { indent_size: 2 });
-        } else if (lang === 'sql') {
-            formattedCode = sqlFormatter.format(code, { tabWidth: 2 });
-        }
-
-        // 2. सर्वर-साइड फ़ॉर्मेटर (Python, C++, Java, आदि)
-        if (!formattedCode) {
-            const response = await fetch('/api/format-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: code, language: lang })
+        // ============ CLIENT-SIDE FORMATTERS (Zero MB, Real) ============
+        if (lang === 'nodejs') {
+            // JavaScript
+            if (typeof js_beautify === 'undefined') throw new Error('JS beautifier not loaded');
+            formattedCode = js_beautify(code, {
+                indent_size: 2, indent_char: ' ',
+                preserve_newlines: true, max_preserve_newlines: 2,
+                brace_style: 'collapse', end_with_newline: true
             });
-            const data = await response.json();
-            if (data.success && data.formattedCode) {
-                formattedCode = data.formattedCode;
-            } else {
-                throw new Error(data.message || 'Server formatter failed');
+        }
+        else if (lang === 'python3') {
+            // Python — Tab to spaces + trailing space fix + blank line cleanup
+            const lines = code.split('\n');
+            const cleaned = lines.map(line => {
+                return line.replace(/\t/g, '    ').replace(/[ \t]+$/, '');
+            }).join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+            formattedCode = cleaned;
+            showToast('✓ Python: tabs→spaces, trailing spaces fixed', 'success');
+        }
+        else if (lang === 'java' || lang === 'csharp') {
+            // Java / C# — basic indentation fix
+            formattedCode = basicBraceFormatter(code, 4);
+        }
+        else if (lang === 'cpp17' || lang === 'c') {
+            // C / C++ — basic indentation fix
+            formattedCode = basicBraceFormatter(code, 4);
+        }
+        else if (lang === 'sql') {
+            // SQL — real formatter
+            if (typeof sqlFormatter === 'undefined') throw new Error('SQL formatter not loaded');
+            formattedCode = sqlFormatter.format(code, { tabWidth: 2, keywordCase: 'upper' });
+        }
+        else if (lang === 'json') {
+            formattedCode = JSON.stringify(JSON.parse(code), null, 2);
+        }
+        else {
+            // Try Monaco's built-in
+            const action = editorInstance.getAction('editor.action.formatDocument');
+            if (action) {
+                await action.run();
+                showToast('✓ Formatted (via Monaco)', 'success');
+                return;
             }
+            throw new Error('Formatting not supported for ' + lang);
         }
 
-        // 3. फॉर्मेटेड कोड को एडिटर में सेट करें
         if (formattedCode) {
             editorInstance.setValue(formattedCode);
-            showToast('✓ Code formatted successfully!', 'success');
-        } else {
-            showToast('⚠️ Formatting not supported for this language yet.', 'warning');
+            if (lang !== 'python3') showToast('✓ Code formatted!', 'success');
         }
-
     } catch (e) {
         console.error(e);
-        showToast('⚠️ Formatting failed: ' + e.message, 'error');
+        showToast('⚠️ ' + e.message, 'error');
     }
+}
+
+/* Lightweight brace-based formatter for C/C++/Java/C# */
+function basicBraceFormatter(code, indentSize) {
+    const lines = code.split('\n');
+    let indent = 0;
+    const result = [];
+    for (let raw of lines) {
+        let line = raw.trim();
+        if (!line) { result.push(''); continue; }
+
+        // Dedent before line if it starts with closing brace
+        if (/^[}\])]/.test(line)) indent = Math.max(0, indent - 1);
+
+        result.push(' '.repeat(indent * indentSize) + line);
+
+        // Adjust indent for next line
+        const opens = (line.match(/[{[(]/g) || []).length;
+        const closes = (line.match(/[}\])]/g) || []).length;
+        const leadingClose = /^[}\])]/.test(line) ? 1 : 0;
+        indent = Math.max(0, indent + opens - (closes - leadingClose));
+    }
+    return result.join('\n');
 }
 
 /* ============================================================
@@ -1918,7 +1960,13 @@ function registerInlineAICopilot() {
                     endLineNumber: position.lineNumber,
                     endColumn: position.column
                 });
-                if (before.trim().length < 5) return { items: [] };
+                // ✅ Minimum 30 chars + सिर्फ smart trigger
+                    if (before.trim().length < 30) return { items: [] };
+                    const lastLine = before.split('\n').pop() || '';
+                    // सिर्फ इन characters पर trigger करो (जहाँ code अधूरा होता है)
+                    if (!/[=:({[,\-+*/]\s*$/.test(lastLine) && lastLine.trim().length < 10) {
+                        return { items: [] };
+                    }
 
                 const cacheKey = langId + ':' + before.slice(-200);
                 if (inlineAICache[cacheKey]) {
@@ -1951,7 +1999,7 @@ function registerInlineAICopilot() {
                             inlineAICache[cacheKey] = items;
                             resolve({ items });
                         } catch (err) { resolve({ items: [] }); }
-                    }, 700);
+                   }, 1500);
                 });
             },
             freeInlineCompletions: () => {}
