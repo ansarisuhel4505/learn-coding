@@ -11,9 +11,9 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+<!-- ✅ सारी UMD libraries पहले load करो (RequireJS से पहले) -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify-css.min.js"></script>
@@ -24,6 +24,9 @@
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/estree.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/postcss.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/html.js"></script>
+
+<!-- ✅ RequireJS LAST में load करो (ताकि UMD libraries पहले register हो चुकी हों) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
 
 <style>
 /* ============ GLOBAL ============ */
