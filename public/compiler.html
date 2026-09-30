@@ -15,6 +15,10 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify-html.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sql-formatter@15.8.2/dist/sql-formatter.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/standalone.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/babel.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/estree.js"></script>
@@ -1792,53 +1796,48 @@ async function formatCodeReal() {
     const code = editorInstance.getValue();
     if (!code.trim()) return showToast('Code is empty', 'warning');
 
-    // Map our languages to Prettier parsers
-    const parserMap = {
-        'nodejs': 'babel',
-        'javascript': 'babel',
-        // For web mode HTML/CSS handled separately below
-    };
+    showToast('Formatting...', 'info');
 
     try {
-        if (lang === 'nodejs') {
-            if (typeof prettier === 'undefined' || !prettier.format) throw new Error('Prettier not loaded');
-            const formatted = await prettier.format(code, {
-                parser: 'babel',
-                plugins: prettier.plugins || [],
-                semi: true, singleQuote: true, tabWidth: 2
+        let formattedCode = null;
+        const indentSize = 4; // आप इसे सेटिंग्स से बदल सकते हैं
+
+        // 1. क्लाइंट-साइड फ़ॉर्मेटर (JS, CSS, HTML, SQL)
+        if (lang === 'nodejs' || lang === 'javascript') {
+            formattedCode = js_beautify(code, { indent_size: 2 });
+        } else if (lang === 'css') {
+            formattedCode = css_beautify(code, { indent_size: 2 });
+        } else if (lang === 'html') {
+            formattedCode = html_beautify(code, { indent_size: 2 });
+        } else if (lang === 'sql') {
+            formattedCode = sqlFormatter.format(code, { tabWidth: 2 });
+        }
+
+        // 2. सर्वर-साइड फ़ॉर्मेटर (Python, C++, Java, आदि)
+        if (!formattedCode) {
+            const response = await fetch('/api/format-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, language: lang })
             });
-            editorInstance.setValue(formatted);
-            showToast('✓ JavaScript formatted', 'success');
-            return;
+            const data = await response.json();
+            if (data.success && data.formattedCode) {
+                formattedCode = data.formattedCode;
+            } else {
+                throw new Error(data.message || 'Server formatter failed');
+            }
         }
 
-        // Python — use simple structural fixer (regex-based, no external 30MB download)
-        if (lang === 'python3') {
-            const fixed = code.split('\n').map(line => {
-                // Fix common indentation issue: replace tabs with 4 spaces
-                return line.replace(/\t/g, '    ').replace(/\s+$/, '');
-            }).join('\n');
-            // Remove extra blank lines (max 2 consecutive)
-            const cleaned = fixed.replace(/\n{3,}/g, '\n\n');
-            editorInstance.setValue(cleaned);
-            showToast('✓ Python cleaned (tabs→spaces, blank lines fixed)', 'success');
-            return;
+        // 3. फॉर्मेटेड कोड को एडिटर में सेट करें
+        if (formattedCode) {
+            editorInstance.setValue(formattedCode);
+            showToast('✓ Code formatted successfully!', 'success');
+        } else {
+            showToast('⚠️ Formatting not supported for this language yet.', 'warning');
         }
 
-        // Try Monaco's built-in for others
-        const action = editorInstance.getAction('editor.action.formatDocument');
-        if (action) {
-            await action.run();
-            showToast('✓ Formatted', 'success');
-            return;
-        }
-        showToast('⚠️ Formatting not available for ' + lang, 'warning');
     } catch (e) {
-        // Fallback
-        try {
-            const action = editorInstance.getAction('editor.action.formatDocument');
-            if (action) { await action.run(); showToast('✓ Formatted', 'success'); return; }
-        } catch(e2) {}
+        console.error(e);
         showToast('⚠️ Formatting failed: ' + e.message, 'error');
     }
 }
