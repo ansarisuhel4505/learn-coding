@@ -42,7 +42,7 @@ if (!GROQ_API_KEY) {
 }
 
 // Helper function to call Groq API
-async function callGroq(messages, model = 'llama-3.3-70b-versatile') {
+async function callGroq(messages, model = 'llama-3.1-8b-instant') {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -797,7 +797,7 @@ app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
                 { role: 'system', content: 'You are CodeMaster AI, a helpful coding assistant. Answer in Hinglish mix when appropriate.' },
                 { role: 'user', content: prompt }
             ];
-            reply = await callGroq(messages, 'llama-3.3-70b-versatile');
+            reply = await callGroq(messages, 'llama-3.1-8b-instant');
         }
         
         res.json({ success: true, reply: reply });
@@ -835,7 +835,7 @@ app.post('/api/generate-resume', async (req, res) => {
             { role: 'user', content: aiPrompt }
         ];
         
-        const responseText = await callGroq(messages, 'llama-3.3-70b-versatile');
+        const responseText = await callGroq(messages, 'llama-3.1-8b-instant');
 
         // AI कभी-कभी ```json लगा देता है, उसे साफ करना
         const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -870,7 +870,7 @@ app.post('/api/upload-resume', upload.single('resumePdf'), async (req, res) => {
             { role: 'user', content: aiPrompt }
         ];
         
-        const responseText = await callGroq(messages, 'llama-3.3-70b-versatile');
+        const responseText = await callGroq(messages, 'llama-3.1-8b-instant');
         
         const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
         const resumeData = JSON.parse(cleanJsonText);
