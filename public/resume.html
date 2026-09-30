@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate AI Resume Builder Pro</title>
+    <meta name="description" content="Ultimate AI Resume Builder Pro - 50+ templates, AI writing, ATS score, multi-language">
+    <meta name="theme-color" content="#3b82f6">
+    <title>Ultimate AI Resume Builder Pro v2</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -12,6 +14,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- NEW: Sanitize user content (XSS protection) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <!-- NEW: QR Code generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root { 
@@ -19,66 +25,93 @@
             --theme-font: 'Poppins', sans-serif; 
             --res-font-size: 13.5px;
             --res-line-height: 1.6;
+            --bg-app: #f1f5f9;
+            --bg-panel: #ffffff;
+            --bg-input: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+        /* 🌙 Dark Mode for Builder UI */
+        body.dark-mode {
+            --bg-app: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-input: #0f172a;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--theme-font); }
-        body { background: #f1f5f9; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background: var(--bg-app); display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: var(--text-main); transition: 0.3s; }
 
-        .top-nav { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0;}
-        .top-nav h2 { font-size: 18px; color: #1e293b; display: flex; align-items: center; gap: 8px;}
+        .top-nav { background: var(--bg-panel); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0; border-bottom: 1px solid var(--border-color);}
+        .top-nav h2 { font-size: 18px; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        .top-nav-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         
-        .btn { padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white; display: flex; align-items: center; gap: 8px; justify-content: center;}
+        .btn { padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; color: white; display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 13px;}
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
         .btn-ai { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
         .btn-success { background: #10b981; }
         .btn-warning { background: #f59e0b; color: white;}
         .btn-danger { background: #ef4444; padding: 5px 10px; font-size: 12px; }
+        .btn-icon { padding: 8px 10px; font-size: 14px; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-color);}
+        .btn-icon:hover { background: var(--theme-color); color: white; }
 
         .hamburger-btn { background: #1e293b; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 18px; cursor: pointer; }
 
+        /* Profile Selector */
+        .profile-selector { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border-color);}
+        .profile-selector select { background: transparent; border: none; color: var(--text-main); font-weight: 600; cursor: pointer; outline: none; font-size: 13px; max-width: 130px;}
+
         .action-menu { 
-            position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; 
-            background: white; box-shadow: -2px 0 15px rgba(0,0,0,0.1); 
+            position: fixed; top: 0; right: -340px; width: 320px; height: 100vh; 
+            background: var(--bg-panel); box-shadow: -2px 0 15px rgba(0,0,0,0.1); 
             z-index: 10000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
             display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
         }
         .action-menu.active { right: 0; }
-        .action-menu-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;}
-        .action-menu-header h3 { color: #1e293b; font-size: 18px;}
+        .action-menu-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;}
+        .action-menu-header h3 { color: var(--text-main); font-size: 18px;}
         .close-menu { cursor: pointer; font-size: 24px; color: #ef4444; }
-        .action-buttons { display: flex; flex-direction: column; gap: 12px; }
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
         .action-buttons .btn { width: 100%; justify-content: flex-start; padding: 12px 15px;}
 
         .menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; }
         .menu-overlay.active { opacity: 1; visibility: visible; }
 
         .builder-container { display: flex; flex-grow: 1; overflow: hidden; }
-        .left-panel { width: 45%; background: white; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
+        .left-panel { width: 45%; background: var(--bg-panel); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
         
-        .tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex-shrink: 0;}
-        .tab-btn { flex: 1; padding: 15px 5px; text-align: center; font-weight: bold; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; font-size: 14px;}
-        .tab-btn.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; background: #f8fafc; }
+        .tabs { display: flex; border-bottom: 1px solid var(--border-color); flex-shrink: 0;}
+        .tab-btn { flex: 1; padding: 15px 5px; text-align: center; font-weight: bold; cursor: pointer; color: var(--text-muted); border-bottom: 3px solid transparent; font-size: 14px;}
+        .tab-btn.active { color: var(--theme-color); border-bottom: 3px solid var(--theme-color); background: var(--bg-input); }
         .tab-content { padding: 20px; overflow-y: auto; flex-grow: 1; display: none; }
         .tab-content.active { display: block; }
 
-        .form-group { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; position: relative;}
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 5px; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif;}
+        .form-group { background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; position: relative;}
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif; background: var(--bg-panel); color: var(--text-main);}
         .form-group input:focus, .form-group textarea:focus { border-color: var(--theme-color); }
         
         .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .layout-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; font-size: 13px;}
+        .layout-card { border: 2px solid var(--border-color); border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; font-size: 12px; background: var(--bg-panel); transition: 0.2s; position: relative;}
+        .layout-card:hover { border-color: var(--theme-color); transform: translateY(-2px);}
         .layout-card.active { border-color: var(--theme-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .layout-card .thumb { width: 100%; height: 45px; border-radius: 4px; margin-bottom: 6px; background: linear-gradient(135deg, #e2e8f0, #f8fafc); display: flex; align-items: center; justify-content: center; color: var(--theme-color); font-size: 20px;}
 
         .preview-panel { width: 55%; background: #94a3b8; padding: 30px; display: flex; justify-content: center; overflow-y: auto; }
-        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height);}
+        .a4-paper { background: white; width: 210mm; min-height: 297mm; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #1e293b; font-size: var(--res-font-size); line-height: var(--res-line-height); position: relative;}
 
         .slider-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .slider-container label { font-size: 13px; font-weight: 600; color: #475569; width: 40%;}
+        .slider-container label { font-size: 13px; font-weight: 600; color: var(--text-muted); width: 40%;}
         .slider-container input[type=range] { width: 60%; cursor: pointer; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 99999; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 500px; max-width: 90%; max-height: 80vh; overflow-y: auto; position: relative;}
+        .modal-content { background: var(--bg-panel); padding: 30px; border-radius: 15px; width: 600px; max-width: 90%; max-height: 85vh; overflow-y: auto; position: relative; color: var(--text-main);}
+        .modal-content.wide { width: 800px; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #ef4444; }
+        .modal h2 { color: var(--text-main); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;}
 
-        .res-section { margin-bottom: 20px; page-break-inside: avoid; position: relative; resize: both; overflow: hidden; min-height: 50px;}
+        .res-section { margin-bottom: 20px; page-break-inside: avoid; position: relative; }
         .res-text { white-space: pre-wrap; }
         .resume-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
         .resume-table th, .resume-table td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
@@ -88,6 +121,29 @@
         .skill-bar-bg { width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; }
         .skill-bar-fill { background: var(--theme-color); height: 100%; border-radius: 4px; }
 
+        /* Toast Notifications */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
+        .toast { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease; min-width: 250px; max-width: 400px; pointer-events: auto; border-left: 4px solid var(--theme-color); color: #1e293b;}
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.info { border-left-color: #3b82f6; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+
+        /* Section visibility toggle */
+        .sec-visibility-btn { background: transparent; border: none; cursor: pointer; color: #64748b; padding: 5px; font-size: 14px;}
+        .sec-visibility-btn.hidden-section { color: #ef4444; }
+
+        /* Word count badge */
+        .word-count-badge { position: absolute; bottom: 8px; right: 12px; font-size: 11px; color: var(--text-muted); background: var(--bg-panel); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border-color);}
+
+        /* Keyword highlighter */
+        .keyword-highlight { background: #fef08a; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+
+        /* Undo/Redo buttons */
+        .history-controls { display: flex; gap: 5px; }
+
         @media (max-width: 850px) {
             .builder-container { flex-direction: column; overflow-y: auto; height: auto;}
             .left-panel { width: 100%; border-right: none; border-bottom: 2px solid #cbd5e1; min-height: 60vh; flex-shrink: 0;}
@@ -95,6 +151,17 @@
             .a4-paper { width: 100%; max-width: 210mm; transform-origin: top center; }
             .layout-grid { grid-template-columns: 1fr 1fr 1fr; } 
             .back-to-home-btn { width: 45px; height: 45px; bottom: 20px; right: 20px; font-size: 20px;}
+            .top-nav-actions .profile-selector { display: none; }
+            .modal-content { padding: 20px; }
+        }
+
+        /* Print Styles */
+        @media print {
+            body { background: white !important; overflow: visible !important; height: auto !important; }
+            .top-nav, .left-panel, .action-menu, .menu-overlay, .back-to-home-btn, .toast-container, .modal { display: none !important; }
+            .builder-container { display: block; overflow: visible; height: auto;}
+            .preview-panel { width: 100%; padding: 0; background: white; display: block; overflow: visible;}
+            .a4-paper { width: 100%; box-shadow: none; margin: 0; padding: 0; }
         }
 
         /* 50 Premium Layouts CSS */
@@ -155,14 +222,37 @@
 
         .back-to-home-btn { position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; z-index: 9999; cursor: pointer; transition: 0.3s; background: #ef4444; color: white; border: none; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); text-decoration: none;}
         .back-to-home-btn:hover { transform: scale(1.1) translateY(-5px); color: white;}
+
+        /* QR Code container in resume */
+        .qr-code-container { text-align: center; margin: 10px 0; }
+        .qr-code-container canvas, .qr-code-container img { display: inline-block; border: 3px solid var(--theme-color); border-radius: 8px; padding: 5px; background: white;}
+
+        /* JD match result */
+        .ats-score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 20px auto; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
     </style>
 </head>
 <body>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <div class="top-nav">
-        <h2><i class="fas fa-file-pdf" style="color: #3b82f6;"></i> Pro Resume Builder</h2>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span id="saveStatus" style="font-size: 12px; color: #10b981; font-weight: bold; display: none;"><i class="fas fa-check-circle"></i> Auto-Saved</span>
+        <h2><i class="fas fa-file-pdf" style="color: #3b82f6;"></i> Pro Resume Builder v2</h2>
+        <div class="top-nav-actions">
+            <!-- Profile Selector -->
+            <div class="profile-selector" title="Switch Resume Profile">
+                <i class="fas fa-user-circle" style="color: var(--theme-color);"></i>
+                <select id="profileSelector" onchange="switchProfile(this.value)"></select>
+                <button class="btn-icon" style="padding: 5px 8px;" onclick="createNewProfile()" title="New Profile"><i class="fas fa-plus"></i></button>
+                <button class="btn-icon" style="padding: 5px 8px;" onclick="deleteCurrentProfile()" title="Delete Profile"><i class="fas fa-trash"></i></button>
+            </div>
+            <!-- History Controls -->
+            <div class="history-controls">
+                <button class="btn-icon" onclick="undo()" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+                <button class="btn-icon" onclick="redo()" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
+            </div>
+            <button class="btn-icon" onclick="toggleDarkMode()" title="Toggle Dark Mode" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+            <span id="saveStatus" style="font-size: 12px; color: #10b981; font-weight: bold; display: none;"><i class="fas fa-check-circle"></i> Saved</span>
             <button class="hamburger-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
         </div>
     </div>
@@ -175,45 +265,64 @@
         </div>
         
         <div class="action-buttons">
-            <button class="btn" style="background: #ec4899;" onclick="generateCoverLetter()"><i class="fas fa-envelope-open-text"></i> Cover Letter</button>
+            <button class="btn" style="background: #ec4899;" onclick="generateCoverLetter()"><i class="fas fa-envelope-open-text"></i> AI Cover Letter</button>
             <button class="btn" style="background: #14b8a6;" onclick="translateResume()"><i class="fas fa-language"></i> Translate Resume</button>
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">
+            <button class="btn" style="background: #6366f1;" onclick="openJDTailorModal()"><i class="fas fa-bullseye"></i> Tailor to Job Description</button>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 5px 0;">
 
             <input type="file" id="importResumeInput" accept="application/pdf" style="display: none;" onchange="handleResumeImport(event)">
             <button class="btn" id="importResumeBtn" style="background: #8b5cf6;" onclick="document.getElementById('importResumeInput').click()">
-                <i class="fas fa-upload"></i> Import Old Resume
+                <i class="fas fa-upload"></i> Import PDF Resume
             </button>
+            <button class="btn" style="background: #0ea5e9;" onclick="document.getElementById('jsonImportInput').click()"><i class="fas fa-file-import"></i> Import JSON Backup</button>
+            <input type="file" id="jsonImportInput" accept=".json" style="display: none;" onchange="importJSON(event)">
 
             <button class="btn btn-warning" onclick="checkATSScore()"><i class="fas fa-robot"></i> AI ATS Score</button>
             <button class="btn btn-ai" onclick="askAIToWriteGlobal()"><i class="fas fa-magic"></i> AI Auto-Fill</button>
+            <button class="btn" style="background: #0284c7;" onclick="checkGrammar()"><i class="fas fa-spell-check"></i> AI Grammar Check</button>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 5px 0;">
+            <button class="btn" style="background: #475569;" onclick="exportJSON()"><i class="fas fa-file-export"></i> Export JSON Backup</button>
             <button class="btn" style="background: #2563eb;" onclick="downloadWord()"><i class="fas fa-file-word"></i> Download Word</button>
+            <button class="btn" style="background: #7c3aed;" onclick="printResume()"><i class="fas fa-print"></i> Print Resume</button>
             <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <button class="btn" style="background: #0891b2;" onclick="downloadPDFWithCover()"><i class="fas fa-file-pdf"></i> PDF + Cover Letter</button>
         </div>
     </div>
 
+    <!-- ATS Modal -->
     <div id="atsModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="document.getElementById('atsModal').style.display='none'">✖</span>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <i class="fas fa-robot" style="font-size: 50px; color: #f59e0b;"></i>
-                <h2 style="color: #1e293b; margin-top: 10px;">AI ATS Review</h2>
-            </div>
-            <div id="atsResult" style="color: #334155; line-height: 1.6; font-size: 15px;">
+            <span class="close-modal" onclick="closeModal('atsModal')">✖</span>
+            <h2><i class="fas fa-robot" style="color: #f59e0b;"></i> AI ATS Review</h2>
+            <div id="atsResult" style="color: var(--text-main); line-height: 1.6; font-size: 15px;">
                 <div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Analyzing your resume...</div>
             </div>
         </div>
     </div>
 
+    <!-- Cover Letter Modal -->
     <div id="cvModal" class="modal">
-        <div class="modal-content" style="width: 700px;">
-            <span class="close-modal" onclick="document.getElementById('cvModal').style.display='none'">✖</span>
-            <h2 style="color: #1e293b; margin-bottom: 20px;"><i class="fas fa-envelope-open-text" style="color: #ec4899;"></i> AI Cover Letter</h2>
-            
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 10px;">✏️ Click inside the box to edit your Cover Letter before downloading.</p>
-            
-            <div id="cvResult" contenteditable="true" style="color: #334155; line-height: 1.6; font-size: 15px; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap; min-height: 200px; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='#3b82f6';"></div>
-            
+        <div class="modal-content wide">
+            <span class="close-modal" onclick="closeModal('cvModal')">✖</span>
+            <h2><i class="fas fa-envelope-open-text" style="color: #ec4899;"></i> AI Cover Letter</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">✏️ Click inside to edit before downloading.</p>
+            <div id="cvResult" contenteditable="true" style="color: var(--text-main); line-height: 1.6; font-size: 15px; background: var(--bg-input); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); white-space: pre-wrap; min-height: 200px; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='#3b82f6';"></div>
             <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="downloadCoverLetterWord()"><i class="fas fa-download"></i> Download as Word</button>
+        </div>
+    </div>
+
+    <!-- JD Tailoring Modal -->
+    <div id="jdModal" class="modal">
+        <div class="modal-content wide">
+            <span class="close-modal" onclick="closeModal('jdModal')">✖</span>
+            <h2><i class="fas fa-bullseye" style="color: #6366f1;"></i> Tailor Resume to Job Description</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Paste the Job Description below. AI will optimize your resume, highlight missing keywords, and improve matching.</p>
+            <textarea id="jdInput" placeholder="Paste Job Description here..." style="width: 100%; height: 200px; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-family: 'Poppins', sans-serif; resize: vertical; outline: none;"></textarea>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-ai" style="flex: 1;" onclick="analyzeJDMatch()"><i class="fas fa-search"></i> Scan Keywords</button>
+                <button class="btn" style="flex: 1; background: #6366f1;" onclick="tailorResumeWithAI()"><i class="fas fa-magic"></i> AI Optimize</button>
+            </div>
+            <div id="jdResult" style="margin-top: 15px; color: var(--text-main); line-height: 1.6; font-size: 14px;"></div>
         </div>
     </div>
 
@@ -226,8 +335,8 @@
 
             <div id="layoutTab" class="tab-content active">
                 
-                <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
-                    <h4 style="color: #3b82f6; margin-bottom: 10px;"><i class="fas fa-compress-arrows-alt"></i> Page Fitter (Fit to 1 Page)</h4>
+                <div style="background: var(--bg-input); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+                    <h4 style="color: var(--theme-color); margin-bottom: 10px;"><i class="fas fa-compress-arrows-alt"></i> Page Fitter (Fit to 1 Page)</h4>
                     <div class="slider-container">
                         <label>Text Size: <span id="valSize">13.5</span>px</label>
                         <input type="range" id="fontSizeSlider" min="10" max="18" step="0.5" value="13.5" oninput="updatePageFitter()">
@@ -239,85 +348,42 @@
                 </div>
 
                 <h3 style="margin-bottom: 15px; font-size: 16px;">Choose Layout</h3>
-                <div class="layout-grid">
-                    <div class="layout-card active" onclick="changeLayout('classic', this)"><b>Classic</b></div>
-                    <div class="layout-card" onclick="changeLayout('modern', this)"><b>Modern Sidebar</b></div>
-                    <div class="layout-card" onclick="changeLayout('minimal', this)"><b>Minimalist</b></div>
-                    <div class="layout-card" onclick="changeLayout('elegant', this)"><b>Elegant</b></div>
-                    <div class="layout-card" onclick="changeLayout('timeline', this)"><b>Timeline Pro</b></div>
-                    <div class="layout-card" onclick="changeLayout('corporate', this)"><b>Corporate Pro</b></div>
-                    <div class="layout-card" onclick="changeLayout('split-right', this)"><b>Split Right</b></div>
-                    <div class="layout-card" onclick="changeLayout('boxed', this)"><b>Boxed Cards</b></div>
-                    <div class="layout-card" onclick="changeLayout('bold-header', this)"><b>Bold Header</b></div>
-                    <div class="layout-card" onclick="changeLayout('academic', this)"><b>Academic CV</b></div>
-                    <div class="layout-card" onclick="changeLayout('pill-titles', this)"><b>Pill Titles</b></div>
-                    <div class="layout-card" onclick="changeLayout('accent-left', this)"><b>Accent Left</b></div>
-                    <div class="layout-card" onclick="changeLayout('startup', this)"><b>Tech Startup</b></div>
-                    <div class="layout-card" onclick="changeLayout('clean-left', this)"><b>Clean Left</b></div>
-                    <div class="layout-card" onclick="changeLayout('executive', this)"><b>Executive</b></div>
-                    <div class="layout-card" onclick="changeLayout('portfolio', this)"><b>Portfolio</b></div>
-                    <div class="layout-card" onclick="changeLayout('tech', this)"><b>Tech Hacker</b></div>
-                    <div class="layout-card" onclick="changeLayout('divided', this)"><b>Divided Grid</b></div>
-                    <div class="layout-card" onclick="changeLayout('soft', this)"><b>Soft Rounded</b></div>
-                    <div class="layout-card" onclick="changeLayout('vibrant', this)"><b>Vibrant Text</b></div>
-                    <div class="layout-card" onclick="changeLayout('compact', this)"><b>Compact Pro</b></div>
-                    <div class="layout-card" onclick="changeLayout('elegant-serif', this)"><b>Elegant Serif</b></div>
-                    <div class="layout-card" onclick="changeLayout('blocky', this)"><b>Blocky Solid</b></div>
-                    <div class="layout-card" onclick="changeLayout('minimal-line', this)"><b>Minimal Line</b></div>
-                    <div class="layout-card" onclick="changeLayout('creative-dark', this)"><b>Creative Dark</b></div>
-                    <div class="layout-card" onclick="changeLayout('ceo-clean', this)"><b>CEO Clean</b></div>
-                    <div class="layout-card" onclick="changeLayout('matrix', this)"><b>Matrix Hacker</b></div>
-                    <div class="layout-card" onclick="changeLayout('swiss-grid', this)"><b>Swiss Grid</b></div>
-                    <div class="layout-card" onclick="changeLayout('material-cards', this)"><b>Material UI</b></div>
-                    <div class="layout-card" onclick="changeLayout('dual-sidebar', this)"><b>Dual Sidebar</b></div>
-                    <div class="layout-card" onclick="changeLayout('brutalist', this)"><b>Brutalist</b></div>
-                    <div class="layout-card" onclick="changeLayout('elegant-gold', this)"><b>Elegant Dark</b></div>
-                    <div class="layout-card" onclick="changeLayout('tech-lead', this)"><b>Tech Lead</b></div>
-                    <div class="layout-card" onclick="changeLayout('notion-style', this)"><b>Notion Doc</b></div>
-                    <div class="layout-card" onclick="changeLayout('github-style', this)"><b>GitHub Profile</b></div>
-                    <div class="layout-card" onclick="changeLayout('classic-serif', this)"><b>Classic Serif</b></div>
-                    <div class="layout-card" onclick="changeLayout('timeline-right', this)"><b>Timeline Right</b></div>
-                    <div class="layout-card" onclick="changeLayout('euro-cv', this)"><b>European CV</b></div>
-                    <div class="layout-card" onclick="changeLayout('creative-dots', this)"><b>Creative Dots</b></div>
-                    <div class="layout-card" onclick="changeLayout('terminal', this)"><b>Dev Terminal</b></div>
-                    <div class="layout-card" onclick="changeLayout('ultra-compact', this)"><b>Ultra Compact</b></div>
-                    <div class="layout-card" onclick="changeLayout('accent-right', this)"><b>Accent Right</b></div>
-                    <div class="layout-card" onclick="changeLayout('pastel', this)"><b>Pastel Soft</b></div>
-                    <div class="layout-card" onclick="changeLayout('corporate-blue', this)"><b>Corporate Solid</b></div>
-                    <div class="layout-card" onclick="changeLayout('stark', this)"><b>Stark Contrast</b></div>
-                    <div class="layout-card" onclick="changeLayout('glass', this)"><b>Glass Mockup</b></div>
-                    <div class="layout-card" onclick="changeLayout('centered-minimal', this)"><b>Center Minimal</b></div>
-                    <div class="layout-card" onclick="changeLayout('wave', this)"><b>Modern Wave</b></div>
-                    <div class="layout-card" onclick="changeLayout('split-diagonal', this)"><b>Split Diagonal</b></div>
-                    <div class="layout-card" onclick="changeLayout('dark-pro', this)"><b>Dark Mode Pro</b></div>
+                <div class="layout-grid" id="layoutGrid">
+                    <!-- Populated by JS -->
                 </div>
 
                 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 16px;">Font Style</h3>
-                <select id="fontSelector" onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
+                <select id="fontSelector" onchange="changeFont(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif; background: var(--bg-panel); color: var(--text-main);">
                     <option value="'Poppins', sans-serif">Poppins (Modern & Clean)</option>
-                    <option value="'Times New Roman', serif">Times New Roman (Formal & Academic)</option>
-                    <option value="'Courier New', monospace">Courier New (Tech & Code)</option>
+                    <option value="'Times New Roman', serif">Times New Roman (Formal)</option>
+                    <option value="'Courier New', monospace">Courier New (Tech)</option>
                     <option value="'Arial', sans-serif">Arial (Classic)</option>
                     <option value="'Georgia', serif">Georgia (Elegant Serif)</option>
                 </select>
 
                 <h3 style="margin-bottom: 15px; font-size: 16px;">Theme Color</h3>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="changeTheme('#0f172a', true)" title="Pure White / B&W"><i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i></div>
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="changeTheme('#0f172a', true)" title="Pure B&W"><i class="fas fa-tint-slash" style="color: #64748b; font-size: 14px;"></i></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; cursor: pointer;" onclick="changeTheme('#3b82f6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #10b981; cursor: pointer;" onclick="changeTheme('#10b981')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #ef4444; cursor: pointer;" onclick="changeTheme('#ef4444')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #8b5cf6; cursor: pointer;" onclick="changeTheme('#8b5cf6')"></div>
                     <div style="width: 35px; height: 35px; border-radius: 50%; background: #0f172a; cursor: pointer;" onclick="changeTheme('#0f172a')"></div>
                 </div>
+
+                <h3 style="margin-bottom: 10px; font-size: 16px;">QR Code (Portfolio/LinkedIn)</h3>
+                <input type="url" id="qrUrlInput" placeholder="https://yourportfolio.com" oninput="updateQRCode(this.value)" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; margin-bottom: 10px;">
+                <label style="font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-muted);">
+                    <input type="checkbox" id="showQR" onchange="toggleQR(this.checked)"> Show QR on resume
+                </label>
             </div>
 
            <div id="dataTab" class="tab-content">
-               <div class="form-group" style="border-left: 4px solid #3b82f6;">
-                    <label>Personal Details</label>
-                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 10px;">
-                        <div onclick="document.getElementById('profileImgInput').click()" style="width: 60px; height: 60px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
-                            <i class="fas fa-camera" style="color: #64748b; font-size: 16px;"></i>
+               <div class="form-group" style="border-left: 4px solid var(--theme-color);">
+                    <label style="color: var(--text-muted); font-weight:600;">Personal Details</label>
+                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 10px; margin-top: 10px;">
+                        <div onclick="document.getElementById('profileImgInput').click()" style="width: 60px; height: 60px; border-radius: 50%; background: var(--border-color); border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; flex-shrink: 0;" title="Click to add photo">
+                            <i class="fas fa-camera" style="color: var(--text-muted); font-size: 16px;"></i>
                             <img id="leftPanelImg" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
                         </div>
                         <div style="flex-grow: 1;">
@@ -327,8 +393,8 @@
                      </div>
                      <textarea id="inpTitle" class="mini-editor" placeholder="Job Title" style="margin-bottom: 10px;">Full Stack Developer</textarea>
                     
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
-                        <label style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 10px; display: block;">Contact & Links</label>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color);">
+                        <label style="font-size: 13px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; display: block;">Contact & Links</label>
                         <div id="contactFieldsContainer"></div>
                         <button onclick="addContactField()" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px;">
                             <i class="fas fa-plus"></i> Add Link
@@ -352,13 +418,21 @@
     <a href="/" class="back-to-home-btn" title="Back to Home"><i class="fas fa-home"></i></a>
 
     <script>
-        function toggleMenu() {
-            document.getElementById('actionMenu').classList.toggle('active');
-            document.getElementById('menuOverlay').classList.toggle('active');
-        }
+        /* ============ CONSTANTS & STATE ============ */
+        const LAYOUTS = ['classic','modern','minimal','elegant','timeline','corporate','split-right','boxed','bold-header','academic','pill-titles','accent-left','startup','clean-left','executive','portfolio','tech','divided','soft','vibrant','compact','elegant-serif','blocky','minimal-line','creative-dark','ceo-clean','matrix','swiss-grid','material-cards','dual-sidebar','brutalist','elegant-gold','tech-lead','notion-style','github-style','classic-serif','timeline-right','euro-cv','creative-dots','terminal','ultra-compact','accent-right','pastel','corporate-blue','stark','glass','centered-minimal','wave','split-diagonal','dark-pro'];
+        const LAYOUT_ICONS = { classic:'fa-file-alt', modern:'fa-columns', minimal:'fa-minus', elegant:'fa-feather', timeline:'fa-stream', corporate:'fa-briefcase', 'split-right':'fa-exchange-alt', boxed:'fa-square', 'bold-header':'fa-bold', academic:'fa-graduation-cap', 'pill-titles':'fa-capsules', 'accent-left':'fa-align-left', startup:'fa-rocket', 'clean-left':'fa-align-left', executive:'fa-user-tie', portfolio:'fa-briefcase', tech:'fa-terminal', divided:'fa-th-large', soft:'fa-circle', vibrant:'fa-palette', compact:'fa-compress', 'elegant-serif':'fa-book', blocky:'fa-square', 'minimal-line':'fa-minus', 'creative-dark':'fa-moon', 'ceo-clean':'fa-crown', matrix:'fa-code', 'swiss-grid':'fa-th', 'material-cards':'fa-layer-group', 'dual-sidebar':'fa-columns', brutalist:'fa-hammer', 'elegant-gold':'fa-star', 'tech-lead':'fa-users-cog', 'notion-style':'fa-sticky-note', 'github-style':'fa-github', 'classic-serif':'fa-book', 'timeline-right':'fa-stream', 'euro-cv':'fa-flag', 'creative-dots':'fa-braille', terminal:'fa-terminal', 'ultra-compact':'fa-compress-alt', 'accent-right':'fa-align-right', pastel:'fa-paint-brush', 'corporate-blue':'fa-building', stark:'fa-adjust', glass:'fa-glass', 'centered-minimal':'fa-align-center', wave:'fa-water', 'split-diagonal':'fa-columns', 'dark-pro':'fa-moon' };
+        const CONTACT_ICONS = { email:'fa-envelope', phone:'fa-phone', linkedin:'fa-linkedin', github:'fa-github', website:'fa-globe', portfolio:'fa-briefcase', twitter:'fa-twitter', location:'fa-map-marker-alt', address:'fa-map-marker-alt' };
 
         let currentLayout = 'classic';
         let userProfilePic = '';
+        let qrCodeDataUrl = '';
+        let showQRCode = false;
+        let currentProfileName = 'Default';
+        let historyStack = [];
+        let historyIndex = -1;
+        let isUndoRedoAction = false;
+        let sectionVisibility = {};
+        
         let sectionsData = [
             { id: 1, title: 'Professional Summary', text: 'A passionate developer building scalable web applications and AI tools.' },
             { id: 2, title: 'Technical Skills', text: 'Frontend: HTML, CSS, React\nBackend: Node.js, Express, MongoDB\nTools: Git, Vercel' },
@@ -370,45 +444,397 @@
             { label: "LinkedIn", value: "linkedin.com/in/suhel" }
         ];
 
-        function loadDraft() {
-            let saved = localStorage.getItem('resumeDraft');
-            if (saved) {
-                let data = JSON.parse(saved);
-                currentLayout = data.currentLayout || 'classic';
-                userProfilePic = data.userProfilePic || '';
-                sectionsData = data.sectionsData || sectionsData;
-                contactFields = data.contactFields || contactFields;
-                
-                document.getElementById('inpName').value = data.name || "SUHEL ANSARI";
-                document.getElementById('inpTitle').value = data.title || "Full Stack Developer";
-                
-                if(data.themeColor) changeTheme(data.themeColor, data.isWhite);
-                if(data.fontStyle) { document.getElementById('fontSelector').value = data.fontStyle; changeFont(data.fontStyle); }
-                if(data.fontSize) { document.getElementById('fontSizeSlider').value = data.fontSize; }
-                if(data.lineSpacing) { document.getElementById('lineHeightSlider').value = data.lineSpacing; updatePageFitter(); }
-                
-                if (userProfilePic) {
-                    document.getElementById('leftPanelImg').src = userProfilePic;
-                    document.getElementById('leftPanelImg').style.display = 'block';
-                }
+        /* ============ TOAST NOTIFICATIONS ============ */
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+            toast.innerHTML = `<i class="fas ${icons[type]}" style="color: ${colors[type]}; font-size: 18px;"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        /* ============ XSS PROTECTION ============ */
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return str;
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        function sanitizeHtml(html) {
+            if (typeof DOMPurify !== 'undefined') {
+                return DOMPurify.sanitize(html, { ADD_ATTR: ['contenteditable'] });
+            }
+            return html;
+        }
+
+        /* ============ UNDO / REDO ============ */
+        function captureState() {
+            return JSON.stringify({
+                currentLayout, userProfilePic, sectionsData, contactFields,
+                name: document.getElementById('inpName')?.value || '',
+                title: document.getElementById('inpTitle')?.value || '',
+                sectionVisibility
+            });
+        }
+        function pushHistory() {
+            if (isUndoRedoAction) return;
+            const state = captureState();
+            if (historyStack[historyIndex] === state) return;
+            historyStack = historyStack.slice(0, historyIndex + 1);
+            historyStack.push(state);
+            if (historyStack.length > 30) historyStack.shift();
+            historyIndex = historyStack.length - 1;
+        }
+        function undo() {
+            if (historyIndex <= 0) { showToast('Nothing to undo', 'info'); return; }
+            historyIndex--;
+            applyState(historyStack[historyIndex]);
+            showToast('Undo', 'info', 1500);
+        }
+        function redo() {
+            if (historyIndex >= historyStack.length - 1) { showToast('Nothing to redo', 'info'); return; }
+            historyIndex++;
+            applyState(historyStack[historyIndex]);
+            showToast('Redo', 'info', 1500);
+        }
+        function applyState(stateStr) {
+            isUndoRedoAction = true;
+            try {
+                const state = JSON.parse(stateStr);
+                currentLayout = state.currentLayout;
+                userProfilePic = state.userProfilePic;
+                sectionsData = state.sectionsData;
+                contactFields = state.contactFields;
+                sectionVisibility = state.sectionVisibility || {};
+                document.getElementById('inpName').value = state.name;
+                document.getElementById('inpTitle').value = state.title;
+                renderContactFields();
+                renderEditor();
+                renderResume();
+                updateLayoutGridActive();
+            } finally {
+                setTimeout(() => { isUndoRedoAction = false; }, 100);
             }
         }
 
-        function saveDraft() {
-            let data = {
-                currentLayout, userProfilePic, sectionsData, contactFields,
-                name: document.getElementById('inpName').value,
-                title: document.getElementById('inpTitle').value,
-                themeColor: document.documentElement.style.getPropertyValue('--theme-color'),
+        /* ============ MULTIPLE PROFILES ============ */
+        function getProfileList() {
+            try { return JSON.parse(localStorage.getItem('resumeProfiles') || '["Default"]'); }
+            catch(e) { return ['Default']; }
+        }
+        function saveProfileList(list) {
+            localStorage.setItem('resumeProfiles', JSON.stringify(list));
+        }
+        function loadProfileList() {
+            const list = getProfileList();
+            const sel = document.getElementById('profileSelector');
+            sel.innerHTML = list.map(p => `<option value="${escapeHtml(p)}" ${p === currentProfileName ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('');
+        }
+        function switchProfile(name) {
+            saveDraft(true);
+            currentProfileName = name;
+            loadDraft();
+            showToast(`Switched to profile: ${name}`, 'success');
+        }
+        function createNewProfile() {
+            const name = prompt("Enter profile name (e.g., 'Google Resume', 'Startup Resume'):");
+            if (!name || !name.trim()) return;
+            const trimmed = name.trim();
+            const list = getProfileList();
+            if (list.includes(trimmed)) { showToast('Profile already exists!', 'warning'); return; }
+            list.push(trimmed);
+            saveProfileList(list);
+            saveDraft(true); // save current
+            currentProfileName = trimmed;
+            // Reset to defaults for new profile
+            localStorage.removeItem(profileKey());
+            resetToDefaults();
+            loadProfileList();
+            showToast(`Created profile: ${trimmed}`, 'success');
+        }
+        function deleteCurrentProfile() {
+            const list = getProfileList();
+            if (list.length <= 1) { showToast('Cannot delete last profile!', 'error'); return; }
+            if (!confirm(`Delete profile "${currentProfileName}"?`)) return;
+            localStorage.removeItem(profileKey());
+            const idx = list.indexOf(currentProfileName);
+            list.splice(idx, 1);
+            saveProfileList(list);
+            currentProfileName = list[0];
+            loadProfileList();
+            loadDraft();
+            showToast('Profile deleted', 'success');
+        }
+        function profileKey() { return 'resumeDraft_' + currentProfileName; }
+        function resetToDefaults() {
+            currentLayout = 'classic';
+            userProfilePic = '';
+            sectionsData = [
+                { id: 1, title: 'Professional Summary', text: '' },
+                { id: 2, title: 'Technical Skills', text: '' },
+                { id: 3, title: 'Experience & Projects', text: '' }
+            ];
+            contactFields = [{ label: "Email", value: "" }, { label: "Phone", value: "" }];
+            sectionVisibility = {};
+            document.getElementById('inpName').value = '';
+            document.getElementById('inpTitle').value = '';
+            renderContactFields();
+            renderEditor();
+            renderResume();
+        }
+
+        /* ============ SAVE / LOAD DRAFT ============ */
+        function loadDraft() {
+            let saved = localStorage.getItem(profileKey()) || localStorage.getItem('resumeDraft');
+            if (saved) {
+                try {
+                    let data = JSON.parse(saved);
+                    currentLayout = data.currentLayout || 'classic';
+                    userProfilePic = data.userProfilePic || '';
+                    sectionsData = data.sectionsData || sectionsData;
+                    contactFields = data.contactFields || contactFields;
+                    sectionVisibility = data.sectionVisibility || {};
+                    
+                    document.getElementById('inpName').value = data.name || "SUHEL ANSARI";
+                    document.getElementById('inpTitle').value = data.title || "Full Stack Developer";
+                    
+                    if (data.themeColor) changeTheme(data.themeColor, data.isWhite);
+                    if (data.fontStyle) { document.getElementById('fontSelector').value = data.fontStyle; changeFont(data.fontStyle); }
+                    if (data.fontSize) { document.getElementById('fontSizeSlider').value = data.fontSize; }
+                    if (data.lineSpacing) { document.getElementById('lineHeightSlider').value = data.lineSpacing; updatePageFitter(); }
+                    if (data.qrUrl) { document.getElementById('qrUrlInput').value = data.qrUrl; updateQRCode(data.qrUrl); }
+                    if (data.showQRCode) { showQRCode = true; document.getElementById('showQR').checked = true; }
+                    if (data.darkMode) { document.body.classList.add('dark-mode'); }
+                    
+                    if (userProfilePic) {
+                        document.getElementById('leftPanelImg').src = userProfilePic;
+                        document.getElementById('leftPanelImg').style.display = 'block';
+                    }
+                    // restore checkbox
+                    const qrCheck = document.getElementById('showQR');
+                    if (qrCheck) qrCheck.checked = !!showQRCode;
+                } catch(e) { console.error('Load failed:', e); }
+            }
+            updateLayoutGridActive();
+        }
+
+        function saveDraft(silent = false) {
+            const data = {
+                currentLayout, userProfilePic, sectionsData, contactFields, sectionVisibility,
+                name: document.getElementById('inpName')?.value || '',
+                title: document.getElementById('inpTitle')?.value || '',
+                themeColor: document.documentElement.style.getPropertyValue('--theme-color').trim(),
                 isWhite: document.getElementById('resumePreview').classList.contains('force-white-theme'),
-                fontStyle: document.documentElement.style.getPropertyValue('--theme-font'),
+                fontStyle: document.documentElement.style.getPropertyValue('--theme-font').trim(),
                 fontSize: document.getElementById('fontSizeSlider').value,
-                lineSpacing: document.getElementById('lineHeightSlider').value
+                lineSpacing: document.getElementById('lineHeightSlider').value,
+                qrUrl: document.getElementById('qrUrlInput')?.value || '',
+                showQRCode,
+                darkMode: document.body.classList.contains('dark-mode')
             };
-            localStorage.setItem('resumeDraft', JSON.stringify(data));
-            let status = document.getElementById('saveStatus');
-            status.style.display = 'inline-block';
-            setTimeout(() => { status.style.display = 'none'; }, 2000);
+            try {
+                localStorage.setItem(profileKey(), JSON.stringify(data));
+                if (!silent) {
+                    let status = document.getElementById('saveStatus');
+                    status.style.display = 'inline-block';
+                    clearTimeout(status._t);
+                    status._t = setTimeout(() => { status.style.display = 'none'; }, 2000);
+                }
+            } catch(e) {
+                showToast('Storage full! Clear old profiles.', 'error');
+            }
+            pushHistory();
+        }
+
+        /* ============ JSON EXPORT / IMPORT ============ */
+        function exportJSON() {
+            const data = {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                profileName: currentProfileName,
+                content: JSON.parse(captureState())
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `resume_backup_${currentProfileName}_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('JSON backup downloaded!', 'success');
+        }
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const content = data.content || data;
+                    if (content.sectionsData) sectionsData = content.sectionsData;
+                    if (content.contactFields) contactFields = content.contactFields;
+                    if (content.currentLayout) currentLayout = content.currentLayout;
+                    if (content.userProfilePic) userProfilePic = content.userProfilePic;
+                    if (content.name) document.getElementById('inpName').value = content.name;
+                    if (content.title) document.getElementById('inpTitle').value = content.title;
+                    if (content.sectionVisibility) sectionVisibility = content.sectionVisibility;
+                    renderContactFields(); renderEditor(); renderResume(); updateLayoutGridActive();
+                    saveDraft();
+                    showToast('Backup imported successfully!', 'success');
+                } catch(err) {
+                    showToast('Invalid JSON file!', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        /* ============ DARK MODE ============ */
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('darkModeBtn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            saveDraft(true);
+            showToast(isDark ? 'Dark mode on' : 'Light mode on', 'info', 1500);
+        }
+
+        /* ============ QR CODE ============ */
+        function updateQRCode(url) {
+            if (!url || !url.trim()) { qrCodeDataUrl = ''; renderResume(); return; }
+            const tempDiv = document.createElement('div');
+            try {
+                new QRCode(tempDiv, { text: url, width: 100, height: 100, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+                setTimeout(() => {
+                    const canvas = tempDiv.querySelector('canvas');
+                    if (canvas) {
+                        qrCodeDataUrl = canvas.toDataURL('image/png');
+                        if (showQRCode) renderResume();
+                    }
+                }, 100);
+            } catch(e) { console.error('QR error:', e); }
+        }
+        function toggleQR(checked) {
+            showQRCode = checked;
+            renderResume();
+            saveDraft();
+        }
+
+        /* ============ JD TAILORING ============ */
+        function openJDTailorModal() {
+            toggleMenu();
+            document.getElementById('jdModal').style.display = 'flex';
+            document.getElementById('jdResult').innerHTML = '';
+        }
+        function extractKeywords(jd) {
+            const stopWords = new Set(['the','a','an','and','or','but','if','then','else','for','of','to','in','on','at','by','with','from','up','about','into','over','after','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','shall','should','may','might','must','can','could','this','that','these','those','i','you','he','she','it','we','they','as','not','no','yes','so','than','too','very','just','only','also','our','your','their','its']);
+            const words = jd.toLowerCase().match(/\b[a-z][a-z+#.-]{2,}\b/g) || [];
+            const counts = {};
+            words.forEach(w => { if (!stopWords.has(w) && w.length > 3) counts[w] = (counts[w] || 0) + 1; });
+            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 25).map(x => x[0]);
+            return sorted;
+        }
+        function analyzeJDMatch() {
+            const jd = document.getElementById('jdInput').value;
+            if (!jd.trim()) { showToast('Please paste a Job Description!', 'warning'); return; }
+            const keywords = extractKeywords(jd);
+            const resumeText = (document.getElementById('inpName').value + ' ' + document.getElementById('inpTitle').value + ' ' + sectionsData.map(s => s.title + ' ' + s.text).join(' ')).toLowerCase();
+            const found = [], missing = [];
+            keywords.forEach(k => { if (resumeText.includes(k)) found.push(k); else missing.push(k); });
+            const score = Math.round((found.length / Math.max(keywords.length, 1)) * 100);
+            const color = score >= 70 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
+            document.getElementById('jdResult').innerHTML = `
+                <div class="ats-score-circle" style="background: ${color};">${score}%</div>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 15px;">Keyword Match Score</p>
+                <div style="margin-bottom: 10px;"><b style="color: #10b981;">✅ Found (${found.length}):</b><br><span style="font-size: 13px;">${found.map(k => `<span class="keyword-highlight">${escapeHtml(k)}</span>`).join(' ')}</span></div>
+                <div><b style="color: #ef4444;">❌ Missing (${missing.length}):</b><br><span style="font-size: 13px;">${missing.map(k => `<span style="background:#fee2e2; padding: 2px 6px; border-radius: 3px; margin: 2px; display: inline-block;">${escapeHtml(k)}</span>`).join(' ')}</span></div>
+                <p style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">💡 Add missing keywords to your Skills/Experience sections to improve ATS score.</p>
+            `;
+        }
+        async function tailorResumeWithAI() {
+            const jd = document.getElementById('jdInput').value;
+            if (!jd.trim()) { showToast('Please paste a Job Description!', 'warning'); return; }
+            const resultDiv = document.getElementById('jdResult');
+            resultDiv.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin fa-2x" style="color: #6366f1;"></i><br><br>AI is optimizing your resume...</div>';
+            const resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n` + sectionsData.map(s => `${s.title}:\n${s.text}`).join('\n\n');
+            try {
+                const aiCommand = `You are an expert resume optimizer. Rewrite and tailor the following resume to match the given Job Description. Emphasize matching skills, use relevant keywords, keep it ATS-friendly, and return ONLY valid JSON in this exact format: {"summary": "...", "skills": "...", "experience": "..."}. Do not add markdown.\n\nJob Description:\n${jd.substring(0, 2000)}\n\nCurrent Resume:\n${resumeText.substring(0, 3000)}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
+                const result = await res.json();
+                if (result.success) {
+                    const jsonMatch = result.reply.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const aiData = JSON.parse(jsonMatch[0]);
+                        const summarySec = sectionsData.find(s => /summ|about|prof/i.test(s.title));
+                        const skillsSec = sectionsData.find(s => /skill|tech/i.test(s.title));
+                        const expSec = sectionsData.find(s => /exp|work|proj/i.test(s.title));
+                        if (summarySec && aiData.summary) summarySec.text = aiData.summary;
+                        if (skillsSec && aiData.skills) skillsSec.text = aiData.skills;
+                        if (expSec && aiData.experience) expSec.text = aiData.experience;
+                        renderEditor(); renderResume(); saveDraft();
+                        resultDiv.innerHTML = '<p style="color: #10b981; font-weight: bold; text-align: center; padding: 15px;"><i class="fas fa-check-circle"></i> Resume optimized! Check the preview.</p>';
+                        showToast('Resume tailored to JD!', 'success');
+                    } else { resultDiv.innerHTML = '<p style="color:#ef4444;">AI response invalid format.</p>'; }
+                } else { resultDiv.innerHTML = '<p style="color:#ef4444;">AI Error.</p>'; }
+            } catch(e) { resultDiv.innerHTML = '<p style="color:#ef4444;">Network error.</p>'; }
+        }
+
+        /* ============ GRAMMAR CHECK ============ */
+        async function checkGrammar() {
+            toggleMenu();
+            if (sectionsData.length === 0) { showToast('No content to check', 'warning'); return; }
+            const allText = sectionsData.map(s => s.text.replace(/<[^>]+>/g, '')).join('\n\n');
+            if (!allText.trim()) { showToast('Add some content first', 'warning'); return; }
+            showToast('Checking grammar...', 'info');
+            try {
+                const aiCommand = `Proofread the following resume content. Fix grammar, spelling, and punctuation errors. Return ONLY the corrected text (no explanation, no markdown).\n\n${allText.substring(0, 3000)}`;
+                const res = await fetch('/api/ask-ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: aiCommand }) });
+                const data = await res.json();
+                if (data.success) {
+                    const corrected = data.reply.trim();
+                    sectionsData.forEach((s, i) => {
+                        if (i < sectionsData.length - 1) return;
+                    });
+                    // Simple approach: replace whole content into a single AI Review section
+                    const existing = sectionsData.find(s => s.title === 'Grammar Review');
+                    if (existing) { existing.text = corrected; }
+                    else { sectionsData.push({ id: Date.now(), title: 'Grammar Review', text: corrected }); }
+                    renderEditor(); renderResume();
+                    showToast('Grammar check complete! See "Grammar Review" section.', 'success');
+                } else showToast('AI error', 'error');
+            } catch(e) { showToast('Network error', 'error'); }
+        }
+
+        /* ============ MODAL HELPERS ============ */
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        /* ============ LAYOUT GRID ============ */
+        function renderLayoutGrid() {
+            const grid = document.getElementById('layoutGrid');
+            grid.innerHTML = LAYOUTS.map(l => {
+                const niceName = l.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                const icon = LAYOUT_ICONS[l] || 'fa-file';
+                return `<div class="layout-card ${l === currentLayout ? 'active' : ''}" data-layout="${l}" onclick="changeLayout('${l}', this)">
+                    <div class="thumb"><i class="fas ${icon}"></i></div>
+                    <b>${niceName}</b>
+                </div>`;
+            }).join('');
+        }
+        function updateLayoutGridActive() {
+            document.querySelectorAll('.layout-card').forEach(c => {
+                c.classList.toggle('active', c.dataset.layout === currentLayout);
+            });
+        }
+
+        /* ============ EXISTING FUNCTIONS (enhanced) ============ */
+        function toggleMenu() {
+            document.getElementById('actionMenu').classList.toggle('active');
+            document.getElementById('menuOverlay').classList.toggle('active');
         }
 
         function updatePageFitter() {
@@ -418,18 +844,20 @@
             document.getElementById('valSpace').innerText = space;
             document.documentElement.style.setProperty('--res-font-size', size + 'px');
             document.documentElement.style.setProperty('--res-line-height', space);
-            saveDraft();
+            saveDraft(true);
         }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
+                if (file.size > 2 * 1024 * 1024) { showToast('Image too large (max 2MB)', 'warning'); return; }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     userProfilePic = e.target.result;
                     document.getElementById('leftPanelImg').src = userProfilePic;
                     document.getElementById('leftPanelImg').style.display = 'block';
                     renderResume();
+                    saveDraft();
                 };
                 reader.readAsDataURL(file);
             }
@@ -440,8 +868,8 @@
             contactFields.forEach((field, index) => {
                 html += `
                 <div style="display:flex; gap:5px; margin-bottom:8px; align-items: flex-start;">
-                    <input type="text" value="${field.label}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px;">
-                    <div style="width: 60%;"><textarea id="contact_${index}" class="mini-editor" placeholder="Link">${field.value}</textarea></div>
+                    <input type="text" value="${escapeHtml(field.label)}" onkeyup="updateContactField(${index}, 'label', this.value)" placeholder="Title" style="width: 30%; padding: 8px; font-weight:bold; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; background: var(--bg-panel); color: var(--text-main);">
+                    <div style="width: 60%;"><textarea id="contact_${index}" class="mini-editor" placeholder="Link" style="width:100%;">${escapeHtml(field.value)}</textarea></div>
                     <button onclick="deleteContactField(${index})" style="width: 10%; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 8px;"><i class="fas fa-trash"></i></button>
                 </div>`;
             });
@@ -454,6 +882,8 @@
             tinymce.init({
                 selector: '.mini-editor', menubar: false, statusbar: false, forced_root_block: false, 
                 toolbar: 'bold italic underline | fontsize', height: 120,
+                skin: document.body.classList.contains('dark-mode') ? 'oxide-dark' : 'oxide',
+                content_css: document.body.classList.contains('dark-mode') ? 'dark' : 'default',
                 setup: function (editor) {
                     editor.on('input change keyup', function () {
                         editor.save();
@@ -462,14 +892,15 @@
                             contactFields[idx].value = editor.getContent();
                         }
                         renderResume(); 
+                        saveDraft(true);
                     });
                 }
             });
         }
 
-        function addContactField() { contactFields.push({ label: "New Title", value: "" }); renderContactFields(); renderResume(); }
-        function updateContactField(index, key, val) { contactFields[index][key] = val; renderResume(); }
-        function deleteContactField(index) { contactFields.splice(index, 1); renderContactFields(); renderResume(); }
+        function addContactField() { contactFields.push({ label: "New Title", value: "" }); renderContactFields(); renderResume(); saveDraft(); }
+        function updateContactField(index, key, val) { contactFields[index][key] = val; renderResume(); saveDraft(true); }
+        function deleteContactField(index) { contactFields.splice(index, 1); renderContactFields(); renderResume(); saveDraft(); }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -483,28 +914,34 @@
             document.documentElement.style.setProperty('--theme-color', color);
             const paper = document.getElementById('resumePreview');
             isWhite ? paper.classList.add('force-white-theme') : paper.classList.remove('force-white-theme');
-            saveDraft();
+            saveDraft(true);
         }
-        function changeFont(font) { document.documentElement.style.setProperty('--theme-font', font); saveDraft(); }
+        function changeFont(font) { document.documentElement.style.setProperty('--theme-font', font); saveDraft(true); }
         function changeLayout(layoutName, cardElem) {
             document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('active'));
             if(cardElem) cardElem.classList.add('active');
             currentLayout = layoutName;
             renderResume();
+            saveDraft();
         }
 
         function renderEditor() {
             let html = '';
             sectionsData.forEach((sec, index) => {
+                const isHidden = sectionVisibility[sec.id] === false;
+                const wordCount = (sec.text || '').replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(w => w).length;
                 html += `
-                <div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; border-left: 5px solid #cbd5e1;">
+                <div class="form-group" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})" style="position:relative; background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; border-left: 5px solid ${isHidden ? '#ef4444' : 'var(--theme-color)'}; ${isHidden ? 'opacity: 0.6;' : ''}">
                     <div style="display: flex; align-items: center; margin-bottom:10px;">
-                        <i class="fas fa-grip-vertical" style="color: #94a3b8; margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag to move"></i>
-                        <input type="text" value="${sec.title}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:15px; width: 60%; color: var(--theme-color);">
+                        <i class="fas fa-grip-vertical" style="color: var(--text-muted); margin-right: 10px; cursor: grab; font-size: 18px;" title="Drag to move"></i>
+                        <input type="text" value="${escapeHtml(sec.title)}" onkeyup="updateSec(${sec.id}, 'title', this.value)" style="font-weight:bold; border:none; background:transparent; padding:0; font-size:15px; width: 55%; color: var(--theme-color); outline: none;">
+                        <button class="sec-visibility-btn ${isHidden ? 'hidden-section' : ''}" onclick="toggleSectionVisibility(${sec.id})" title="${isHidden ? 'Show' : 'Hide'} section">
+                            <i class="fas ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                        </button>
                     </div>
                     <div style="position:absolute; top:12px; right:12px; display:flex; gap:5px;">
-                        <button onclick="moveSecUp(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Up"><i class="fas fa-arrow-up"></i></button>
-                        <button onclick="moveSecDown(${index})" style="background:#e2e8f0; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Down"><i class="fas fa-arrow-down"></i></button>
+                        <button onclick="moveSecUp(${index})" style="background: var(--border-color); color: var(--text-main); border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Up"><i class="fas fa-arrow-up"></i></button>
+                        <button onclick="moveSecDown(${index})" style="background: var(--border-color); color: var(--text-main); border:none; padding:5px 8px; border-radius:4px; cursor:pointer;" title="Move Down"><i class="fas fa-arrow-down"></i></button>
                         <button class="btn-danger" onclick="deleteSec(${sec.id})" style="border-radius:4px;"><i class="fas fa-trash"></i></button>
                     </div>
                     <div style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px;">
@@ -514,6 +951,7 @@
                         <button onclick="addSkillBarToSec(${sec.id})" style="background: #0ea5e9; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold;"><i class="fas fa-sliders-h"></i> Bar</button>
                     </div>
                     <textarea id="text_${sec.id}" class="rich-editor" style="width: 100%; min-height: 200px;">${sec.text}</textarea>
+                    <span class="word-count-badge"><i class="fas fa-file-word"></i> ${wordCount} words</span>
                 </div>`;
             });
             document.getElementById('editorSections').innerHTML = html;
@@ -521,36 +959,54 @@
             setTimeout(() => {
                 tinymce.remove('.rich-editor'); 
                 tinymce.init({
-                    selector: '.rich-editor', plugins: 'table lists advlist',
+                    selector: '.rich-editor', plugins: 'table lists advlist', 
                     toolbar: 'bold italic underline | bullist numlist | table | undo redo',
                     menubar: false, branding: false, promotion: false, height: 220,
+                    skin: document.body.classList.contains('dark-mode') ? 'oxide-dark' : 'oxide',
+                    content_css: document.body.classList.contains('dark-mode') ? 'dark' : 'default',
                     setup: function (editor) {
                         editor.on('input change keyup', function () {
                             let id = parseInt(editor.id.split('_')[1]);
                             let sec = sectionsData.find(s => s.id === id);
-                            if(sec) { sec.text = editor.getContent(); renderResume(); }
+                            if(sec) { 
+                                sec.text = editor.getContent(); 
+                                renderResume(); 
+                                // update word count badge
+                                const parent = editor.getContainer().closest('.form-group');
+                                const badge = parent?.querySelector('.word-count-badge');
+                                if (badge) {
+                                    const wc = editor.getContent().replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(w => w).length;
+                                    badge.innerHTML = `<i class="fas fa-file-word"></i> ${wc} words`;
+                                }
+                            }
                         });
+                        editor.on('blur', () => saveDraft(true));
                     }
                 });
             }, 100);
         }
-                    
-        function addSection() { sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' }); renderEditor(); renderResume(); }
-        function updateSec(id, field, val) { let sec = sectionsData.find(s => s.id === id); if(sec) { sec[field] = val; renderResume(); } }
-        function deleteSec(id) { sectionsData = sectionsData.filter(s => s.id !== id); renderEditor(); renderResume(); }
+
+        function toggleSectionVisibility(id) {
+            sectionVisibility[id] = sectionVisibility[id] === false ? true : false;
+            renderEditor(); renderResume(); saveDraft();
+        }
+
+        function addSection() { sectionsData.push({ id: Date.now(), title: 'New Section', text: 'Details here...' }); renderEditor(); renderResume(); saveDraft(); }
+        function updateSec(id, field, val) { let sec = sectionsData.find(s => s.id === id); if(sec) { sec[field] = val; renderResume(); saveDraft(true); } }
+        function deleteSec(id) { if(!confirm('Delete this section?')) return; sectionsData = sectionsData.filter(s => s.id !== id); renderEditor(); renderResume(); saveDraft(); }
 
         function addTableToSec(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
             sec.text += `\n<table class="resume-table">\n  <tr>\n    <th>Degree</th>\n    <th>Institute</th>\n    <th>Year</th>\n  </tr>\n  <tr>\n    <td>B.Tech CSE</td>\n    <td>Your University</td>\n    <td>2028</td>\n  </tr>\n</table>\n`;
-            renderEditor(); renderResume();
+            renderEditor(); renderResume(); saveDraft();
         }
 
         function addSkillBarToSec(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
             sec.text += `\n<div class="skill-bar-wrapper"><div class="skill-bar-header"><span>JavaScript / React</span><span>85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 85%;"></div></div></div>\n`;
-            renderEditor(); renderResume();
+            renderEditor(); renderResume(); saveDraft();
         }
 
         let draggedItemIndex = null;
@@ -560,10 +1016,10 @@
             if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
             const item = sectionsData.splice(draggedItemIndex, 1)[0];
             sectionsData.splice(targetIndex, 0, item);
-            renderEditor(); renderResume();
+            renderEditor(); renderResume(); saveDraft();
         }
-        function moveSecUp(index) { if (index > 0) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index - 1]; sectionsData[index - 1] = temp; renderEditor(); renderResume(); } }
-        function moveSecDown(index) { if (index < sectionsData.length - 1) { let temp = sectionsData[index]; sectionsData[index] = sectionsData[index + 1]; sectionsData[index + 1] = temp; renderEditor(); renderResume(); } }
+        function moveSecUp(index) { if (index > 0) { [sectionsData[index], sectionsData[index-1]] = [sectionsData[index-1], sectionsData[index]]; renderEditor(); renderResume(); saveDraft(); } }
+        function moveSecDown(index) { if (index < sectionsData.length - 1) { [sectionsData[index], sectionsData[index+1]] = [sectionsData[index+1], sectionsData[index]]; renderEditor(); renderResume(); saveDraft(); } }
 
         function getTitleIcon(title) {
             const t = title.toLowerCase();
@@ -574,58 +1030,65 @@
             if(t.includes('cert')) return '<i class="fas fa-certificate" style="margin-right:8px;"></i>';
             if(t.includes('lang')) return '<i class="fas fa-language" style="margin-right:8px;"></i>';
             if(t.includes('sum') || t.includes('obj') || t.includes('prof') || t.includes('about')) return '<i class="fas fa-user-tie" style="margin-right:8px;"></i>';
+            if(t.includes('gram')) return '<i class="fas fa-spell-check" style="margin-right:8px;"></i>';
             return '<i class="fas fa-star" style="margin-right:8px;"></i>'; 
         }
 
         function renderResume() {
-            const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : document.getElementById('inpName').value;
-            const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : document.getElementById('inpTitle').value;
-            const contact = contactFields.filter(f => f.value.trim() !== "").map(f => f.label.trim() ? `<b>${f.label}:</b> ${f.value}` : f.value).join(' | ');
+            const name = tinymce.get('inpName') ? tinymce.get('inpName').getContent() : (document.getElementById('inpName')?.value || '');
+            const title = tinymce.get('inpTitle') ? tinymce.get('inpTitle').getContent() : (document.getElementById('inpTitle')?.value || '');
+            const contact = contactFields.filter(f => f.value.trim() !== "").map(f => f.label.trim() ? `<b>${escapeHtml(f.label)}:</b> ${f.value}` : f.value).join(' | ');
             
             let blocksHtml = '';
             sectionsData.forEach(s => { 
-                blocksHtml += `<div class="res-section"><div class="sec-title">${getTitleIcon(s.title)}${s.title}</div><div class="res-text">${s.text}</div></div>`; 
+                if (sectionVisibility[s.id] === false) return;
+                blocksHtml += `<div class="res-section"><div class="sec-title">${getTitleIcon(s.title)}${escapeHtml(s.title)}</div><div class="res-text">${sanitizeHtml(s.text)}</div></div>`; 
             });
+
+            let qrBlock = '';
+            if (showQRCode && qrCodeDataUrl) {
+                qrBlock = `<div class="qr-code-container"><img src="${qrCodeDataUrl}" alt="QR Code" style="width: 100px; height: 100px;"><div style="font-size: 0.75em; color: #64748b; margin-top: 3px;">Scan to connect</div></div>`;
+            }
 
             let finalHtml = '';
 
-            if (currentLayout === 'classic') { finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:2.5em; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#475569; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; } 
-            else if (currentLayout === 'modern') { finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div><div class="res-section"><div class="sec-title"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
-            else if (currentLayout === 'minimal') { finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:2.8em; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="font-size:1em; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'elegant') { finalHtml = `<div class="layout-elegant"><div style="margin-bottom:40px;"><div style="font-size:2.2em; letter-spacing:3px; text-transform:uppercase;">${name}</div><div style="color:#64748b; margin:10px 0;">${title}</div><div style="font-size:1em; color:var(--theme-color);">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'timeline') { finalHtml = `<div class="layout-timeline"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'corporate') { finalHtml = `<div class="layout-corporate"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'split-right') { finalHtml = `<div class="layout-split-right"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; color:var(--theme-color);">${title}</div><div class="res-section"><div class="sec-title" style="color:white; border-color:white;"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
-            else if (currentLayout === 'boxed') { finalHtml = `<div class="layout-boxed"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="font-size:1em; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'bold-header') { finalHtml = `<div class="layout-bold-header"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.4em; opacity:0.9;">${title}</div><div style="font-size:1em; margin-top:10px;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
-            else if (currentLayout === 'academic') { finalHtml = `<div class="layout-academic"><div class="header"><div class="name">${name}</div><div>${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'pill-titles') { finalHtml = `<div class="layout-pill-titles"><div style="text-align:center; margin-bottom:30px;"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'accent-left') { finalHtml = `<div class="layout-accent-left"><div style="margin-bottom:30px;"><div style="font-size:3em; font-weight:bold; line-height:1;">${name}</div><div style="font-size:1.5em; color:var(--theme-color); margin-bottom:10px;">${title}</div><div>${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'startup') { finalHtml = `<div class="layout-startup"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="font-size:1em; margin-top:10px; opacity:0.8;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'clean-left') { finalHtml = `<div class="layout-clean-left"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em;">${title}</div><div style="color:#64748b;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'executive') { finalHtml = `<div class="layout-executive"><div class="header"><div><div class="name">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="text-align:right; color:#475569; font-size:1em;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'portfolio') { finalHtml = `<div class="layout-portfolio"><div style="margin-bottom:40px;"><div class="name">${name}</div><div style="font-size:1.5em; font-weight:bold; color:#1e293b;">${title}</div><div style="color:#64748b; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'tech') { finalHtml = `<div class="layout-tech"><div style="margin-bottom:30px;"><div class="name">> ${name}_</div><div style="color:#94a3b8; margin:10px 0;">> ${title}</div><div style="color:#64748b; font-size:1em;">> ${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'divided') { finalHtml = `<div class="layout-divided"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'soft') { finalHtml = `<div class="layout-soft"><div class="header"><div style="font-size:2.5em; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'vibrant') { finalHtml = `<div class="layout-vibrant"><div style="margin-bottom:40px; text-align:center;"><div class="name">${name}</div><div style="font-size:1.5em; font-weight:bold; background:var(--theme-color); color:white; display:inline-block; padding:5px 15px; border-radius:20px;">${title}</div><div style="margin-top:10px; color:#475569;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'compact') { finalHtml = `<div class="layout-compact"><div class="header"><div><div style="font-size:2.2em; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div></div><div style="text-align:right; font-size:0.9em; color:#64748b;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'elegant-serif') { finalHtml = `<div class="layout-elegant-serif"><div style="text-align:center; margin-bottom:30px;"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.2em;">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'blocky') { finalHtml = `<div class="layout-blocky"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.5em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'minimal-line') { finalHtml = `<div class="layout-minimal-line"><div class="header"><div style="font-size:2.8em; font-weight:300; letter-spacing:2px;">${name}</div><div style="color:var(--theme-color); font-weight:bold; margin-top:5px;">${title}</div><div style="color:#94a3b8; margin-top:5px; font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'creative-dark') { finalHtml = `<div class="layout-creative-dark"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.5em; font-weight:bold;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.8;">${contact}</div></div><div class="main">${blocksHtml}</div></div>`; }
-            else if (currentLayout === 'ceo-clean') { finalHtml = `<div class="layout-ceo-clean"><div class="name">${name}</div><div style="font-size:1.2em;">${title}</div><div style="font-size:1em; margin-top:5px; color:#555;">${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'matrix') { finalHtml = `<div class="layout-matrix"><div class="name">root@${name.replace(/\s+/g, '_').toLowerCase()}:~$</div><div style="margin:10px 0;">> Role: ${title}</div><div style="margin-bottom:30px;">> Contact: ${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div></div>` + sectionsData.map(s => `<div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div>`).join('') + `</div>`; }
-            else if (currentLayout === 'material-cards') { finalHtml = `<div class="layout-material-cards"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.9;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'brutalist') { finalHtml = `<div class="layout-brutalist"><div class="header"><div class="name">${name}</div><div style="font-size:1.8em; font-weight:bold; margin-top:10px;">${title}</div><div style="font-weight:bold; margin-top:10px;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'notion-style') { finalHtml = `<div class="layout-notion-style"><div style="font-size:4.5em;">📄</div><div class="name">${name}</div><div style="font-size:1.4em; color:gray; margin-bottom:5px;">${title}</div><div style="font-size:1em; color:gray;">${contact}</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'github-style') { finalHtml = `<div class="layout-github-style"><div class="header"><img src="https://ui-avatars.com/api/?name=${name}&background=random" style="width:60px; height:60px; border-radius:50%; margin-right:15px;"><div style="flex:1;"><div class="name">${name}</div><div style="color:#57606a;">${title}</div></div><div style="font-size:0.9em; color:#57606a;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="font-size:1.2em; color:var(--theme-color);">${title}</div><div style="font-size:0.9em;">${contact}</div></div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${blocksHtml}</div>`; }
-            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div></div>` + sectionsData.map(s => `<div class="res-section"><div class="sec-title">${s.title}</div><div class="res-text">${s.text}</div></div>`).join('') + `</div>`; }
+            if (currentLayout === 'classic') { finalHtml = `<div class="layout-classic"><div class="header"><div style="font-size:2.5em; font-weight:bold; text-transform:uppercase;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#475569; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; } 
+            else if (currentLayout === 'modern') { finalHtml = `<div class="layout-modern"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; opacity:0.9;">${title}</div>${qrBlock}<div class="res-section"><div class="sec-title"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'minimal') { finalHtml = `<div class="layout-minimal"><div class="header"><div><div style="font-size:2.8em; font-weight:300;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div>${qrBlock}</div><div style="font-size:1em; color:#64748b; text-align:right;">${contact.replace(/ \| /g, '<br>')}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'elegant') { finalHtml = `<div class="layout-elegant"><div style="margin-bottom:40px;"><div style="font-size:2.2em; letter-spacing:3px; text-transform:uppercase;">${name}</div><div style="color:#64748b; margin:10px 0;">${title}</div><div style="font-size:1em; color:var(--theme-color);">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'timeline') { finalHtml = `<div class="layout-timeline"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'corporate') { finalHtml = `<div class="layout-corporate"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em; color:var(--theme-color);">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'split-right') { finalHtml = `<div class="layout-split-right"><div class="sidebar"><div style="font-size:2.2em; font-weight:bold; line-height:1.2;">${name}</div><div style="margin-bottom:30px; color:var(--theme-color);">${title}</div>${qrBlock}<div class="res-section"><div class="sec-title" style="color:white; border-color:white;"><i class="fas fa-address-book" style="margin-right:8px;"></i>Contact</div><div class="res-text">${contact.replace(/ \| /g, '<br>')}</div></div></div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'boxed') { finalHtml = `<div class="layout-boxed"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="font-size:1em; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'bold-header') { finalHtml = `<div class="layout-bold-header"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.4em; opacity:0.9;">${title}</div><div style="font-size:1em; margin-top:10px;">${contact}</div>${qrBlock}</div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'academic') { finalHtml = `<div class="layout-academic"><div class="header"><div class="name">${name}</div><div>${title}</div><div>${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'pill-titles') { finalHtml = `<div class="layout-pill-titles"><div style="text-align:center; margin-bottom:30px;"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div>${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'accent-left') { finalHtml = `<div class="layout-accent-left"><div style="margin-bottom:30px;"><div style="font-size:3em; font-weight:bold; line-height:1;">${name}</div><div style="font-size:1.5em; color:var(--theme-color); margin-bottom:10px;">${title}</div><div>${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'startup') { finalHtml = `<div class="layout-startup"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="font-size:1em; margin-top:10px; opacity:0.8;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'clean-left') { finalHtml = `<div class="layout-clean-left"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em;">${title}</div><div style="color:#64748b;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'executive') { finalHtml = `<div class="layout-executive"><div class="header"><div><div class="name">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div></div><div style="text-align:right; color:#475569; font-size:1em;">${contact.replace(/ \| /g, '<br>')}${qrBlock}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'portfolio') { finalHtml = `<div class="layout-portfolio"><div style="margin-bottom:40px;"><div class="name">${name}</div><div style="font-size:1.5em; font-weight:bold; color:#1e293b;">${title}</div><div style="color:#64748b; margin-top:10px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'tech') { finalHtml = `<div class="layout-tech"><div style="margin-bottom:30px;"><div class="name">> ${name}_</div><div style="color:#94a3b8; margin:10px 0;">> ${title}</div><div style="color:#64748b; font-size:1em;">> ${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'divided') { finalHtml = `<div class="layout-divided"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'soft') { finalHtml = `<div class="layout-soft"><div class="header"><div style="font-size:2.5em; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div><div style="color:#64748b; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'vibrant') { finalHtml = `<div class="layout-vibrant"><div style="margin-bottom:40px; text-align:center;"><div class="name">${name}</div><div style="font-size:1.5em; font-weight:bold; background:var(--theme-color); color:white; display:inline-block; padding:5px 15px; border-radius:20px;">${title}</div><div style="margin-top:10px; color:#475569;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'compact') { finalHtml = `<div class="layout-compact"><div class="header"><div><div style="font-size:2.2em; font-weight:bold; color:var(--theme-color);">${name}</div><div style="font-weight:bold;">${title}</div></div><div style="text-align:right; font-size:0.9em; color:#64748b;">${contact.replace(/ \| /g, '<br>')}${qrBlock}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'elegant-serif') { finalHtml = `<div class="layout-elegant-serif"><div style="text-align:center; margin-bottom:30px;"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.2em;">${title}</div><div style="font-size:1em; color:#666; margin-top:5px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'blocky') { finalHtml = `<div class="layout-blocky"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-weight:bold; font-size:1.5em;">${title}</div><div style="margin-top:10px; font-size:1em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'minimal-line') { finalHtml = `<div class="layout-minimal-line"><div class="header"><div style="font-size:2.8em; font-weight:300; letter-spacing:2px;">${name}</div><div style="color:var(--theme-color); font-weight:bold; margin-top:5px;">${title}</div><div style="color:#94a3b8; margin-top:5px; font-size:1em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'creative-dark') { finalHtml = `<div class="layout-creative-dark"><div class="header"><div style="font-size:3em; font-weight:bold;">${name}</div><div style="font-size:1.5em; font-weight:bold;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.8;">${contact}</div>${qrBlock}</div><div class="main">${blocksHtml}</div></div>`; }
+            else if (currentLayout === 'ceo-clean') { finalHtml = `<div class="layout-ceo-clean"><div class="name">${name}</div><div style="font-size:1.2em;">${title}</div><div style="font-size:1em; margin-top:5px; color:#555;">${contact}</div>${qrBlock}${blocksHtml}</div>`; }
+            else if (currentLayout === 'matrix') { finalHtml = `<div class="layout-matrix"><div class="name">root@${name.replace(/\s+/g, '_').toLowerCase()}:~$</div><div style="margin:10px 0;">> Role: ${title}</div><div style="margin-bottom:30px;">> Contact: ${contact}</div>${qrBlock}${blocksHtml}</div>`; }
+            else if (currentLayout === 'swiss-grid') { finalHtml = `<div class="layout-swiss-grid"><div class="header"><div class="name">${name}</div><div style="font-size:1.5em; color:var(--theme-color);">${title}</div><div>${contact}</div>${qrBlock}</div>` + sectionsData.filter(s => sectionVisibility[s.id] !== false).map(s => `<div class="sec-title">${escapeHtml(s.title)}</div><div class="res-text">${sanitizeHtml(s.text)}</div>`).join('') + `</div>`; }
+            else if (currentLayout === 'material-cards') { finalHtml = `<div class="layout-material-cards"><div class="header"><div style="font-size:2.8em; font-weight:bold;">${name}</div><div style="font-size:1.4em;">${title}</div><div style="margin-top:10px; font-size:1em; opacity:0.9;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'brutalist') { finalHtml = `<div class="layout-brutalist"><div class="header"><div class="name">${name}</div><div style="font-size:1.8em; font-weight:bold; margin-top:10px;">${title}</div><div style="font-weight:bold; margin-top:10px;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'notion-style') { finalHtml = `<div class="layout-notion-style"><div style="font-size:4.5em;">📄</div><div class="name">${name}</div><div style="font-size:1.4em; color:gray; margin-bottom:5px;">${title}</div><div style="font-size:1em; color:gray;">${contact}</div>${qrBlock}${blocksHtml}</div>`; }
+            else if (currentLayout === 'github-style') { finalHtml = `<div class="layout-github-style"><div class="header"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random" style="width:60px; height:60px; border-radius:50%; margin-right:15px;"><div style="flex:1;"><div class="name">${name}</div><div style="color:#57606a;">${title}</div></div><div style="font-size:0.9em; color:#57606a;">${contact.replace(/ \| /g, '<br>')}${qrBlock}</div></div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'tech-lead') { finalHtml = `<div class="layout-tech-lead"><div class="header"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="font-size:1.2em; color:var(--theme-color);">${title}</div><div style="font-size:0.9em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; }
+            else if (currentLayout === 'terminal') { finalHtml = `<div class="layout-terminal"><div class="name">~ % ./start_resume.sh</div><div style="color:#4ec9b0; margin:15px 0;">> Name: "${name}"<br>> Title: "${title}"<br>> Contact: "${contact}"</div>${qrBlock}${blocksHtml}</div>`; }
+            else if (currentLayout === 'euro-cv') { finalHtml = `<div class="layout-euro-cv"><div class="header"><div class="name">${name}</div><div style="font-weight:bold; font-size:1.4em; margin-top:10px;">${title}</div><div style="color:#666; font-size:1em;">${contact}</div>${qrBlock}</div>` + sectionsData.filter(s => sectionVisibility[s.id] !== false).map(s => `<div class="res-section"><div class="sec-title">${escapeHtml(s.title)}</div><div class="res-text">${sanitizeHtml(s.text)}</div></div>`).join('') + `</div>`; }
             else if (['dual-sidebar', 'elegant-gold', 'classic-serif', 'timeline-right', 'creative-dots', 'ultra-compact', 'accent-right', 'pastel', 'corporate-blue', 'stark', 'glass', 'centered-minimal', 'wave', 'split-diagonal', 'dark-pro'].includes(currentLayout)) { 
-                finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:1.4em;">${title}</div><div style="font-size:1em;">${contact}</div></div>${blocksHtml}</div>`; 
+                finalHtml = `<div class="layout-${currentLayout}"><div class="header" style="margin-bottom:20px;"><div style="font-size:2.5em; font-weight:bold;">${name}</div><div style="color:var(--theme-color); font-size:1.4em;">${title}</div><div style="font-size:1em;">${contact}</div>${qrBlock}</div>${blocksHtml}</div>`; 
             }
 
             if (userProfilePic) {
@@ -638,16 +1101,54 @@
             document.getElementById('resumePreview').innerHTML = finalHtml;
             document.getElementById('resumePreview').contentEditable = "true";
             document.getElementById('resumePreview').style.outline = "none";
-            saveDraft();
         }
         
         function downloadPDF() {
-            const element = document.getElementById('resumePreview');
-            html2pdf().set({ margin: 0, filename: 'CodeMaster_Resume.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
             toggleMenu();
+            showToast('Generating PDF...', 'info');
+            const element = document.getElementById('resumePreview');
+            html2pdf().set({ 
+                margin: 0, filename: `${currentProfileName.replace(/\s+/g,'_')}_Resume.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            }).from(element).save().then(() => showToast('PDF downloaded!', 'success'));
+        }
+
+        function downloadPDFWithCover() {
+            toggleMenu();
+            const cvText = document.getElementById('cvResult').innerText.trim();
+            if (!cvText || cvText.includes('Writing your Cover')) {
+                showToast('Generate a cover letter first!', 'warning');
+                return;
+            }
+            showToast('Generating combined PDF...', 'info');
+            // Create temp container with resume + cover letter
+            const temp = document.createElement('div');
+            temp.style.background = 'white';
+            temp.style.padding = '20mm';
+            temp.style.fontFamily = 'Poppins, sans-serif';
+            temp.style.fontSize = '12px';
+            temp.style.color = '#1e293b';
+            temp.style.lineHeight = '1.5';
+            temp.innerHTML = `<h1 style="border-bottom:2px solid #3b82f6; padding-bottom:10px; margin-bottom:20px;">Cover Letter</h1><div style="white-space:pre-wrap;">${escapeHtml(cvText)}</div><div style="page-break-after: always;"></div>`;
+            const resumeClone = document.getElementById('resumePreview').cloneNode(true);
+            temp.appendChild(resumeClone);
+            document.body.appendChild(temp);
+            html2pdf().set({ 
+                margin: 0, filename: `${currentProfileName.replace(/\s+/g,'_')}_Resume_CV.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            }).from(temp).save().then(() => {
+                document.body.removeChild(temp);
+                showToast('Combined PDF downloaded!', 'success');
+            });
         }
 
         function downloadWord() {
+            toggleMenu();
             const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume</title></head><body>";
             const footer = "</body></html>";
             const sourceHTML = header + document.getElementById("resumePreview").innerHTML + footer;
@@ -655,23 +1156,23 @@
             const fileDownload = document.createElement("a");
             document.body.appendChild(fileDownload);
             fileDownload.href = source;
-            fileDownload.download = 'CodeMaster_Resume.doc';
+            fileDownload.download = `${currentProfileName.replace(/\s+/g,'_')}_Resume.doc`;
             fileDownload.click();
             document.body.removeChild(fileDownload);
+            showToast('Word downloaded!', 'success');
+        }
+
+        function printResume() {
             toggleMenu();
+            window.print();
         }
 
         async function askAIToWriteGlobal() {
             const userPrompt = prompt("What kind of resume do you want?\nExample: 'A fresher React Developer'");
             if (!userPrompt) return; 
-
-            const btn = document.querySelector('.btn-ai');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Writing...';
-            btn.disabled = true;
-
+            showToast('AI is writing your resume...', 'info');
             try {
-                const aiCommand = `Write a professional resume for: ${userPrompt}. Return ONLY a valid raw JSON object (without any markdown like \`\`\`json). The JSON must have these exact keys: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | Link), "summary", "skills", "experience".`;
+                const aiCommand = `Write a professional resume for: ${userPrompt}. Return ONLY a valid raw JSON object (without any markdown). Keys: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | Link), "summary", "skills", "experience".`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
@@ -683,33 +1184,30 @@
                         const aiData = JSON.parse(result.reply.replace(/```json/g, '').replace(/```/g, '').trim());
                         document.getElementById('inpName').value = aiData.fullName || "Your Name";
                         document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
-                        
                         contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
                         renderContactFields();
-
                         sectionsData = [
                             { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
                             { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
                             { id: Date.now() + 2, title: 'Experience & Projects', text: aiData.experience || "" }
                         ];
-
                         renderEditor(); renderResume();
                         document.querySelectorAll('.tab-btn')[1].click();
                         toggleMenu();
-                    } catch(parseError) { alert("⚠️ AI sent invalid format."); }
-                } else alert("⚠️ AI Error: " + result.reply);
-            } catch (error) { alert("⚠️ Network Error!"); } 
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+                        showToast('AI resume generated!', 'success');
+                    } catch(parseError) { showToast('AI sent invalid format.', 'error'); }
+                } else showToast("AI Error: " + result.reply, 'error');
+            } catch (error) { showToast('Network error!', 'error'); } 
         }
 
         async function handleResumeImport(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const btn = document.getElementById('importResumeBtn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reading PDF...';
             btn.disabled = true;
+            showToast('Reading PDF...', 'info');
 
             try {
                 const fileReader = new FileReader();
@@ -726,8 +1224,7 @@
                         }
 
                         btn.innerHTML = '<i class="fas fa-brain fa-spin"></i> AI Formatting...';
-                        const aiCommand = `Extract details from this old resume text. Return ONLY a valid raw JSON object. Keys must be: "fullName", "jobTitle", "contactInfo" (format: Email | Phone | LinkedIn), "summary", "skills", "experience". Keep original details but format professionally.\n\nOld Resume:\n${fullText.substring(0, 3500)}`;
-                        
+                        const aiCommand = `Extract details from this old resume text. Return ONLY a valid raw JSON object. Keys: "fullName", "jobTitle", "contactInfo" (Email | Phone | LinkedIn), "summary", "skills", "experience".\n\nOld Resume:\n${fullText.substring(0, 3500)}`;
                         const res = await fetch('/api/ask-ai', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ message: aiCommand })
@@ -740,7 +1237,6 @@
                             document.getElementById('inpTitle').value = aiData.jobTitle || "Job Title";
                             contactFields = (aiData.contactInfo || "Email | Phone").split('|').map(s => ({ label: "", value: s.trim() }));
                             renderContactFields();
-
                             sectionsData = [
                                 { id: Date.now(), title: 'Professional Summary', text: aiData.summary || "" },
                                 { id: Date.now() + 1, title: 'Technical Skills', text: aiData.skills || "" },
@@ -749,32 +1245,29 @@
                             renderEditor(); renderResume();
                             document.querySelectorAll('.tab-btn')[1].click();
                             toggleMenu();
-                            alert("✅ Resume Imported & Designed!");
-                        } else { alert("⚠️ AI Error."); }
-                    } catch (e) { alert("⚠️ Error parsing PDF."); } 
+                            showToast('Resume imported!', 'success');
+                        } else { showToast('AI Error.', 'error'); }
+                    } catch (e) { showToast('Error parsing PDF.', 'error'); } 
                     finally { document.getElementById('importResumeInput').value = ""; btn.innerHTML = originalText; btn.disabled = false; }
                 };
                 fileReader.readAsArrayBuffer(file);
-            } catch (error) { alert("⚠️ Load Error."); btn.innerHTML = originalText; btn.disabled = false; }
+            } catch (error) { showToast('Load error.', 'error'); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
         async function checkATSScore() {
             toggleMenu();
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
-
             document.getElementById('atsModal').style.display = 'flex';
             document.getElementById('atsResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Scanning keywords... Generating ATS Score...</div>';
 
             try {
-                const aiCommand = `Act as a strict HR Applicant Tracking System (ATS). Review this resume data. Give an 'ATS Match Score' out of 100. Then provide exactly 3 bullet points on what is good, and 3 bullet points on how to improve it to get a job. Make it short and professional.\n\nResume Data:\n${resumeText}`;
-                
+                const aiCommand = `Act as a strict HR Applicant Tracking System (ATS). Review this resume. Give an 'ATS Match Score' out of 100. Then provide exactly 3 bullet points on what is good, and 3 bullet points on how to improve it. Make it short and professional.\n\nResume:\n${resumeText}`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
                 const data = await res.json();
-                
                 if(data.success) { document.getElementById('atsResult').innerHTML = marked.parse(data.reply); } 
                 else { document.getElementById('atsResult').innerHTML = "⚠️ Failed to calculate score."; }
             } catch (err) { document.getElementById('atsResult').innerHTML = "⚠️ Server Error."; }
@@ -783,108 +1276,88 @@
         async function makeItPro(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
-
             const editorInstance = tinymce.get(`text_${id}`);
             let oldText = editorInstance ? editorInstance.getContent() : sec.text;
-            if(!oldText.trim()) return alert("Please write some text first!");
-
-            if(editorInstance) editorInstance.setContent("<p style='color:#ec4899;'><i class='fas fa-wand-magic-sparkles'></i> Enhancing text like a PRO... ✨</p>");
-
+            if(!oldText.trim()) { showToast('Please write some text first!', 'warning'); return; }
+            if(editorInstance) editorInstance.setContent("<p style='color:#ec4899;'><i class='fas fa-wand-magic-sparkles'></i> Enhancing... ✨</p>");
             try {
-                const aiCommand = `Rewrite the following resume section to make it sound highly professional, impactful, and ATS-friendly. Use strong action verbs and Harvard-style phrasing. Do NOT use markdown bold/italics (like **). Return ONLY the rewritten text.\n\nText to improve:\n${oldText}`;
+                const aiCommand = `Rewrite this resume section to be highly professional, impactful, and ATS-friendly. Use strong action verbs. Do NOT use markdown bold/italics. Return ONLY the rewritten text.\n\nText:\n${oldText}`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
                 const data = await res.json();
-                
                 if(data.success) { 
                     sec.text = data.reply.trim().replace(/\n/g, '<br>');
                     if(editorInstance) editorInstance.setContent(sec.text);
-                    renderResume(); 
+                    renderResume(); saveDraft();
+                    showToast('Section enhanced!', 'success');
                 } 
-                else { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ AI Error"); }
-            } catch (err) { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ Error connecting to AI."); }
+                else { if(editorInstance) editorInstance.setContent(oldText); showToast('AI Error', 'error'); }
+            } catch (err) { if(editorInstance) editorInstance.setContent(oldText); showToast('Network error.', 'error'); }
         }
 
         async function generateCoverLetter() {
             toggleMenu();
             let companyInfo = prompt("Enter Target Company and Job Role:\nExample: 'Google, Frontend Developer'");
             if(!companyInfo) return;
-
             let resumeText = `${document.getElementById('inpName').value} | ${document.getElementById('inpTitle').value}\n`;
             sectionsData.forEach(s => resumeText += `\n${s.title}:\n${s.text}`);
-
             document.getElementById('cvModal').style.display = 'flex';
             document.getElementById('cvResult').innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Writing your Cover Letter...</div>';
-
             try {
-                const aiCommand = `Write a highly professional and persuasive Cover Letter for the role of ${companyInfo}. Use my resume details provided below to highlight relevant skills and experience. Do not use markdown like **. Keep it standard letter format.\n\nMy Resume:\n${resumeText}`;
+                const aiCommand = `Write a highly professional and persuasive Cover Letter for the role of ${companyInfo}. Use my resume details below. Do not use markdown like **. Standard letter format.\n\nMy Resume:\n${resumeText}`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
                 const data = await res.json();
-                
                 if(data.success) { document.getElementById('cvResult').innerText = data.reply.trim(); } 
-                else { document.getElementById('cvResult').innerHTML = "⚠️ Failed to generate cover letter."; }
+                else { document.getElementById('cvResult').innerHTML = "⚠️ Failed."; }
             } catch (err) { document.getElementById('cvResult').innerHTML = "⚠️ Server Error."; }
         }
 
         function downloadCoverLetterWord() {
             const text = document.getElementById('cvResult').innerText;
-            if(!text || text.includes('Writing your Cover')) return;
-            
+            if(!text || text.includes('Writing your Cover')) { showToast('Generate a cover letter first!', 'warning'); return; }
             const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Cover Letter</title></head><body>";
             const footer = "</body></html>";
             const sourceHTML = header + text.replace(/\n/g, '<br>') + footer;
-            
             const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
             const fileDownload = document.createElement("a");
             document.body.appendChild(fileDownload);
             fileDownload.href = source;
-            fileDownload.download = 'CodeMaster_CoverLetter.doc';
+            fileDownload.download = `${currentProfileName.replace(/\s+/g,'_')}_CoverLetter.doc`;
             fileDownload.click();
             document.body.removeChild(fileDownload);
+            showToast('Cover letter downloaded!', 'success');
         }
 
-        // 🌟 FIXED: SMARTER TRANSLATION LOGIC (REGEX JSON PARSER)
         async function translateResume() {
             toggleMenu();
-            let lang = prompt("Which language do you want to translate your resume into?\nExample: Hindi, Spanish, German, French");
+            let lang = prompt("Which language?\nExample: Hindi, Spanish, German, French");
             if(!lang) return;
-
-            const btn = document.querySelector('.hamburger-btn');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
+            showToast(`Translating to ${lang}...`, 'info');
             let dataToTranslate = {
                 name: document.getElementById('inpName').value,
                 title: document.getElementById('inpTitle').value,
                 contactFields: contactFields,
                 sections: sectionsData.map(s => ({ id: s.id, title: s.title, text: s.text.replace(/<[^>]*>?/gm, '') }))
             };
-
             try {
-                const aiCommand = `You are a professional translator. Translate the values of this JSON object into ${lang}. Return ONLY a valid JSON object starting with { and ending with }. Do not add any other text.\n\n${JSON.stringify(dataToTranslate)}`;
-                
+                const aiCommand = `Translate the values of this JSON object into ${lang}. Return ONLY a valid JSON object starting with { and ending with }.\n\n${JSON.stringify(dataToTranslate)}`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
                 const result = await res.json();
-                
                 if(result.success) {
-                    // 🌟 FIX: Regex se sirf JSON nikalna taaki fältu text na aaye
                     const jsonMatch = result.reply.match(/\{[\s\S]*\}/);
-                    
                     if(jsonMatch) {
                         const translatedData = JSON.parse(jsonMatch[0]);
-                        
                         document.getElementById('inpName').value = translatedData.name || dataToTranslate.name;
                         document.getElementById('inpTitle').value = translatedData.title || dataToTranslate.title;
                         contactFields = translatedData.contactFields || contactFields;
-                        
                         translatedData.sections.forEach(ts => {
                             let sec = sectionsData.find(s => s.id === ts.id);
                             if(sec) {
@@ -894,54 +1367,80 @@
                                 if(editor) editor.setContent(sec.text);
                             }
                         });
-                        
-                        renderContactFields();
-                        renderEditor();
-                        renderResume();
-                        alert(`✅ Resume successfully translated to ${lang}!`);
-                    } else {
-                        alert("⚠️ Translation failed: AI did not return a valid JSON format.");
-                    }
-                } else { alert("⚠️ Translation failed."); }
-            } catch(e) { alert("⚠️ Translation Error. Try again."); } 
-            finally { btn.innerHTML = originalHTML; }
+                        renderContactFields(); renderEditor(); renderResume(); saveDraft();
+                        showToast(`Translated to ${lang}!`, 'success');
+                    } else { showToast("AI didn't return valid JSON.", 'error'); }
+                } else showToast("Translation failed.", 'error');
+            } catch(e) { showToast("Translation error.", 'error'); }
         }
 
         async function generateSectionAI(id) {
             let sec = sectionsData.find(s => s.id === id);
             if(!sec) return;
-
             let jobTitle = document.getElementById('inpTitle').value || "Professional";
             let promptText = prompt(`Details for "${sec.title}"?\nExample: Worked on React for 2 years`);
-            if(!promptText) return; 
-
+            if(!promptText) return;
             const editorInstance = tinymce.get(`text_${id}`);
             let oldText = editorInstance ? editorInstance.getContent() : sec.text;
-            if(editorInstance) { editorInstance.setContent("<p style='color:#3b82f6;'>AI is thinking & writing... 🧠</p>"); }
-
+            if(editorInstance) { editorInstance.setContent("<p style='color:#3b82f6;'>AI is thinking... 🧠</p>"); }
             try {
-                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details to include: ${promptText}. Write in impactful bullet points without markdown bold/italics. Return plain text.`;
+                const aiCommand = `Write highly professional resume content for the section titled "${sec.title}". I am a ${jobTitle}. Details: ${promptText}. Write in impactful bullet points. Return plain text.`;
                 const res = await fetch('/api/ask-ai', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: aiCommand })
                 });
                 const data = await res.json();
-                
                 if(data.success) { 
                     sec.text = data.reply.trim().replace(/\n/g, '<br>');
                     if(editorInstance) editorInstance.setContent(sec.text);
-                    renderResume(); 
+                    renderResume(); saveDraft();
+                    showToast('Content generated!', 'success');
                 } 
-                else { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ AI Error"); }
-            } catch (err) { if(editorInstance) editorInstance.setContent(oldText); alert("⚠️ Error connecting to AI."); }
+                else { if(editorInstance) editorInstance.setContent(oldText); showToast('AI Error', 'error'); }
+            } catch (err) { if(editorInstance) editorInstance.setContent(oldText); showToast('Network error.', 'error'); }
         }
 
+        /* ============ KEYBOARD SHORTCUTS ============ */
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveDraft(); showToast('Saved!', 'success', 1500); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { 
+                const tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+                e.preventDefault(); undo(); 
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { 
+                const tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+                e.preventDefault(); redo(); 
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); printResume(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); exportJSON(); }
+            if (e.key === 'Escape') { 
+                document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+                if (document.getElementById('actionMenu').classList.contains('active')) toggleMenu();
+            }
+        });
+
+        /* ============ INIT ============ */
         window.onload = () => {
+            renderLayoutGrid();
+            loadProfileList();
             loadDraft(); 
             renderContactFields();
             renderEditor();
             initMiniEditors();
             renderResume();
+            // Set initial history
+            historyStack = [captureState()];
+            historyIndex = 0;
+            
+            // Restore dark mode icon
+            if (document.body.classList.contains('dark-mode')) {
+                document.getElementById('darkModeBtn').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // Welcome toast
+            setTimeout(() => showToast('Welcome! Press Ctrl+S to save, Ctrl+P to print.', 'info', 4000), 800);
         };
     </script>
 </body>
