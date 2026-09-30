@@ -1137,12 +1137,10 @@ app.post('/api/format-code', async (req, res) => {
 
     try {
         // Judge0 API का उपयोग करके कोड को फॉर्मेट करें
-        const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
+        const response = await fetch('https://ce.judge0.com/submissions', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-RapidAPI-Key': process.env.JUDGE0_API_KEY,
-                'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 source_code: code,
