@@ -2048,71 +2048,71 @@ function searchInFilesWorker() {
     searchWorker.postMessage({ files: fileSystem, query: q });
 }
 
-/* ============================================================
-   🤖 REAL INLINE AI COPILOT (Ctrl+Space)
-============================================================ */
-let inlineAICache = {};
-let inlineAIDebounce = null;
+// /* ============================================================
+//    🤖 REAL INLINE AI COPILOT (Ctrl+Space)
+// ============================================================ */
+// let inlineAICache = {};
+// let inlineAIDebounce = null;
 
-function registerInlineAICopilot() {
-    if (!editorInstance || typeof monaco === 'undefined') return;
+// function registerInlineAICopilot() {
+//     if (!editorInstance || typeof monaco === 'undefined') return;
 
-    ['python', 'cpp', 'java', 'javascript'].forEach(langId => {
-        monaco.languages.registerInlineCompletionsProvider(langId, {
-            provideInlineCompletions: async (model, position, context, token) => {
-                // Only trigger on Ctrl+Space or after typing
-                const before = model.getValueInRange({
-                    startLineNumber: Math.max(1, position.lineNumber - 8),
-                    startColumn: 1,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column
-                });
-                // ✅ Minimum 30 chars + सिर्फ smart trigger
-                    if (before.trim().length < 30) return { items: [] };
-                    const lastLine = before.split('\n').pop() || '';
-                    // सिर्फ इन characters पर trigger करो (जहाँ code अधूरा होता है)
-                    if (!/[=:({[,\-+*/]\s*$/.test(lastLine) && lastLine.trim().length < 10) {
-                        return { items: [] };
-                    }
+//     ['python', 'cpp', 'java', 'javascript'].forEach(langId => {
+//         monaco.languages.registerInlineCompletionsProvider(langId, {
+//             provideInlineCompletions: async (model, position, context, token) => {
+//                 // Only trigger on Ctrl+Space or after typing
+//                 const before = model.getValueInRange({
+//                     startLineNumber: Math.max(1, position.lineNumber - 8),
+//                     startColumn: 1,
+//                     endLineNumber: position.lineNumber,
+//                     endColumn: position.column
+//                 });
+//                 // ✅ Minimum 30 chars + सिर्फ smart trigger
+//                     if (before.trim().length < 30) return { items: [] };
+//                     const lastLine = before.split('\n').pop() || '';
+//                     // सिर्फ इन characters पर trigger करो (जहाँ code अधूरा होता है)
+//                     if (!/[=:({[,\-+*/]\s*$/.test(lastLine) && lastLine.trim().length < 10) {
+//                         return { items: [] };
+//                     }
 
-                const cacheKey = langId + ':' + before.slice(-200);
-                if (inlineAICache[cacheKey]) {
-                    return { items: inlineAICache[cacheKey] };
-                }
+//                 const cacheKey = langId + ':' + before.slice(-200);
+//                 if (inlineAICache[cacheKey]) {
+//                     return { items: inlineAICache[cacheKey] };
+//                 }
 
-                // Debounce to avoid API spam
-                return new Promise(resolve => {
-                    clearTimeout(inlineAIDebounce);
-                    inlineAIDebounce = setTimeout(async () => {
-                        try {
-                            const res = await fetch('/api/ask-ai', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    message: `Complete this ${langId} code. Return ONLY the next 1-2 lines of code. No explanation, no markdown:\n\n${before}`
-                                })
-                            });
-                            const data = await res.json();
-                            if (!data.success) return resolve({ items: [] });
-                            let suggestion = (data.reply || '').replace(/```[\w]*\n?/g, '').replace(/```/g, '').trim();
-                            // Take only first line
-                            suggestion = suggestion.split('\n')[0] || '';
-                            if (!suggestion || suggestion.length > 200) return resolve({ items: [] });
+//                 // Debounce to avoid API spam
+//                 return new Promise(resolve => {
+//                     clearTimeout(inlineAIDebounce);
+//                     inlineAIDebounce = setTimeout(async () => {
+//                         try {
+//                             const res = await fetch('/api/ask-ai', {
+//                                 method: 'POST',
+//                                 headers: { 'Content-Type': 'application/json' },
+//                                 body: JSON.stringify({
+//                                     message: `Complete this ${langId} code. Return ONLY the next 1-2 lines of code. No explanation, no markdown:\n\n${before}`
+//                                 })
+//                             });
+//                             const data = await res.json();
+//                             if (!data.success) return resolve({ items: [] });
+//                             let suggestion = (data.reply || '').replace(/```[\w]*\n?/g, '').replace(/```/g, '').trim();
+//                             // Take only first line
+//                             suggestion = suggestion.split('\n')[0] || '';
+//                             if (!suggestion || suggestion.length > 200) return resolve({ items: [] });
 
-                            const items = [{
-                                insertText: suggestion,
-                                range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
-                            }];
-                            inlineAICache[cacheKey] = items;
-                            resolve({ items });
-                        } catch (err) { resolve({ items: [] }); }
-                   }, 1500);
-                });
-            },
-            freeInlineCompletions: () => {}
-        });
-    });
-}
+//                             const items = [{
+//                                 insertText: suggestion,
+//                                 range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+//                             }];
+//                             inlineAICache[cacheKey] = items;
+//                             resolve({ items });
+//                         } catch (err) { resolve({ items: [] }); }
+//                    }, 1500);
+//                 });
+//             },
+//             freeInlineCompletions: () => {}
+//         });
+//     });
+// }
 
 /* ============================================================
    📡 REAL STREAMING OUTPUT (Typewriter UX)
@@ -2180,18 +2180,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ✅ Init search worker
     initSearchWorker();
 
-    // ✅ Register Inline AI Copilot after editor ready
-    const waitEditor = setInterval(() => {
-        if (editorInstance) {
-            clearInterval(waitEditor);
-            registerInlineAICopilot();
+    // // ✅ Register Inline AI Copilot after editor ready
+    // const waitEditor = setInterval(() => {
+    //     if (editorInstance) {
+    //         clearInterval(waitEditor);
+    //         registerInlineAICopilot();
 
-            // Add Ctrl+Space shortcut for inline AI trigger
-            editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
-                editorInstance.trigger('keyboard', 'editor.action.inlineSuggest.trigger', {});
-            });
-        }
-    }, 300);
+    //         // Add Ctrl+Space shortcut for inline AI trigger
+    //         editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
+    //             editorInstance.trigger('keyboard', 'editor.action.inlineSuggest.trigger', {});
+    //         });
+    //     }
+    // }, 300);
 });
 </script>
 </body>
