@@ -28,24 +28,38 @@ const AdminDeviceSchema = new mongoose.Schema({
 });
 const AdminDevice = mongoose.model('AdminDevice', AdminDeviceSchema);
 
-
-
-// 🌟 Google AI & Multer Setup 🌟
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+// 🌟 Groq AI & Multer Setup 🌟
 const multer = require('multer');
 
 // इमेज को मेमोरी में टेम्पररी सेव करने के लिए
 const upload = multer({ storage: multer.memoryStorage() }); 
-const apiKey = process.env.GEMINI_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
-if (!apiKey) {
-    console.error("❌ ERROR: GEMINI_API_KEY is missing from Environment Variables!");
+if (!GROQ_API_KEY) {
+    console.error("❌ ERROR: GROQ_API_KEY is missing from Environment Variables!");
 } else {
-    console.log("✅ SUCCESS: GEMINI_API_KEY has been loaded.");
+    console.log("✅ SUCCESS: GROQ_API_KEY has been loaded.");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-
+// Helper function to call Groq API
+async function callGroq(messages, model = 'llama-3.3-70b-versatile') {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: messages,
+            temperature: 0.7,
+            max_tokens: 4096
+        })
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.choices[0].message.content;
+}
 const app = express();
 const PORT = process.env.PORT || 8080;
 // ==========================================
@@ -754,69 +768,74 @@ app.put('/api/profile/update', async (req, res) => {
     }
 });
 // ==========================================
-// 🤖 FINAL FIXED AI DOUBT SOLVER ROUTE
+// 🤖 AI DOUBT SOLVER (Groq API)
 // ==========================================
 app.post('/api/ask-ai', upload.single('image'), async (req, res) => {
     try {
         const prompt = req.body.message || "Explain this image and solve the doubt.";
         
-        // 1.5-flash सबसे लेटेस्ट और स्टेबल मॉडल है
-        // मॉडल का नाम इस तरह से देने पर v1beta वाला एरर खत्म हो जाएगा
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash" 
-});
+        let reply;
         
-        let result;
         if (req.file) {
-            const imageParts = [{
-                inlineData: {
-                    data: req.file.buffer.toString("base64"),
-                    mimeType: req.file.mimetype
-                }
+            // ✅ Image analysis - Vision model use करो
+            const base64Image = req.file.buffer.toString('base64');
+            const imageDataUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+            
+            const messages = [{
+                role: 'user',
+                content: [
+                    { type: 'text', text: prompt },
+                    { type: 'image_url', image_url: { url: imageDataUrl } }
+                ]
             }];
-            result = await model.generateContent([prompt, ...imageParts]);
+            
+            // Groq का vision model
+            reply = await callGroq(messages, 'llama-3.2-11b-vision-preview');
         } else {
-            result = await model.generateContent(prompt);
+            // ✅ Text-only query
+            const messages = [
+                { role: 'system', content: 'You are CodeMaster AI, a helpful coding assistant. Answer in Hinglish mix when appropriate.' },
+                { role: 'user', content: prompt }
+            ];
+            reply = await callGroq(messages, 'llama-3.3-70b-versatile');
         }
-
-        const response = await result.response;
-        const text = response.text();
-        res.json({ success: true, reply: text });
+        
+        res.json({ success: true, reply: reply });
 
     } catch (error) {
         console.error("AI Error Details:", error.message); 
         
-        // 🌟 स्मार्ट एरर हैंडलिंग: अब AI असली दिक्कत बताएगा
-        if (error.status === 503) {
+        if (error.message && error.message.includes('rate_limit')) {
             res.json({ 
                 success: false, 
-                reply: "🤖 CodeMaster AI अभी बहुत सारे सवालों के जवाब दे रहा है (सर्वर बिज़ी है)। कृपया 1-2 मिनट बाद दोबारा पूछें!" 
+                reply: "🤖 AI अभी बिज़ी है (rate limit)। कृपया 1-2 मिनट बाद दोबारा पूछें!" 
             });
         } else {
             res.json({ 
                 success: false, 
-                reply: `⚠️ AI Brain Error: (Real Error: ${error.message})` 
+                reply: `⚠️ AI Error: ${error.message}` 
             });
         }
     }
 });
 // ==========================================
-// 📄 AI RESUME GENERATOR API
+// 📄 AI RESUME GENERATOR API (Groq)
 // ==========================================
 app.post('/api/generate-resume', async (req, res) => {
     try {
         const { prompt } = req.body;
         
-        // AI को सख्त निर्देश (Prompt) देना कि वो सिर्फ JSON फॉर्मेट में ही जवाब दे
         const aiPrompt = `You are an expert HR and Resume Writer. Based on the following user profile: "${prompt}", generate a professional resume. 
         Return ONLY a valid JSON object with exactly these keys: 
         "fullName", "jobTitle", "contactInfo", "summary", "skills", "experience".
         Make the summary impactful and experience detailed. Do not include any markdown formatting like \`\`\`json.`;
 
-        // Gemini 2.5 Flash का इस्तेमाल (या जो भी मॉडल आप यूज़ कर रहे हैं)
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        const result = await model.generateContent(aiPrompt);
-        const responseText = result.response.text();
+        const messages = [
+            { role: 'system', content: 'You are an expert HR and Resume Writer. Always return valid JSON only.' },
+            { role: 'user', content: aiPrompt }
+        ];
+        
+        const responseText = await callGroq(messages, 'llama-3.3-70b-versatile');
 
         // AI कभी-कभी ```json लगा देता है, उसे साफ करना
         const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -829,28 +848,31 @@ app.post('/api/generate-resume', async (req, res) => {
     }
 });
 // ==========================================
-// 📤 UPLOAD & PARSE OLD RESUME API
+// 📤 UPLOAD & PARSE OLD RESUME API (Groq)
 // ==========================================
-// 'upload.single' (multer) का इस्तेमाल हम पहले ही चैटबॉट में कर चुके हैं
 app.post('/api/upload-resume', upload.single('resumePdf'), async (req, res) => {
     try {
         if (!req.file) return res.json({ success: false, message: "No file uploaded!" });
 
-        // 1. PDF फाइल के अंदर से सारा कच्चा टेक्स्ट (Raw Text) निकालना
+        // PDF से text निकालो
         const pdfData = await pdfParse(req.file.buffer);
         const rawText = pdfData.text;
 
-        // 2. AI को यह टेक्स्ट देना ताकि वह इसे सही हिस्सों (Skills, Experience) में बाँट सके
+        // Groq से analyze करवाओ
         const aiPrompt = `You are an expert HR. Read the following text extracted from a resume: 
         "${rawText}"
         Extract the details and return ONLY a valid JSON object with exactly these keys: 
         "fullName", "jobTitle", "contactInfo", "summary", "skills", "experience".
         Do not include any markdown formatting like \`\`\`json.`;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        const result = await model.generateContent(aiPrompt);
+        const messages = [
+            { role: 'system', content: 'You are an expert HR. Always return valid JSON only.' },
+            { role: 'user', content: aiPrompt }
+        ];
         
-        const cleanJsonText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+        const responseText = await callGroq(messages, 'llama-3.3-70b-versatile');
+        
+        const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
         const resumeData = JSON.parse(cleanJsonText);
 
         res.json({ success: true, data: resumeData });
