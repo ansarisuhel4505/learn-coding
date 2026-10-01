@@ -745,8 +745,8 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
 <div class="modal-overlay" id="flowchartModal">
     <div class="modal" style="max-width: 800px;">
         <div class="modal-header"><h3><i class="fas fa-project-diagram"></i> Code Architecture</h3><span class="modal-close" onclick="closeModal('flowchartModal')">&times;</span></div>
-        <div class="modal-body" style="background: white; text-align: center; overflow: auto; min-height:300px;">
-            <div id="mermaidOutput" style="color: black;">Generating Flowchart...</div>
+        <div class="modal-body" style="background: #f8fafc; text-align: center; overflow: auto; min-height:300px; padding:15px;">
+            <div id="erOutput" style="color: #0f172a;">Generating ER Diagram...</div>
         </div>
     </div>
 </div>
@@ -754,8 +754,8 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
 <div class="modal-overlay" id="erModal">
     <div class="modal" style="max-width: 800px;">
         <div class="modal-header"><h3><i class="fas fa-database"></i> SQL ER Diagram</h3><span class="modal-close" onclick="closeModal('erModal')">&times;</span></div>
-        <div class="modal-body" style="background: white; text-align: center; overflow: auto; min-height:300px;">
-            <div id="erOutput" style="color: black;">Generating ER Diagram...</div>
+       <div class="modal-body" style="background: #f8fafc; text-align: center; overflow: auto; min-height:300px; padding:15px;">
+            <div id="mermaidOutput" style="color: #0f172a;">Generating Flowchart...</div>
         </div>
     </div>
 </div>
@@ -933,6 +933,26 @@ let aiInputAction = null;
 let zenMode = false;
 let lastRunTime = 0;
 let pwaInstallEvent = null;
+// ✅ Mermaid setup — सिर्फ एक बार
+let mermaidReady = false;
+function initMermaid() {
+    if (mermaidReady) return true;
+    if (typeof mermaid === 'undefined') {
+        console.warn('Mermaid library not loaded yet');
+        return false;
+    }
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        fontFamily: 'Poppins, sans-serif',
+        flowchart: { useMaxWidth: true, htmlLabels: false },
+        er: { useMaxWidth: true }
+    });
+    mermaidReady = true;
+    console.log('✅ Mermaid initialized');
+    return true;
+}
 
 activeFile = Object.keys(fileSystem)[0] || "main.py";
 openTabs = [activeFile];
@@ -2740,25 +2760,22 @@ async function generateFlowchart() {
     const code = editorInstance.getValue();
     if (!code.trim()) return showToast('Write code first!', 'warning');
 
+    // ✅ Mermaid ready check
+    if (!initMermaid()) {
+        return showToast('Mermaid library load नहीं हुई। Page refresh करो।', 'error');
+    }
+
     openModal('flowchartModal');
     const outputDiv = document.getElementById('mermaidOutput');
-    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI analyzing code...';
+    outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#3b82f6;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:10px;">AI analyzing code...</p></div>';
 
-    const prompt = `Analyze this code and generate a logic flowchart using Mermaid.js syntax.
+    const prompt = `Analyze this code and generate a flowchart using Mermaid.js syntax.
 CRITICAL RULES:
-1. Start exactly with "graph TD" on first line.
-2. Do NOT use quotes, brackets, or special chars inside node labels. Use simple English words.
-3. Wrap the final mermaid code in \`\`\`mermaid ... \`\`\` block.
-4. Example format:
-\`\`\`mermaid
-graph TD
-    Start[Start] --> Input[Read Input]
-    Input --> Check[Check Condition]
-    Check --> Output[Print Result]
-    Output --> End[End]
-\`\`\`
+1. First line MUST be exactly: graph TD
+2. Use simple English words in nodes. NO quotes, NO brackets [], {}, () inside node labels.
+3. Wrap the mermaid code in a \`\`\`mermaid ... \`\`\` block.
 
-Code to analyze:
+Code:
 ${code}`;
 
     try {
@@ -2770,51 +2787,56 @@ ${code}`;
         const data = await res.json();
 
         if (!data.success) {
-            outputDiv.innerHTML = '<span style="color:red;">AI Error: ' + (data.reply || 'Failed') + '</span>';
+            outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">AI Error: ' + (data.reply || 'Failed') + '</div>';
             return;
         }
 
-        // ✅ Clean mermaid code
+        // ✅ Mermaid code extract करो — सिर्फ code block
         let mermaidCode = '';
         const match = data.reply.match(/```mermaid\s*([\s\S]*?)```/i);
         if (match) {
-            mermaidCode = match[1].trim();
+            mermaidCode = match[1];
         } else {
-            mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '').trim();
+            mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '');
         }
+
+        // ✅ BOM और hidden characters clean करो
+        mermaidCode = mermaidCode
+            .replace(/\uFEFF/g, '')        // BOM हटाओ
+            .replace(/\u200B/g, '')        // Zero-width space हटाओ
+            .replace(/\r/g, '')            // CR हटाओ
+            .trim();
+
         if (!/^(graph|flowchart)/i.test(mermaidCode)) {
             mermaidCode = "graph TD\n" + mermaidCode;
         }
 
-        console.log('Mermaid code:', mermaidCode);
+        console.log('✅ Final mermaid code:', JSON.stringify(mermaidCode));
 
-        // ✅ LOCAL rendering with mermaid.js (जो तुमने पहले से load किया है)
-        outputDiv.innerHTML = '';
-        const graphDiv = document.createElement('div');
-        graphDiv.className = 'mermaid';
-        graphDiv.textContent = mermaidCode;
-        outputDiv.appendChild(graphDiv);
+        // ✅ mermaid.render() use करो — ये SVG string return करता है
+        outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering diagram...</div>';
 
-        // Mermaid initialize + render
-        if (typeof mermaid !== 'undefined') {
-            mermaid.initialize({ startOnLoad: false, theme: 'default' });
-            try {
-                await mermaid.run({ nodes: [graphDiv] });
-            } catch (err) {
-                console.error('Mermaid render error:', err);
-                outputDiv.innerHTML =
-                    '<div style="color:#ef4444; padding:10px;">' +
-                    '⚠️ AI का syntax सही नहीं था। नीचे raw code देखो:<br>' +
-                    '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:10px; border-radius:5px; margin-top:10px; white-space:pre-wrap;">' +
-                    escapeHtml(mermaidCode) + '</pre></div>';
-            }
-        } else {
-            outputDiv.innerHTML = '<span style="color:red;">Mermaid.js library load नहीं हुई</span>';
+        try {
+            const uniqueId = 'flowchart-' + Date.now();
+            const { svg } = await mermaid.render(uniqueId, mermaidCode);
+            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px;">' + svg + '</div>';
+            showToast('✓ Flowchart generated!', 'success');
+        } catch (renderErr) {
+            console.error('Mermaid render error:', renderErr);
+            outputDiv.innerHTML =
+                '<div style="color:#ef4444; padding:20px;">' +
+                '<h4>⚠️ Render Error</h4>' +
+                '<p style="font-size:12px; margin:10px 0;">AI ने invalid syntax दिया। नीचे raw code देखो और दोबारा try करो:</p>' +
+                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px;">' +
+                escapeHtml(mermaidCode) +
+                '</pre>' +
+                '<button onclick="generateFlowchart()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
+                '</div>';
         }
 
     } catch (e) {
         console.error(e);
-        outputDiv.innerHTML = '<span style="color:red;">Network Error: ' + e.message + '</span>';
+        outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">Network Error: ' + e.message + '</div>';
     }
 }
     async function generateERDiagram() {
@@ -2824,28 +2846,19 @@ ${code}`;
     if (!code.trim()) return showToast('Write SQL code first!', 'warning');
     if (lang !== 'sql') return showToast('Please select SQL language first!', 'error');
 
+    if (!initMermaid()) {
+        return showToast('Mermaid library load नहीं हुई। Page refresh करो।', 'error');
+    }
+
     openModal('erModal');
     const outputDiv = document.getElementById('erOutput');
-    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI analyzing SQL tables...';
+    outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#a855f7;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:10px;">AI analyzing SQL tables...</p></div>';
 
     const prompt = `Analyze this SQL code and generate an ER diagram using Mermaid.js syntax.
 CRITICAL RULES:
-1. Start exactly with "erDiagram" on first line.
+1. First line MUST be exactly: erDiagram
 2. Use simple table/column names without special chars.
-3. Wrap the final mermaid code in \`\`\`mermaid ... \`\`\` block.
-4. Example format:
-\`\`\`mermaid
-erDiagram
-    USER ||--o{ ORDER : places
-    USER {
-        int id
-        string name
-    }
-    ORDER {
-        int id
-        int userId
-    }
-\`\`\`
+3. Wrap the mermaid code in a \`\`\`mermaid ... \`\`\` block.
 
 SQL Code:
 ${code}`;
@@ -2859,49 +2872,56 @@ ${code}`;
         const data = await res.json();
 
         if (!data.success) {
-            outputDiv.innerHTML = '<span style="color:red;">AI Error: ' + (data.reply || 'Failed') + '</span>';
+            outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">AI Error: ' + (data.reply || 'Failed') + '</div>';
             return;
         }
 
         let mermaidCode = '';
         const match = data.reply.match(/```mermaid\s*([\s\S]*?)```/i);
         if (match) {
-            mermaidCode = match[1].trim();
+            mermaidCode = match[1];
         } else {
-            mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '').trim();
+            mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '');
         }
+
+        // ✅ BOM और hidden characters clean करो
+        mermaidCode = mermaidCode
+            .replace(/\uFEFF/g, '')
+            .replace(/\u200B/g, '')
+            .replace(/\r/g, '')
+            .trim();
+
         if (!/^erDiagram/i.test(mermaidCode)) {
             mermaidCode = "erDiagram\n" + mermaidCode;
         }
 
-        console.log('ER code:', mermaidCode);
+        console.log('✅ Final ER code:', JSON.stringify(mermaidCode));
 
-        outputDiv.innerHTML = '';
-        const graphDiv = document.createElement('div');
-        graphDiv.className = 'mermaid';
-        graphDiv.textContent = mermaidCode;
-        outputDiv.appendChild(graphDiv);
+        outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering ER diagram...</div>';
 
-        if (typeof mermaid !== 'undefined') {
-            mermaid.initialize({ startOnLoad: false, theme: 'default' });
-            try {
-                await mermaid.run({ nodes: [graphDiv] });
-            } catch (err) {
-                console.error('ER render error:', err);
-                outputDiv.innerHTML =
-                    '<div style="color:#ef4444; padding:10px;">' +
-                    '⚠️ AI syntax error। Raw code:<br>' +
-                    '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:10px; border-radius:5px; margin-top:10px; white-space:pre-wrap;">' +
-                    escapeHtml(mermaidCode) + '</pre></div>';
-            }
+        try {
+            const uniqueId = 'er-' + Date.now();
+            const { svg } = await mermaid.render(uniqueId, mermaidCode);
+            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px; overflow:auto;">' + svg + '</div>';
+            showToast('✓ ER Diagram generated!', 'success');
+        } catch (renderErr) {
+            console.error('ER render error:', renderErr);
+            outputDiv.innerHTML =
+                '<div style="color:#ef4444; padding:20px;">' +
+                '<h4>⚠️ Render Error</h4>' +
+                '<p style="font-size:12px; margin:10px 0;">AI ने invalid ER syntax दिया:</p>' +
+                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px;">' +
+                escapeHtml(mermaidCode) +
+                '</pre>' +
+                '<button onclick="generateERDiagram()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
+                '</div>';
         }
 
     } catch (e) {
         console.error(e);
-        outputDiv.innerHTML = '<span style="color:red;">Network Error: ' + e.message + '</span>';
+        outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">Network Error: ' + e.message + '</div>';
     }
 }
-
 // 5. Visual Time Travel Debugger (via PythonTutor Embed)
 function openVisualDebugger() {
     const code = editorInstance.getValue();
