@@ -253,9 +253,10 @@ select optgroup { background: #0f172a; color: #94a3b8; }
 .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 1px; height: 30px; background: #64748b; }
 
 /* TERMINAL */
-.coding-right { width: 35%; display: flex; flex-direction: column; background: #000; flex-shrink: 0; min-width: 220px; overflow: hidden; }
-.custom-input-area { height: 30%; border-bottom: 2px solid #334155; display: flex; flex-direction: column; flex-shrink: 0; }
+.coding-right { width: 35%; max-width: 80%; display: flex; flex-direction: column; background: #000; flex-shrink: 0; min-width: 200px; overflow: hidden; }
+.custom-input-area { height: 30%; border-bottom: 2px solid #334155; display: flex; flex-direction: column; flex-shrink: 0; width: 100%; }
 .custom-input-area textarea {
+    width: 100%; box-sizing: border-box; /* ✅ Added to prevent overflow */
     flex-grow: 1;
     background: #0f172a;
     color: #f8fafc;
@@ -1915,10 +1916,9 @@ function initSplitter() {
     const codingRight = document.getElementById('terminalDrawer');
     if (!splitter) return;
 
-    // Restore saved split
     if (userSettings.splitPct) {
-        codingLeft.style.flex = `0 0 ${userSettings.splitPct}%`;
-        codingRight.style.width = `calc(${100 - userSettings.splitPct}% - 5px)`;
+        codingLeft.style.flex = `1`; 
+        codingRight.style.width = `${100 - userSettings.splitPct}%`;
     }
 
     const startResize = (clientX) => {
@@ -1931,9 +1931,11 @@ function initSplitter() {
         if (!isResizing) return;
         const rect = codingLeft.parentElement.getBoundingClientRect();
         const leftW = clientX - rect.left;
-        const pct = Math.max(30, Math.min(80, (leftW / rect.width) * 100));
-        codingLeft.style.flex = `0 0 ${pct}%`;
-        codingRight.style.width = `calc(${100 - pct}% - 5px)`;
+        const pct = Math.max(20, Math.min(80, (leftW / rect.width) * 100));
+        
+        codingLeft.style.flex = `1`; // ✅ Auto fill remaining space
+        codingRight.style.width = `${100 - pct}%`; // ✅ Strict percentage
+        
         if (editorInstance) editorInstance.layout();
     };
     const stopResize = () => {
@@ -1942,8 +1944,10 @@ function initSplitter() {
             splitter.classList.remove('dragging');
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
-            const pct = parseFloat(codingLeft.style.flex.replace('0 0 ','').replace('%','')) || 65;
-            userSettings.splitPct = pct;
+            
+            const rect = codingLeft.parentElement.getBoundingClientRect();
+            const rightRect = document.getElementById('terminalDrawer').getBoundingClientRect();
+            userSettings.splitPct = 100 - ((rightRect.width / rect.width) * 100);
             localStorage.setItem('cm_settings', JSON.stringify(userSettings));
         }
     };
@@ -2733,20 +2737,21 @@ async function startJarvis() {
 
 // 4. Code to Flowchart (Mermaid.js)
 // 4. Code to Flowchart (Mermaid Image Rendering - No Glitch)
+// 4. Code to Flowchart (Local Safe Rendering)
 async function generateFlowchart() {
     const code = editorInstance.getValue();
     if(!code.trim()) return showToast('Write code first!', 'warning');
     
     openModal('flowchartModal');
     const outputDiv = document.getElementById('mermaidOutput');
-    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and generating flowchart image...';
+    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and generating flowchart...';
 
     const prompt = `Analyze this code and generate a logic flowchart using Mermaid.js syntax.
 CRITICAL RULES:
 1. Start exactly with "graph TD".
-2. Do NOT use quotes, brackets [], {}, () inside node names. Just use plain text.
-3. Do NOT use special characters (<, >, =, %). Use words (e.g. 'equals', 'less than').
-4. ONLY output valid mermaid code. No explanations. No markdown block like \`\`\`mermaid.
+2. Use ONLY simple words for node labels. Do NOT use special characters, quotes, brackets, or math symbols inside nodes.
+3. Good Example: A[Start] --> B[Check Even or Odd]
+4. ONLY output raw mermaid code. No markdown formatting like \`\`\`mermaid.
 
 Code:
 ${code}`;
@@ -2757,25 +2762,20 @@ ${code}`;
         });
         const data = await res.json();
         
-        // Cleanup AI response
         let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
-        if (!mermaidCode.startsWith("graph")) {
-            mermaidCode = "graph TD\n" + mermaidCode;
-        }
+        if (!mermaidCode.startsWith("graph")) mermaidCode = "graph TD\n" + mermaidCode;
         
-        // Encode logic for safe image generation
-        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
-        const imgUrl = `https://mermaid.ink/img/${encoded}`;
-        
-        // Show as Image (Will NEVER crash the browser)
-        outputDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; height:auto; border-radius:8px; background:white; padding:10px;" alt="Flowchart" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>AI generated invalid syntax. Please click Flowchart again.</span>';">`;
-        
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        const uniqueId = 'flow_' + Date.now();
+        const { svg } = await mermaid.render(uniqueId, mermaidCode);
+        outputDiv.innerHTML = svg;
     } catch(e) {
         console.error(e);
-        outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate flowchart.</span>';
+        outputDiv.innerHTML = '<span style="color:red; font-weight:bold;">⚠️ AI generated a complex format. Please click the Flowchart button again!</span>';
     }
 }
-    // 4.5 SQL to ER Diagram (Mermaid Image Rendering)
+
+// 4.5 SQL to ER Diagram (Local Safe Rendering)
 async function generateERDiagram() {
     const code = editorInstance.getValue();
     const lang = document.getElementById('langSelect').value;
@@ -2787,12 +2787,11 @@ async function generateERDiagram() {
     const outputDiv = document.getElementById('erOutput');
     outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing SQL tables and generating ER Diagram...';
 
-    const prompt = `Analyze this SQL code (CREATE TABLE statements, foreign keys, etc.) and generate an Entity-Relationship (ER) diagram using Mermaid.js syntax.
+    const prompt = `Analyze this SQL code and generate an Entity-Relationship (ER) diagram using Mermaid.js syntax.
 CRITICAL RULES:
 1. Start exactly with "erDiagram".
-2. Define relationships properly (e.g., ||--o{, }|..|{ ).
-3. Do NOT use quotes, special characters, or markdown blocks like \`\`\`mermaid.
-4. ONLY output raw mermaid code. No explanations.
+2. Define simple relationships. No special characters or quotes in table/column names.
+3. ONLY output raw mermaid code. No markdown formatting.
 
 SQL Code:
 ${code}`;
@@ -2803,22 +2802,16 @@ ${code}`;
         });
         const data = await res.json();
         
-        // Cleanup AI response
         let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```sql/gi, '').replace(/```/g, '').trim();
-        if (!mermaidCode.startsWith("erDiagram")) {
-            mermaidCode = "erDiagram\n" + mermaidCode;
-        }
+        if (!mermaidCode.startsWith("erDiagram")) mermaidCode = "erDiagram\n" + mermaidCode;
         
-        // Encode logic for safe image generation
-        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
-        const imgUrl = `[https://mermaid.ink/img/$](https://mermaid.ink/img/$){encoded}`;
-        
-        // Show as Image
-        outputDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; height:auto; border-radius:8px; background:white; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);" alt="ER Diagram" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>AI failed to generate a valid ER Diagram. Check your SQL syntax and try again!</span>';">`;
-        
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        const uniqueId = 'er_' + Date.now();
+        const { svg } = await mermaid.render(uniqueId, mermaidCode);
+        outputDiv.innerHTML = svg;
     } catch(e) {
         console.error(e);
-        outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate ER Diagram.</span>';
+        outputDiv.innerHTML = '<span style="color:red; font-weight:bold;">⚠️ AI generated invalid SQL syntax format. Try again!</span>';
     }
 }
 
