@@ -3152,10 +3152,14 @@ async function searchNPM(e) {
    🎨 UNIVERSAL MERMAID RENDERER — Local SVG Rendering (Fixed 0x0 Bug)
 ============================================================ */
 /* ============================================================
-   🎨 UNIVERSAL MERMAID RENDERER — Fixed Layout & Visibility
+   🎨 UNIVERSAL MERMAID RENDERER — (Force Open Modal Fix)
 ============================================================ */
 async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
     console.log('🎬 Rendering ' + diagramName + ' locally...');
+
+    // 🚀 FIX 1: जिस Modal में डायग्राम बन रहा है, उसे ज़बरदस्ती Active (Open) करो
+    const parentModal = outputDiv.closest('.modal-overlay');
+    if (parentModal) parentModal.classList.add('active');
 
     // Loading State
     outputDiv.innerHTML = '<div style="padding:30px; text-align:center; color:#3b82f6;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i><p style="margin-top:12px; font-size:13px;">Rendering ' + diagramName + '...</p></div>';
@@ -3163,25 +3167,21 @@ async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
     try {
         if (typeof mermaid === 'undefined') throw new Error('Mermaid library not loaded');
 
-        // Unique ID (Mermaid needs this to render without caching issues)
+        // Unique ID
         const id = 'mermaid-svg-' + Date.now();
-        
-        // Render to SVG
         const { svg } = await mermaid.render(id, mermaidCode);
 
         // Clear output
         outputDiv.innerHTML = '';
         
-        // 🛠️ FIX 1: Removed 'display: flex' & fixed background
-        // Background हटा दिया गया है ताकि यह Modal के natural color (#f8fafc) के साथ ब्लेंड हो जाए
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'text-align:center; padding:10px; width:100%; overflow-x:auto; overflow-y:hidden; min-height:300px;';
+        wrapper.style.cssText = 'text-align:center; padding:10px; width:100%; overflow-x:auto; overflow-y:hidden; min-height:300px; display:block;';
         wrapper.innerHTML = svg;
 
-        // 🛠️ FIX 2: Force SVG to behave like a responsive block image
+        // Force SVG visibility
         const svgEl = wrapper.querySelector('svg');
         if (svgEl) {
-            svgEl.removeAttribute('width');  // Let viewBox handle aspect ratio
+            svgEl.removeAttribute('width');  
             svgEl.removeAttribute('height'); 
             svgEl.style.maxWidth = '100%';
             svgEl.style.height = 'auto';
@@ -3189,11 +3189,17 @@ async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
         }
 
         outputDiv.appendChild(wrapper);
+        
+        // 🚀 FIX 2: रेंडर होने के बाद एक बार फिर चेक करो कि Modal खुला है या नहीं
+        if (parentModal) parentModal.classList.add('active');
+
         showToast('✓ ' + diagramName + ' generated!', 'success');
         console.log('🎉 ' + diagramName + ' displayed in modal');
 
     } catch (err) {
         console.error('❌ ' + diagramName + ' render failed:', err);
+        if (parentModal) parentModal.classList.add('active'); // Error आने पर भी Modal खोलो
+        
         outputDiv.innerHTML = 
             '<div style="color:#ef4444; padding:20px;">' +
             '<h4>⚠️ ' + diagramName + ' Rendering Failed</h4>' +
