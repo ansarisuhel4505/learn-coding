@@ -69,6 +69,181 @@ body.custom-bg textarea { background: transparent !important; }
 .chat-user { background: #3b82f6; align-self: flex-end; color: white; }
 .chat-input { display: flex; padding: 10px; background: #1e293b; }
 .chat-input input { flex-grow: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
+    /* ============ SQL DATABASE EXPLORER ============ */
+.db-search-box {
+    padding: 8px 10px;
+    border-bottom: 1px solid #1e293b;
+}
+.db-search-box input {
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    outline: none;
+}
+.db-search-box input:focus { border-color: #3b82f6; }
+
+.schema-item {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #cbd5e1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 3px solid transparent;
+    transition: .15s;
+    user-select: none;
+}
+.schema-item:hover { background: #1e293b; color: #f8fafc; }
+.schema-item.active { background: #1e293b; color: #3b82f6; border-left-color: #3b82f6; }
+.schema-item i.fa-table { color: #10b981; }
+.schema-item i.fa-database { color: #f59e0b; }
+.schema-item .badge-count {
+    margin-left: auto;
+    background: #334155;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 9px;
+    color: #94a3b8;
+}
+
+.schema-column {
+    padding: 4px 12px 4px 34px;
+    font-size: 11px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.schema-column i.fa-key { color: #f59e0b; font-size: 9px; }
+.schema-column .col-type { color: #8b5cf6; font-size: 10px; margin-left: auto; }
+.schema-column .col-null { color: #64748b; font-size: 9px; }
+
+.db-empty-state {
+    padding: 30px 15px;
+    text-align: center;
+    color: #64748b;
+    font-size: 11px;
+}
+.db-empty-state i {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+    color: #334155;
+}
+.db-empty-state button {
+    margin-top: 12px;
+}
+
+/* ============ TABLE VIEWER ============ */
+.table-viewer-tabs {
+    display: flex;
+    gap: 3px;
+    background: #0b1120;
+    padding: 0 12px;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0;
+}
+.table-viewer-tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: .15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.table-viewer-tab:hover { color: #f8fafc; }
+.table-viewer-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+
+.db-table-wrapper {
+    width: 100%;
+    overflow: auto;
+    background: #1e293b;
+    border-radius: 8px;
+    margin-top: 10px;
+    max-height: 500px;
+    border: 1px solid #334155;
+}
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+    min-width: 100%;
+}
+.db-table th {
+    background: #1e40af;
+    color: white;
+    padding: 10px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-weight: 700;
+    white-space: nowrap;
+    border-right: 1px solid #334155;
+    font-size: 11px;
+}
+.db-table th:last-child { border-right: none; }
+.db-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #334155;
+    border-right: 1px solid #1e293b;
+    color: #e2e8f0;
+    white-space: nowrap;
+}
+.db-table td:last-child { border-right: none; }
+.db-table tbody tr:hover { background: #334155; }
+.db-table tbody tr:nth-child(even) { background: rgba(30,41,59,.4); }
+
+.structure-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.structure-table th {
+    background: #1e40af;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+}
+.structure-table td {
+    padding: 10px;
+    border-bottom: 1px solid #334155;
+    color: #e2e8f0;
+}
+.structure-table tr:hover { background: #1e293b; }
+.pk-badge { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; }
+.fk-badge { background: #8b5cf6; color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; margin-left: 3px; }
+.nn-badge { background: #ef4444; color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; margin-left: 3px; }
+
+.type-badge { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+
+.sql-code-view {
+    background: #0b1120;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #10b981;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border: 1px solid #334155;
+}
+
+@media (max-width: 850px) {
+    .table-viewer-tab span { display: none; }
+    .table-viewer-tab { padding: 8px 10px; }
+}
 /* ✅ Mermaid SVG Display Fix */
 /* ✅ Mermaid output containers - forced dimensions */
 #mermaidOutput,
@@ -565,9 +740,10 @@ select optgroup { background: #0f172a; color: #94a3b8; }
 
     <!-- FILE EXPLORER -->
     <div class="file-explorer" id="mobileExplorer">
-        <div class="explorer-tabs">
+       <div class="explorer-tabs">
             <div class="explorer-tab active" onclick="switchExplorerTab('files', this)"><i class="fas fa-folder"></i> Files</div>
             <div class="explorer-tab" onclick="switchExplorerTab('search', this)"><i class="fas fa-search"></i> Search</div>
+            <div class="explorer-tab" onclick="switchExplorerTab('db', this)"><i class="fas fa-database"></i> DB</div>
         </div>
         <div id="filesPanel" style="display:flex;flex-direction:column;flex-grow:1;min-height:0;">
             <div class="explorer-header">
@@ -587,6 +763,23 @@ select optgroup { background: #0f172a; color: #94a3b8; }
                 <input type="text" id="searchInput" placeholder="Search in files..." oninput="searchInFiles()">
             </div>
             <div id="searchResults" style="overflow-y:auto;flex-grow:1;"></div>
+        </div>
+        <!-- ✅ SQL DATABASE EXPLORER -->
+        <div id="dbPanel" class="hidden" style="display:flex;flex-direction:column;flex-grow:1;min-height:0;">
+            <div class="explorer-header">
+                <span><i class="fas fa-database"></i> DATABASE</span>
+                <div class="explorer-actions">
+                    <i class="fas fa-sync-alt" onclick="refreshSchemaTree()" title="Refresh"></i>
+                    <i class="fas fa-file-csv" onclick="document.getElementById('csvUpload').click()" title="Import CSV"></i>
+                    <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none;" onchange="uploadCSV(event)">
+                    <i class="fas fa-plus" onclick="promptCreateTable()" title="New Table"></i>
+                    <i class="fas fa-file-code" onclick="promptRunQuery()" title="Run Query"></i>
+                </div>
+            </div>
+            <div class="db-search-box">
+                <input type="text" id="dbSearchInput" placeholder="🔍 Filter tables..." oninput="filterSchemaTree()">
+            </div>
+            <div id="schemaTree" style="overflow-y:auto;flex-grow:1;padding:4px 0;"></div>
         </div>
     </div>
 
@@ -791,7 +984,46 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         </div>
     </div>
 </div>
+<!-- ✅ SQL TABLE VIEWER MODAL -->
+<div class="modal-overlay" id="tableViewerModal">
+    <div class="modal" style="max-width:1100px; width:95vw; height:88vh;">
+        <div class="modal-header">
+            <h3 id="tableViewerTitle"><i class="fas fa-table"></i> Table Viewer</h3>
+            <span class="modal-close" onclick="closeModal('tableViewerModal')">&times;</span>
+        </div>
+        <div class="table-viewer-tabs">
+            <div class="table-viewer-tab active" onclick="switchTableTab('data', this)"><i class="fas fa-list"></i> Data</div>
+            <div class="table-viewer-tab" onclick="switchTableTab('structure', this)"><i class="fas fa-columns"></i> Structure</div>
+            <div class="table-viewer-tab" onclick="switchTableTab('indexes', this)"><i class="fas fa-key"></i> Indexes</div>
+            <div class="table-viewer-tab" onclick="switchTableTab('sql', this)"><i class="fas fa-code"></i> SQL Info</div>
+        </div>
+        <div class="modal-body" style="padding:0; overflow:auto; background:#0f172a;">
+            <div id="tableViewerContent" style="padding:15px;"></div>
+        </div>
+        <div class="modal-footer" style="justify-content:space-between;">
+            <div style="display:flex;gap:6px;">
+                <button class="btn-secondary" onclick="insertRowIntoTable()"><i class="fas fa-plus"></i> Insert Row</button>
+                <button class="btn-secondary" onclick="exportCurrentTableCSV()"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+            <button class="btn-primary" onclick="closeModal('tableViewerModal')">Close</button>
+        </div>
+    </div>
+</div>
 
+<!-- ✅ INSERT ROW MODAL -->
+<div class="modal-overlay" id="insertRowModal">
+    <div class="modal" style="max-width:600px;">
+        <div class="modal-header">
+            <h3 id="insertRowTitle"><i class="fas fa-plus"></i> Insert Row</h3>
+            <span class="modal-close" onclick="closeModal('insertRowModal')">&times;</span>
+        </div>
+        <div class="modal-body" id="insertRowForm"></div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('insertRowModal')">Cancel</button>
+            <button class="btn-primary" onclick="submitInsertRow()"><i class="fas fa-save"></i> Insert</button>
+        </div>
+    </div>
+</div>
 <!-- Activity Heatmap Modal -->
 <div class="modal-overlay" id="heatmapModal">
     <div class="modal">
@@ -3135,6 +3367,657 @@ async function searchNPM(e) {
     }
 }
     /* ============================================================
+   🗄️ SQL IDE — Schema Tree + Table Viewer + CSV Import
+============================================================ */
+
+let currentViewedTable = null;
+let currentTableStructure = [];
+
+// ✅ Switch to DB tab
+function switchDBExplorer() {
+    const dbTab = document.querySelector('.explorer-tab[onclick*="db"]');
+    if (dbTab) {
+        switchExplorerTab('db', dbTab);
+        refreshSchemaTree();
+    }
+}
+
+// ✅ Refresh Schema Tree in sidebar
+function refreshSchemaTree() {
+    const tree = document.getElementById('schemaTree');
+    if (!tree) return;
+
+    if (!sqlDatabase) {
+        tree.innerHTML = `
+            <div class="db-empty-state">
+                <i class="fas fa-database"></i>
+                <p>No database yet</p>
+                <p style="font-size:10px;margin-top:5px;">Run a CREATE TABLE query<br>या CSV upload करो</p>
+                <button class="btn-primary" onclick="document.getElementById('csvUpload').click()">
+                    <i class="fas fa-file-csv"></i> Import CSV
+                </button>
+            </div>`;
+        return;
+    }
+
+    try {
+        // Get all tables
+        const tablesRes = sqlDatabase.exec(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        );
+        const tables = tablesRes[0]?.values?.map(r => r[0]) || [];
+
+        // Get all views
+        const viewsRes = sqlDatabase.exec(
+            "SELECT name FROM sqlite_master WHERE type='view' ORDER BY name"
+        );
+        const views = viewsRes[0]?.values?.map(r => r[0]) || [];
+
+        if (tables.length === 0 && views.length === 0) {
+            tree.innerHTML = `
+                <div class="db-empty-state">
+                    <i class="fas fa-database"></i>
+                    <p>Database empty है</p>
+                    <p style="font-size:10px;margin-top:5px;">CREATE TABLE query run करो</p>
+                    <button class="btn-primary" onclick="promptCreateTable()">
+                        <i class="fas fa-plus"></i> New Table
+                    </button>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+
+        // Databases folder
+        html += `<div style="padding:6px 12px;font-size:10px;color:#64748b;text-transform:uppercase;font-weight:bold;">📁 main (SQLite)</div>`;
+
+        // Tables folder
+        if (tables.length > 0) {
+            html += `<div style="padding:4px 12px;font-size:10px;color:#64748b;display:flex;align-items:center;gap:5px;"><i class="fas fa-folder" style="color:#f59e0b;"></i> Tables (${tables.length})</div>`;
+
+            tables.forEach(table => {
+                const rowCount = getTableRowCount(table);
+                const active = currentViewedTable === table ? 'active' : '';
+                html += `
+                    <div class="schema-item ${active}" onclick="openTable('${table.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-table"></i>
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(table)}</span>
+                        <span class="badge-count">${rowCount}</span>
+                    </div>`;
+            });
+        }
+
+        // Views folder
+        if (views.length > 0) {
+            html += `<div style="padding:8px 12px 4px;font-size:10px;color:#64748b;display:flex;align-items:center;gap:5px;"><i class="fas fa-eye" style="color:#8b5cf6;"></i> Views (${views.length})</div>`;
+            views.forEach(v => {
+                html += `
+                    <div class="schema-item" onclick="openTable('${v.replace(/'/g, "\\'")}', true)">
+                        <i class="fas fa-eye" style="color:#8b5cf6;"></i>
+                        <span>${escapeHtml(v)}</span>
+                    </div>`;
+            });
+        }
+
+        tree.innerHTML = html;
+    } catch (e) {
+        tree.innerHTML = `<div class="db-empty-state" style="color:#ef4444;">Error: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+// ✅ Filter tables
+function filterSchemaTree() {
+    const q = (document.getElementById('dbSearchInput')?.value || '').toLowerCase();
+    document.querySelectorAll('#schemaTree .schema-item').forEach(item => {
+        const name = item.textContent.toLowerCase();
+        item.style.display = name.includes(q) ? 'flex' : 'none';
+    });
+}
+
+// ✅ Get row count for a table
+function getTableRowCount(tableName) {
+    if (!sqlDatabase) return 0;
+    try {
+        const res = sqlDatabase.exec(`SELECT COUNT(*) FROM "${tableName}"`);
+        return res[0]?.values[0]?.[0] || 0;
+    } catch (e) { return 0; }
+}
+
+// ✅ Open Table in viewer
+async function openTable(tableName, isView = false) {
+    if (!sqlDatabase) return showToast('No database', 'warning');
+    currentViewedTable = tableName;
+
+    openModal('tableViewerModal');
+    document.getElementById('tableViewerTitle').innerHTML =
+        `<i class="fas fa-${isView ? 'eye' : 'table'}"></i> ${escapeHtml(tableName)}`;
+
+    // Reset tabs to Data
+    document.querySelectorAll('.table-viewer-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.table-viewer-tab[onclick*="data"]')?.classList.add('active');
+
+    refreshSchemaTree();
+    showTableData(tableName);
+}
+
+// ✅ Switch table viewer tab
+function switchTableTab(tab, el) {
+    document.querySelectorAll('.table-viewer-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+
+    if (!currentViewedTable) return;
+
+    switch(tab) {
+        case 'data': showTableData(currentViewedTable); break;
+        case 'structure': showTableStructure(currentViewedTable); break;
+        case 'indexes': showTableIndexes(currentViewedTable); break;
+        case 'sql': showTableSQL(currentViewedTable); break;
+    }
+}
+
+// ✅ Show table data
+function showTableData(tableName) {
+    const content = document.getElementById('tableViewerContent');
+    content.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Loading data...</div>';
+
+    setTimeout(() => {
+        try {
+            const res = sqlDatabase.exec(`SELECT * FROM "${tableName}" LIMIT 500`);
+            if (res.length === 0 || !res[0].values || res[0].values.length === 0) {
+                content.innerHTML = `
+                    <div class="db-empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Table '${escapeHtml(tableName)}' empty है</p>
+                        <button class="btn-primary" onclick="insertRowIntoTable()" style="margin-top:12px;">
+                            <i class="fas fa-plus"></i> Insert First Row
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            const result = res[0];
+            const totalRows = getTableRowCount(tableName);
+
+            let html = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+                    <div style="font-size:12px;color:#94a3b8;">
+                        <b style="color:#10b981;">${result.values.length}</b> row(s) shown
+                        ${totalRows > 500 ? `<span style="color:#f59e0b;"> (of ${totalRows} total — showing first 500)</span>` : ''}
+                    </div>
+                    <div style="font-size:11px;color:#64748b;">
+                        <i class="fas fa-database"></i> ${result.columns.length} column(s)
+                    </div>
+                </div>`;
+
+            html += '<div class="db-table-wrapper"><table class="db-table"><thead><tr>';
+            html += `<th style="width:40px;">#</th>`;
+            result.columns.forEach(col => {
+                html += `<th>${escapeHtml(String(col))}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            result.values.forEach((row, idx) => {
+                html += `<tr><td style="color:#64748b;font-size:10px;">${idx + 1}</td>`;
+                row.forEach(val => {
+                    let display;
+                    if (val === null) display = '<i style="color:#64748b;font-size:10px;">NULL</i>';
+                    else if (typeof val === 'string' && val.length > 200) display = escapeHtml(val.substring(0, 200)) + '...';
+                    else display = escapeHtml(String(val));
+                    html += `<td>${display}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+        } catch (e) {
+            content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error: ${escapeHtml(e.message)}</div>`;
+        }
+    }, 50);
+}
+
+// ✅ Show table structure (columns + types)
+function showTableStructure(tableName) {
+    const content = document.getElementById('tableViewerContent');
+    try {
+        // Get column info using PRAGMA
+        const res = sqlDatabase.exec(`PRAGMA table_info("${tableName}")`);
+        if (!res.length || !res[0].values) {
+            content.innerHTML = '<div style="color:#ef4444;padding:20px;">Cannot read structure</div>';
+            return;
+        }
+
+        const columns = res[0].values; // [cid, name, type, notnull, dflt_value, pk]
+        currentTableStructure = columns.map(c => ({
+            cid: c[0], name: c[1], type: c[2] || 'BLOB',
+            notnull: c[3], defaultValue: c[4], pk: c[5]
+        }));
+
+        // Get foreign keys
+        let fkMap = {};
+        try {
+            const fkRes = sqlDatabase.exec(`PRAGMA foreign_key_list("${tableName}")`);
+            if (fkRes.length && fkRes[0].values) {
+                fkRes[0].values.forEach(fk => {
+                    fkMap[fk[3]] = { table: fk[2], column: fk[4] }; // from->col, to->table, to_col
+                });
+            }
+        } catch (e) {}
+
+        let html = `
+            <div style="margin-bottom:12px;font-size:12px;color:#94a3b8;">
+                <b style="color:#3b82f6;">${columns.length}</b> column(s) — Structure
+            </div>
+            <table class="structure-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Name</th>
+                        <th>Data Type</th>
+                        <th>Key</th>
+                        <th>Nullable</th>
+                        <th>Default</th>
+                        <th>Extra</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        columns.forEach((col, idx) => {
+            const [cid, name, type, notnull, dflt_value, pk] = col;
+            const isPK = pk > 0;
+            const isFK = fkMap[name];
+            const typeStr = type || 'BLOB';
+
+            html += `
+                <tr>
+                    <td style="color:#64748b;font-size:10px;">${idx + 1}</td>
+                    <td><b style="color:#f8fafc;">${escapeHtml(name)}</b></td>
+                    <td><span class="type-badge">${escapeHtml(typeStr.toUpperCase())}</span></td>
+                    <td>
+                        ${isPK ? '<span class="pk-badge">PRIMARY</span>' : ''}
+                        ${isFK ? `<span class="fk-badge">FK → ${escapeHtml(isFK.table)}.${escapeHtml(isFK.column)}</span>` : ''}
+                    </td>
+                    <td>${notnull ? '<span style="color:#ef4444;">NOT NULL</span>' : '<span style="color:#64748b;">NULL OK</span>'}</td>
+                    <td style="color:#94a3b8;">${dflt_value !== null ? escapeHtml(String(dflt_value)) : '<i style="color:#64748b;">—</i>'}</td>
+                    <td>${isPK ? '<span style="color:#f59e0b;font-size:10px;">AUTOINCREMENT</span>' : ''}</td>
+                </tr>`;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+    } catch (e) {
+        content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+// ✅ Show indexes
+function showTableIndexes(tableName) {
+    const content = document.getElementById('tableViewerContent');
+    try {
+        const res = sqlDatabase.exec(`PRAGMA index_list("${tableName}")`);
+        if (!res.length || !res[0].values || res[0].values.length === 0) {
+            content.innerHTML = `
+                <div class="db-empty-state">
+                    <i class="fas fa-key"></i>
+                    <p>No indexes on this table (except primary key)</p>
+                </div>`;
+            return;
+        }
+
+        let html = '<table class="structure-table"><thead><tr><th>Index Name</th><th>Unique</th><th>Columns</th></tr></thead><tbody>';
+        res[0].values.forEach(idx => {
+            const [seq, name, unique] = idx;
+            let cols = [];
+            try {
+                const colRes = sqlDatabase.exec(`PRAGMA index_info("${name}")`);
+                if (colRes.length && colRes[0].values) {
+                    cols = colRes[0].values.map(c => c[2]);
+                }
+            } catch (e) {}
+            html += `<tr><td><b>${escapeHtml(name)}</b></td><td>${unique ? '✓ Yes' : 'No'}</td><td>${cols.map(c => `<span class="type-badge" style="background:#10b981;">${escapeHtml(c)}</span>`).join(' ')}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        content.innerHTML = html;
+    } catch (e) {
+        content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+// ✅ Show SQL CREATE statement
+function showTableSQL(tableName) {
+    const content = document.getElementById('tableViewerContent');
+    try {
+        const res = sqlDatabase.exec(`SELECT sql FROM sqlite_master WHERE name='${tableName.replace(/'/g, "''")}'`);
+        const createSQL = res[0]?.values[0]?.[0] || 'No SQL found';
+
+        let html = `
+            <div style="margin-bottom:12px;font-size:12px;color:#94a3b8;">
+                <b style="color:#3b82f6;">CREATE Statement</b>
+            </div>
+            <div class="sql-code-view">${escapeHtml(createSQL)}</div>
+            <div style="margin-top:15px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-secondary" onclick="copyTableSQL()"><i class="fas fa-copy"></i> Copy SQL</button>
+                <button class="btn-secondary" onclick="runTableSQL()"><i class="fas fa-play"></i> Re-Run</button>
+            </div>`;
+
+        content.innerHTML = html;
+        window._currentTableSQL = createSQL;
+    } catch (e) {
+        content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function copyTableSQL() {
+    if (window._currentTableSQL) {
+        navigator.clipboard.writeText(window._currentTableSQL).then(() => {
+            showToast('SQL copied!', 'success');
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = window._currentTableSQL;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            showToast('SQL copied!', 'success');
+        });
+    }
+}
+
+function runTableSQL() {
+    if (window._currentTableSQL) {
+        editorInstance.setValue(window._currentTableSQL);
+        closeModal('tableViewerModal');
+        switchTerminalTab('output', document.querySelector('.terminal-tab'));
+        setTimeout(() => runSQLDatabase(window._currentTableSQL), 300);
+    }
+}
+
+// ✅ CSV Upload — auto-create table
+async function uploadCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showToast('Parsing CSV...', 'info');
+
+    try {
+        const text = await file.text();
+        const rows = parseCSV(text);
+
+        if (rows.length < 2) {
+            showToast('CSV must have header + at least 1 data row', 'error');
+            event.target.value = '';
+            return;
+        }
+
+        const headers = rows[0].map(h => h.trim().replace(/[^\w]/g, '_').replace(/^(\d)/, '_$1') || 'col');
+        const dataRows = rows.slice(1);
+
+        // Infer column types
+        const colTypes = headers.map((_, colIdx) => {
+            let hasInt = false, hasFloat = false, hasText = false;
+            for (let i = 0; i < Math.min(dataRows.length, 100); i++) {
+                const val = dataRows[i][colIdx];
+                if (val === undefined || val === null || val === '') continue;
+                if (/^-?\d+$/.test(val)) hasInt = true;
+                else if (/^-?\d+\.\d+$/.test(val)) hasFloat = true;
+                else hasText = true;
+            }
+            if (hasText) return 'TEXT';
+            if (hasFloat) return 'REAL';
+            if (hasInt) return 'INTEGER';
+            return 'TEXT';
+        });
+
+        // Create table name from file
+        const tableName = file.name.replace(/\.[^.]+$/, '').replace(/[^\w]/g, '_').toLowerCase() || 'table_' + Date.now();
+
+        // Ensure unique name
+        let finalName = tableName;
+        let suffix = 1;
+        while (sqlDatabase && sqlDatabase.exec(`SELECT name FROM sqlite_master WHERE name='${finalName}'`)[0]?.values?.length > 0) {
+            finalName = tableName + '_' + suffix++;
+        }
+
+        // Create table
+        if (!sqlDatabase) {
+            if (!sqlReady) {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
+                    script.onload = resolve;
+                    if (typeof window.initSqlJs === 'undefined') document.head.appendChild(script);
+                    else resolve();
+                });
+                window._SQL = await window.initSqlJs({
+                    locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}`
+                });
+                sqlReady = true;
+            }
+            sqlDatabase = new window._SQL.Database();
+        }
+
+        const colDefs = headers.map((h, i) => `"${h}" ${colTypes[i]}`).join(', ');
+        sqlDatabase.run(`CREATE TABLE "${finalName}" (${colDefs})`);
+
+        // Insert rows (batch in transaction)
+        const placeholders = headers.map(() => '?').join(', ');
+        const insertSQL = `INSERT INTO "${finalName}" VALUES (${placeholders})`;
+        const stmt = sqlDatabase.prepare(insertSQL);
+
+        sqlDatabase.run('BEGIN TRANSACTION');
+        let inserted = 0;
+        dataRows.forEach(row => {
+            try {
+                const values = headers.map((_, i) => {
+                    let val = row[i];
+                    if (val === undefined || val === null || val === '') return null;
+                    if (colTypes[i] === 'INTEGER') { const n = parseInt(val); return isNaN(n) ? null : n; }
+                    if (colTypes[i] === 'REAL') { const n = parseFloat(val); return isNaN(n) ? null : n; }
+                    return String(val);
+                });
+                stmt.run(values);
+                inserted++;
+            } catch (e) { /* skip bad row */ }
+        });
+        stmt.free();
+        sqlDatabase.run('COMMIT');
+
+        showToast(`✓ ${inserted} rows imported into "${finalName}"`, 'success');
+
+        // Refresh UI
+        switchDBExplorer();
+        setTimeout(() => openTable(finalName), 400);
+
+    } catch (e) {
+        console.error(e);
+        showToast('CSV import failed: ' + e.message, 'error');
+    }
+
+    event.target.value = '';
+}
+
+// ✅ CSV Parser (handles quotes, commas, newlines)
+function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < text.length) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (inQuotes) {
+            if (ch === '"' && next === '"') { cell += '"'; i += 2; continue; }
+            if (ch === '"') { inQuotes = false; i++; continue; }
+            cell += ch;
+            i++;
+        } else {
+            if (ch === '"') { inQuotes = true; i++; continue; }
+            if (ch === ',') { row.push(cell.trim()); cell = ''; i++; continue; }
+            if (ch === '\r') { i++; continue; }
+            if (ch === '\n') { row.push(cell.trim()); rows.push(row); row = []; cell = ''; i++; continue; }
+            cell += ch;
+            i++;
+        }
+    }
+    if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+    return rows.filter(r => r.length > 0 && r.some(c => c));
+}
+
+// ✅ Prompt to create table
+function promptCreateTable() {
+    const name = prompt('New table name:');
+    if (!name) return;
+    const cleanName = name.trim().replace(/[^\w]/g, '_');
+    const sql = `CREATE TABLE "${cleanName}" (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    name TEXT NOT NULL,\n    created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n);`;
+    editorInstance.setValue(sql);
+    document.getElementById('langSelect').value = 'sql';
+    showToast('Table template ready — Run दबाओ', 'info');
+}
+
+// ✅ Prompt to run a query in terminal
+function promptRunQuery() {
+    const q = prompt('Enter SQL query:');
+    if (!q) return;
+    editorInstance.setValue(q);
+    document.getElementById('langSelect').value = 'sql';
+    switchTerminalTab('output', document.querySelector('.terminal-tab'));
+    setTimeout(() => runSQLDatabase(q), 200);
+}
+
+// ✅ Insert Row via modal
+function insertRowIntoTable() {
+    if (!currentViewedTable) return;
+    if (!sqlDatabase) return;
+
+    try {
+        const res = sqlDatabase.exec(`PRAGMA table_info("${currentViewedTable}")`);
+        if (!res.length) return showToast('Cannot read structure', 'error');
+        const columns = res[0].values;
+
+        // Build form
+        let html = `<div style="margin-bottom:10px;font-size:11px;color:#94a3b8;">Insert row into <b style="color:#3b82f6;">${escapeHtml(currentViewedTable)}</b></div>`;
+
+        columns.forEach(col => {
+            const [cid, name, type, notnull, dflt, pk] = col;
+            const isAuto = pk > 0 && (type || '').toUpperCase().includes('INTEGER');
+            html += `
+                <div class="form-group">
+                    <label>
+                        ${escapeHtml(name)}
+                        <span style="color:#8b5cf6;">${escapeHtml((type||'TEXT').toUpperCase())}</span>
+                        ${pk ? '<span class="pk-badge">PK</span>' : ''}
+                        ${notnull ? '<span class="nn-badge">NOT NULL</span>' : ''}
+                    </label>
+                    <input type="${isAuto ? 'text' : 'text'}"
+                           id="ins_${cid}"
+                           placeholder="${isAuto ? '(auto-generated)' : (dflt !== null ? 'default: ' + dflt : 'Enter value...')}"
+                           ${isAuto ? 'disabled style="opacity:0.5;"' : ''}>
+                </div>`;
+        });
+
+        document.getElementById('insertRowForm').innerHTML = html;
+        document.getElementById('insertRowTitle').innerHTML = `<i class="fas fa-plus"></i> Insert Row → ${escapeHtml(currentViewedTable)}`;
+        openModal('insertRowModal');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+function submitInsertRow() {
+    if (!sqlDatabase || !currentViewedTable) return;
+
+    try {
+        const res = sqlDatabase.exec(`PRAGMA table_info("${currentViewedTable}")`);
+        const columns = res[0].values;
+
+        const values = [];
+        const colNames = [];
+        const placeholders = [];
+
+        columns.forEach(col => {
+            const [cid, name, type, notnull, dflt, pk] = col;
+            const isAuto = pk > 0 && (type || '').toUpperCase().includes('INTEGER');
+            if (isAuto) return;
+
+            const input = document.getElementById('ins_' + cid);
+            if (!input) return;
+            let val = input.value.trim();
+
+            colNames.push(`"${name}"`);
+            placeholders.push('?');
+            if (val === '') values.push(null);
+            else if ((type || '').toUpperCase().includes('INT')) {
+                const n = parseInt(val);
+                values.push(isNaN(n) ? null : n);
+            } else if ((type || '').toUpperCase().includes('REAL') || (type || '').toUpperCase().includes('FLOA')) {
+                const n = parseFloat(val);
+                values.push(isNaN(n) ? null : n);
+            } else {
+                values.push(val);
+            }
+        });
+
+        if (colNames.length === 0) {
+            // Only auto columns
+            sqlDatabase.run(`INSERT INTO "${currentViewedTable}" DEFAULT VALUES`);
+        } else {
+            const sql = `INSERT INTO "${currentViewedTable}" (${colNames.join(',')}) VALUES (${placeholders.join(',')})`;
+            sqlDatabase.run(sql, values);
+        }
+
+        closeModal('insertRowModal');
+        showToast('✓ Row inserted!', 'success');
+
+        refreshSchemaTree();
+        if (document.querySelector('.table-viewer-tab.active')?.textContent?.includes('Data')) {
+            showTableData(currentViewedTable);
+        } else {
+            document.querySelector('.table-viewer-tab[onclick*="data"]')?.click();
+        }
+    } catch (e) {
+        showToast('Insert failed: ' + e.message, 'error');
+    }
+}
+
+// ✅ Export current table as CSV
+function exportCurrentTableCSV() {
+    if (!currentViewedTable || !sqlDatabase) return;
+
+    try {
+        const res = sqlDatabase.exec(`SELECT * FROM "${currentViewedTable}"`);
+        if (!res.length || !res[0].values) return showToast('Table is empty', 'warning');
+
+        const cols = res[0].columns;
+        const rows = res[0].values;
+
+        const csvEscape = (val) => {
+            if (val === null) return '';
+            const str = String(val);
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        };
+
+        let csv = cols.map(csvEscape).join(',') + '\n';
+        rows.forEach(r => { csv += r.map(csvEscape).join(',') + '\n'; });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = currentViewedTable + '_' + Date.now() + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('CSV exported!', 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+    /* ============================================================
    🗄️ PERSISTENT SQL DATABASE (sql.js) — Full CRUD Support
 ============================================================ */
 async function runSQLDatabase(code) {
@@ -3235,13 +4118,15 @@ async function runSQLDatabase(code) {
             ✓ ${successCount} success &nbsp;|&nbsp; ✗ ${errorCount} errors &nbsp;|&nbsp; ⏱️ ${elapsed}ms
         </div>`;
 
-        terminal.innerHTML = html;
+       terminal.innerHTML = html;
         terminal.scrollTop = terminal.scrollHeight;
+
+        // ✅ AUTO-REFRESH schema tree after execution
+        refreshSchemaTree();
 
         if (window.innerWidth <= 850) {
             document.getElementById('terminalDrawer').classList.add('active');
         }
-
     } catch (e) {
         console.error(e);
         terminal.innerHTML = `<span class="text-error">❌ SQL Error: ${escapeHtml(e.message)}</span>`;
@@ -3341,8 +4226,10 @@ function getTableCount() {
 function resetSQLDatabase() {
     if (!confirm('⚠️ Poora database delete ho jaayega. Continue?')) return;
     sqlDatabase = null;
+    currentViewedTable = null;
     const terminal = document.getElementById('terminalOutput');
     terminal.innerHTML = '<span class="text-success">✓ Database reset! नया DB बनाया जा सकता है।</span>';
+    refreshSchemaTree();
     showToast('Database reset', 'success');
 }
 
@@ -3554,6 +4441,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ✅ Init search worker
     initSearchWorker();
+        // ✅ Auto-refresh SQL schema when SQL language selected
+    document.getElementById('langSelect')?.addEventListener('change', function() {
+        if (this.value === 'sql') {
+            setTimeout(() => {
+                switchDBExplorer();
+            }, 300);
+        }
+    });
+
+    // ✅ Initial schema refresh
+    setTimeout(refreshSchemaTree, 500);
 
     // // ✅ Register Inline AI Copilot after editor ready
     // const waitEditor = setInterval(() => {
