@@ -1325,11 +1325,23 @@ function openModal(id) {
     if (id === 'themesModal') renderThemes();
     document.getElementById(id).classList.add('active');
 }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('active');
+    // ✅ Reset any inline styles we forced
+    modal.style.cssText = '';
+    const card = modal.querySelector('.modal');
+    if (card) card.style.cssText = '';
+}
 document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+    m.addEventListener('click', e => {
+        if (e.target === m) {
+            // ✅ Use closeModal instead of direct classList.remove
+            closeModal(m.id);
+        }
+    });
 });
-
 /* ============================================================
    MOBILE TOGGLES
 ============================================================ */
@@ -3688,39 +3700,89 @@ async function openTable(tableName, isView = false) {
         return;
     }
 
-    // ✅ STEP 3: Force-open the modal (safe way)
+    // ✅ STEP 3: Get modal element
     const modal = document.getElementById('tableViewerModal');
     if (!modal) {
-        showToast('Table viewer not found in DOM!', 'error');
+        showToast('Table viewer modal missing!', 'error');
         return;
     }
-    modal.classList.add('active');
-    // Force z-index in case of conflict
-    modal.style.zIndex = '10050';
 
-    // ✅ STEP 4: Set title
+    // ✅ STEP 4: FORCE OPEN with inline styles (bulletproof — bypasses ALL CSS conflicts)
+    modal.classList.add('active');
+    modal.style.cssText = [
+        'display: flex !important',
+        'position: fixed !important',
+        'top: 0 !important',
+        'left: 0 !important',
+        'right: 0 !important',
+        'bottom: 0 !important',
+        'width: 100vw !important',
+        'height: 100vh !important',
+        'z-index: 2147483646 !important',
+        'background: rgba(0, 0, 0, 0.88) !important',
+        'align-items: center !important',
+        'justify-content: center !important',
+        'padding: 15px !important',
+        'box-sizing: border-box !important',
+        'backdrop-filter: none !important',
+        '-webkit-backdrop-filter: none !important',
+        'overflow: auto !important'
+    ].join(';');
+
+    // ✅ STEP 5: Also style the inner modal card (bulletproof)
+    const card = modal.querySelector('.modal');
+    if (card) {
+        card.style.cssText = [
+            'background: #1e293b !important',
+            'color: #e2e8f0 !important',
+            'border-radius: 12px !important',
+            'width: 95vw !important',
+            'max-width: 1100px !important',
+            'height: 88vh !important',
+            'max-height: 88vh !important',
+            'display: flex !important',
+            'flex-direction: column !important',
+            'border: 1px solid #334155 !important',
+            'box-shadow: 0 20px 60px rgba(0,0,0,0.8) !important',
+            'overflow: hidden !important',
+            'position: relative !important'
+        ].join(';');
+    }
+
+    // ✅ STEP 6: Set title
     const titleEl = document.getElementById('tableViewerTitle');
     if (titleEl) {
         titleEl.innerHTML = `<i class="fas fa-${isView ? 'eye' : 'table'}"></i> ${escapeHtml(tableName)} <span style="color:#64748b;font-size:11px;margin-left:8px;">(${escapeHtml(activeDatabase)})</span>`;
     }
 
-    // ✅ STEP 5: Reset tabs — Data tab default
+    // ✅ STEP 7: Reset tabs — Data tab default
     document.querySelectorAll('.table-viewer-tab').forEach(t => t.classList.remove('active'));
     const dataTab = document.querySelector('.table-viewer-tab[onclick*="data"]');
     if (dataTab) dataTab.classList.add('active');
 
-    // ✅ STEP 6: Render data (with small delay to ensure modal is visible)
+    // ✅ STEP 8: Render data
     setTimeout(() => {
         try {
             showTableData(tableName);
         } catch (e) {
             console.error('showTableData failed:', e);
             const content = document.getElementById('tableViewerContent');
-            if (content) content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error loading data: ${escapeHtml(e.message)}</div>`;
+            if (content) content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error: ${escapeHtml(e.message)}</div>`;
         }
-    }, 100);
+    }, 50);
 
-    // ✅ STEP 7: Refresh sidebar to highlight active table
+    // ✅ STEP 9: Log verification
+    setTimeout(() => {
+        const computed = window.getComputedStyle(modal);
+        console.log('🔍 Modal verification:');
+        console.log('  display:', computed.display);
+        console.log('  z-index:', computed.zIndex);
+        console.log('  position:', computed.position);
+        console.log('  rect:', modal.getBoundingClientRect().width + 'x' + modal.getBoundingClientRect().height);
+        console.log('  visible?', computed.display !== 'none' && computed.visibility !== 'hidden');
+    }, 200);
+
+    // ✅ STEP 10: Refresh sidebar to highlight active table
     refreshSchemaTree();
 
     console.log('✅ Table viewer opened for:', tableName);
