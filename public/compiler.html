@@ -25,6 +25,9 @@
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/postcss.js"></script>
     <!-- ✅ New Features Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/html.js"></script>
 
 <!-- ✅ RequireJS LAST में load करो (ताकि UMD libraries पहले register हो चुकी हों) -->
@@ -41,6 +44,9 @@
 body.custom-bg { background-size: cover !important; background-position: center !important; }
 body.custom-bg .workspace, body.custom-bg .navbar, body.custom-bg .coding-controls, body.custom-bg .editor-box, body.custom-bg .terminal-output, body.custom-bg .file-explorer, body.custom-bg .status-bar { background: rgba(15, 23, 42, 0.7) !important; backdrop-filter: blur(10px); border-color: rgba(255,255,255,0.1); }
 body.custom-bg textarea { background: transparent !important; }
+.live-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; animation: pulse 1.5s infinite; display: none; z-index: 100; pointer-events: none; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.xterm-wrapper { padding: 10px; height: 100%; width: 100%; background: #000; display: none; }
 /* ============ GLOBAL ============ */
 * {
     margin: 0;
@@ -452,6 +458,9 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         <button class="icon-btn" onclick="exportCodeImage()" title="Export Code as Image"><i class="fas fa-camera-retro" style="color: #10b981;"></i></button>
 <button class="icon-btn" onclick="toggleCPTimer()" title="CP Contest Timer"><i class="fas fa-stopwatch" style="color: #f59e0b;"></i></button>
 <button class="icon-btn" onclick="openModal('bgModal')" title="Custom Background"><i class="fas fa-image" style="color: #ec4899;"></i></button>
+        <button class="icon-btn" onclick="openModal('liveShareModal')" title="Live Share Collaboration"><i class="fas fa-users" style="color: #06b6d4;"></i></button>
+<button class="icon-btn" onclick="openModal('githubModal')" title="Push to GitHub"><i class="fab fa-github" style="color: #f8fafc;"></i></button>
+<button class="icon-btn" onclick="generateEmbed()" title="Generate Iframe Embed"><i class="fas fa-code" style="color: #8b5cf6;"></i></button>
         <button class="icon-btn" onclick="openAIImageSolver()" title="AI Image Doubt Solver"><i class="fas fa-camera"></i></button>
         <button class="icon-btn" onclick="cloudSave()" title="Save to Cloud"><i class="fas fa-cloud-upload-alt"></i></button>
 <button class="icon-btn" onclick="cloudLoad()" title="Load from Cloud"><i class="fas fa-cloud-download-alt"></i></button>
@@ -559,7 +568,8 @@ select optgroup { background: #0f172a; color: #94a3b8; }
                 <button class="run-btn" id="runBtn" onclick="executeCode()"><i class="fas fa-play"></i> Run</button>
             </div>
         </div>
-        <div id="monacoEditor"></div>
+       <div id="monacoEditor"></div>
+        <div class="live-badge" id="liveBadge">🔴 LIVE SHARE ON</div>
     </div>
 
     <!-- SPLITTER -->
@@ -576,9 +586,10 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         </div>
         <div class="terminal-header">
             <div class="terminal-tabs">
-                <span class="terminal-tab active" onclick="switchTerminalTab('output', this)">Output</span>
-                <span class="terminal-tab" onclick="switchTerminalTab('problems', this)">Problems</span>
-            </div>
+            <span class="terminal-tab active" onclick="switchTerminalTab('output', this)">Output</span>
+            <span class="terminal-tab" onclick="switchTerminalTab('problems', this)">Problems</span>
+            <span class="terminal-tab" onclick="switchTerminalTab('shell', this)" style="color: #f59e0b;"><i class="fas fa-terminal"></i> Real Shell (Beta)</span>
+        </div>
             <div>
                 <i class="fas fa-trash" style="cursor:pointer;color:#ef4444;padding:4px;" title="Clear" onclick="clearTerminal()"></i>
             </div>
@@ -586,6 +597,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         <div class="terminal-output" id="terminalOutput"><span class="text-success">✨ CodeMaster Cloud Environment Started...</span>
 Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         </div>
+        <div class="xterm-wrapper" id="xtermContainer"></div>
     </div>
 </div>
 
@@ -630,6 +642,46 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
                 <button class="btn-secondary" onclick="removeCustomBg()" style="grid-column: span 2;">Remove Background</button>
             </div>
         </div>
+    </div>
+</div>
+    <!-- Live Share Modal -->
+<div class="modal-overlay" id="liveShareModal">
+    <div class="modal">
+        <div class="modal-header"><h3><i class="fas fa-users"></i> Live Collaboration</h3><span class="modal-close" onclick="closeModal('liveShareModal')">&times;</span></div>
+        <div class="modal-body">
+            <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Doston ke sath real-time me code karein.</p>
+            <div class="form-group"><label>Room ID</label><input type="text" id="liveRoomId" placeholder="e.g. room-123"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-danger" onclick="stopLiveShare()" id="stopLiveBtn" style="display:none;">Stop Sharing</button>
+            <button class="btn-primary" onclick="startLiveShare()">Join / Create Room</button>
+        </div>
+    </div>
+</div>
+
+<!-- GitHub Modal -->
+<div class="modal-overlay" id="githubModal">
+    <div class="modal">
+        <div class="modal-header"><h3><i class="fab fa-github"></i> Push to GitHub</h3><span class="modal-close" onclick="closeModal('githubModal')">&times;</span></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Personal Access Token (Saved locally)</label><input type="password" id="ghToken" placeholder="ghp_xxxxxxxx"></div>
+            <div class="form-group"><label>Repo Name</label><input type="text" id="ghRepo" placeholder="username/repo-name"></div>
+            <div class="form-group"><label>File Path</label><input type="text" id="ghFile" placeholder="main.py"></div>
+            <div class="form-group"><label>Commit Message</label><input type="text" id="ghMsg" placeholder="Update via CodeMaster"></div>
+        </div>
+        <div class="modal-footer"><button class="btn-primary" onclick="pushToGitHub()"><i class="fas fa-upload"></i> Push Code</button></div>
+    </div>
+</div>
+
+<!-- Embed Modal -->
+<div class="modal-overlay" id="embedModal">
+    <div class="modal">
+        <div class="modal-header"><h3><i class="fas fa-code"></i> Embed Iframe</h3><span class="modal-close" onclick="closeModal('embedModal')">&times;</span></div>
+        <div class="modal-body">
+            <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Is iframe tag ko apni website ya blog me copy-paste karein.</p>
+            <div class="form-group"><textarea id="embedTag" rows="3" readonly onclick="this.select()" style="font-family:monospace; color:#3b82f6;"></textarea></div>
+        </div>
+        <div class="modal-footer"><button class="btn-primary" onclick="copyEmbed()"><i class="fas fa-copy"></i> Copy Iframe</button></div>
     </div>
 </div>
 
@@ -2306,6 +2358,185 @@ function toggleVimMode() {
         btn.style.color = '#94a3b8';
         showToast('Vim Mode Disabled', 'warning');
     }
+}
+    /* ============================================================
+   🔥 NEW KILLER FEATURES LOGIC (Live Share, GitHub, Xterm, Embed)
+============================================================ */
+
+// 1. Live Share (Socket.io)
+let socket = null;
+let currentRoom = null;
+let isRemoteChange = false;
+
+function startLiveShare() {
+    const roomId = document.getElementById('liveRoomId').value.trim();
+    if (!roomId) return showToast('Enter Room ID!', 'warning');
+    
+    if (!socket) {
+        socket = io(location.origin);
+        socket.on('receive-code', (data) => {
+            isRemoteChange = true;
+            if(data.lang) document.getElementById('langSelect').value = data.lang;
+            if(editorInstance) editorInstance.setValue(data.code);
+            isRemoteChange = false;
+        });
+        socket.on('user-joined', (id) => showToast('A user joined the room!', 'success'));
+    }
+    
+    currentRoom = roomId;
+    socket.emit('join-room', roomId);
+    document.getElementById('liveBadge').style.display = 'block';
+    document.getElementById('stopLiveBtn').style.display = 'block';
+    closeModal('liveShareModal');
+    showToast(`Joined Room: ${roomId}`, 'success');
+}
+
+function stopLiveShare() {
+    if (socket) { socket.disconnect(); socket = null; }
+    currentRoom = null;
+    document.getElementById('liveBadge').style.display = 'none';
+    document.getElementById('stopLiveBtn').style.display = 'none';
+    closeModal('liveShareModal');
+    showToast('Live Share Stopped', 'info');
+}
+
+// Hook to Monaco Editor for Live Share
+setTimeout(() => {
+    if(editorInstance) {
+        editorInstance.onDidChangeModelContent(() => {
+            if(!isRemoteChange && currentRoom && socket) {
+                socket.emit('code-change', { 
+                    roomId: currentRoom, 
+                    code: editorInstance.getValue(), 
+                    lang: document.getElementById('langSelect').value 
+                });
+            }
+        });
+    }
+}, 2000);
+
+// 2. GitHub Push Integration
+// Load saved token/repo
+document.getElementById('ghToken').value = localStorage.getItem('cm_gh_token') || '';
+document.getElementById('ghRepo').value = localStorage.getItem('cm_gh_repo') || '';
+
+async function pushToGitHub() {
+    const token = document.getElementById('ghToken').value.trim();
+    const repo = document.getElementById('ghRepo').value.trim();
+    const filename = document.getElementById('ghFile').value.trim() || activeFile;
+    const message = document.getElementById('ghMsg').value.trim();
+    const code = editorInstance.getValue();
+
+    if (!token || !repo) return showToast('Token and Repo are required!', 'error');
+    
+    localStorage.setItem('cm_gh_token', token);
+    localStorage.setItem('cm_gh_repo', repo);
+    showToast('Pushing to GitHub...', 'info');
+
+    try {
+        const res = await fetch('/api/github/push', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, repo, filename, code, message })
+        });
+        const data = await res.json();
+        if (data.success) { showToast(data.message, 'success'); closeModal('githubModal'); }
+        else showToast(data.message, 'error');
+    } catch(e) { showToast('Network Error', 'error'); }
+}
+
+// 3. Real Terminal (Xterm.js)
+let xtermInst = null;
+let currentCmd = '';
+
+function switchTerminalTab(tab, el) {
+    document.querySelectorAll('.terminal-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    
+    const outputBox = document.getElementById('terminalOutput');
+    const xtermBox = document.getElementById('xtermContainer');
+    const inputArea = document.querySelector('.custom-input-area');
+
+    if (tab === 'shell') {
+        outputBox.style.display = 'none';
+        inputArea.style.display = 'none'; // Shell me stdin zarurat nahi
+        xtermBox.style.display = 'block';
+        if (!xtermInst) initXterm();
+        setTimeout(() => xtermInst.focus(), 100);
+    } else {
+        xtermBox.style.display = 'none';
+        outputBox.style.display = 'block';
+        inputArea.style.display = 'flex';
+        if (tab === 'problems') {
+            outputBox.innerHTML = '<span class="text-muted">No problems detected.</span>';
+        } else {
+            outputBox.innerHTML = '<span class="text-success">Ready to run code.</span>';
+        }
+    }
+}
+
+function initXterm() {
+    xtermInst = new Terminal({ theme: { background: '#000000', foreground: '#e2e8f0' }, cursorBlink: true, fontSize: 12, fontFamily: "'JetBrains Mono', monospace" });
+    xtermInst.open(document.getElementById('xtermContainer'));
+    xtermInst.write('\x1b[32mCodeMaster Pseudo Terminal\x1b[0m\r\n(Limited bash for security)\r\n\r\n$ ');
+    
+    xtermInst.onKey(async e => {
+        const ev = e.domEvent;
+        const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey;
+
+        if (ev.keyCode === 13) { // Enter
+            xtermInst.write('\r\n');
+            if(currentCmd.trim()) {
+                xtermInst.write('\x1b[33mRunning...\x1b[0m\r\n');
+                try {
+                    const res = await fetch('/api/terminal/run', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ command: currentCmd })
+                    });
+                    const data = await res.json();
+                    xtermInst.write((data.output || '').replace(/\n/g, '\r\n'));
+                } catch(e) { xtermInst.write('\x1b[31mError connecting to shell API\x1b[0m\r\n'); }
+            }
+            currentCmd = '';
+            xtermInst.write('\r\n$ ');
+        } else if (ev.keyCode === 8) { // Backspace
+            if (currentCmd.length > 0) {
+                xtermInst.write('\b \b');
+                currentCmd = currentCmd.slice(0, -1);
+            }
+        } else if (printable) {
+            xtermInst.write(e.key);
+            currentCmd += e.key;
+        }
+    });
+}
+
+// 4. Generate Embed Iframe
+async function generateEmbed() {
+    if (!editorInstance) return;
+    const code = editorInstance.getValue();
+    if(!code.trim()) return showToast('Code is empty!', 'warning');
+    
+    showToast('Generating Link...', 'info');
+    try {
+        const res = await fetch('/api/snippets', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ code, lang: document.getElementById('langSelect').value })
+        });
+        const data = await res.json();
+        if(data.success) {
+            const iframeTag = `<iframe src="${data.embedUrl}" width="100%" height="400" frameborder="0" style="border-radius:8px; border:1px solid #334155;"></iframe>`;
+            document.getElementById('embedTag').value = iframeTag;
+            openModal('embedModal');
+        } else showToast('Failed to generate embed', 'error');
+    } catch(e) { showToast('Network Error', 'error'); }
+}
+
+function copyEmbed() {
+    const el = document.getElementById('embedTag');
+    el.select();
+    try { document.execCommand('copy'); showToast('Iframe Copied!', 'success'); closeModal('embedModal'); } 
+    catch(e) { showToast('Copy failed', 'error'); }
 }
 
 /* ============================================================
