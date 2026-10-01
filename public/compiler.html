@@ -253,7 +253,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
 .splitter::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 1px; height: 30px; background: #64748b; }
 
 /* TERMINAL */
-.coding-right { width: 35%; display: flex; flex-direction: column; background: #000; flex-shrink: 0; min-width: 220px; }
+.coding-right { width: 35%; display: flex; flex-direction: column; background: #000; flex-shrink: 0; min-width: 220px; overflow: hidden; }
 .custom-input-area { height: 30%; border-bottom: 2px solid #334155; display: flex; flex-direction: column; flex-shrink: 0; }
 .custom-input-area textarea {
     flex-grow: 1;
@@ -280,14 +280,14 @@ select optgroup { background: #0f172a; color: #94a3b8; }
     flex-grow: 1; padding: 12px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px; color: #e2e8f0;
-    overflow-y: auto;
-    overflow-x: hidden;              /* ✅ Horizontal scroll हटाओ */
+    overflow: auto;                  /* ✅ Horizontal & Vertical Scroll Allow करो */
     white-space: pre-wrap;
     word-break: break-word;
     overflow-wrap: anywhere;         /* ✅ Long words भी wrap हों */
     background: #000;
     line-height: 1.6;
-    max-width: 100%;                 /* ✅ Parent से बाहर न निकले */
+    max-width: 100%;
+    width: 100%;                     /* ✅ बॉक्स के अंदर फिक्स रखो */
 }
 .text-success { color: #10b981; } .text-error { color: #ef4444; } .text-warning { color: #f59e0b; } .text-info { color: #3b82f6; } .text-muted { color: #64748b; } .text-purple { color: #8b5cf6; }
 .terminal-output pre {
@@ -2722,21 +2722,21 @@ async function startJarvis() {
 }
 
 // 4. Code to Flowchart (Mermaid.js)
-// 4. Code to Flowchart (Mermaid.js)
+// 4. Code to Flowchart (Mermaid Image Rendering - No Glitch)
 async function generateFlowchart() {
     const code = editorInstance.getValue();
     if(!code.trim()) return showToast('Write code first!', 'warning');
     
     openModal('flowchartModal');
-    document.getElementById('mermaidOutput').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and drawing flowchart...';
+    const outputDiv = document.getElementById('mermaidOutput');
+    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and generating flowchart image...';
 
-    // 🌟 STRICTER PROMPT: AI ko special characters use karne se rokne ke liye
-    const prompt = `Analyze this code and create a Mermaid.js flowchart (graph TD).
+    const prompt = `Analyze this code and generate a logic flowchart using Mermaid.js syntax.
 CRITICAL RULES:
-1. Use ONLY valid Mermaid syntax.
-2. Do NOT use quotes (" or ') inside node text.
-3. Do NOT use special characters like %, ==, <, > directly in node text (use words instead, e.g., 'Is num equal to 0?').
-4. Return ONLY raw mermaid code. No markdown formatting like \`\`\`mermaid.
+1. Start exactly with "graph TD".
+2. Do NOT use quotes, brackets [], {}, () inside node names. Just use plain text.
+3. Do NOT use special characters (<, >, =, %). Use words (e.g. 'equals', 'less than').
+4. ONLY output valid mermaid code. No explanations. No markdown block like \`\`\`mermaid.
 
 Code:
 ${code}`;
@@ -2747,18 +2747,22 @@ ${code}`;
         });
         const data = await res.json();
         
-        // Better cleanup for AI markdown wrapping
+        // Cleanup AI response
         let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
+        if (!mermaidCode.startsWith("graph")) {
+            mermaidCode = "graph TD\n" + mermaidCode;
+        }
         
-        // Render with unique ID to avoid caching issues
-        mermaid.initialize({ startOnLoad: false, theme: 'default' });
-        const uniqueId = 'mermaidGraph_' + Date.now();
-        const { svg } = await mermaid.render(uniqueId, mermaidCode);
+        // Encode logic for safe image generation
+        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
+        const imgUrl = `https://mermaid.ink/img/${encoded}`;
         
-        document.getElementById('mermaidOutput').innerHTML = svg;
+        // Show as Image (Will NEVER crash the browser)
+        outputDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; height:auto; border-radius:8px; background:white; padding:10px;" alt="Flowchart" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>AI generated invalid syntax. Please click Flowchart again.</span>';">`;
+        
     } catch(e) {
-        console.error("Mermaid Error: ", e);
-        document.getElementById('mermaidOutput').innerHTML = '<span style="color:red;">Syntax Error: AI generated invalid flowchart format. Please click the Flowchart button again!</span>';
+        console.error(e);
+        outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate flowchart.</span>';
     }
 }
 
