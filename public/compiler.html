@@ -593,6 +593,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
                 <button class="btn-secondary" id="vimToggleBtn" onclick="toggleVimMode()" title="Toggle Vim Mode"><i class="fab fa-viadeo"></i> <span>Vim: OFF</span></button>
                 <button class="btn-ai" onclick="startJarvis()" title="Jarvis Voice Coding" style="color:#ef4444; border-color:#ef4444;"><i class="fas fa-microphone"></i> <span>Jarvis</span></button>
 <button class="btn-ai" onclick="generateFlowchart()" title="Code to Flowchart" style="color:#06b6d4; border-color:#06b6d4;"><i class="fas fa-project-diagram"></i> <span>Flowchart</span></button>
+            <button class="btn-ai" onclick="generateERDiagram()" title="SQL to ER Diagram" style="color:#a855f7; border-color:#a855f7;"><i class="fas fa-database"></i> <span>ER Diagram</span></button>
 <button class="btn-secondary" onclick="openVisualDebugger()" title="Time Travel Debugger"><i class="fas fa-bug"></i> <span>Visual Debug</span></button>
 <button class="btn-secondary" onclick="runOfflineWASM()" title="Run Offline (Zero Cost)"><i class="fas fa-bolt" style="color:#eab308;"></i> <span>WASM Run</span></button>
 <button class="btn-secondary" onclick="togglePowerMode()" title="Power Mode"><i class="fas fa-fire" style="color:#f97316;"></i> <span>Power: OFF</span></button>
@@ -745,6 +746,15 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         <div class="modal-header"><h3><i class="fas fa-project-diagram"></i> Code Architecture</h3><span class="modal-close" onclick="closeModal('flowchartModal')">&times;</span></div>
         <div class="modal-body" style="background: white; text-align: center; overflow: auto; min-height:300px;">
             <div id="mermaidOutput" style="color: black;">Generating Flowchart...</div>
+        </div>
+    </div>
+</div>
+    <!-- ER Diagram Modal -->
+<div class="modal-overlay" id="erModal">
+    <div class="modal" style="max-width: 800px;">
+        <div class="modal-header"><h3><i class="fas fa-database"></i> SQL ER Diagram</h3><span class="modal-close" onclick="closeModal('erModal')">&times;</span></div>
+        <div class="modal-body" style="background: white; text-align: center; overflow: auto; min-height:300px;">
+            <div id="erOutput" style="color: black;">Generating ER Diagram...</div>
         </div>
     </div>
 </div>
@@ -2763,6 +2773,52 @@ ${code}`;
     } catch(e) {
         console.error(e);
         outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate flowchart.</span>';
+    }
+}
+    // 4.5 SQL to ER Diagram (Mermaid Image Rendering)
+async function generateERDiagram() {
+    const code = editorInstance.getValue();
+    const lang = document.getElementById('langSelect').value;
+
+    if(!code.trim()) return showToast('Write SQL code first!', 'warning');
+    if(lang !== 'sql') return showToast('Please select SQL language first!', 'error');
+    
+    openModal('erModal');
+    const outputDiv = document.getElementById('erOutput');
+    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing SQL tables and generating ER Diagram...';
+
+    const prompt = `Analyze this SQL code (CREATE TABLE statements, foreign keys, etc.) and generate an Entity-Relationship (ER) diagram using Mermaid.js syntax.
+CRITICAL RULES:
+1. Start exactly with "erDiagram".
+2. Define relationships properly (e.g., ||--o{, }|..|{ ).
+3. Do NOT use quotes, special characters, or markdown blocks like \`\`\`mermaid.
+4. ONLY output raw mermaid code. No explanations.
+
+SQL Code:
+${code}`;
+    
+    try {
+        const res = await fetch('/api/ask-ai', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt })
+        });
+        const data = await res.json();
+        
+        // Cleanup AI response
+        let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```sql/gi, '').replace(/```/g, '').trim();
+        if (!mermaidCode.startsWith("erDiagram")) {
+            mermaidCode = "erDiagram\n" + mermaidCode;
+        }
+        
+        // Encode logic for safe image generation
+        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
+        const imgUrl = `[https://mermaid.ink/img/$](https://mermaid.ink/img/$){encoded}`;
+        
+        // Show as Image
+        outputDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; height:auto; border-radius:8px; background:white; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);" alt="ER Diagram" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>AI failed to generate a valid ER Diagram. Check your SQL syntax and try again!</span>';">`;
+        
+    } catch(e) {
+        console.error(e);
+        outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate ER Diagram.</span>';
     }
 }
 
