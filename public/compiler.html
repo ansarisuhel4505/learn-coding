@@ -45,6 +45,22 @@
 .cp-time { font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #10b981; font-weight: bold; }
 .cp-controls button { background: transparent; border: 1px solid #64748b; color: #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
 .cp-controls button:hover { background: #334155; }
+.sql-hint-badge {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 999;
+    display: none;
+    box-shadow: 0 4px 15px rgba(139,92,246,0.4);
+    animation: fadeInOut 0.3s ease;
+}
+@keyframes fadeInOut { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 body.custom-bg { background-size: cover !important; background-position: center !important; }
 body.custom-bg .workspace, body.custom-bg .navbar, body.custom-bg .coding-controls, body.custom-bg .editor-box, body.custom-bg .terminal-output, body.custom-bg .file-explorer, body.custom-bg .status-bar { background: rgba(15, 23, 42, 0.7) !important; backdrop-filter: blur(10px); border-color: rgba(255,255,255,0.1); }
@@ -1034,6 +1050,7 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         </div>
     </div>
 </div>
+    <div class="sql-hint-badge" id="sqlHintBadge">🎯 Only selected query will run</div>
 
 <!-- ============ TOASTS ============ -->
 <div class="toast-container" id="toastContainer"></div>
@@ -1445,13 +1462,23 @@ require(['vs/editor/editor.main'], function() {
         document.getElementById('statusCursor').innerHTML = `<i class="fas fa-map-marker-alt"></i> Ln ${e.position.lineNumber}, Col ${e.position.column}`;
     });
 
-    editorInstance.onDidChangeCursorSelection(e => {
+      editorInstance.onDidChangeCursorSelection(e => {
         const sel = editorInstance.getModel().getValueInRange(e.selection);
         const el = document.getElementById('statusSel');
         if (sel.length > 0) { el.style.display = 'flex'; document.getElementById('selCount').textContent = sel.length; }
         else el.style.display = 'none';
-    });
 
+        // ✅ Show SQL hint when selection exists and lang is SQL
+        const hintBadge = document.getElementById('sqlHintBadge');
+        if (hintBadge) {
+            const lang = document.getElementById('langSelect')?.value;
+            if (lang === 'sql' && sel.trim().length > 0) {
+                hintBadge.style.display = 'block';
+            } else {
+                hintBadge.style.display = 'none';
+            }
+        }
+    });
     // Snippet providers
     monaco.languages.registerCompletionItemProvider('python', {
         provideCompletionItems: () => ({
@@ -2120,7 +2147,15 @@ document.addEventListener('keydown', e => {
     // Skip when typing in input/textarea outside Monaco
     const inInput = e.target.matches('input, textarea') && !e.target.closest('.monaco-editor');
 
-    if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); executeCode(); }
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        // ✅ SQL के लिए smart: selection है तो selected queries चलाओ
+        if (document.getElementById('langSelect').value === 'sql') {
+            runOfflineWASM();
+        } else {
+            executeCode();
+        }
+    }
     else if (e.ctrlKey && e.key === 's') { e.preventDefault(); formatCode(); setTimeout(downloadCurrentFile, 300); }
     else if (e.ctrlKey && e.key === 'k') { e.preventDefault(); clearTerminal(); }
     else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); formatCode(); }
@@ -2128,7 +2163,16 @@ document.addEventListener('keydown', e => {
     else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); toggleZenMode(); }
     else if (e.ctrlKey && e.key === 'p') { e.preventDefault(); openCommandPalette(); }
     else if (e.ctrlKey && (e.key === '=' || e.key === '+')) { e.preventDefault(); changeFontSize(1); }
-    else if (e.ctrlKey && e.key === '-') { e.preventDefault(); changeFontSize(-1); }
+       else if (e.ctrlKey && e.key === '-') { e.preventDefault(); changeFontSize(-1); }
+    else if (e.key === 'F5') {
+        // ✅ F5 = Smart Run (Selection-based for SQL)
+        e.preventDefault();
+        if (document.getElementById('langSelect').value === 'sql') {
+            runOfflineWASM();
+        } else {
+            executeCode();
+        }
+    }
     else if (e.key === 'Escape') {
         closeCommandPalette();
         document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
@@ -3212,25 +3256,38 @@ let sqlInstance = null;
 
 async function runOfflineWASM() {
     const lang = document.getElementById('langSelect').value;
-    const code = editorInstance.getValue();
+    let code = editorInstance.getValue();
     const terminal = document.getElementById('terminalOutput');
-    terminal.innerHTML = '<span class="text-warning">⚡ Initializing Offline WASM Engine...</span>\n';
-    
+
+    // ✅ SMART SELECTION: अगर user ने कुछ select किया है, तो सिर्फ वोही run करो
+    let isSelectionRun = false;
+    if (lang === 'sql') {
+        const selection = editorInstance.getModel().getValueInRange(editorInstance.getSelection());
+        if (selection && selection.trim().length > 0) {
+            code = selection;
+            isSelectionRun = true;
+            console.log('🎯 Running SELECTED SQL only');
+        } else {
+            console.log('📄 Running ALL SQL queries');
+        }
+    }
+
+    terminal.innerHTML = '<span class="text-warning">⚡ Initializing ' + (isSelectionRun ? 'Selected' : '') + ' ' + lang.toUpperCase() + ' Engine...</span>\n';
+
     if (window.innerWidth <= 850) document.getElementById('terminalDrawer').classList.add('active');
 
     try {
         if (lang === 'python3') {
             if (!pyodideInstance) {
                 pyodideInstance = await loadPyodide();
-                // Redirect python stdout to terminal
                 pyodideInstance.setStdout({ batched: (msg) => { terminal.innerHTML += escapeHtml(msg) + '\n'; }});
             }
             terminal.innerHTML = '<span class="text-success">🐍 Python Offline WASM Ready!</span>\n';
             await pyodideInstance.runPythonAsync(code);
             terminal.scrollTop = terminal.scrollHeight;
-        } 
-       else if (lang === 'sql') {
-            await runSQLDatabase(code);
+        }
+        else if (lang === 'sql') {
+            await runSQLDatabase(code, isSelectionRun);
         }
         else {
             showToast('WASM Offline Run only supports Python & SQL right now.', 'warning');
@@ -4020,7 +4077,7 @@ function exportCurrentTableCSV() {
     /* ============================================================
    🗄️ PERSISTENT SQL DATABASE (sql.js) — Full CRUD Support
 ============================================================ */
-async function runSQLDatabase(code) {
+async function runSQLDatabase(code, isSelectionRun = false) {
     const terminal = document.getElementById('terminalOutput');
     const startTime = Date.now();
 
@@ -4063,6 +4120,9 @@ async function runSQLDatabase(code) {
         let html = '<div style="padding:8px 12px; background:#1e293b; border-radius:6px; margin-bottom:10px; font-size:11px; color:#94a3b8;">';
         html += '<b style="color:#10b981;">🗄️ SQLite Persistent DB</b>';
         html += ' &nbsp;|&nbsp; Tables: <b style="color:#3b82f6;">' + getTableCount() + '</b>';
+        if (isSelectionRun) {
+            html += ' &nbsp;|&nbsp; <span style="background:#8b5cf6;color:#fff;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;">🎯 SELECTION MODE</span>';
+        }
         html += ' &nbsp;|&nbsp; <button onclick="resetSQLDatabase()" style="background:#ef4444;color:#fff;border:none;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;margin-left:6px;">🗑️ Reset DB</button>';
         html += '</div>';
 
