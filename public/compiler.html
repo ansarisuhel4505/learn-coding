@@ -28,6 +28,11 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+<!-- ✅ Ultra Advanced Features Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/html.js"></script>
 
 <!-- ✅ RequireJS LAST में load करो (ताकि UMD libraries पहले register हो चुकी हों) -->
@@ -47,6 +52,28 @@ body.custom-bg textarea { background: transparent !important; }
 .live-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; animation: pulse 1.5s infinite; display: none; z-index: 100; pointer-events: none; }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 .xterm-wrapper { padding: 10px; height: 100%; width: 100%; background: #000; display: none; }
+/* ============ ULTRA FEATURES CSS ============ */
+.power-mode-active { animation: shake 0.1s ease-in-out; }
+@keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 50% { transform: translate(-1px, -2px) rotate(-1deg); } 100% { transform: translate(0px, 0px) rotate(0deg); } }
+.spark { position: absolute; pointer-events: none; width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 10px #f59e0b; animation: sparkAnim 0.5s linear forwards; z-index: 9999; }
+@keyframes sparkAnim { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0) translateY(-50px) translateX(20px); } }
+
+.heatmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12px, 1px)); gap: 3px; max-height: 200px; overflow-x: auto; padding: 10px; }
+.heat-box { width: 12px; height: 12px; border-radius: 2px; background: #1e293b; }
+.heat-1 { background: #0e4429; } .heat-2 { background: #006d32; } .heat-3 { background: #26a641; } .heat-4 { background: #39d353; }
+
+.interviewer-panel { position: absolute; right: 0; top: 0; width: 350px; height: 100%; background: #0f172a; border-left: 2px solid #3b82f6; z-index: 100; display: none; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
+.chat-body { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+.chat-msg { padding: 8px 12px; border-radius: 8px; max-width: 85%; }
+.chat-ai { background: #1e293b; align-self: flex-start; color: #cbd5e1; border-left: 3px solid #3b82f6; }
+.chat-user { background: #3b82f6; align-self: flex-end; color: white; }
+.chat-input { display: flex; padding: 10px; background: #1e293b; }
+.chat-input input { flex-grow: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
+
+.db-table-wrapper { width: 100%; overflow: auto; background: #1e293b; border-radius: 5px; margin-top: 10px; }
+.db-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
+.db-table th { background: #3b82f6; color: white; padding: 6px; }
+.db-table td { padding: 6px; border: 1px solid #334155; color: #e2e8f0; }
 /* ============ GLOBAL ============ */
 * {
     margin: 0;
@@ -461,6 +488,8 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         <button class="icon-btn" onclick="openModal('liveShareModal')" title="Live Share Collaboration"><i class="fas fa-users" style="color: #06b6d4;"></i></button>
 <button class="icon-btn" onclick="openModal('githubModal')" title="Push to GitHub"><i class="fab fa-github" style="color: #f8fafc;"></i></button>
 <button class="icon-btn" onclick="generateEmbed()" title="Generate Iframe Embed"><i class="fas fa-code" style="color: #8b5cf6;"></i></button>
+        <button class="icon-btn" onclick="openModal('heatmapModal')" title="Activity Graph"><i class="fas fa-chart-bar" style="color: #10b981;"></i></button>
+<button class="icon-btn" onclick="toggleInterviewer()" title="AI Mock Interviewer"><i class="fas fa-user-tie" style="color: #f59e0b;"></i></button>
         <button class="icon-btn" onclick="openAIImageSolver()" title="AI Image Doubt Solver"><i class="fas fa-camera"></i></button>
         <button class="icon-btn" onclick="cloudSave()" title="Save to Cloud"><i class="fas fa-cloud-upload-alt"></i></button>
 <button class="icon-btn" onclick="cloudLoad()" title="Load from Cloud"><i class="fas fa-cloud-download-alt"></i></button>
@@ -496,6 +525,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
             </div>
         </div>
         <div class="cdn-panel hidden" id="cdnPanel">
+            <input type="text" id="npmSearch" placeholder="Search npm (e.g., gsap)" onkeyup="searchNPM(event)" style="background:#0f172a; border:1px solid #334155; color:white; padding:4px 8px; border-radius:4px; font-size:11px; outline:none;">
             <button class="btn-secondary" onclick="addCDN('tailwind')">+ Tailwind</button>
             <button class="btn-secondary" onclick="addCDN('bootstrap')">+ Bootstrap</button>
             <button class="btn-secondary" onclick="addCDN('jquery')">+ jQuery</button>
@@ -561,6 +591,11 @@ select optgroup { background: #0f172a; color: #94a3b8; }
                 <button class="btn-secondary" onclick="downloadCurrentFile()" title="Save (Ctrl+S)" style="color:#eab308;border-color:#eab308;"><i class="fas fa-download"></i> <span>Save</span></button>
                 <button class="btn-secondary" onclick="saveSnapshot()" title="Save Snapshot"><i class="fas fa-camera"></i> <span>Snap</span></button>
                 <button class="btn-secondary" id="vimToggleBtn" onclick="toggleVimMode()" title="Toggle Vim Mode"><i class="fab fa-viadeo"></i> <span>Vim: OFF</span></button>
+                <button class="btn-ai" onclick="startJarvis()" title="Jarvis Voice Coding" style="color:#ef4444; border-color:#ef4444;"><i class="fas fa-microphone"></i> <span>Jarvis</span></button>
+<button class="btn-ai" onclick="generateFlowchart()" title="Code to Flowchart" style="color:#06b6d4; border-color:#06b6d4;"><i class="fas fa-project-diagram"></i> <span>Flowchart</span></button>
+<button class="btn-secondary" onclick="openVisualDebugger()" title="Time Travel Debugger"><i class="fas fa-bug"></i> <span>Visual Debug</span></button>
+<button class="btn-secondary" onclick="runOfflineWASM()" title="Run Offline (Zero Cost)"><i class="fas fa-bolt" style="color:#eab308;"></i> <span>WASM Run</span></button>
+<button class="btn-secondary" onclick="togglePowerMode()" title="Power Mode"><i class="fas fa-fire" style="color:#f97316;"></i> <span>Power: OFF</span></button>
             </div>
             <div class="run-group">
                 <button class="terminal-btn" onclick="toggleMobileTerminal()"><i class="fas fa-terminal"></i></button>
@@ -652,8 +687,13 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
             <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Doston ke sath real-time me code karein.</p>
             <div class="form-group"><label>Room ID</label><input type="text" id="liveRoomId" placeholder="e.g. room-123"></div>
         </div>
-        <div class="modal-footer">
-            <button class="btn-danger" onclick="stopLiveShare()" id="stopLiveBtn" style="display:none;">Stop Sharing</button>
+        <div class="modal-footer" style="justify-content: space-between;">
+            <div id="voiceChatControls" style="display:none; align-items:center; gap:5px;">
+                <span style="font-size:10px; color:#10b981;">🟢 Audio Connected</span>
+                <audio id="remoteAudio" autoplay></audio>
+            </div>
+            <div>
+                <button class="btn-danger" onclick="stopLiveShare()" id="stopLiveBtn" style="display:none;">Stop Sharing</button>
             <button class="btn-primary" onclick="startLiveShare()">Join / Create Room</button>
         </div>
     </div>
@@ -682,6 +722,51 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
             <div class="form-group"><textarea id="embedTag" rows="3" readonly onclick="this.select()" style="font-family:monospace; color:#3b82f6;"></textarea></div>
         </div>
         <div class="modal-footer"><button class="btn-primary" onclick="copyEmbed()"><i class="fas fa-copy"></i> Copy Iframe</button></div>
+    </div>
+</div>
+    <!-- AI Interviewer Panel -->
+<div class="interviewer-panel" id="interviewerPanel">
+    <div class="modal-header" style="background:#1e293b;">
+        <h3><i class="fas fa-user-tie"></i> AI Interviewer</h3>
+        <span class="modal-close" onclick="toggleInterviewer()">&times;</span>
+    </div>
+    <div class="chat-body" id="interviewChat">
+        <div class="chat-msg chat-ai">Hello! I am your AI Interviewer. Start writing code and ask me to review your approach, or ask me for a DSA question!</div>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="interviewInput" placeholder="Ask something..." onkeypress="if(event.key==='Enter') sendInterviewMsg()">
+        <button class="icon-btn" onclick="sendInterviewMsg()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<!-- Flowchart Modal -->
+<div class="modal-overlay" id="flowchartModal">
+    <div class="modal" style="max-width: 800px;">
+        <div class="modal-header"><h3><i class="fas fa-project-diagram"></i> Code Architecture</h3><span class="modal-close" onclick="closeModal('flowchartModal')">&times;</span></div>
+        <div class="modal-body" style="background: white; text-align: center; overflow: auto; min-height:300px;">
+            <div id="mermaidOutput" style="color: black;">Generating Flowchart...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Visual Debugger Modal -->
+<div class="modal-overlay" id="debugModal">
+    <div class="modal" style="max-width: 900px; height: 90vh;">
+        <div class="modal-header"><h3><i class="fas fa-bug"></i> Visual Time-Travel Debugger</h3><span class="modal-close" onclick="closeModal('debugModal')">&times;</span></div>
+        <div class="modal-body" style="padding:0;">
+            <iframe id="pyTutorIframe" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Heatmap Modal -->
+<div class="modal-overlay" id="heatmapModal">
+    <div class="modal">
+        <div class="modal-header"><h3><i class="fas fa-chart-bar"></i> Coding Activity (Last 100 Runs)</h3><span class="modal-close" onclick="closeModal('heatmapModal')">&times;</span></div>
+        <div class="modal-body">
+            <div class="heatmap-grid" id="heatmapGrid"></div>
+            <p style="font-size:10px; color:#64748b; margin-top:10px; text-align:right;">Darker = More Code Executed</p>
+        </div>
     </div>
 </div>
 
@@ -2538,7 +2623,333 @@ function copyEmbed() {
     try { document.execCommand('copy'); showToast('Iframe Copied!', 'success'); closeModal('embedModal'); } 
     catch(e) { showToast('Copy failed', 'error'); }
 }
+/* ============================================================
+   🚀 GOD TIER FEATURES LOGIC (Jarvis, WASM, PeerJS, Heatmap, PowerMode, Interviewer)
+============================================================ */
 
+// 1. Heatmap / Activity Tracker
+function logActivity() {
+    let activity = JSON.parse(localStorage.getItem('cm_activity') || '{}');
+    let today = new Date().toISOString().split('T')[0];
+    activity[today] = (activity[today] || 0) + 1;
+    localStorage.setItem('cm_activity', JSON.stringify(activity));
+}
+
+function renderHeatmap() {
+    const grid = document.getElementById('heatmapGrid');
+    grid.innerHTML = '';
+    let activity = JSON.parse(localStorage.getItem('cm_activity') || '{}');
+    
+    // Generate last 100 days
+    for(let i = 100; i >= 0; i--) {
+        let d = new Date();
+        d.setDate(d.getDate() - i);
+        let dateStr = d.toISOString().split('T')[0];
+        let count = activity[dateStr] || 0;
+        let colorClass = count > 10 ? 'heat-4' : count > 5 ? 'heat-3' : count > 2 ? 'heat-2' : count > 0 ? 'heat-1' : '';
+        grid.innerHTML += `<div class="heat-box ${colorClass}" title="${dateStr}: ${count} runs"></div>`;
+    }
+}
+
+// Hook Heatmap to Run Button
+const originalExecute = executeCode;
+executeCode = async function() {
+    logActivity();
+    renderHeatmap();
+    await originalExecute();
+};
+
+// 2. Typing Power Mode (Combo & Sparks)
+let isPowerMode = false;
+function togglePowerMode() {
+    isPowerMode = !isPowerMode;
+    const btn = document.querySelector('[onclick="togglePowerMode()"]');
+    btn.innerHTML = isPowerMode ? '<i class="fas fa-fire"></i> <span>Power: ON</span>' : '<i class="fas fa-fire"></i> <span>Power: OFF</span>';
+    btn.style.color = isPowerMode ? '#ef4444' : '#f97316';
+    showToast(isPowerMode ? '🔥 Power Mode Activated!' : 'Power Mode Deactivated', 'info');
+}
+
+setTimeout(() => {
+    if(editorInstance) {
+        editorInstance.onKeyDown((e) => {
+            if(!isPowerMode) return;
+            // Shake Editor
+            const edNode = document.getElementById('monacoEditor');
+            edNode.classList.remove('power-mode-active');
+            void edNode.offsetWidth; // trigger reflow
+            edNode.classList.add('power-mode-active');
+
+            // Generate Spark Particle
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            // Random position near cursor (approximate)
+            spark.style.left = (Math.random() * window.innerWidth) + 'px';
+            spark.style.top = (Math.random() * (window.innerHeight / 2)) + 'px';
+            document.body.appendChild(spark);
+            setTimeout(() => spark.remove(), 500);
+        });
+    }
+}, 2500);
+
+// 3. Jarvis Voice Coding (Web Speech API + AI)
+let jarvisActive = false;
+async function startJarvis() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return showToast('Voice API not supported in your browser!', 'error');
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    showToast('🎤 Listening... Speak your code logic!', 'info');
+    
+    recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        showToast(`Jarvis heard: "${transcript}"`, 'success');
+        
+        // Send to Groq AI
+        document.getElementById('terminalOutput').innerHTML = '<span class="text-info"><i class="fas fa-brain fa-spin"></i> Jarvis is writing code...</span>\n';
+        if (window.innerWidth <= 850) document.getElementById('terminalDrawer').classList.add('active');
+        
+        const lang = document.getElementById('langSelect').value;
+        const prompt = `Convert this voice command to ${lang} code. Voice command: "${transcript}". Return ONLY the code inside a single markdown code block. No explanations.`;
+        
+        await callAI(prompt, true); // True means auto-insert into editor
+    };
+
+    recognition.onerror = (e) => showToast('Microphone Error: ' + e.error, 'error');
+    recognition.start();
+}
+
+// 4. Code to Flowchart (Mermaid.js)
+async function generateFlowchart() {
+    const code = editorInstance.getValue();
+    if(!code.trim()) return showToast('Write code first!', 'warning');
+    
+    openModal('flowchartModal');
+    document.getElementById('mermaidOutput').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and drawing flowchart...';
+
+    const prompt = `Read this code and generate a 'mermaid.js' flowchart (graph TD) that explains its logic step-by-step. Return ONLY the raw mermaid syntax, no markdown block, no explanations.\n\n${code}`;
+    
+    try {
+        const res = await fetch('/api/ask-ai', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt })
+        });
+        const data = await res.json();
+        let mermaidCode = data.reply.replace(/```mermaid/g, '').replace(/```/g, '').trim();
+        
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        const { svg } = await mermaid.render('mermaidGraph', mermaidCode);
+        document.getElementById('mermaidOutput').innerHTML = svg;
+    } catch(e) {
+        document.getElementById('mermaidOutput').innerHTML = '<span style="color:red;">Failed to generate flowchart.</span>';
+    }
+}
+
+// 5. Visual Time Travel Debugger (via PythonTutor Embed)
+function openVisualDebugger() {
+    const code = editorInstance.getValue();
+    const lang = document.getElementById('langSelect').value;
+    
+    let pyTutorLang = 'py3';
+    if(lang === 'java') pyTutorLang = 'java';
+    else if(lang === 'cpp17' || lang === 'c') pyTutorLang = 'cpp';
+    else if(lang === 'nodejs') pyTutorLang = 'js';
+
+    if(!['py3', 'java', 'cpp', 'js'].includes(pyTutorLang)) {
+        return showToast('Visual Debugger supports Python, Java, C++, JS only.', 'warning');
+    }
+
+    const encodedCode = encodeURIComponent(code);
+    const tutorUrl = `https://pythontutor.com/iframe-embed.html#code=${encodedCode}&cumulative=false&heapPrimitives=nevernest&mode=edit&origin=opt-frontend.js&py=${pyTutorLang}&rawInputLstJSON=%5B%5D&textReferences=false`;
+    
+    document.getElementById('pyTutorIframe').src = tutorUrl;
+    openModal('debugModal');
+}
+
+// 6. Offline WASM Compilers (Python & SQL)
+let pyodideInstance = null;
+let sqlInstance = null;
+
+async function runOfflineWASM() {
+    const lang = document.getElementById('langSelect').value;
+    const code = editorInstance.getValue();
+    const terminal = document.getElementById('terminalOutput');
+    terminal.innerHTML = '<span class="text-warning">⚡ Initializing Offline WASM Engine...</span>\n';
+    
+    if (window.innerWidth <= 850) document.getElementById('terminalDrawer').classList.add('active');
+
+    try {
+        if (lang === 'python3') {
+            if (!pyodideInstance) {
+                pyodideInstance = await loadPyodide();
+                // Redirect python stdout to terminal
+                pyodideInstance.setStdout({ batched: (msg) => { terminal.innerHTML += escapeHtml(msg) + '\n'; }});
+            }
+            terminal.innerHTML = '<span class="text-success">🐍 Python Offline WASM Ready!</span>\n';
+            await pyodideInstance.runPythonAsync(code);
+            terminal.scrollTop = terminal.scrollHeight;
+        } 
+        else if (lang === 'sql') {
+            if (!sqlInstance) {
+                const initSqlJsLib = window.initSqlJs;
+                sqlInstance = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+            }
+            terminal.innerHTML = '<span class="text-success">💾 SQL Offline WASM Ready!</span>\n';
+            
+            const db = new sqlInstance.Database();
+            const res = db.exec(code);
+            
+            if (res.length > 0) {
+                // Render Visual Database Explorer (HTML Table)
+                let tableHtml = '<div class="db-table-wrapper"><table class="db-table"><tr>';
+                res[0].columns.forEach(col => tableHtml += `<th>${col}</th>`);
+                tableHtml += '</tr>';
+                res[0].values.forEach(row => {
+                    tableHtml += '<tr>';
+                    row.forEach(val => tableHtml += `<td>${val}</td>`);
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</table></div>';
+                terminal.innerHTML += tableHtml;
+            } else {
+                terminal.innerHTML += '<span class="text-info">Query executed successfully (No output returned).</span>';
+            }
+        } 
+        else {
+            showToast('WASM Offline Run only supports Python & SQL right now.', 'warning');
+            terminal.innerHTML = '<span class="text-error">Unsupported language for offline execution. Use the main Run button.</span>';
+        }
+    } catch(e) {
+        terminal.innerHTML += `<span class="text-error">${escapeHtml(e.message)}</span>`;
+    }
+}
+
+// 7. Live Voice Chat Integration (PeerJS inside Live Share)
+let myPeer = null;
+let currentCall = null;
+
+// Replace original startLiveShare partially to init Voice
+const ogStartLiveShare = startLiveShare;
+startLiveShare = function() {
+    ogStartLiveShare(); // Run original logic
+    
+    // Init Voice Chat
+    if (!myPeer) {
+        myPeer = new Peer();
+        myPeer.on('open', id => console.log('My Peer ID:', id));
+        
+        myPeer.on('call', call => {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                call.answer(stream);
+                call.on('stream', remoteStream => {
+                    document.getElementById('remoteAudio').srcObject = remoteStream;
+                    document.getElementById('voiceChatControls').style.display = 'flex';
+                });
+            });
+            currentCall = call;
+        });
+
+        // Broadcast peer ID via Socket.io
+        setTimeout(() => {
+            if(socket && currentRoom) socket.emit('code-change', { roomId: currentRoom, peerIdToCall: myPeer.id });
+        }, 2000);
+    }
+};
+
+// Listen for remote PeerID on socket and make call
+setTimeout(() => {
+    if(typeof socket !== 'undefined' && socket) {
+        socket.on('receive-code', (data) => {
+            if(data.peerIdToCall && myPeer) {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                    const call = myPeer.call(data.peerIdToCall, stream);
+                    call.on('stream', remoteStream => {
+                        document.getElementById('remoteAudio').srcObject = remoteStream;
+                        document.getElementById('voiceChatControls').style.display = 'flex';
+                    });
+                    currentCall = call;
+                });
+            }
+        });
+    }
+}, 3000);
+
+// 8. AI Mock Interviewer Chat
+function toggleInterviewer() {
+    const panel = document.getElementById('interviewerPanel');
+    panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+}
+
+let interviewContext = [
+    { role: 'system', content: 'You are an expert strict Technical Interviewer from Google. Ask a DSA question, evaluate the code user writes, and ask cross questions about Time/Space complexity. Keep responses short and conversational.' }
+];
+
+async function sendInterviewMsg() {
+    const input = document.getElementById('interviewInput');
+    const msg = input.value.trim();
+    if(!msg) return;
+    
+    const chatBody = document.getElementById('interviewChat');
+    chatBody.innerHTML += `<div class="chat-msg chat-user">${escapeHtml(msg)}</div>`;
+    input.value = '';
+    
+    // Attach current code from editor for context
+    const currentCode = editorInstance.getValue();
+    const promptWithCode = `User says: "${msg}".\n\nCurrent Code in Editor:\n\`\`\`\n${currentCode}\n\`\`\``;
+    
+    interviewContext.push({ role: 'user', content: promptWithCode });
+    chatBody.innerHTML += `<div class="chat-msg chat-ai" id="aiTyping"><i class="fas fa-ellipsis-h fa-spin"></i> Typing...</div>`;
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer YOUR_GROQ_KEY_OR_BACKEND_API`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'openai/gpt-oss-120b', messages: interviewContext })
+        });
+        
+        // Note: For security, you should route this through your backend `/api/ask-ai` instead of raw fetch here.
+        // For frontend demo purposes, assuming backend `/api/ask-ai` can accept full message arrays if updated.
+        // Let's use your existing endpoint formatting:
+        
+        const myRes = await fetch('/api/ask-ai', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `Act as Interviewer: ${promptWithCode}` })
+        });
+        const data = await myRes.json();
+        
+        document.getElementById('aiTyping').remove();
+        chatBody.innerHTML += `<div class="chat-msg chat-ai">${marked.parse(data.reply)}</div>`;
+        interviewContext.push({ role: 'assistant', content: data.reply });
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+    } catch(e) {
+        document.getElementById('aiTyping').innerText = 'Network Error!';
+    }
+}
+
+// 9. NPM Package Manager (Web Mode CDNJS Search)
+async function searchNPM(e) {
+    const q = e.target.value.trim();
+    if(q.length < 3) return;
+    
+    // If Enter pressed, fetch from CDNJS
+    if(e.key === 'Enter') {
+        const res = await fetch(`https://api.cdnjs.com/libraries?search=${q}&limit=5`);
+        const data = await res.json();
+        if(data.results && data.results.length > 0) {
+            const bestUrl = data.results[0].latest;
+            const tag = bestUrl.endsWith('.css') ? `<link rel="stylesheet" href="${bestUrl}">` : `<script src="${bestUrl}"><\/script>`;
+            document.getElementById('htmlCode').value = tag + '\n' + document.getElementById('htmlCode').value;
+            compileWeb();
+            showToast(`Injected: ${data.results[0].name}`, 'success');
+            e.target.value = '';
+        } else {
+            showToast('Package not found', 'error');
+        }
+    }
+}
 /* ============================================================
    INIT
 ============================================================ */
