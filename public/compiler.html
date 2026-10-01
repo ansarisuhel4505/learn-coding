@@ -70,21 +70,26 @@ body.custom-bg textarea { background: transparent !important; }
 .chat-input { display: flex; padding: 10px; background: #1e293b; }
 .chat-input input { flex-grow: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
 /* ✅ Mermaid SVG Display Fix */
+/* ✅ Mermaid SVG Display Fix */
+#mermaidOutput,
+#erOutput {
+    width: 100% !important;
+    min-height: 400px !important;
+    display: block !important;
+}
+#mermaidOutput > div,
+#erOutput > div {
+    width: 100% !important;
+    min-height: 400px !important;
+    display: block !important;
+}
 #mermaidOutput svg,
 #erOutput svg {
     display: block !important;
     max-width: 100% !important;
     height: auto !important;
-    min-height: 250px !important;
     margin: 0 auto !important;
     background: white !important;
-}
-#mermaidOutput, #erOutput {
-    width: 100% !important;
-    min-height: 300px !important;
-}
-#mermaidOutput > div, #erOutput > div {
-    width: 100% !important;
 }
 .db-table-wrapper { width: 100%; overflow: auto; background: #1e293b; border-radius: 5px; margin-top: 10px; }
 .db-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
@@ -3155,83 +3160,125 @@ async function searchNPM(e) {
 async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
     outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin" style="font-size:22px;"></i><p style="margin-top:10px;">Rendering ' + diagramName + '...</p></div>';
 
-    // ✅ STEP 1: Try SVG render
-    const uniqueId = 'mermaid-' + Date.now();
-    let svgRendered = false;
+    // ✅ STEP 1: Force modal layout BEFORE creating SVG
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => setTimeout(r, 50));
 
+    // ✅ STEP 2: Create VISIBLE container with explicit size FIRST
+    const container = document.createElement('div');
+    container.style.cssText = 'width:100%; min-height:400px; background:#ffffff; padding:20px; border-radius:8px; overflow:auto; display:block;';
+    outputDiv.innerHTML = '';
+    outputDiv.appendChild(container);
+
+    // ✅ STEP 3: Try SVG render with proper sizing
+    const uniqueId = 'mermaid-' + Date.now();
     try {
         const result = await mermaid.render(uniqueId, mermaidCode);
-        const svg = result.svg;
+        container.innerHTML = result.svg;
 
-        // Create container with fixed size
-        const container = document.createElement('div');
-        container.style.cssText = 'width:100%; min-height:300px; background:white; padding:20px; border-radius:8px; overflow:auto; display:block;';
-
-        // Inject SVG
-        container.innerHTML = svg;
-
-        // Force explicit size on SVG
         const svgEl = container.querySelector('svg');
         if (svgEl) {
-            svgEl.style.display = 'block';
-            svgEl.style.margin = '0 auto';
-            svgEl.style.maxWidth = '100%';
-            svgEl.style.height = 'auto';
-            svgEl.style.minHeight = '250px';
+            // 🎯 THE CRITICAL FIX: Extract viewBox and set explicit width/height
+            const viewBox = svgEl.getAttribute('viewBox');
+            if (viewBox) {
+                const parts = viewBox.split(/[\s,]+/).filter(Boolean);
+                if (parts.length === 4) {
+                    const w = parseFloat(parts[2]);
+                    const h = parseFloat(parts[3]);
+                    if (w > 0 && h > 0) {
+                        svgEl.setAttribute('width', w);
+                        svgEl.setAttribute('height', h);
+                        svgEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+                        svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                        svgEl.style.maxWidth = '100%';
+                        svgEl.style.height = 'auto';
+                        svgEl.style.display = 'block';
+                        svgEl.style.margin = '0 auto';
+                        svgEl.style.background = 'white';
+                    }
+                }
+            }
+
+            // Remove any width/height=100% attributes that mermaid adds
+            if (svgEl.style.width === '100%') svgEl.style.width = '';
         }
 
-        outputDiv.innerHTML = '';
-        outputDiv.appendChild(container);
-
-        // ✅ Verify SVG has proper dimensions after rendering
-        await new Promise(r => setTimeout(r, 150));
+        // ✅ STEP 4: Verify dimensions after render
+        await new Promise(r => setTimeout(r, 200));
         if (svgEl) {
             const rect = svgEl.getBoundingClientRect();
-            console.log('📐 SVG dimensions:', rect.width + 'x' + rect.height);
-            if (rect.width > 20 && rect.height > 20) {
-                svgRendered = true;
+            console.log('📐 SVG dimensions:', Math.round(rect.width) + 'x' + Math.round(rect.height));
+            if (rect.width > 50 && rect.height > 50) {
+                showToast('✓ ' + diagramName + ' generated!', 'success');
+                console.log('✅ ' + diagramName + ' SVG rendered successfully');
+                return;
             }
         }
 
-        if (svgRendered) {
-            showToast('✓ ' + diagramName + ' generated!', 'success');
-            console.log('✅ ' + diagramName + ' SVG rendered successfully');
-            return; // Success - done!
-        }
-
-        console.warn('⚠️ SVG has 0 dimensions, falling back to image');
+        console.warn('⚠️ SVG too small, trying mermaid.ink fallback');
 
     } catch (renderErr) {
         console.error('Mermaid render error:', renderErr);
-        console.warn('⚠️ Falling back to mermaid.ink image');
     }
 
-    // ✅ STEP 2: Fallback — mermaid.ink image (always works)
+    // ✅ STEP 5: Fallback — mermaid.ink with URL-SAFE base64
     try {
-        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
-        const imgUrl = 'https://mermaid.ink/img/' + encoded + '?bgColor=FFFFFF&type=png';
+        // URL-safe base64: + → -, / → _, remove trailing =
+        const utf8Bytes = new TextEncoder().encode(mermaidCode);
+        let binStr = '';
+        for (let i = 0; i < utf8Bytes.length; i++) {
+            binStr += String.fromCharCode(utf8Bytes[i]);
+        }
+        const b64 = btoa(binStr)
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
 
-        outputDiv.innerHTML =
-            '<div style="padding:20px; text-align:center; background:white; border-radius:8px;">' +
-            '<p style="color:#10b981; margin-bottom:10px; font-size:12px;"><i class="fas fa-check-circle"></i> ' + diagramName + ' (image mode)</p>' +
-            '<img src="' + imgUrl + '" ' +
-                'style="max-width:100%; height:auto; min-height:250px; display:block; margin:0 auto;" ' +
-                'alt="' + diagramName + '" ' +
-                'onerror="this.parentElement.innerHTML=\'<div style=&quot;color:#ef4444;padding:20px;&quot;><h4>⚠️ Both SVG and image failed</h4><pre style=&quot;text-align:left;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;overflow:auto;font-size:11px;max-height:300px;&quot;>' + escapeHtml(mermaidCode).replace(/'/g, '&#39;').replace(/"/g, '&quot;') + '</pre></div>\';">' +
-            '</div>';
+        const imgUrl = 'https://mermaid.ink/img/' + b64 + '?bgColor=FFFFFF';
 
-        console.log('📷 ' + diagramName + ' rendered via mermaid.ink');
-        showToast('✓ ' + diagramName + ' generated (image)', 'success');
+        console.log('📷 Trying mermaid.ink:', imgUrl.substring(0, 100) + '...');
 
-    } catch (imgErr) {
-        console.error('Image fallback failed:', imgErr);
-        outputDiv.innerHTML =
-            '<div style="color:#ef4444; padding:20px;">' +
-            '<h4>⚠️ Render Failed</h4>' +
-            '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
+        // Load image and verify it works
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+
+        const imageLoaded = new Promise((resolve) => {
+            img.onload = () => {
+                console.log('✅ mermaid.ink image loaded:', img.naturalWidth + 'x' + img.naturalHeight);
+                resolve(true);
+            };
+            img.onerror = () => {
+                console.error('❌ mermaid.ink image failed to load');
+                resolve(false);
+            };
+            setTimeout(() => resolve(false), 10000); // 10s timeout
+        });
+
+        img.src = imgUrl;
+        img.style.cssText = 'max-width:100%; height:auto; display:block; margin:0 auto; background:white;';
+
+        const success = await imageLoaded;
+
+        if (success) {
+            container.innerHTML = '';
+            container.appendChild(img);
+            showToast('✓ ' + diagramName + ' generated!', 'success');
+            return;
+        }
+
+        // ✅ STEP 6: Both failed — show raw code
+        throw new Error('Both SVG and image failed');
+
+    } catch (fallbackErr) {
+        console.error('All render methods failed:', fallbackErr);
+        container.innerHTML =
+            '<div style="color:#ef4444; padding:20px; text-align:left;">' +
+            '<h4>⚠️ ' + diagramName + ' could not be rendered</h4>' +
+            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">यह Mermaid code generate हुआ था (copy करके <a href="https://mermaid.live" target="_blank" style="color:#3b82f6;">mermaid.live</a> पर paste करके देख सकते हो):</p>' +
+            '<pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:400px; white-space:pre-wrap;">' +
             escapeHtml(mermaidCode) +
             '</pre>' +
-            '<button onclick="generateFlowchart()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
+            '<button onclick="' + (diagramName.includes('ER') ? 'generateERDiagram()' : 'generateFlowchart()') + '" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
             '</div>';
     }
 }
