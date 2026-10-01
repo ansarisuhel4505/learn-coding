@@ -645,6 +645,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
             <span class="terminal-tab active" onclick="switchTerminalTab('output', this)">Output</span>
             <span class="terminal-tab" onclick="switchTerminalTab('problems', this)">Problems</span>
             <span class="terminal-tab" onclick="switchTerminalTab('shell', this)" style="color: #f59e0b;"><i class="fas fa-terminal"></i> Real Shell (Beta)</span>
+            <span class="terminal-tab" onclick="exportSQLDatabase()" style="color: #10b981;" title="Export SQLite DB"><i class="fas fa-download"></i> Export DB</span>
         </div>
             <div>
                 <i class="fas fa-trash" style="cursor:pointer;color:#ef4444;padding:4px;" title="Clear" onclick="clearTerminal()"></i>
@@ -954,6 +955,10 @@ let aiInputAction = null;
 let zenMode = false;
 let lastRunTime = 0;
 let pwaInstallEvent = null;
+// ✅ Persistent SQL Database
+let sqlDatabase = null;        // sql.js Database instance (reuse होगा)
+let sqlReady = false;           // library loaded flag
+let sqlLastResult = null;       // last query result
 // ✅ Mermaid setup — सिर्फ एक बार
 
 let mermaidReady = false;
@@ -2992,32 +2997,9 @@ async function runOfflineWASM() {
             await pyodideInstance.runPythonAsync(code);
             terminal.scrollTop = terminal.scrollHeight;
         } 
-        else if (lang === 'sql') {
-            if (!sqlInstance) {
-                const initSqlJsLib = window.initSqlJs;
-                sqlInstance = await initSqlJsLib({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-            }
-            terminal.innerHTML = '<span class="text-success">💾 SQL Offline WASM Ready!</span>\n';
-            
-            const db = new sqlInstance.Database();
-            const res = db.exec(code);
-            
-            if (res.length > 0) {
-                // Render Visual Database Explorer (HTML Table)
-                let tableHtml = '<div class="db-table-wrapper"><table class="db-table"><tr>';
-                res[0].columns.forEach(col => tableHtml += `<th>${col}</th>`);
-                tableHtml += '</tr>';
-                res[0].values.forEach(row => {
-                    tableHtml += '<tr>';
-                    row.forEach(val => tableHtml += `<td>${val}</td>`);
-                    tableHtml += '</tr>';
-                });
-                tableHtml += '</table></div>';
-                terminal.innerHTML += tableHtml;
-            } else {
-                terminal.innerHTML += '<span class="text-info">Query executed successfully (No output returned).</span>';
-            }
-        } 
+       else if (lang === 'sql') {
+            await runSQLDatabase(code);
+        }
         else {
             showToast('WASM Offline Run only supports Python & SQL right now.', 'warning');
             terminal.innerHTML = '<span class="text-error">Unsupported language for offline execution. Use the main Run button.</span>';
@@ -3150,6 +3132,235 @@ async function searchNPM(e) {
         } else {
             showToast('Package not found', 'error');
         }
+    }
+}
+    /* ============================================================
+   🗄️ PERSISTENT SQL DATABASE (sql.js) — Full CRUD Support
+============================================================ */
+async function runSQLDatabase(code) {
+    const terminal = document.getElementById('terminalOutput');
+    const startTime = Date.now();
+
+    try {
+        // ✅ STEP 1: Load sql.js library (only once)
+        if (!sqlReady) {
+            terminal.innerHTML = '<span class="text-warning">⚡ Loading SQL Engine (SQLite WASM)...</span>\n';
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Failed to load sql.js'));
+                if (typeof window.initSqlJs === 'undefined') document.head.appendChild(script);
+                else resolve();
+            });
+
+            const SQL = await window.initSqlJs({
+                locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+            });
+            window._SQL = SQL;
+            sqlReady = true;
+        }
+
+        // ✅ STEP 2: Create persistent database (ONLY ONCE)
+        if (!sqlDatabase) {
+            sqlDatabase = new window._SQL.Database();
+            console.log('✅ New SQLite database created');
+        }
+
+        // ✅ STEP 3: Split code into individual statements
+        // Remove comments and split on ; (respecting quotes)
+        const statements = splitSQLStatements(code);
+
+        if (statements.length === 0) {
+            terminal.innerHTML = '<span class="text-info">ℹ️ No SQL statements to execute.</span>';
+            return;
+        }
+
+        // ✅ STEP 4: Execute each statement
+        let html = '<div style="padding:8px 12px; background:#1e293b; border-radius:6px; margin-bottom:10px; font-size:11px; color:#94a3b8;">';
+        html += '<b style="color:#10b981;">🗄️ SQLite Persistent DB</b>';
+        html += ' &nbsp;|&nbsp; Tables: <b style="color:#3b82f6;">' + getTableCount() + '</b>';
+        html += ' &nbsp;|&nbsp; <button onclick="resetSQLDatabase()" style="background:#ef4444;color:#fff;border:none;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;margin-left:6px;">🗑️ Reset DB</button>';
+        html += '</div>';
+
+        let successCount = 0;
+        let errorCount = 0;
+        let resultsHtml = '';
+
+        for (let i = 0; i < statements.length; i++) {
+            const stmt = statements[i].trim();
+            if (!stmt) continue;
+
+            try {
+                const res = sqlDatabase.exec(stmt);
+                successCount++;
+
+                const shortStmt = stmt.length > 80 ? stmt.substring(0, 80) + '...' : stmt;
+                const isRead = /^\s*(SELECT|PRAGMA|WITH)/i.test(stmt);
+
+                if (res.length > 0 && res[0].values && res[0].values.length > 0) {
+                    // ✅ SELECT query - show table
+                    resultsHtml += `
+                        <div style="margin:8px 0;">
+                            <div style="background:#1e293b;color:#3b82f6;padding:4px 8px;border-radius:4px 4px 0 0;font-size:10px;">
+                                <b>Query ${i + 1}:</b> ${escapeHtml(shortStmt)}
+                            </div>
+                            ${renderSQLResultTable(res[0])}
+                        </div>`;
+                } else if (isRead) {
+                    resultsHtml += `
+                        <div style="margin:8px 0; padding:6px 10px; background:#1e293b; border-radius:4px; font-size:11px;">
+                            <span style="color:#3b82f6;">Query ${i + 1}:</span> ${escapeHtml(shortStmt)}
+                            <br><span style="color:#94a3b8;">→ No rows returned</span>
+                        </div>`;
+                } else {
+                    resultsHtml += `
+                        <div style="margin:6px 0; padding:6px 10px; background:#0e4429; border-left:3px solid #10b981; border-radius:4px; font-size:11px;">
+                            <span style="color:#10b981;">✓ Query ${i + 1}:</span> ${escapeHtml(shortStmt)}
+                        </div>`;
+                }
+            } catch (stmtErr) {
+                errorCount++;
+                resultsHtml += `
+                    <div style="margin:6px 0; padding:6px 10px; background:#7f1d1d; border-left:3px solid #ef4444; border-radius:4px; font-size:11px;">
+                        <b style="color:#fca5a5;">✗ Query ${i + 1} Error:</b> ${escapeHtml(stmtErr.message)}
+                        <div style="color:#94a3b8;margin-top:3px;font-size:10px;">${escapeHtml(stmt.substring(0, 150))}</div>
+                    </div>`;
+            }
+        }
+
+        const elapsed = Date.now() - startTime;
+        html += resultsHtml;
+        html += `<div style="margin-top:10px;padding:6px 10px;background:#1e293b;border-radius:4px;font-size:10px;color:#64748b;">
+            ✓ ${successCount} success &nbsp;|&nbsp; ✗ ${errorCount} errors &nbsp;|&nbsp; ⏱️ ${elapsed}ms
+        </div>`;
+
+        terminal.innerHTML = html;
+        terminal.scrollTop = terminal.scrollHeight;
+
+        if (window.innerWidth <= 850) {
+            document.getElementById('terminalDrawer').classList.add('active');
+        }
+
+    } catch (e) {
+        console.error(e);
+        terminal.innerHTML = `<span class="text-error">❌ SQL Error: ${escapeHtml(e.message)}</span>`;
+    }
+}
+
+/* ✅ SQL statement splitter - respects quotes and comments */
+function splitSQLStatements(code) {
+    const statements = [];
+    let current = '';
+    let inString = false;
+    let stringChar = '';
+    let inLineComment = false;
+    let inBlockComment = false;
+
+    for (let i = 0; i < code.length; i++) {
+        const ch = code[i];
+        const next = code[i + 1];
+
+        // Handle comments
+        if (!inString && !inBlockComment && ch === '-' && next === '-') {
+            inLineComment = true;
+            i++;
+            continue;
+        }
+        if (inLineComment && ch === '\n') {
+            inLineComment = false;
+            current += ch;
+            continue;
+        }
+        if (!inString && !inLineComment && ch === '/' && next === '*') {
+            inBlockComment = true;
+            i++;
+            continue;
+        }
+        if (inBlockComment && ch === '*' && next === '/') {
+            inBlockComment = false;
+            i++;
+            continue;
+        }
+        if (inLineComment || inBlockComment) continue;
+
+        // Handle strings
+        if (!inString && (ch === "'" || ch === '"' || ch === '`')) {
+            inString = true;
+            stringChar = ch;
+            current += ch;
+        } else if (inString && ch === stringChar && code[i - 1] !== '\\') {
+            inString = false;
+            current += ch;
+        } else if (!inString && ch === ';') {
+            if (current.trim()) statements.push(current.trim());
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    if (current.trim()) statements.push(current.trim());
+    return statements;
+}
+
+/* ✅ Render SQL result as HTML table */
+function renderSQLResultTable(result) {
+    if (!result.columns || !result.values) return '';
+    let html = '<div class="db-table-wrapper" style="max-height:400px;"><table class="db-table"><thead><tr>';
+    result.columns.forEach(col => {
+        html += `<th>${escapeHtml(String(col))}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    if (result.values.length === 0) {
+        html += `<tr><td colspan="${result.columns.length}" style="text-align:center;color:#64748b;padding:12px;">(0 rows)</td></tr>`;
+    } else {
+        result.values.forEach(row => {
+            html += '<tr>';
+            row.forEach(val => {
+                const display = val === null ? '<i style="color:#64748b;">NULL</i>' : escapeHtml(String(val));
+                html += `<td>${display}</td>`;
+            });
+            html += '</tr>';
+        });
+    }
+    html += '</tbody></table></div>';
+    html += `<div style="padding:4px 8px;font-size:10px;color:#64748b;background:#0f172a;border-radius:0 0 4px 4px;">${result.values.length} row(s)</div>`;
+    return html;
+}
+
+/* ✅ Count tables in DB */
+function getTableCount() {
+    if (!sqlDatabase) return 0;
+    try {
+        const res = sqlDatabase.exec("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+        return res[0]?.values[0]?.[0] || 0;
+    } catch (e) { return 0; }
+}
+
+/* ✅ Reset database */
+function resetSQLDatabase() {
+    if (!confirm('⚠️ Poora database delete ho jaayega. Continue?')) return;
+    sqlDatabase = null;
+    const terminal = document.getElementById('terminalOutput');
+    terminal.innerHTML = '<span class="text-success">✓ Database reset! नया DB बनाया जा सकता है।</span>';
+    showToast('Database reset', 'success');
+}
+
+/* ✅ Export database as .sql file (bonus feature) */
+function exportSQLDatabase() {
+    if (!sqlDatabase) return showToast('No database to export', 'warning');
+    try {
+        const binary = sqlDatabase.export();
+        const blob = new Blob([binary], { type: 'application/x-sqlite3' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'codemaster_db_' + Date.now() + '.sqlite';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Database exported!', 'success');
+    } catch (e) {
+        showToast('Export failed: ' + e.message, 'error');
     }
 }
    /* ============================================================
