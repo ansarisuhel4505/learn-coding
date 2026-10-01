@@ -2722,6 +2722,7 @@ async function startJarvis() {
 }
 
 // 4. Code to Flowchart (Mermaid.js)
+// 4. Code to Flowchart (Mermaid.js)
 async function generateFlowchart() {
     const code = editorInstance.getValue();
     if(!code.trim()) return showToast('Write code first!', 'warning');
@@ -2729,20 +2730,35 @@ async function generateFlowchart() {
     openModal('flowchartModal');
     document.getElementById('mermaidOutput').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and drawing flowchart...';
 
-    const prompt = `Read this code and generate a 'mermaid.js' flowchart (graph TD) that explains its logic step-by-step. Return ONLY the raw mermaid syntax, no markdown block, no explanations.\n\n${code}`;
+    // 🌟 STRICTER PROMPT: AI ko special characters use karne se rokne ke liye
+    const prompt = `Analyze this code and create a Mermaid.js flowchart (graph TD).
+CRITICAL RULES:
+1. Use ONLY valid Mermaid syntax.
+2. Do NOT use quotes (" or ') inside node text.
+3. Do NOT use special characters like %, ==, <, > directly in node text (use words instead, e.g., 'Is num equal to 0?').
+4. Return ONLY raw mermaid code. No markdown formatting like \`\`\`mermaid.
+
+Code:
+${code}`;
     
     try {
         const res = await fetch('/api/ask-ai', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: prompt })
         });
         const data = await res.json();
-        let mermaidCode = data.reply.replace(/```mermaid/g, '').replace(/```/g, '').trim();
         
+        // Better cleanup for AI markdown wrapping
+        let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
+        
+        // Render with unique ID to avoid caching issues
         mermaid.initialize({ startOnLoad: false, theme: 'default' });
-        const { svg } = await mermaid.render('mermaidGraph', mermaidCode);
+        const uniqueId = 'mermaidGraph_' + Date.now();
+        const { svg } = await mermaid.render(uniqueId, mermaidCode);
+        
         document.getElementById('mermaidOutput').innerHTML = svg;
     } catch(e) {
-        document.getElementById('mermaidOutput').innerHTML = '<span style="color:red;">Failed to generate flowchart.</span>';
+        console.error("Mermaid Error: ", e);
+        document.getElementById('mermaidOutput').innerHTML = '<span style="color:red;">Syntax Error: AI generated invalid flowchart format. Please click the Flowchart button again!</span>';
     }
 }
 
