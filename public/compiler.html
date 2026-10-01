@@ -783,7 +783,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         <!-- ✅ SQL DATABASE EXPLORER -->
         <div id="dbPanel" class="hidden" style="display:flex;flex-direction:column;flex-grow:1;min-height:0;">
             <div class="explorer-header">
-                <span><i class="fas fa-database"></i> DATABASE</span>
+                <span><i class="fas fa-database"></i> <span id="activeDbLabel">main</span></span>
                 <div class="explorer-actions">
                     <i class="fas fa-sync-alt" onclick="refreshSchemaTree()" title="Refresh"></i>
                     <i class="fas fa-file-csv" onclick="document.getElementById('csvUpload').click()" title="Import CSV"></i>
@@ -1204,10 +1204,30 @@ let aiInputAction = null;
 let zenMode = false;
 let lastRunTime = 0;
 let pwaInstallEvent = null;
-// ✅ Persistent SQL Database
-let sqlDatabase = null;        // sql.js Database instance (reuse होगा)
-let sqlReady = false;           // library loaded flag
-let sqlLastResult = null;       // last query result
+// ✅ MySQL-like Multi-Database Support
+let sqlDatabases = {};              // { 'main': Database, 'test': Database }
+let activeDatabase = 'main';        // Currently selected database
+let sqlDatabase = null;             // Points to active db (compatibility)
+let sqlReady = false;
+let sqlLastResult = null;
+
+// Getter for active database
+function getActiveDB() {
+    return sqlDatabases[activeDatabase] || null;
+}
+
+// Switch active database
+function setActiveDatabase(name) {
+    if (!sqlDatabases[name]) return false;
+    activeDatabase = name;
+    sqlDatabase = sqlDatabases[name];
+    // Update status bar
+    const el = document.getElementById('statusFile');
+    if (el && document.getElementById('langSelect')?.value === 'sql') {
+        el.innerHTML = `<i class="fas fa-database"></i> ${name}`;
+    }
+    return true;
+}      
 // ✅ Mermaid setup — सिर्फ एक बार
 
 let mermaidReady = false;
@@ -1666,7 +1686,12 @@ function switchExplorerTab(tab, el) {
     el.classList.add('active');
     document.getElementById('filesPanel').classList.toggle('hidden', tab !== 'files');
     document.getElementById('searchPanel').classList.toggle('hidden', tab !== 'search');
+    const dbPanel = document.getElementById('dbPanel');
+    if (dbPanel) dbPanel.classList.toggle('hidden', tab !== 'db');
+
     if (tab === 'search') setTimeout(() => document.getElementById('searchInput').focus(), 100);
+    // ✅ DB tab खुलते ही schema refresh
+    if (tab === 'db') setTimeout(refreshSchemaTree, 50);
 }
 
 function searchInFiles() {
@@ -3444,82 +3469,156 @@ function refreshSchemaTree() {
     const tree = document.getElementById('schemaTree');
     if (!tree) return;
 
-    if (!sqlDatabase) {
+    // ✅ Update sidebar header with active DB name
+    const lbl = document.getElementById('activeDbLabel');
+    if (lbl) lbl.textContent = activeDatabase;
+
+    // ✅ Sync sqlDatabase with activeDatabase
+    if (sqlDatabases[activeDatabase]) {
+        sqlDatabase = sqlDatabases[activeDatabase];
+    }
+
+    // Agar koi DB hi nahi hai
+    if (Object.keys(sqlDatabases).length === 0) {
         tree.innerHTML = `
             <div class="db-empty-state">
                 <i class="fas fa-database"></i>
                 <p>No database yet</p>
-                <p style="font-size:10px;margin-top:5px;">Run a CREATE TABLE query<br>या CSV upload करो</p>
-                <button class="btn-primary" onclick="document.getElementById('csvUpload').click()">
+                <p style="font-size:10px;margin-top:5px;">Run:<br><code style="color:#10b981;">CREATE DATABASE testdb;</code></p>
+                <button class="btn-primary" onclick="promptCreateDatabase()" style="margin-top:12px;">
+                    <i class="fas fa-plus"></i> Create Database
+                </button>
+                <button class="btn-secondary" onclick="document.getElementById('csvUpload').click()" style="margin-top:6px;">
                     <i class="fas fa-file-csv"></i> Import CSV
                 </button>
             </div>`;
         return;
     }
 
-    try {
-        // Get all tables
-        const tablesRes = sqlDatabase.exec(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
-        );
-        const tables = tablesRes[0]?.values?.map(r => r[0]) || [];
+    let html = '';
 
-        // Get all views
-        const viewsRes = sqlDatabase.exec(
-            "SELECT name FROM sqlite_master WHERE type='view' ORDER BY name"
-        );
-        const views = viewsRes[0]?.values?.map(r => r[0]) || [];
+    // ==========================================
+    // ✅ LIST ALL DATABASES (MySQL-like)
+    // ==========================================
+    const dbNames = Object.keys(sqlDatabases);
 
-        if (tables.length === 0 && views.length === 0) {
-            tree.innerHTML = `
-                <div class="db-empty-state">
-                    <i class="fas fa-database"></i>
-                    <p>Database empty है</p>
-                    <p style="font-size:10px;margin-top:5px;">CREATE TABLE query run करो</p>
-                    <button class="btn-primary" onclick="promptCreateTable()">
-                        <i class="fas fa-plus"></i> New Table
-                    </button>
-                </div>`;
-            return;
+    dbNames.forEach(dbName => {
+        const isActive = dbName === activeDatabase;
+        let tables = [];
+        let views = [];
+
+        try {
+            const db = sqlDatabases[dbName];
+            const tr = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
+            tables = tr[0]?.values?.map(r => r[0]) || [];
+            const vr = db.exec("SELECT name FROM sqlite_master WHERE type='view' ORDER BY name");
+            views = vr[0]?.values?.map(r => r[0]) || [];
+        } catch (e) {}
+
+        const activeColor = isActive ? '#10b981' : '#f59e0b';
+        const activeBadge = isActive ? '<span style="background:#10b981;color:white;padding:1px 5px;border-radius:8px;font-size:8px;margin-left:4px;">ACTIVE</span>' : '';
+        const totalRows = tables.reduce((sum, t) => sum + getTableRowCountForDB(dbName, t), 0);
+
+        // Database header
+        html += `
+            <div style="padding:6px 12px;background:${isActive ? 'rgba(16,185,129,0.1)' : 'transparent'};border-left:3px solid ${activeColor};cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:${activeColor};font-weight:600;"
+                 onclick="switchDatabase('${dbName.replace(/'/g, "\\'")}')"
+                 title="Click to switch to this database">
+                <i class="fas fa-database"></i>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(dbName)}</span>
+                ${activeBadge}
+                <span style="margin-left:auto;background:#334155;color:#94a3b8;padding:1px 6px;border-radius:10px;font-size:9px;" title="${tables.length} tables, ${totalRows} rows">${tables.length}t</span>
+                ${dbName !== 'main' ? `<i class="fas fa-times" style="color:#ef4444;font-size:10px;padding:2px;" title="Drop database" onclick="event.stopPropagation(); dropDatabaseByName('${dbName.replace(/'/g, "\\'")}')"></i>` : ''}
+            </div>`;
+
+        // Tables under this database (only show if active)
+        if (isActive) {
+            if (tables.length > 0) {
+                html += `<div style="padding:4px 12px 2px 24px;font-size:9px;color:#64748b;display:flex;align-items:center;gap:4px;">📁 Tables (${tables.length})</div>`;
+                tables.forEach(table => {
+                    const rowCount = getTableRowCountForDB(dbName, table);
+                    const activeTable = currentViewedTable === table ? 'active' : '';
+                    html += `
+                        <div class="schema-item ${activeTable}" style="padding-left:34px;" onclick="openTable('${table.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-table"></i>
+                            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(table)}</span>
+                            <span class="badge-count">${rowCount}</span>
+                        </div>`;
+                });
+            }
+
+            if (views.length > 0) {
+                html += `<div style="padding:4px 12px 2px 24px;font-size:9px;color:#64748b;display:flex;align-items:center;gap:4px;">👁️ Views (${views.length})</div>`;
+                views.forEach(v => {
+                    html += `
+                        <div class="schema-item" style="padding-left:34px;" onclick="openTable('${v.replace(/'/g, "\\'")}', true)">
+                            <i class="fas fa-eye" style="color:#8b5cf6;"></i>
+                            <span>${escapeHtml(v)}</span>
+                        </div>`;
+                });
+            }
+
+            if (tables.length === 0 && views.length === 0) {
+                html += `<div style="padding:8px 12px 8px 34px;font-size:10px;color:#64748b;font-style:italic;">Empty — CREATE TABLE run करो</div>`;
+            }
         }
+    });
 
-        let html = '';
+    // Bottom actions
+    html += `
+        <div style="padding:10px 12px;margin-top:8px;border-top:1px solid #1e293b;display:flex;gap:6px;flex-direction:column;">
+            <button class="btn-primary" onclick="promptCreateDatabase()" style="font-size:10px;padding:6px;width:100%;">
+                <i class="fas fa-plus"></i> New Database
+            </button>
+            <button class="btn-secondary" onclick="document.getElementById('csvUpload').click()" style="font-size:10px;padding:6px;width:100%;">
+                <i class="fas fa-file-csv"></i> Import CSV
+            </button>
+        </div>`;
 
-        // Databases folder
-        html += `<div style="padding:6px 12px;font-size:10px;color:#64748b;text-transform:uppercase;font-weight:bold;">📁 main (SQLite)</div>`;
+    tree.innerHTML = html;
+}
 
-        // Tables folder
-        if (tables.length > 0) {
-            html += `<div style="padding:4px 12px;font-size:10px;color:#64748b;display:flex;align-items:center;gap:5px;"><i class="fas fa-folder" style="color:#f59e0b;"></i> Tables (${tables.length})</div>`;
-
-            tables.forEach(table => {
-                const rowCount = getTableRowCount(table);
-                const active = currentViewedTable === table ? 'active' : '';
-                html += `
-                    <div class="schema-item ${active}" onclick="openTable('${table.replace(/'/g, "\\'")}')">
-                        <i class="fas fa-table"></i>
-                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(table)}</span>
-                        <span class="badge-count">${rowCount}</span>
-                    </div>`;
-            });
-        }
-
-        // Views folder
-        if (views.length > 0) {
-            html += `<div style="padding:8px 12px 4px;font-size:10px;color:#64748b;display:flex;align-items:center;gap:5px;"><i class="fas fa-eye" style="color:#8b5cf6;"></i> Views (${views.length})</div>`;
-            views.forEach(v => {
-                html += `
-                    <div class="schema-item" onclick="openTable('${v.replace(/'/g, "\\'")}', true)">
-                        <i class="fas fa-eye" style="color:#8b5cf6;"></i>
-                        <span>${escapeHtml(v)}</span>
-                    </div>`;
-            });
-        }
-
-        tree.innerHTML = html;
-    } catch (e) {
-        tree.innerHTML = `<div class="db-empty-state" style="color:#ef4444;">Error: ${escapeHtml(e.message)}</div>`;
+// ✅ Switch database
+function switchDatabase(name) {
+    if (setActiveDatabase(name)) {
+        currentViewedTable = null;
+        refreshSchemaTree();
+        const el = document.getElementById('statusFile');
+        if (el) el.innerHTML = `<i class="fas fa-database"></i> ${name}`;
+        showToast(`Switched to database: ${name}`, 'success');
     }
+}
+
+// ✅ Drop database
+function dropDatabaseByName(name) {
+    if (name === 'main') return showToast('Cannot drop main database', 'warning');
+    if (!confirm(`⚠️ Drop database '${name}'? सारे tables delete हो जाएँगे!`)) return;
+    delete sqlDatabases[name];
+    if (activeDatabase === name) setActiveDatabase('main');
+    refreshSchemaTree();
+    showToast(`Database '${name}' dropped`, 'warning');
+}
+
+// ✅ Row count for a specific DB
+function getTableRowCountForDB(dbName, tableName) {
+    try {
+        const db = sqlDatabases[dbName];
+        if (!db) return 0;
+        const res = db.exec(`SELECT COUNT(*) FROM "${tableName}"`);
+        return res[0]?.values[0]?.[0] || 0;
+    } catch (e) { return 0; }
+}
+
+// ✅ Prompt create database
+function promptCreateDatabase() {
+    const name = prompt('New database name (letters, digits, underscore only):');
+    if (!name) return;
+    const cleanName = name.trim().replace(/[^a-zA-Z0-9_]/g, '_');
+    if (sqlDatabases[cleanName]) return showToast(`Database '${cleanName}' already exists`, 'error');
+    if (!window._SQL) return showToast('SQL Engine loading... Try again in a moment', 'warning');
+    sqlDatabases[cleanName] = new window._SQL.Database();
+    refreshSchemaTree();
+    showToast(`✓ Database '${cleanName}' created — click to switch`, 'success');
 }
 
 // ✅ Filter tables
@@ -4102,10 +4201,16 @@ async function runSQLDatabase(code, isSelectionRun = false) {
         }
 
         // ✅ STEP 2: Create persistent database (ONLY ONCE)
-        if (!sqlDatabase) {
-            sqlDatabase = new window._SQL.Database();
-            console.log('✅ New SQLite database created');
+               // ✅ STEP 2: Ensure 'main' database exists
+        if (!sqlDatabases['main']) {
+            sqlDatabases['main'] = new window._SQL.Database();
+            console.log('✅ Main database created');
         }
+        // Set active
+        if (!sqlDatabases[activeDatabase]) {
+            activeDatabase = 'main';
+        }
+        sqlDatabase = sqlDatabases[activeDatabase];
 
         // ✅ STEP 3: Split code into individual statements
         // Remove comments and split on ; (respecting quotes)
@@ -4116,33 +4221,141 @@ async function runSQLDatabase(code, isSelectionRun = false) {
             return;
         }
 
-        // ✅ STEP 4: Execute each statement
+      
+                // ✅ STEP 4: Execute each statement
         let html = '<div style="padding:8px 12px; background:#1e293b; border-radius:6px; margin-bottom:10px; font-size:11px; color:#94a3b8;">';
-        html += '<b style="color:#10b981;">🗄️ SQLite Persistent DB</b>';
+        html += '<b style="color:#10b981;">🗄️ MySQL-like SQL Engine</b>';
+        html += ' &nbsp;|&nbsp; 🗃️ <b style="color:#f59e0b;">' + activeDatabase + '</b>';
         html += ' &nbsp;|&nbsp; Tables: <b style="color:#3b82f6;">' + getTableCount() + '</b>';
+        html += ' &nbsp;|&nbsp; DBs: <b style="color:#8b5cf6;">' + Object.keys(sqlDatabases).length + '</b>';
         if (isSelectionRun) {
             html += ' &nbsp;|&nbsp; <span style="background:#8b5cf6;color:#fff;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;">🎯 SELECTION MODE</span>';
         }
-        html += ' &nbsp;|&nbsp; <button onclick="resetSQLDatabase()" style="background:#ef4444;color:#fff;border:none;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;margin-left:6px;">🗑️ Reset DB</button>';
+        html += ' &nbsp;|&nbsp; <button onclick="resetSQLDatabase()" style="background:#ef4444;color:#fff;border:none;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:10px;margin-left:6px;">🗑️ Reset All</button>';
         html += '</div>';
 
         let successCount = 0;
         let errorCount = 0;
         let resultsHtml = '';
 
-        for (let i = 0; i < statements.length; i++) {
+                for (let i = 0; i < statements.length; i++) {
             const stmt = statements[i].trim();
             if (!stmt) continue;
 
+            const shortStmt = stmt.length > 80 ? stmt.substring(0, 80) + '...' : stmt;
+
+            // ==========================================
+            // ✅ MYSQL-LIKE COMMANDS INTERCEPTION
+            // ==========================================
+
+            // CREATE DATABASE / SCHEMA
+            let m = stmt.match(/^CREATE\s+(?:DATABASE|SCHEMA)\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"']?([a-zA-Z_][a-zA-Z0-9_]*)[`"']?\s*$/i);
+            if (m) {
+                const dbName = m[1];
+                if (sqlDatabases[dbName]) {
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#78350f; border-left:3px solid #f59e0b; border-radius:4px; font-size:11px;"><b style="color:#fbbf24;">⚠️ Query ${i+1}:</b> Database '${escapeHtml(dbName)}' already exists</div>`;
+                } else {
+                    sqlDatabases[dbName] = new window._SQL.Database();
+                    successCount++;
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#0e4429; border-left:3px solid #10b981; border-radius:4px; font-size:11px;"><b style="color:#10b981;">✓ Query ${i+1}:</b> Database '${escapeHtml(dbName)}' created</div>`;
+                }
+                continue;
+            }
+
+            // DROP DATABASE / SCHEMA
+            m = stmt.match(/^DROP\s+(?:DATABASE|SCHEMA)\s+(?:IF\s+EXISTS\s+)?[`"']?([a-zA-Z_][a-zA-Z0-9_]*)[`"']?\s*$/i);
+            if (m) {
+                const dbName = m[1];
+                if (!sqlDatabases[dbName]) {
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#7f1d1d; border-left:3px solid #ef4444; border-radius:4px; font-size:11px;"><b style="color:#fca5a5;">✗ Query ${i+1}:</b> Database '${escapeHtml(dbName)}' not found</div>`;
+                    errorCount++;
+                } else if (dbName === 'main') {
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#7f1d1d; border-left:3px solid #ef4444; border-radius:4px; font-size:11px;"><b style="color:#fca5a5;">✗ Query ${i+1}:</b> Cannot drop 'main' database</div>`;
+                    errorCount++;
+                } else {
+                    delete sqlDatabases[dbName];
+                    if (activeDatabase === dbName) setActiveDatabase('main');
+                    successCount++;
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#0e4429; border-left:3px solid #10b981; border-radius:4px; font-size:11px;"><b style="color:#10b981;">✓ Query ${i+1}:</b> Database '${escapeHtml(dbName)}' dropped</div>`;
+                }
+                continue;
+            }
+
+            // USE database
+            m = stmt.match(/^USE\s+[`"']?([a-zA-Z_][a-zA-Z0-9_]*)[`"']?\s*$/i);
+            if (m) {
+                const dbName = m[1];
+                if (setActiveDatabase(dbName)) {
+                    successCount++;
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#0e4429; border-left:3px solid #10b981; border-radius:4px; font-size:11px;"><b style="color:#10b981;">✓ Query ${i+1}:</b> Now using database '${escapeHtml(dbName)}'</div>`;
+                } else {
+                    errorCount++;
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#7f1d1d; border-left:3px solid #ef4444; border-radius:4px; font-size:11px;"><b style="color:#fca5a5;">✗ Query ${i+1}:</b> Unknown database '${escapeHtml(dbName)}'</div>`;
+                }
+                continue;
+            }
+
+            // SHOW DATABASES
+            if (/^SHOW\s+(?:DATABASES|SCHEMAS)\s*$/i.test(stmt)) {
+                successCount++;
+                const dbList = Object.keys(sqlDatabases);
+                resultsHtml += `
+                    <div style="margin:8px 0;">
+                        <div style="background:#1e293b;color:#3b82f6;padding:4px 8px;border-radius:4px 4px 0 0;font-size:10px;"><b>Query ${i+1}:</b> ${escapeHtml(shortStmt)}</div>
+                        <div class="db-table-wrapper" style="max-height:300px;">
+                            <table class="db-table">
+                                <thead><tr><th>Database</th><th>Tables</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    ${dbList.map(name => {
+                                        const tblCount = (() => {
+                                            try { return sqlDatabases[name].exec("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")[0]?.values[0]?.[0] || 0; }
+                                            catch(e) { return 0; }
+                                        })();
+                                        return `<tr><td><b style="color:#f59e0b;">🗃️ ${escapeHtml(name)}</b></td><td>${tblCount}</td><td>${name === activeDatabase ? '<span style="color:#10b981;">← ACTIVE</span>' : ''}</td></tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="padding:4px 8px;font-size:10px;color:#64748b;background:#0f172a;border-radius:0 0 4px 4px;">${dbList.length} database(s)</div>
+                    </div>`;
+                continue;
+            }
+
+            // SHOW TABLES
+            if (/^SHOW\s+TABLES\s*$/i.test(stmt)) {
+                successCount++;
+                try {
+                    const tblsRes = sqlDatabase.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
+                    const tbls = tblsRes[0]?.values?.map(r => r[0]) || [];
+                    resultsHtml += `
+                        <div style="margin:8px 0;">
+                            <div style="background:#1e293b;color:#3b82f6;padding:4px 8px;border-radius:4px 4px 0 0;font-size:10px;"><b>Query ${i+1}:</b> ${escapeHtml(shortStmt)} (in ${activeDatabase})</div>
+                            <div class="db-table-wrapper" style="max-height:300px;">
+                                <table class="db-table">
+                                    <thead><tr><th>Table</th><th>Type</th></tr></thead>
+                                    <tbody>
+                                        ${tbls.map(t => `<tr><td><b style="color:#10b981;">📋 ${escapeHtml(t)}</b></td><td>BASE TABLE</td></tr>`).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="padding:4px 8px;font-size:10px;color:#64748b;background:#0f172a;border-radius:0 0 4px 4px;">${tbls.length} table(s)</div>
+                        </div>`;
+                } catch(e) {
+                    resultsHtml += `<div style="margin:6px 0; padding:6px 10px; background:#7f1d1d; border-radius:4px; font-size:11px;"><b style="color:#fca5a5;">✗ SHOW TABLES error:</b> ${escapeHtml(e.message)}</div>`;
+                }
+                continue;
+            }
+
+            // ==========================================
+            // Regular SQL — pass to active SQLite database
+            // ==========================================
             try {
                 const res = sqlDatabase.exec(stmt);
                 successCount++;
 
-                const shortStmt = stmt.length > 80 ? stmt.substring(0, 80) + '...' : stmt;
-                const isRead = /^\s*(SELECT|PRAGMA|WITH)/i.test(stmt);
+                const isRead = /^\s*(SELECT|PRAGMA|WITH|EXPLAIN)/i.test(stmt);
 
                 if (res.length > 0 && res[0].values && res[0].values.length > 0) {
-                    // ✅ SELECT query - show table
                     resultsHtml += `
                         <div style="margin:8px 0;">
                             <div style="background:#1e293b;color:#3b82f6;padding:4px 8px;border-radius:4px 4px 0 0;font-size:10px;">
@@ -4171,6 +4384,7 @@ async function runSQLDatabase(code, isSelectionRun = false) {
                     </div>`;
             }
         }
+        /* OLD LOOP ENDS HERE — DELETE NEXT LINES TILL closing brace */
 
         const elapsed = Date.now() - startTime;
         html += resultsHtml;
@@ -4284,13 +4498,15 @@ function getTableCount() {
 
 /* ✅ Reset database */
 function resetSQLDatabase() {
-    if (!confirm('⚠️ Poora database delete ho jaayega. Continue?')) return;
-    sqlDatabase = null;
+    if (!confirm('⚠️ सारे databases delete हो जाएँगे (main भी)। Continue?')) return;
+    sqlDatabases = { 'main': new window._SQL.Database() };
+    activeDatabase = 'main';
+    sqlDatabase = sqlDatabases['main'];
     currentViewedTable = null;
     const terminal = document.getElementById('terminalOutput');
-    terminal.innerHTML = '<span class="text-success">✓ Database reset! नया DB बनाया जा सकता है।</span>';
+    terminal.innerHTML = '<span class="text-success">✓ All databases reset! Fresh main database ready.</span>';
     refreshSchemaTree();
-    showToast('Database reset', 'success');
+    showToast('All databases reset', 'success');
 }
 
 /* ✅ Export database as .sql file (bonus feature) */
