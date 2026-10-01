@@ -3151,34 +3151,41 @@ async function searchNPM(e) {
    /* ============================================================
    🎨 UNIVERSAL MERMAID RENDERER — Local SVG Rendering (Fixed 0x0 Bug)
 ============================================================ */
+/* ============================================================
+   🎨 UNIVERSAL MERMAID RENDERER — Fixed Layout & Visibility
+============================================================ */
 async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
     console.log('🎬 Rendering ' + diagramName + ' locally...');
 
-    // ✅ Show loading spinner
+    // Loading State
     outputDiv.innerHTML = '<div style="padding:30px; text-align:center; color:#3b82f6;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i><p style="margin-top:12px; font-size:13px;">Rendering ' + diagramName + '...</p></div>';
 
     try {
-        // Ensure Mermaid is initialized
-        if (!initMermaid()) throw new Error('Mermaid library not found.');
+        if (typeof mermaid === 'undefined') throw new Error('Mermaid library not loaded');
 
-        // Generate a unique ID for the SVG
-        const id = 'mermaid-svg-' + Math.random().toString(36).substr(2, 9);
+        // Unique ID (Mermaid needs this to render without caching issues)
+        const id = 'mermaid-svg-' + Date.now();
         
-        // ✅ Render SVG directly using Local Mermaid API
+        // Render to SVG
         const { svg } = await mermaid.render(id, mermaidCode);
 
-        // ✅ Clear output and create a flex wrapper to prevent 0x0 collapse
+        // Clear output
         outputDiv.innerHTML = '';
+        
+        // 🛠️ FIX 1: Removed 'display: flex' & fixed background
+        // Background हटा दिया गया है ताकि यह Modal के natural color (#f8fafc) के साथ ब्लेंड हो जाए
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'background:#ffffff; padding:20px; border-radius:8px; display:flex; justify-content:center; align-items:center; min-height:300px; overflow:auto;';
+        wrapper.style.cssText = 'text-align:center; padding:10px; width:100%; overflow-x:auto; overflow-y:hidden; min-height:300px;';
         wrapper.innerHTML = svg;
 
-        // Fix SVG inline styles to ensure it takes up space correctly
+        // 🛠️ FIX 2: Force SVG to behave like a responsive block image
         const svgEl = wrapper.querySelector('svg');
         if (svgEl) {
+            svgEl.removeAttribute('width');  // Let viewBox handle aspect ratio
+            svgEl.removeAttribute('height'); 
             svgEl.style.maxWidth = '100%';
             svgEl.style.height = 'auto';
-            svgEl.style.display = 'block';
+            svgEl.style.display = 'inline-block';
         }
 
         outputDiv.appendChild(wrapper);
@@ -3187,19 +3194,16 @@ async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
 
     } catch (err) {
         console.error('❌ ' + diagramName + ' render failed:', err);
-        
-        // Show fallback error UI with raw code
-        outputDiv.innerHTML =
-            '<div style="padding:20px; color:#ef4444;">' +
+        outputDiv.innerHTML = 
+            '<div style="color:#ef4444; padding:20px;">' +
             '<h4>⚠️ ' + diagramName + ' Rendering Failed</h4>' +
-            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">There was a syntax error in the diagram code. Raw code:</p>' +
+            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">' + err.message + '</p>' +
             '<pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; font-size:11px; max-height:300px; overflow:auto; text-align:left;">' +
             escapeHtml(mermaidCode) + '</pre>' +
             '<button onclick="' + (diagramName.includes('ER') ? 'generateERDiagram()' : 'generateFlowchart()') + '" class="btn-primary" style="margin-top:12px;">🔄 Retry</button>' +
             '</div>';
     }
 }
-
 /* ============================================================
    INIT
 ============================================================ */
