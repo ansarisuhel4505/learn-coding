@@ -916,7 +916,14 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         <div class="modal-header"><h3><i class="fas fa-users"></i> Live Collaboration</h3><span class="modal-close" onclick="closeModal('liveShareModal')">&times;</span></div>
         <div class="modal-body">
             <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Doston ke sath real-time me code karein.</p>
-            <div class="form-group"><label>Room ID</label><input type="text" id="liveRoomId" placeholder="e.g. room-123"></div>
+            <div class="form-group">
+    <label>Room ID (shared करने के लिए)</label>
+    <input type="text" id="liveRoomId" placeholder="खाली छोड़ो → Auto-create होगा">
+</div>
+<p style="font-size:11px;color:#94a3b8;margin:8px 0 12px;line-height:1.5;">
+    <b style="color:#10b981;">पहला user:</b> खाली छोड़कर "Create Room" दबाओ → Room ID मिलेगा<br>
+    <b style="color:#3b82f6;">दूसरा user:</b> वो Room ID यहाँ पेस्ट करके Join करो
+</p>
         </div>
         <div class="modal-footer" style="justify-content: space-between;">
             <div id="voiceChatControls" style="display:none; align-items:center; gap:5px;">
@@ -925,7 +932,9 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
             </div>
             <div>
                 <button class="btn-danger" onclick="stopLiveShare()" id="stopLiveBtn" style="display:none;">Stop Sharing</button>
-            <button class="btn-primary" onclick="startLiveShare()">Join / Create Room</button>
+            <button class="btn-primary" onclick="startLiveShare()">
+    <i class="fas fa-satellite-dish"></i> Create / Join Room
+</button>
         </div>
     </div>
 </div>
@@ -2818,61 +2827,222 @@ function toggleVimMode() {
         showToast('Vim Mode Disabled', 'warning');
     }
 }
-    /* ============================================================
-   🔥 NEW KILLER FEATURES LOGIC (Live Share, GitHub, Xterm, Embed)
+   /* ============================================================
+   🌐 LIVE SHARE via PeerJS (P2P — works on Vercel!)
 ============================================================ */
+let livePeer = null;              // PeerJS instance
+let liveConnection = null;        // DataConnection to remote peer
+let liveRoomId = null;            // current room
+let isApplyingRemote = false;     // avoid echo loop
+let liveIsHost = false;           // who created the room
 
-// 1. Live Share (Socket.io)
-let socket = null;
-let currentRoom = null;
-let isRemoteChange = false;
+function generateRoomCode() {
+    // 8-char room code like "CM-7X4K9A2B"
+    return 'CM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
-function startLiveShare() {
-    const roomId = document.getElementById('liveRoomId').value.trim();
-    if (!roomId) return showToast('Enter Room ID!', 'warning');
-    
-    if (!socket) {
-        socket = io(location.origin);
-        socket.on('receive-code', (data) => {
-            isRemoteChange = true;
-            if(data.lang) document.getElementById('langSelect').value = data.lang;
-            if(editorInstance) editorInstance.setValue(data.code);
-            isRemoteChange = false;
-        });
-        socket.on('user-joined', (id) => showToast('A user joined the room!', 'success'));
+async function startLiveShare() {
+    if (typeof Peer === 'undefined') {
+        return showToast('PeerJS library load नहीं हुई, page refresh करो', 'error');
     }
-    
-    currentRoom = roomId;
-    socket.emit('join-room', roomId);
-    document.getElementById('liveBadge').style.display = 'block';
-    document.getElementById('stopLiveBtn').style.display = 'block';
+
+    let roomId = document.getElementById('liveRoomId')?.value.trim();
+
+    // अगर room id खाली है, तो generate करके host बनो
+    if (!roomId) {
+        roomId = generateRoomCode();
+        document.getElementById('liveRoomId').value = roomId;
+        liveIsHost = true;
+    } else {
+        liveIsHost = false;
+    }
+
+    liveRoomId = roomId;
+
+    try {
+        // ✅ PeerJS cloud signaling server (free, no signup)
+        livePeer = new Peer(liveRoomId, {
+            debug: 1,
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:global.stun.twilio.com:3478' }
+                ]
+            }
+        });
+
+        // ✅ Peer ready
+        livePeer.on('open', (id) => {
+            console.log('✅ PeerJS ready. Room ID:', id);
+            showLiveShareUI();
+            showToast('Room ready! Share ID: ' + id, 'success', 6000);
+        });
+
+        // ✅ Peer error
+        livePeer.on('error', (err) => {
+            console.error('PeerJS error:', err);
+            if (err.type === 'unavailable-id') {
+                // Room ID already taken — join as guest
+                liveIsHost = false;
+                showToast('Room already exists, connecting as guest...', 'info');
+                livePeer.destroy();
+                setTimeout(() => joinAsGuest(roomId), 300);
+            } else if (err.type === 'peer-unavailable') {
+                showToast('Room not found. Check the ID.', 'error');
+                stopLiveShare();
+            } else {
+                showToast('Peer error: ' + err.type, 'error');
+            }
+        });
+
+        // ✅ Host receives connection from guest
+        livePeer.on('connection', (conn) => {
+            if (liveConnection) {
+                showToast('Only 2 people allowed in a room', 'warning');
+                conn.close();
+                return;
+            }
+            liveConnection = conn;
+            setupLiveConnection(conn, 'guest');
+            showToast('✓ Guest joined your room!', 'success');
+        });
+
+    } catch (e) {
+        console.error(e);
+        showToast('Failed to start live share: ' + e.message, 'error');
+    }
+}
+
+function joinAsGuest(roomId) {
+    liveRoomId = roomId;
+    liveIsHost = false;
+
+    livePeer = new Peer({ debug: 1 });
+    livePeer.on('open', () => {
+        const conn = livePeer.connect(roomId, { reliable: true });
+        liveConnection = conn;
+        setupLiveConnection(conn, 'host');
+    });
+    livePeer.on('error', (err) => {
+        console.error(err);
+        if (err.type === 'peer-unavailable') showToast('Room not found!', 'error');
+        else showToast('Connection error: ' + err.type, 'error');
+        stopLiveShare();
+    });
+}
+
+function setupLiveConnection(conn, remoteRole) {
+    conn.on('open', () => {
+        console.log('✅ Data channel open with ' + remoteRole);
+
+        // Send current code + lang to remote peer
+        if (editorInstance) {
+            conn.send({
+                type: 'sync',
+                code: editorInstance.getValue(),
+                lang: document.getElementById('langSelect').value
+            });
+        }
+
+        showLiveShareUI();
+        showToast('🔴 Live Share ACTIVE with ' + remoteRole, 'success');
+    });
+
+    conn.on('data', (data) => {
+        if (!data || !data.type) return;
+
+        if (data.type === 'code') {
+            // Remote user ne code change kiya
+            isApplyingRemote = true;
+            try {
+                if (data.lang && document.getElementById('langSelect').value !== data.lang) {
+                    document.getElementById('langSelect').value = data.lang;
+                }
+                if (editorInstance) {
+                    const currentPos = editorInstance.getPosition();
+                    editorInstance.setValue(data.code);
+                    // Cursor position try restore (approximate)
+                    try { editorInstance.setPosition(currentPos); } catch(e) {}
+                }
+            } finally {
+                // Small delay to prevent echo
+                setTimeout(() => { isApplyingRemote = false; }, 50);
+            }
+        }
+
+        if (data.type === 'sync') {
+            // Initial sync from the connecting peer
+            isApplyingRemote = true;
+            try {
+                if (data.lang) document.getElementById('langSelect').value = data.lang;
+                if (editorInstance) editorInstance.setValue(data.code);
+            } finally {
+                setTimeout(() => { isApplyingRemote = false; }, 100);
+            }
+        }
+
+        if (data.type === 'chat') {
+            // Optional chat message
+            showToast('💬 ' + data.msg, 'info', 4000);
+        }
+
+        if (data.type === 'cursor') {
+            // (Optional) — could show remote cursor position
+        }
+    });
+
+    conn.on('close', () => {
+        showToast('⚠️ Partner disconnected', 'warning');
+        stopLiveShare();
+    });
+
+    conn.on('error', (err) => {
+        console.error('Conn error:', err);
+        showToast('Connection error', 'error');
+    });
+}
+
+function showLiveShareUI() {
+    const badge = document.getElementById('liveBadge');
+    if (badge) badge.style.display = 'block';
+    const stopBtn = document.getElementById('stopLiveBtn');
+    if (stopBtn) stopBtn.style.display = 'block';
     closeModal('liveShareModal');
-    showToast(`Joined Room: ${roomId}`, 'success');
 }
 
 function stopLiveShare() {
-    if (socket) { socket.disconnect(); socket = null; }
-    currentRoom = null;
-    document.getElementById('liveBadge').style.display = 'none';
-    document.getElementById('stopLiveBtn').style.display = 'none';
+    try {
+        if (liveConnection) { liveConnection.close(); liveConnection = null; }
+        if (livePeer) { livePeer.destroy(); livePeer = null; }
+    } catch (e) {}
+    liveRoomId = null;
+    liveIsHost = false;
+
+    const badge = document.getElementById('liveBadge');
+    if (badge) badge.style.display = 'none';
+    const stopBtn = document.getElementById('stopLiveBtn');
+    if (stopBtn) stopBtn.style.display = 'none';
+
     closeModal('liveShareModal');
-    showToast('Live Share Stopped', 'info');
+    showToast('Live Share stopped', 'info');
 }
 
-// Hook to Monaco Editor for Live Share
+/* ✅ Hook Monaco editor to broadcast changes */
 setTimeout(() => {
-    if(editorInstance) {
-        editorInstance.onDidChangeModelContent(() => {
-            if(!isRemoteChange && currentRoom && socket) {
-                socket.emit('code-change', { 
-                    roomId: currentRoom, 
-                    code: editorInstance.getValue(), 
-                    lang: document.getElementById('langSelect').value 
-                });
-            }
-        });
-    }
-}, 2000);
+    if (!editorInstance) return;
+    editorInstance.onDidChangeModelContent(() => {
+        if (isApplyingRemote) return;
+        if (!liveConnection || !liveConnection.open) return;
+        try {
+            liveConnection.send({
+                type: 'code',
+                code: editorInstance.getValue(),
+                lang: document.getElementById('langSelect')?.value || 'python3'
+            });
+        } catch (e) { /* ignore */ }
+    });
+    console.log('✅ Live share editor hook installed');
+}, 3000);
 
 // 2. GitHub Push Integration
 // Load saved token/repo
@@ -3399,47 +3569,86 @@ let interviewContext = [
 async function sendInterviewMsg() {
     const input = document.getElementById('interviewInput');
     const msg = input.value.trim();
-    if(!msg) return;
-    
+    if (!msg) return;
+
     const chatBody = document.getElementById('interviewChat');
+    if (!chatBody) return;
+
+    // User message add करो
     chatBody.innerHTML += `<div class="chat-msg chat-user">${escapeHtml(msg)}</div>`;
     input.value = '';
-    
-    // Attach current code from editor for context
-    const currentCode = editorInstance.getValue();
-    const promptWithCode = `User says: "${msg}".\n\nCurrent Code in Editor:\n\`\`\`\n${currentCode}\n\`\`\``;
-    
-    interviewContext.push({ role: 'user', content: promptWithCode });
-    chatBody.innerHTML += `<div class="chat-msg chat-ai" id="aiTyping"><i class="fas fa-ellipsis-h fa-spin"></i> Typing...</div>`;
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer YOUR_GROQ_KEY_OR_BACKEND_API`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: 'openai/gpt-oss-120b', messages: interviewContext })
-        });
-        
-        // Note: For security, you should route this through your backend `/api/ask-ai` instead of raw fetch here.
-        // For frontend demo purposes, assuming backend `/api/ask-ai` can accept full message arrays if updated.
-        // Let's use your existing endpoint formatting:
-        
-        const myRes = await fetch('/api/ask-ai', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `Act as Interviewer: ${promptWithCode}` })
-        });
-        const data = await myRes.json();
-        
-        document.getElementById('aiTyping').remove();
-        chatBody.innerHTML += `<div class="chat-msg chat-ai">${marked.parse(data.reply)}</div>`;
-        interviewContext.push({ role: 'assistant', content: data.reply });
-        chatBody.scrollTop = chatBody.scrollHeight;
+    // Typing indicator
+    const typingId = 'aiTyping_' + Date.now();
+    chatBody.innerHTML += `<div class="chat-msg chat-ai" id="${typingId}"><i class="fas fa-ellipsis-h fa-spin"></i> Typing...</div>`;
+    chatBody.scrollTop = chatBody.scrollHeight;
 
-    } catch(e) {
-        document.getElementById('aiTyping').innerText = 'Network Error!';
+    // Current code from editor (interview context)
+    const currentCode = editorInstance ? editorInstance.getValue() : '';
+    const currentLang = document.getElementById('langSelect')?.value || 'python3';
+
+    // Interview history (last 6 messages for context)
+    const historyText = interviewContext
+        .filter(m => m.role !== 'system')
+        .slice(-6)
+        .map(m => `${m.role === 'user' ? 'Candidate' : 'Interviewer'}: ${m.content}`)
+        .join('\n');
+
+    // Build full prompt
+    const fullPrompt = `You are a STRICT Senior Technical Interviewer from Google/Amazon, conducting a mock interview.
+
+RULES:
+- Keep responses SHORT (2-4 sentences max)
+- Ask ONE question at a time
+- If candidate shares code, evaluate it and ask cross-questions about Time/Space complexity
+- If candidate asks DSA question, provide a hint first, not full answer
+- Use conversational Hinglish (Hindi+English mix) for friendliness
+- After 3-4 exchanges on one topic, move to a new question
+
+${historyText ? 'PREVIOUS CONVERSATION:\n' + historyText + '\n' : ''}
+
+Candidate says: "${msg}"
+
+${currentCode.trim() ? `Current code in editor (${currentLang}):\n\`\`\`${currentLang}\n${currentCode.substring(0, 1500)}\n\`\`\`` : ''}
+
+Now respond as the interviewer:`;
+
+    try {
+        const res = await fetch('/api/ask-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: fullPrompt })
+        });
+        const data = await res.json();
+
+        // Remove typing indicator
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        if (data.success && data.reply) {
+            const formatted = typeof marked !== 'undefined' ? marked.parse(data.reply) : escapeHtml(data.reply);
+            chatBody.innerHTML += `<div class="chat-msg chat-ai">${formatted}</div>`;
+
+            // Save to history
+            interviewContext.push({ role: 'user', content: msg });
+            interviewContext.push({ role: 'assistant', content: data.reply });
+
+            // Limit history to 20 messages
+            if (interviewContext.length > 20) {
+                interviewContext = [interviewContext[0], ...interviewContext.slice(-18)];
+            }
+        } else {
+            chatBody.innerHTML += `<div class="chat-msg chat-ai" style="border-left-color:#ef4444;color:#fca5a5;">⚠️ AI Error: ${escapeHtml(data.reply || 'No response')}</div>`;
+        }
+        chatBody.scrollTop = chatBody.scrollHeight;
+    } catch (e) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        chatBody.innerHTML += `<div class="chat-msg chat-ai" style="border-left-color:#ef4444;color:#fca5a5;">⚠️ Network error — check console</div>`;
+        console.error('Interview AI error:', e);
     }
 }
-
 // 9. NPM Package Manager (Web Mode CDNJS Search)
 async function searchNPM(e) {
     const q = e.target.value.trim();
