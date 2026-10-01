@@ -1690,10 +1690,11 @@ function switchExplorerTab(tab, el) {
     if (dbPanel) dbPanel.classList.toggle('hidden', tab !== 'db');
 
     if (tab === 'search') setTimeout(() => document.getElementById('searchInput').focus(), 100);
-    // ✅ DB tab खुलते ही schema refresh
-    if (tab === 'db') setTimeout(refreshSchemaTree, 50);
+    if (tab === 'db') {
+        console.log('📂 DB tab opened — refreshing schema tree...');
+        setTimeout(refreshSchemaTree, 50);
+    }
 }
-
 function searchInFiles() {
     // Use Worker if available, else sync fallback
     if (typeof searchWorker !== 'undefined' && searchWorker) {
@@ -3521,8 +3522,8 @@ function refreshSchemaTree() {
 
         // Database header
         html += `
-            <div style="padding:6px 12px;background:${isActive ? 'rgba(16,185,129,0.1)' : 'transparent'};border-left:3px solid ${activeColor};cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:${activeColor};font-weight:600;"
-                 onclick="switchDatabase('${dbName.replace(/'/g, "\\'")}')"
+                       <div style="padding:6px 12px;background:${isActive ? 'rgba(16,185,129,0.1)' : 'transparent'};border-left:3px solid ${activeColor};cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:${activeColor};font-weight:600;"
+                 data-switch-db="${escapeHtml(dbName)}"
                  title="Click to switch to this database">
                 <i class="fas fa-database"></i>
                 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(dbName)}</span>
@@ -3535,18 +3536,18 @@ function refreshSchemaTree() {
         if (isActive) {
             if (tables.length > 0) {
                 html += `<div style="padding:4px 12px 2px 24px;font-size:9px;color:#64748b;display:flex;align-items:center;gap:4px;">📁 Tables (${tables.length})</div>`;
-                tables.forEach(table => {
+                               tables.forEach(table => {
                     const rowCount = getTableRowCountForDB(dbName, table);
                     const activeTable = currentViewedTable === table ? 'active' : '';
+                    // ✅ Using data-table attribute + event delegation (safer than onclick)
                     html += `
-                        <div class="schema-item ${activeTable}" style="padding-left:34px;" onclick="openTable('${table.replace(/'/g, "\\'")}')">
+                        <div class="schema-item ${activeTable}" style="padding-left:34px;" data-table="${escapeHtml(table)}" data-db="${escapeHtml(dbName)}">
                             <i class="fas fa-table"></i>
                             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(table)}</span>
                             <span class="badge-count">${rowCount}</span>
                         </div>`;
                 });
             }
-
             if (views.length > 0) {
                 html += `<div style="padding:4px 12px 2px 24px;font-size:9px;color:#64748b;display:flex;align-items:center;gap:4px;">👁️ Views (${views.length})</div>`;
                 views.forEach(v => {
@@ -3575,7 +3576,27 @@ function refreshSchemaTree() {
             </button>
         </div>`;
 
-    tree.innerHTML = html;
+       tree.innerHTML = html;
+
+    // ✅ Attach click handlers via event delegation (safer)
+    tree.querySelectorAll('[data-table]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.target.closest('.fa-times')) return;
+            const tbl = this.getAttribute('data-table');
+            const db = this.getAttribute('data-db');
+            if (db && db !== activeDatabase) setActiveDatabase(db);
+            openTable(tbl);
+        });
+    });
+
+    // ✅ Attach DB switch handlers
+    tree.querySelectorAll('[data-switch-db]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.target.closest('.fa-times')) return;
+            const db = this.getAttribute('data-switch-db');
+            switchDatabase(db);
+        });
+    });
 }
 
 // ✅ Switch database
@@ -3641,19 +3662,68 @@ function getTableRowCount(tableName) {
 
 // ✅ Open Table in viewer
 async function openTable(tableName, isView = false) {
-    if (!sqlDatabase) return showToast('No database', 'warning');
+    console.log('🔓 openTable called:', tableName, '| activeDB:', activeDatabase);
+
+    // ✅ STEP 1: Sync sqlDatabase with activeDatabase
+    sqlDatabase = sqlDatabases[activeDatabase];
+    if (!sqlDatabase) {
+        showToast('No database active', 'error');
+        return;
+    }
+
     currentViewedTable = tableName;
 
-    openModal('tableViewerModal');
-    document.getElementById('tableViewerTitle').innerHTML =
-        `<i class="fas fa-${isView ? 'eye' : 'table'}"></i> ${escapeHtml(tableName)}`;
+    // ✅ STEP 2: Verify table exists
+    try {
+        const check = sqlDatabase.exec(
+            `SELECT name FROM sqlite_master WHERE name='${tableName.replace(/'/g, "''")}'`
+        );
+        if (!check.length || !check[0].values.length) {
+            showToast(`Table '${tableName}' not found`, 'error');
+            return;
+        }
+    } catch (e) {
+        console.error('Table check failed:', e);
+        showToast('Cannot access table: ' + e.message, 'error');
+        return;
+    }
 
-    // Reset tabs to Data
+    // ✅ STEP 3: Force-open the modal (safe way)
+    const modal = document.getElementById('tableViewerModal');
+    if (!modal) {
+        showToast('Table viewer not found in DOM!', 'error');
+        return;
+    }
+    modal.classList.add('active');
+    // Force z-index in case of conflict
+    modal.style.zIndex = '10050';
+
+    // ✅ STEP 4: Set title
+    const titleEl = document.getElementById('tableViewerTitle');
+    if (titleEl) {
+        titleEl.innerHTML = `<i class="fas fa-${isView ? 'eye' : 'table'}"></i> ${escapeHtml(tableName)} <span style="color:#64748b;font-size:11px;margin-left:8px;">(${escapeHtml(activeDatabase)})</span>`;
+    }
+
+    // ✅ STEP 5: Reset tabs — Data tab default
     document.querySelectorAll('.table-viewer-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('.table-viewer-tab[onclick*="data"]')?.classList.add('active');
+    const dataTab = document.querySelector('.table-viewer-tab[onclick*="data"]');
+    if (dataTab) dataTab.classList.add('active');
 
+    // ✅ STEP 6: Render data (with small delay to ensure modal is visible)
+    setTimeout(() => {
+        try {
+            showTableData(tableName);
+        } catch (e) {
+            console.error('showTableData failed:', e);
+            const content = document.getElementById('tableViewerContent');
+            if (content) content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error loading data: ${escapeHtml(e.message)}</div>`;
+        }
+    }, 100);
+
+    // ✅ STEP 7: Refresh sidebar to highlight active table
     refreshSchemaTree();
-    showTableData(tableName);
+
+    console.log('✅ Table viewer opened for:', tableName);
 }
 
 // ✅ Switch table viewer tab
@@ -3674,11 +3744,22 @@ function switchTableTab(tab, el) {
 // ✅ Show table data
 function showTableData(tableName) {
     const content = document.getElementById('tableViewerContent');
+    if (!content) {
+        console.error('❌ tableViewerContent not found!');
+        return;
+    }
     content.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Loading data...</div>';
 
     setTimeout(() => {
         try {
-            const res = sqlDatabase.exec(`SELECT * FROM "${tableName}" LIMIT 500`);
+            // Ensure we're querying the right database
+            const db = sqlDatabases[activeDatabase] || sqlDatabase;
+            if (!db) {
+                content.innerHTML = '<div style="color:#ef4444;padding:20px;">No active database</div>';
+                return;
+            }
+
+            const res = db.exec(`SELECT * FROM "${tableName}" LIMIT 500`);
             if (res.length === 0 || !res[0].values || res[0].values.length === 0) {
                 content.innerHTML = `
                     <div class="db-empty-state">
@@ -3735,9 +3816,18 @@ function showTableData(tableName) {
 // ✅ Show table structure (columns + types)
 function showTableStructure(tableName) {
     const content = document.getElementById('tableViewerContent');
+    if (!content) return;
+
     try {
+        // Ensure we're querying the right database
+        const db = sqlDatabases[activeDatabase] || sqlDatabase;
+        if (!db) {
+            content.innerHTML = '<div style="color:#ef4444;padding:20px;">No active database</div>';
+            return;
+        }
+
         // Get column info using PRAGMA
-        const res = sqlDatabase.exec(`PRAGMA table_info("${tableName}")`);
+        const res = db.exec(`PRAGMA table_info("${tableName}")`);
         if (!res.length || !res[0].values) {
             content.innerHTML = '<div style="color:#ef4444;padding:20px;">Cannot read structure</div>';
             return;
@@ -3809,8 +3899,14 @@ function showTableStructure(tableName) {
 // ✅ Show indexes
 function showTableIndexes(tableName) {
     const content = document.getElementById('tableViewerContent');
+    if (!content) return;
     try {
-        const res = sqlDatabase.exec(`PRAGMA index_list("${tableName}")`);
+        const db = sqlDatabases[activeDatabase] || sqlDatabase;
+        if (!db) {
+            content.innerHTML = '<div style="color:#ef4444;padding:20px;">No active database</div>';
+            return;
+        }
+        const res = db.exec(`PRAGMA index_list("${tableName}")`);
         if (!res.length || !res[0].values || res[0].values.length === 0) {
             content.innerHTML = `
                 <div class="db-empty-state">
@@ -3842,8 +3938,14 @@ function showTableIndexes(tableName) {
 // ✅ Show SQL CREATE statement
 function showTableSQL(tableName) {
     const content = document.getElementById('tableViewerContent');
+    if (!content) return;
     try {
-        const res = sqlDatabase.exec(`SELECT sql FROM sqlite_master WHERE name='${tableName.replace(/'/g, "''")}'`);
+        const db = sqlDatabases[activeDatabase] || sqlDatabase;
+        if (!db) {
+            content.innerHTML = '<div style="color:#ef4444;padding:20px;">No active database</div>';
+            return;
+        }
+        const res = db.exec(`SELECT sql FROM sqlite_master WHERE name='${tableName.replace(/'/g, "''")}'`);
         const createSQL = res[0]?.values[0]?.[0] || 'No SQL found';
 
         let html = `
