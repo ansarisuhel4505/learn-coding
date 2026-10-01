@@ -2738,20 +2738,21 @@ async function startJarvis() {
 // 4. Code to Flowchart (Mermaid.js)
 // 4. Code to Flowchart (Mermaid Image Rendering - No Glitch)
 // 4. Code to Flowchart (Local Safe Rendering)
+// 4. Code to Flowchart (Safe API Image Rendering - No Glitch)
 async function generateFlowchart() {
     const code = editorInstance.getValue();
     if(!code.trim()) return showToast('Write code first!', 'warning');
     
     openModal('flowchartModal');
     const outputDiv = document.getElementById('mermaidOutput');
-    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and generating flowchart...';
+    outputDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code and generating flowchart image...';
 
     const prompt = `Analyze this code and generate a logic flowchart using Mermaid.js syntax.
 CRITICAL RULES:
 1. Start exactly with "graph TD".
-2. Use ONLY simple words for node labels. Do NOT use special characters, quotes, brackets, or math symbols inside nodes.
-3. Good Example: A[Start] --> B[Check Even or Odd]
-4. ONLY output raw mermaid code. No markdown formatting like \`\`\`mermaid.
+2. Do NOT use quotes, brackets [], {}, () inside node names. Just use plain text.
+3. Do NOT use special characters (<, >, =, %). Use simple English words instead.
+4. ONLY output valid mermaid code. No explanations. No markdown block like \`\`\`mermaid.
 
 Code:
 ${code}`;
@@ -2763,19 +2764,24 @@ ${code}`;
         const data = await res.json();
         
         let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
-        if (!mermaidCode.startsWith("graph")) mermaidCode = "graph TD\n" + mermaidCode;
+        if (!mermaidCode.startsWith("graph")) {
+            mermaidCode = "graph TD\n" + mermaidCode;
+        }
         
-        mermaid.initialize({ startOnLoad: false, theme: 'default' });
-        const uniqueId = 'flow_' + Date.now();
-        const { svg } = await mermaid.render(uniqueId, mermaidCode);
-        outputDiv.innerHTML = svg;
+        // Encode logic for safe image generation via API
+        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
+        const imgUrl = `https://mermaid.ink/img/${encoded}`;
+        
+        // Show as Image (Will NEVER crash the browser)
+        outputDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; height:auto; border-radius:8px; background:white; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);" alt="Flowchart" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>AI generated complex syntax. Please click Flowchart button again.</span>';">`;
+        
     } catch(e) {
         console.error(e);
-        outputDiv.innerHTML = '<span style="color:red; font-weight:bold;">⚠️ AI generated a complex format. Please click the Flowchart button again!</span>';
+        outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate flowchart.</span>';
     }
 }
 
-// 4.5 SQL to ER Diagram (Local Safe Rendering)
+// 4.5 SQL to ER Diagram (Safe API Image Rendering)
 async function generateERDiagram() {
     const code = editorInstance.getValue();
     const lang = document.getElementById('langSelect').value;
@@ -2803,15 +2809,20 @@ ${code}`;
         const data = await res.json();
         
         let mermaidCode = data.reply.replace(/```mermaid/gi, '').replace(/```sql/gi, '').replace(/```/g, '').trim();
-        if (!mermaidCode.startsWith("erDiagram")) mermaidCode = "erDiagram\n" + mermaidCode;
+        if (!mermaidCode.startsWith("erDiagram")) {
+            mermaidCode = "erDiagram\n" + mermaidCode;
+        }
         
-        mermaid.initialize({ startOnLoad: false, theme: 'default' });
-        const uniqueId = 'er_' + Date.now();
-        const { svg } = await mermaid.render(uniqueId, mermaidCode);
-        outputDiv.innerHTML = svg;
+        // Encode logic for safe image generation
+        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
+        const imgUrl = `[https://mermaid.ink/img/$](https://mermaid.ink/img/$){encoded}`;
+        
+        // Show as Image
+        outputDiv.innerHTML = `<img src="${imgUrl}" style="max-width:100%; height:auto; border-radius:8px; background:white; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);" alt="ER Diagram" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>AI failed to generate a valid ER Diagram. Try again!</span>';">`;
+        
     } catch(e) {
         console.error(e);
-        outputDiv.innerHTML = '<span style="color:red; font-weight:bold;">⚠️ AI generated invalid SQL syntax format. Try again!</span>';
+        outputDiv.innerHTML = '<span style="color:red;">Network Error: Failed to generate ER Diagram.</span>';
     }
 }
 
