@@ -70,20 +70,24 @@ body.custom-bg textarea { background: transparent !important; }
 .chat-input { display: flex; padding: 10px; background: #1e293b; }
 .chat-input input { flex-grow: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
 /* ✅ Mermaid SVG Display Fix */
-/* ✅ Mermaid output containers - simple and reliable */
+/* ✅ Mermaid output containers - forced dimensions */
 #mermaidOutput,
 #erOutput {
     width: 100%;
-    min-height: 300px;
+    min-height: 400px;
     display: block;
+    text-align: center;
+}
+#mermaidOutput > div,
+#erOutput > div {
+    display: inline-block;
+    max-width: 100%;
 }
 #mermaidOutput img,
 #erOutput img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    background: white;
+    display: block !important;
+    margin: 0 auto !important;
+    background: white !important;
 }
 .db-table-wrapper { width: 100%; overflow: auto; background: #1e293b; border-radius: 5px; margin-top: 10px; }
 .db-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
@@ -3151,64 +3155,111 @@ async function searchNPM(e) {
    /* ============================================================
    🎨 UNIVERSAL MERMAID RENDERER — Local SVG Rendering (Fixed 0x0 Bug)
 ============================================================ */
-/* ============================================================
-   🎨 UNIVERSAL MERMAID RENDERER — (Force Open Modal Fix)
-============================================================ */
 async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
-    console.log('🎬 Rendering ' + diagramName + ' locally...');
+    console.log('🎬 Rendering ' + diagramName + '...');
 
-    // 🚀 FIX 1: जिस Modal में डायग्राम बन रहा है, उसे ज़बरदस्ती Active (Open) करो
-    const parentModal = outputDiv.closest('.modal-overlay');
-    if (parentModal) parentModal.classList.add('active');
+    // ✅ STEP 1: Force modal to open
+    const overlay = outputDiv.closest('.modal-overlay');
+    if (overlay && !overlay.classList.contains('active')) {
+        overlay.classList.add('active');
+        console.warn('⚠️ Modal was hidden — forcing open');
+    }
 
-    // Loading State
+    // ✅ STEP 2: Build mermaid.ink URL
+    let imgUrl;
+    try {
+        const bytes = new TextEncoder().encode(mermaidCode);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        imgUrl = 'https://mermaid.ink/img/' + b64 + '?bgColor=FFFFFF';
+        console.log('🖼️ URL ready');
+    } catch (e) {
+        outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">Encoding error: ' + e.message + '</div>';
+        return;
+    }
+
+    // ✅ STEP 3: Show loading spinner
     outputDiv.innerHTML = '<div style="padding:30px; text-align:center; color:#3b82f6;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i><p style="margin-top:12px; font-size:13px;">Rendering ' + diagramName + '...</p></div>';
 
-    try {
-        if (typeof mermaid === 'undefined') throw new Error('Mermaid library not loaded');
+    // ✅ STEP 4: Preload image to get exact dimensions
+    const preloadImg = new Image();
+    preloadImg.crossOrigin = 'anonymous';
 
-        // Unique ID
-        const id = 'mermaid-svg-' + Date.now();
-        const { svg } = await mermaid.render(id, mermaidCode);
+    preloadImg.onload = function() {
+        const nw = preloadImg.naturalWidth || 600;
+        const nh = preloadImg.naturalHeight || 400;
 
-        // Clear output
-        outputDiv.innerHTML = '';
-        
-        const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'text-align:center; padding:10px; width:100%; overflow-x:auto; overflow-y:hidden; min-height:300px; display:block;';
-        wrapper.innerHTML = svg;
+        console.log('✅ Image loaded: ' + nw + 'x' + nh);
 
-        // Force SVG visibility
-        const svgEl = wrapper.querySelector('svg');
-        if (svgEl) {
-            svgEl.removeAttribute('width');  
-            svgEl.removeAttribute('height'); 
-            svgEl.style.maxWidth = '100%';
-            svgEl.style.height = 'auto';
-            svgEl.style.display = 'inline-block';
-        }
+        // ✅ STEP 5: Calculate display size (fit in modal)
+        const maxAvailW = Math.min(window.innerWidth - 80, 750);
+        const displayW = Math.min(nw, maxAvailW);
+        const displayH = Math.round((nh * displayW) / nw);
 
-        outputDiv.appendChild(wrapper);
-        
-        // 🚀 FIX 2: रेंडर होने के बाद एक बार फिर चेक करो कि Modal खुला है या नहीं
-        if (parentModal) parentModal.classList.add('active');
+        console.log('📐 Display size: ' + displayW + 'x' + displayH);
 
-        showToast('✓ ' + diagramName + ' generated!', 'success');
-        console.log('🎉 ' + diagramName + ' displayed in modal');
+        // ✅ STEP 6: Inject with BOTH attributes AND styles (bulletproof)
+        outputDiv.innerHTML =
+            '<div style="background:#ffffff; padding:15px; border-radius:8px; display:inline-block; max-width:100%;">' +
+                '<img ' +
+                    'src="' + imgUrl + '" ' +
+                    'alt="' + diagramName + '" ' +
+                    'width="' + displayW + '" ' +
+                    'height="' + displayH + '" ' +
+                    'style="' +
+                        'display:block !important;' +
+                        'width:' + displayW + 'px !important;' +
+                        'height:' + displayH + 'px !important;' +
+                        'min-width:' + displayW + 'px !important;' +
+                        'min-height:' + displayH + 'px !important;' +
+                        'max-width:100% !important;' +
+                        'margin:0 auto !important;' +
+                        'background:#ffffff !important;' +
+                        'box-sizing:content-box !important;' +
+                        'visibility:visible !important;' +
+                        'opacity:1 !important;' +
+                    '" ' +
+                '>' +
+            '</div>';
 
-    } catch (err) {
-        console.error('❌ ' + diagramName + ' render failed:', err);
-        if (parentModal) parentModal.classList.add('active'); // Error आने पर भी Modal खोलो
-        
-        outputDiv.innerHTML = 
-            '<div style="color:#ef4444; padding:20px;">' +
-            '<h4>⚠️ ' + diagramName + ' Rendering Failed</h4>' +
-            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">' + err.message + '</p>' +
-            '<pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; font-size:11px; max-height:300px; overflow:auto; text-align:left;">' +
+        // ✅ STEP 7: Verify after render
+        setTimeout(() => {
+            const imgEl = outputDiv.querySelector('img');
+            if (imgEl) {
+                const rect = imgEl.getBoundingClientRect();
+                console.log('🎯 Verified rect: ' + Math.round(rect.width) + 'x' + Math.round(rect.height));
+                if (rect.width > 50 && rect.height > 50) {
+                    showToast('✓ ' + diagramName + ' generated!', 'success');
+                    console.log('🎉 SUCCESS');
+                } else {
+                    console.error('❌ Still 0x0! Parent chain:');
+                    let p = imgEl.parentElement;
+                    let depth = 0;
+                    while (p && depth < 6) {
+                        const r = p.getBoundingClientRect();
+                        console.error('  Level ' + depth + ' <' + p.tagName + '>: ' + Math.round(r.width) + 'x' + Math.round(r.height));
+                        p = p.parentElement;
+                        depth++;
+                    }
+                }
+            }
+        }, 200);
+    };
+
+    preloadImg.onerror = function() {
+        console.error('❌ ' + diagramName + ' image failed to load');
+        outputDiv.innerHTML =
+            '<div style="padding:20px; color:#ef4444;">' +
+            '<h4>⚠️ ' + diagramName + ' image load नहीं हुई</h4>' +
+            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">Raw mermaid code:</p>' +
+            '<pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; font-size:11px; max-height:300px; overflow:auto;">' +
             escapeHtml(mermaidCode) + '</pre>' +
             '<button onclick="' + (diagramName.includes('ER') ? 'generateERDiagram()' : 'generateFlowchart()') + '" class="btn-primary" style="margin-top:12px;">🔄 Retry</button>' +
             '</div>';
-    }
+    };
+
+    preloadImg.src = imgUrl;
 }
 /* ============================================================
    INIT
