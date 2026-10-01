@@ -742,20 +742,22 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
 </div>
 
 <!-- Flowchart Modal -->
+<!-- Flowchart Modal -->
 <div class="modal-overlay" id="flowchartModal">
     <div class="modal" style="max-width: 800px;">
         <div class="modal-header"><h3><i class="fas fa-project-diagram"></i> Code Architecture</h3><span class="modal-close" onclick="closeModal('flowchartModal')">&times;</span></div>
         <div class="modal-body" style="background: #f8fafc; text-align: center; overflow: auto; min-height:300px; padding:15px;">
-            <div id="erOutput" style="color: #0f172a;">Generating ER Diagram...</div>
+            <div id="mermaidOutput" style="color: #0f172a;">Generating Flowchart...</div>
         </div>
     </div>
 </div>
-    <!-- ER Diagram Modal -->
+
+<!-- ER Diagram Modal -->
 <div class="modal-overlay" id="erModal">
     <div class="modal" style="max-width: 800px;">
         <div class="modal-header"><h3><i class="fas fa-database"></i> SQL ER Diagram</h3><span class="modal-close" onclick="closeModal('erModal')">&times;</span></div>
-       <div class="modal-body" style="background: #f8fafc; text-align: center; overflow: auto; min-height:300px; padding:15px;">
-            <div id="mermaidOutput" style="color: #0f172a;">Generating Flowchart...</div>
+        <div class="modal-body" style="background: #f8fafc; text-align: center; overflow: auto; min-height:300px; padding:15px;">
+            <div id="erOutput" style="color: #0f172a;">Generating ER Diagram...</div>
         </div>
     </div>
 </div>
@@ -2892,8 +2894,15 @@ ${code}`;
             .trim();
 
         if (!/^erDiagram/i.test(mermaidCode)) {
-            mermaidCode = "erDiagram\n" + mermaidCode;
-        }
+    mermaidCode = "erDiagram\n" + mermaidCode;
+}
+
+// ✅ AI की गलत "PK xxx" syntax ठीक करो → "int xxx PK"
+// Pattern: "PK column_name" (जो AI गलत generate करता है)
+mermaidCode = mermaidCode.replace(/\bPK\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, 'int $1 PK');
+
+// ✅ कोई और invalid keyword हटाओ
+mermaidCode = mermaidCode.replace(/\bFK\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, 'int $1 FK');
 
         console.log('✅ Final ER code:', JSON.stringify(mermaidCode));
 
