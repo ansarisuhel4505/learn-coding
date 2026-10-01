@@ -19,6 +19,8 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "socket.io": "^4.7.5",
+    "axios": "^1.6.8",
     "connect-mongo": "^5.1.0",
     "@google/generative-ai": "^0.21.0",
     "body-parser": "^1.20.2",
