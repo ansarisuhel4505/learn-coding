@@ -937,6 +937,7 @@ let lastRunTime = 0;
 let pwaInstallEvent = null;
 // ✅ Mermaid setup — सिर्फ एक बार
 let mermaidReady = false;
+let mermaidReady = false;
 function initMermaid() {
     if (mermaidReady) return true;
     if (typeof mermaid === 'undefined') {
@@ -948,14 +949,13 @@ function initMermaid() {
         theme: 'default',
         securityLevel: 'loose',
         fontFamily: 'Poppins, sans-serif',
-        flowchart: { useMaxWidth: true, htmlLabels: false },
-        er: { useMaxWidth: true }
+        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+        er: { useMaxWidth: true, layoutDirection: 'TB' }
     });
     mermaidReady = true;
-    console.log('✅ Mermaid initialized');
+    console.log('✅ Mermaid initialized v' + (mermaid.version || '11'));
     return true;
 }
-
 activeFile = Object.keys(fileSystem)[0] || "main.py";
 openTabs = [activeFile];
 
@@ -2762,7 +2762,6 @@ async function generateFlowchart() {
     const code = editorInstance.getValue();
     if (!code.trim()) return showToast('Write code first!', 'warning');
 
-    // ✅ Mermaid ready check
     if (!initMermaid()) {
         return showToast('Mermaid library load नहीं हुई। Page refresh करो।', 'error');
     }
@@ -2774,8 +2773,9 @@ async function generateFlowchart() {
     const prompt = `Analyze this code and generate a flowchart using Mermaid.js syntax.
 CRITICAL RULES:
 1. First line MUST be exactly: graph TD
-2. Use simple English words in nodes. NO quotes, NO brackets [], {}, () inside node labels.
-3. Wrap the mermaid code in a \`\`\`mermaid ... \`\`\` block.
+2. Every edge/statement on its OWN LINE
+3. NO parentheses, quotes, brackets inside node labels. Only plain text.
+4. Wrap the mermaid code in a \`\`\`mermaid ... \`\`\` block.
 
 Code:
 ${code}`;
@@ -2793,20 +2793,15 @@ ${code}`;
             return;
         }
 
-        // ✅ Mermaid code extract करो — सिर्फ code block
         let mermaidCode = '';
         const match = data.reply.match(/```mermaid\s*([\s\S]*?)```/i);
-        if (match) {
-            mermaidCode = match[1];
-        } else {
-            mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '');
-        }
+        if (match) mermaidCode = match[1];
+        else mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '');
 
-        // ✅ BOM और hidden characters clean करो
         mermaidCode = mermaidCode
-            .replace(/\uFEFF/g, '')        // BOM हटाओ
-            .replace(/\u200B/g, '')        // Zero-width space हटाओ
-            .replace(/\r/g, '')            // CR हटाओ
+            .replace(/\uFEFF/g, '')
+            .replace(/\u200B/g, '')
+            .replace(/\r/g, '')
             .trim();
 
         if (!/^(graph|flowchart)/i.test(mermaidCode)) {
@@ -2815,21 +2810,22 @@ ${code}`;
 
         console.log('✅ Final mermaid code:', JSON.stringify(mermaidCode));
 
-        // ✅ mermaid.render() use करो — ये SVG string return करता है
-        outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering diagram...</div>';
+        outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering...</div>';
 
+        // ✅ Fresh approach: पहले एक बार mermaid element create करो, फिर render
+        const uniqueId = 'flowchart-' + Date.now();
         try {
-            const uniqueId = 'flowchart-' + Date.now();
             const { svg } = await mermaid.render(uniqueId, mermaidCode);
-            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px;">' + svg + '</div>';
+            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px; min-height:200px;">' + svg + '</div>';
             showToast('✓ Flowchart generated!', 'success');
+            console.log('✅ Flowchart rendered successfully');
         } catch (renderErr) {
             console.error('Mermaid render error:', renderErr);
             outputDiv.innerHTML =
                 '<div style="color:#ef4444; padding:20px;">' +
                 '<h4>⚠️ Render Error</h4>' +
-                '<p style="font-size:12px; margin:10px 0;">AI ने invalid syntax दिया। नीचे raw code देखो और दोबारा try करो:</p>' +
-                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px;">' +
+                '<p style="font-size:12px; margin:10px 0;">' + escapeHtml(renderErr.message || renderErr) + '</p>' +
+                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
                 escapeHtml(mermaidCode) +
                 '</pre>' +
                 '<button onclick="generateFlowchart()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
@@ -2841,7 +2837,7 @@ ${code}`;
         outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">Network Error: ' + e.message + '</div>';
     }
 }
-    async function generateERDiagram() {
+   async function generateERDiagram() {
     const code = editorInstance.getValue();
     const lang = document.getElementById('langSelect').value;
 
@@ -2856,11 +2852,25 @@ ${code}`;
     const outputDiv = document.getElementById('erOutput');
     outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#a855f7;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:10px;">AI analyzing SQL tables...</p></div>';
 
-    const prompt = `Analyze this SQL code and generate an ER diagram using Mermaid.js syntax.
-CRITICAL RULES:
-1. First line MUST be exactly: erDiagram
-2. Use simple table/column names without special chars.
-3. Wrap the mermaid code in a \`\`\`mermaid ... \`\`\` block.
+    // ✅ AI को JSON माँगो — मermaid नहीं
+    const prompt = `Analyze this SQL code and return a JSON object describing tables and relations.
+Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
+
+{
+  "tables": [
+    {
+      "name": "TABLE_NAME",
+      "columns": [
+        { "name": "column_name", "type": "int", "isPK": true, "isFK": false }
+      ]
+    }
+  ],
+  "relations": [
+    { "from": "TABLE_A", "to": "TABLE_B", "cardinality": "many-to-one", "label": "belongs_to" }
+  ]
+}
+
+Cardinality can be: "many-to-one", "one-to-many", "one-to-one", "many-to-many"
 
 SQL Code:
 ${code}`;
@@ -2878,48 +2888,85 @@ ${code}`;
             return;
         }
 
-        let mermaidCode = '';
-        const match = data.reply.match(/```mermaid\s*([\s\S]*?)```/i);
-        if (match) {
-            mermaidCode = match[1];
-        } else {
-            mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '');
+        // ✅ JSON parse करो
+        let jsonText = data.reply.replace(/```json/gi, '').replace(/```/g, '').trim();
+        let schema;
+        try {
+            schema = JSON.parse(jsonText);
+        } catch (parseErr) {
+            console.error('JSON parse failed:', jsonText);
+            outputDiv.innerHTML =
+                '<div style="color:#ef4444; padding:20px;">' +
+                '<h4>⚠️ AI ने valid JSON नहीं दिया</h4>' +
+                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
+                escapeHtml(data.reply) +
+                '</pre>' +
+                '<button onclick="generateERDiagram()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
+                '</div>';
+            return;
         }
 
-        // ✅ BOM और hidden characters clean करो
-        mermaidCode = mermaidCode
-            .replace(/\uFEFF/g, '')
-            .replace(/\u200B/g, '')
-            .replace(/\r/g, '')
-            .trim();
+        // ✅ JSON से Mermaid ER code generate करो
+        let mermaidCode = 'erDiagram\n';
 
-        if (!/^erDiagram/i.test(mermaidCode)) {
-    mermaidCode = "erDiagram\n" + mermaidCode;
-}
+        // Tables + columns
+        if (schema.tables && Array.isArray(schema.tables)) {
+            schema.tables.forEach(t => {
+                const tableName = (t.name || '').replace(/[^a-zA-Z0-9_]/g, '');
+                if (!tableName) return;
 
-// ✅ AI की गलत "PK xxx" syntax ठीक करो → "int xxx PK"
-// Pattern: "PK column_name" (जो AI गलत generate करता है)
-mermaidCode = mermaidCode.replace(/\bPK\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, 'int $1 PK');
+                mermaidCode += '    ' + tableName + ' {\n';
+                if (Array.isArray(t.columns)) {
+                    t.columns.forEach(col => {
+                        const colName = (col.name || '').replace(/[^a-zA-Z0-9_]/g, '');
+                        if (!colName) return;
+                        const colType = (col.type || 'string').replace(/[^a-zA-Z0-9_]/g, '') || 'string';
+                        let constraint = '';
+                        if (col.isPK) constraint = ' PK';
+                        else if (col.isFK) constraint = ' FK';
+                        mermaidCode += '        ' + colType + ' ' + colName + constraint + '\n';
+                    });
+                }
+                mermaidCode += '    }\n';
+            });
+        }
 
-// ✅ कोई और invalid keyword हटाओ
-mermaidCode = mermaidCode.replace(/\bFK\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, 'int $1 FK');
+        // Relations
+        const cardinalityMap = {
+            'one-to-one': '||--||',
+            'one-to-many': '||--o{',
+            'many-to-one': '}o--||',
+            'many-to-many': '}o--o{'
+        };
 
-        console.log('✅ Final ER code:', JSON.stringify(mermaidCode));
+        if (schema.relations && Array.isArray(schema.relations)) {
+            schema.relations.forEach(rel => {
+                const from = (rel.from || '').replace(/[^a-zA-Z0-9_]/g, '');
+                const to = (rel.to || '').replace(/[^a-zA-Z0-9_]/g, '');
+                if (!from || !to) return;
+                const card = cardinalityMap[rel.cardinality] || '||--o{';
+                const label = (rel.label || 'has').replace(/[^a-zA-Z0-9_ ]/g, '');
+                mermaidCode += '    ' + from + ' ' + card + ' ' + to + ' : "' + label + '"\n';
+            });
+        }
+
+        console.log('✅ Generated ER code:', JSON.stringify(mermaidCode));
 
         outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering ER diagram...</div>';
 
+        const uniqueId = 'er-' + Date.now();
         try {
-            const uniqueId = 'er-' + Date.now();
             const { svg } = await mermaid.render(uniqueId, mermaidCode);
-            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px; overflow:auto;">' + svg + '</div>';
+            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px; overflow:auto; min-height:200px;">' + svg + '</div>';
             showToast('✓ ER Diagram generated!', 'success');
+            console.log('✅ ER Diagram rendered successfully');
         } catch (renderErr) {
             console.error('ER render error:', renderErr);
             outputDiv.innerHTML =
                 '<div style="color:#ef4444; padding:20px;">' +
                 '<h4>⚠️ Render Error</h4>' +
-                '<p style="font-size:12px; margin:10px 0;">AI ने invalid ER syntax दिया:</p>' +
-                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px;">' +
+                '<p style="font-size:12px; margin:10px 0;">' + escapeHtml(renderErr.message || renderErr) + '</p>' +
+                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
                 escapeHtml(mermaidCode) +
                 '</pre>' +
                 '<button onclick="generateERDiagram()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
