@@ -3148,68 +3148,58 @@ async function searchNPM(e) {
         }
     }
 }
-    /* ============================================================
-   🎨 UNIVERSAL MERMAID RENDERER — SVG first, image fallback
+   /* ============================================================
+   🎨 UNIVERSAL MERMAID RENDERER — Local SVG Rendering (Fixed 0x0 Bug)
 ============================================================ */
 async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
-    console.log('🎬 Rendering ' + diagramName + '...');
+    console.log('🎬 Rendering ' + diagramName + ' locally...');
 
-    // ✅ Create mermaid.ink URL with URL-safe base64
-    let imgUrl;
-    try {
-        const bytes = new TextEncoder().encode(mermaidCode);
-        let bin = '';
-        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-        const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        imgUrl = 'https://mermaid.ink/img/' + b64 + '?bgColor=FFFFFF';
-        console.log('🖼️ Image URL ready');
-    } catch (e) {
-        outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">Encoding error: ' + e.message + '</div>';
-        return;
-    }
-
-    // ✅ Show loading spinner first
+    // ✅ Show loading spinner
     outputDiv.innerHTML = '<div style="padding:30px; text-align:center; color:#3b82f6;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i><p style="margin-top:12px; font-size:13px;">Rendering ' + diagramName + '...</p></div>';
 
-    // ✅ Create image
-    const img = document.createElement('img');
-    img.alt = diagramName;
-    img.style.cssText = 'display:block !important; max-width:100% !important; height:auto !important; margin:0 auto !important; background:#ffffff !important; border-radius:6px !important; visibility:visible !important; opacity:1 !important;';
+    try {
+        // Ensure Mermaid is initialized
+        if (!initMermaid()) throw new Error('Mermaid library not found.');
 
-    // ✅ On success - replace spinner with image
-    img.onload = function() {
-        console.log('✅ ' + diagramName + ' image loaded: ' + img.naturalWidth + 'x' + img.naturalHeight);
+        // Generate a unique ID for the SVG
+        const id = 'mermaid-svg-' + Math.random().toString(36).substr(2, 9);
+        
+        // ✅ Render SVG directly using Local Mermaid API
+        const { svg } = await mermaid.render(id, mermaidCode);
 
-        // Clear and put a nice container
+        // ✅ Clear output and create a flex wrapper to prevent 0x0 collapse
         outputDiv.innerHTML = '';
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'background:#ffffff; padding:20px; border-radius:8px; text-align:center; min-height:300px; overflow:auto;';
-        wrapper.appendChild(img);
+        wrapper.style.cssText = 'background:#ffffff; padding:20px; border-radius:8px; display:flex; justify-content:center; align-items:center; min-height:300px; overflow:auto;';
+        wrapper.innerHTML = svg;
+
+        // Fix SVG inline styles to ensure it takes up space correctly
+        const svgEl = wrapper.querySelector('svg');
+        if (svgEl) {
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+            svgEl.style.display = 'block';
+        }
+
         outputDiv.appendChild(wrapper);
-
-        // Force reflow
-        void wrapper.offsetHeight;
-
         showToast('✓ ' + diagramName + ' generated!', 'success');
         console.log('🎉 ' + diagramName + ' displayed in modal');
-    };
 
-    // ✅ On error - show raw code + retry
-    img.onerror = function() {
-        console.error('❌ ' + diagramName + ' image failed');
+    } catch (err) {
+        console.error('❌ ' + diagramName + ' render failed:', err);
+        
+        // Show fallback error UI with raw code
         outputDiv.innerHTML =
             '<div style="padding:20px; color:#ef4444;">' +
-            '<h4>⚠️ ' + diagramName + ' नहीं बन पाया</h4>' +
-            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">Retry करो या नीचे का code copy करके <a href="https://mermaid.live" target="_blank" style="color:#3b82f6;">mermaid.live</a> पर paste करो:</p>' +
-            '<pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; font-size:11px; max-height:300px; overflow:auto;">' +
+            '<h4>⚠️ ' + diagramName + ' Rendering Failed</h4>' +
+            '<p style="font-size:12px; margin:10px 0; color:#94a3b8;">There was a syntax error in the diagram code. Raw code:</p>' +
+            '<pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; font-size:11px; max-height:300px; overflow:auto; text-align:left;">' +
             escapeHtml(mermaidCode) + '</pre>' +
             '<button onclick="' + (diagramName.includes('ER') ? 'generateERDiagram()' : 'generateFlowchart()') + '" class="btn-primary" style="margin-top:12px;">🔄 Retry</button>' +
             '</div>';
-    };
-
-    // ✅ Set src LAST
-    img.src = imgUrl;
+    }
 }
+
 /* ============================================================
    INIT
 ============================================================ */
