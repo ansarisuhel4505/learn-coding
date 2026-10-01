@@ -60,7 +60,26 @@ async function callGroq(messages, model = 'openai/gpt-oss-120b') {
     if (data.error) throw new Error(data.error.message);
     return data.choices[0].message.content;
 }
+const http = require('http');
+const { Server } = require('socket.io');
+const axios = require('axios');
+const { exec } = require('child_process');
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+// 🌟 NAYA: Socket.io for Real-Time Live Share
+io.on('connection', (socket) => {
+    socket.on('join-room', (roomId) => {
+        socket.join(roomId);
+        socket.to(roomId).emit('user-joined', socket.id);
+    });
+    socket.on('code-change', ({ roomId, code, lang }) => {
+        socket.to(roomId).emit('receive-code', { code, lang });
+    });
+});
+
 const PORT = process.env.PORT || 8080;
 // ==========================================
 // 1. MIDDLEWARE & STATIC FILES
@@ -1133,13 +1152,74 @@ app.post('/api/workspace/load', async (req, res) => {
         res.json({ success: true, files: ws?.files || {}, updatedAt: ws?.updatedAt || null });
     } catch (err) { res.json({ success: false, message: err.message }); }
 });
+// ==========================================
+// 🚀 NAYA: EMBED, GITHUB & TERMINAL APIs
+// ==========================================
+
+// 1. Snippet Schema for Embed Iframes
+const Snippet = mongoose.model('Snippet', new mongoose.Schema({
+    code: String, lang: String, shortId: String, 
+    createdAt: { type: Date, default: Date.now, expires: '30d' } // 30 din baad auto-delete
+}));
+
+// API: Generate Embed Link
+app.post('/api/snippets', async (req, res) => {
+    const { code, lang } = req.body;
+    const shortId = Math.random().toString(36).substring(2, 8);
+    await Snippet.create({ code, lang, shortId });
+    res.json({ success: true, embedUrl: `${req.protocol}://${req.get('host')}/embed/${shortId}` });
+});
+
+// Route: Serve Read-Only Iframe
+app.get('/embed/:id', async (req, res) => {
+    const snippet = await Snippet.findOne({ shortId: req.params.id });
+    if (!snippet) return res.send('<h2 style="color:white;">Snippet not found or expired!</h2>');
+    res.send(`
+        <html style="background:#0f172a; color:white; font-family:'Courier New', monospace; padding:15px; margin:0;">
+            <body>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #334155; padding-bottom:8px; margin-bottom:12px;">
+                    <b style="color:#3b82f6;">CodeMaster Ultra</b> <span style="color:#10b981; font-size:12px;">${snippet.lang}</span>
+                </div>
+                <pre style="white-space:pre-wrap; word-break:break-word; font-size:13px; line-height:1.5;">${snippet.code.replace(/</g, '&lt;')}</pre>
+            </body>
+        </html>
+    `);
+});
+
+// 2. GitHub API (Push Code directly to Repo)
+app.post('/api/github/push', async (req, res) => {
+    const { token, repo, filename, code, message } = req.body;
+    try {
+        const apiUrl = `https://api.github.com/repos/${repo}/contents/${filename}`;
+        let sha = null;
+        try {
+            const getRes = await axios.get(apiUrl, { headers: { Authorization: `Bearer ${token}` } });
+            sha = getRes.data.sha; // Agar file already hai toh overwrite karne ke liye SHA chahiye
+        } catch (e) {}
+
+        const data = { message: message || "Update from CodeMaster Ultra", content: Buffer.from(code).toString('base64'), ...(sha && { sha }) };
+        await axios.put(apiUrl, data, { headers: { Authorization: `Bearer ${token}` } });
+        res.json({ success: true, message: "Code successfully pushed to GitHub!" });
+    } catch (err) {
+        res.json({ success: false, message: err.response?.data?.message || "GitHub Push Failed" });
+    }
+});
+
+// 3. Pseudo Terminal Execution API (For Xterm.js)
+app.post('/api/terminal/run', checkAdmin, (req, res) => {
+    const { command } = req.body;
+    exec(command, { timeout: 5000 }, (error, stdout, stderr) => {
+        if (error) return res.json({ output: stderr || error.message });
+        res.json({ output: stdout });
+    });
+});
 
 // ==========================================
 // VERCEL EXPORT (Server Start) - FIXED 🚀
 // ==========================================
 if (process.env.NODE_ENV !== 'production') {
     const LOCAL_PORT = process.env.PORT || 8080;
-    app.listen(LOCAL_PORT, () => {
+    server.listen(LOCAL_PORT, () => {
         console.log(`💻 Local Server running on port ${LOCAL_PORT}`);
     });
 }
