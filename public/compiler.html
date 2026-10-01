@@ -2211,12 +2211,12 @@ document.addEventListener('keydown', e => {
             executeCode();
         }
     }
-    else if (e.key === 'Escape') {
+        else if (e.key === 'Escape') {
         closeCommandPalette();
+        closeTableViewer();  // ✅ Close custom viewer
         document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
         document.getElementById('mobileExplorer').classList.remove('active');
     }
-});
 
 /* ============================================================
    THEMES
@@ -3673,120 +3673,259 @@ function getTableRowCount(tableName) {
 }
 
 // ✅ Open Table in viewer
-async function openTable(tableName, isView = false) {
-    console.log('🔓 openTable called:', tableName, '| activeDB:', activeDatabase);
 
-    // ✅ STEP 1: Sync sqlDatabase with activeDatabase
+async function openTable(tableName, isView = false) {
+    console.log('🔓 openTable:', tableName, '| activeDB:', activeDatabase);
+
+    // ✅ Remove any existing viewer
+    document.getElementById('cm-table-viewer')?.remove();
+
+    // ✅ Sync DB
     sqlDatabase = sqlDatabases[activeDatabase];
-    if (!sqlDatabase) {
-        showToast('No database active', 'error');
-        return;
+    if (!sqlDatabase) return showToast('No database active', 'error');
+
+    // ✅ Verify table exists
+    try {
+        const check = sqlDatabase.exec(`SELECT name FROM sqlite_master WHERE name='${tableName.replace(/'/g, "''")}'`);
+        if (!check.length || !check[0].values.length) return showToast(`Table '${tableName}' not found`, 'error');
+    } catch (e) {
+        return showToast('Cannot access table', 'error');
     }
 
     currentViewedTable = tableName;
 
-    // ✅ STEP 2: Verify table exists
+    // ✅ Build fresh overlay (NO !important, NO external CSS dependency)
+    const overlay = document.createElement('div');
+    overlay.id = 'cm-table-viewer';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:2147483646;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;padding:15px;box-sizing:border-box;font-family:Poppins,sans-serif;overflow:auto;';
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeTableViewer();
+    });
+
+    // ✅ Card
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#1e293b;border-radius:12px;width:95vw;max-width:1100px;height:88vh;max-height:88vh;display:flex;flex-direction:column;border:1px solid #334155;box-shadow:0 20px 60px rgba(0,0,0,0.8);overflow:hidden;color:#e2e8f0;';
+
+    // ✅ Header
+    const header = document.createElement('div');
+    header.style.cssText = 'padding:14px 18px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;';
+    header.innerHTML = `
+        <h3 style="color:#3b82f6;font-size:15px;display:flex;align-items:center;gap:8px;font-weight:600;margin:0;">
+            <i class="fas fa-${isView ? 'eye' : 'table'}"></i> ${escapeHtml(tableName)}
+            <span style="color:#64748b;font-size:11px;margin-left:8px;font-weight:400;">(${escapeHtml(activeDatabase)})</span>
+        </h3>
+        <span style="cursor:pointer;color:#64748b;font-size:24px;line-height:1;padding:0 6px;" onclick="closeTableViewer()">&times;</span>
+    `;
+    card.appendChild(header);
+
+    // ✅ Tabs
+    const tabs = document.createElement('div');
+    tabs.style.cssText = 'display:flex;gap:3px;background:#0b1120;padding:0 12px;border-bottom:1px solid #334155;flex-shrink:0;';
+    tabs.innerHTML = `
+        <div class="cm-viewer-tab active" data-tab="data" style="padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-list"></i> Data</div>
+        <div class="cm-viewer-tab" data-tab="structure" style="padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-columns"></i> Structure</div>
+        <div class="cm-viewer-tab" data-tab="indexes" style="padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-key"></i> Indexes</div>
+        <div class="cm-viewer-tab" data-tab="sql" style="padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-code"></i> SQL Info</div>
+    `;
+    card.appendChild(tabs);
+
+    // ✅ Content area
+    const content = document.createElement('div');
+    content.id = 'cm-viewer-content';
+    content.style.cssText = 'flex:1;overflow:auto;padding:15px;background:#0f172a;min-height:0;';
+    card.appendChild(content);
+
+    // ✅ Footer
+    const footer = document.createElement('div');
+    footer.style.cssText = 'padding:12px 18px;border-top:1px solid #334155;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;flex-wrap:wrap;';
+    footer.innerHTML = `
+        <div style="display:flex;gap:6px;">
+            <button onclick="insertRowIntoTable()" style="background:transparent;color:#94a3b8;border:1px solid #64748b;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;"><i class="fas fa-plus"></i> Insert Row</button>
+            <button onclick="exportCurrentTableCSV()" style="background:transparent;color:#94a3b8;border:1px solid #64748b;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;"><i class="fas fa-download"></i> Export CSV</button>
+        </div>
+        <button onclick="closeTableViewer()" style="background:#3b82f6;color:white;border:none;padding:6px 16px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;">Close</button>
+    `;
+    card.appendChild(footer);
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // ✅ Attach tab handlers
+    tabs.querySelectorAll('.cm-viewer-tab').forEach(t => {
+        t.addEventListener('click', function() {
+            tabs.querySelectorAll('.cm-viewer-tab').forEach(x => {
+                x.classList.remove('active');
+                x.style.color = '#94a3b8';
+                x.style.borderBottom = '2px solid transparent';
+            });
+            this.classList.add('active');
+            this.style.color = '#3b82f6';
+            this.style.borderBottom = '2px solid #3b82f6';
+            cmRenderTab(this.getAttribute('data-tab'));
+        });
+    });
+    // Set initial active tab styling
+    const firstTab = tabs.querySelector('.cm-viewer-tab.active');
+    if (firstTab) {
+        firstTab.style.color = '#3b82f6';
+        firstTab.style.borderBottom = '2px solid #3b82f6';
+    }
+
+    // ✅ Render data tab
+    cmRenderTab('data');
+
+    showToast(`✓ Table: ${tableName}`, 'success');
+    console.log('✅ Custom table viewer created — size:', overlay.getBoundingClientRect().width + 'x' + overlay.getBoundingClientRect().height);
+}
+
+/* ✅ Close custom table viewer */
+function closeTableViewer() {
+    document.getElementById('cm-table-viewer')?.remove();
+    currentViewedTable = null;
+}
+
+/* ✅ Render tab content */
+function cmRenderTab(tab) {
+    const content = document.getElementById('cm-viewer-content');
+    if (!content) return;
+    const db = sqlDatabases[activeDatabase];
+    const table = currentViewedTable;
+    if (!db || !table) return;
+
     try {
-        const check = sqlDatabase.exec(
-            `SELECT name FROM sqlite_master WHERE name='${tableName.replace(/'/g, "''")}'`
-        );
-        if (!check.length || !check[0].values.length) {
-            showToast(`Table '${tableName}' not found`, 'error');
-            return;
+        if (tab === 'data') {
+            const res = db.exec(`SELECT * FROM "${table}" LIMIT 500`);
+            const totalRows = (() => {
+                try { return db.exec(`SELECT COUNT(*) FROM "${table}"`)[0]?.values[0]?.[0] || 0; }
+                catch(e) { return 0; }
+            })();
+
+            if (!res.length || !res[0].values || res[0].values.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align:center;padding:50px 20px;color:#64748b;">
+                        <i class="fas fa-inbox" style="font-size:40px;color:#334155;display:block;margin-bottom:12px;"></i>
+                        <p style="font-size:13px;">Table '${escapeHtml(table)}' empty है</p>
+                        <button onclick="insertRowIntoTable()" style="margin-top:15px;background:#3b82f6;color:white;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">
+                            <i class="fas fa-plus"></i> Insert First Row
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            const result = res[0];
+            let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;font-size:12px;color:#94a3b8;">
+                <div><b style="color:#10b981;">${result.values.length}</b> rows shown${totalRows > 500 ? ` <span style="color:#f59e0b;">(of ${totalRows})</span>` : ''}</div>
+                <div><i class="fas fa-columns"></i> ${result.columns.length} columns</div>
+            </div>`;
+            html += '<div style="overflow:auto;background:#1e293b;border-radius:8px;border:1px solid #334155;max-height:calc(88vh - 280px);"><table style="width:100%;border-collapse:collapse;font-size:12px;">';
+            html += '<thead><tr>';
+            html += '<th style="background:#1e40af;color:white;padding:10px 12px;text-align:left;position:sticky;top:0;z-index:2;font-size:11px;white-space:nowrap;border-right:1px solid #334155;">#</th>';
+            result.columns.forEach(col => {
+                html += `<th style="background:#1e40af;color:white;padding:10px 12px;text-align:left;position:sticky;top:0;z-index:2;font-size:11px;white-space:nowrap;border-right:1px solid #334155;">${escapeHtml(String(col))}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            result.values.forEach((row, idx) => {
+                const bg = idx % 2 === 0 ? '#1e293b' : 'rgba(30,41,59,.5)';
+                html += `<tr style="background:${bg};" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='${bg}'">`;
+                html += `<td style="padding:8px 12px;border-bottom:1px solid #334155;color:#64748b;font-size:10px;">${idx + 1}</td>`;
+                row.forEach(val => {
+                    let display;
+                    if (val === null) display = '<i style="color:#64748b;font-size:10px;">NULL</i>';
+                    else {
+                        const str = String(val);
+                        display = escapeHtml(str.length > 200 ? str.substring(0, 200) + '...' : str);
+                    }
+                    html += `<td style="padding:8px 12px;border-bottom:1px solid #334155;color:#e2e8f0;white-space:nowrap;">${display}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+
+        } else if (tab === 'structure') {
+            const res = db.exec(`PRAGMA table_info("${table}")`);
+            if (!res.length) { content.innerHTML = '<div style="color:#ef4444;padding:20px;">Cannot read structure</div>'; return; }
+            const columns = res[0].values;
+
+            let fkMap = {};
+            try {
+                const fkRes = db.exec(`PRAGMA foreign_key_list("${table}")`);
+                if (fkRes.length && fkRes[0].values) {
+                    fkRes[0].values.forEach(fk => { fkMap[fk[3]] = { table: fk[2], column: fk[4] }; });
+                }
+            } catch(e) {}
+
+            let html = `<div style="margin-bottom:12px;font-size:12px;color:#94a3b8;"><b style="color:#3b82f6;">${columns.length}</b> column(s) — Structure</div>`;
+            html += '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
+            ['#', 'Name', 'Data Type', 'Key', 'Nullable', 'Default', 'Extra'].forEach(h => {
+                html += `<th style="background:#1e40af;color:white;padding:10px;text-align:left;font-weight:700;font-size:11px;">${h}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            columns.forEach((col, idx) => {
+                const [cid, name, type, notnull, dflt_value, pk] = col;
+                const isPK = pk > 0;
+                const isFK = fkMap[name];
+                const typeStr = (type || 'BLOB').toUpperCase();
+                html += `<tr style="background:${idx % 2 === 0 ? '#1e293b' : 'rgba(30,41,59,.5)'};">
+                    <td style="padding:10px;border-bottom:1px solid #334155;color:#64748b;font-size:10px;">${idx + 1}</td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;color:#f8fafc;font-weight:600;">${escapeHtml(name)}</td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;"><span style="background:#3b82f6;color:white;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;">${escapeHtml(typeStr)}</span></td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;">
+                        ${isPK ? '<span style="background:#f59e0b;color:white;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:bold;">PRIMARY</span>' : ''}
+                        ${isFK ? `<span style="background:#8b5cf6;color:white;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:bold;margin-left:3px;">FK→${escapeHtml(isFK.table)}</span>` : ''}
+                    </td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;color:${notnull ? '#ef4444' : '#64748b'};">${notnull ? 'NOT NULL' : 'NULL OK'}</td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;color:#94a3b8;">${dflt_value !== null ? escapeHtml(String(dflt_value)) : '<i style="color:#64748b;">—</i>'}</td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;">${isPK ? '<span style="color:#f59e0b;font-size:10px;">AUTOINCREMENT</span>' : ''}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            content.innerHTML = html;
+
+        } else if (tab === 'indexes') {
+            const res = db.exec(`PRAGMA index_list("${table}")`);
+            if (!res.length || !res[0].values || res[0].values.length === 0) {
+                content.innerHTML = '<div style="text-align:center;padding:50px;color:#64748b;"><i class="fas fa-key" style="font-size:40px;color:#334155;display:block;margin-bottom:12px;"></i><p>No indexes on this table</p></div>';
+                return;
+            }
+            let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
+            ['Index Name', 'Unique', 'Columns'].forEach(h => { html += `<th style="background:#1e40af;color:white;padding:10px;text-align:left;font-size:11px;">${h}</th>`; });
+            html += '</tr></thead><tbody>';
+            res[0].values.forEach((idx, i) => {
+                const [seq, name, unique] = idx;
+                let cols = [];
+                try {
+                    const colRes = db.exec(`PRAGMA index_info("${name}")`);
+                    if (colRes.length && colRes[0].values) cols = colRes[0].values.map(c => c[2]);
+                } catch(e) {}
+                html += `<tr style="background:${i % 2 === 0 ? '#1e293b' : 'rgba(30,41,59,.5)'};">
+                    <td style="padding:10px;border-bottom:1px solid #334155;color:#f8fafc;font-weight:600;">${escapeHtml(name)}</td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;">${unique ? '<span style="color:#10b981;">✓ Yes</span>' : 'No'}</td>
+                    <td style="padding:10px;border-bottom:1px solid #334155;">${cols.map(c => `<span style="background:#10b981;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">${escapeHtml(c)}</span>`).join(' ')}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            content.innerHTML = html;
+
+        } else if (tab === 'sql') {
+            const res = db.exec(`SELECT sql FROM sqlite_master WHERE name='${table.replace(/'/g, "''")}'`);
+            const createSQL = res[0]?.values[0]?.[0] || 'No SQL found';
+            window._currentTableSQL = createSQL;
+            content.innerHTML = `
+                <div style="margin-bottom:12px;font-size:12px;color:#94a3b8;"><b style="color:#3b82f6;">CREATE Statement</b></div>
+                <pre style="background:#0b1120;padding:15px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#10b981;white-space:pre-wrap;word-break:break-word;border:1px solid #334155;margin:0;overflow:auto;">${escapeHtml(createSQL)}</pre>
+                <div style="margin-top:15px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button onclick="copyTableSQL()" style="background:transparent;color:#94a3b8;border:1px solid #64748b;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;"><i class="fas fa-copy"></i> Copy SQL</button>
+                    <button onclick="runTableSQL()" style="background:transparent;color:#94a3b8;border:1px solid #64748b;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;"><i class="fas fa-play"></i> Re-Run</button>
+                </div>`;
         }
     } catch (e) {
-        console.error('Table check failed:', e);
-        showToast('Cannot access table: ' + e.message, 'error');
-        return;
+        content.innerHTML = `<div style="color:#ef4444;padding:20px;font-size:13px;"><b>Error:</b> ${escapeHtml(e.message)}</div>`;
     }
-
-    // ✅ STEP 3: Get modal element
-    const modal = document.getElementById('tableViewerModal');
-    if (!modal) {
-        showToast('Table viewer modal missing!', 'error');
-        return;
-    }
-
-    // ✅ STEP 4: FORCE OPEN with inline styles (bulletproof — bypasses ALL CSS conflicts)
-    modal.classList.add('active');
-    modal.style.cssText = [
-        'display: flex !important',
-        'position: fixed !important',
-        'top: 0 !important',
-        'left: 0 !important',
-        'right: 0 !important',
-        'bottom: 0 !important',
-        'width: 100vw !important',
-        'height: 100vh !important',
-        'z-index: 2147483646 !important',
-        'background: rgba(0, 0, 0, 0.88) !important',
-        'align-items: center !important',
-        'justify-content: center !important',
-        'padding: 15px !important',
-        'box-sizing: border-box !important',
-        'backdrop-filter: none !important',
-        '-webkit-backdrop-filter: none !important',
-        'overflow: auto !important'
-    ].join(';');
-
-    // ✅ STEP 5: Also style the inner modal card (bulletproof)
-    const card = modal.querySelector('.modal');
-    if (card) {
-        card.style.cssText = [
-            'background: #1e293b !important',
-            'color: #e2e8f0 !important',
-            'border-radius: 12px !important',
-            'width: 95vw !important',
-            'max-width: 1100px !important',
-            'height: 88vh !important',
-            'max-height: 88vh !important',
-            'display: flex !important',
-            'flex-direction: column !important',
-            'border: 1px solid #334155 !important',
-            'box-shadow: 0 20px 60px rgba(0,0,0,0.8) !important',
-            'overflow: hidden !important',
-            'position: relative !important'
-        ].join(';');
-    }
-
-    // ✅ STEP 6: Set title
-    const titleEl = document.getElementById('tableViewerTitle');
-    if (titleEl) {
-        titleEl.innerHTML = `<i class="fas fa-${isView ? 'eye' : 'table'}"></i> ${escapeHtml(tableName)} <span style="color:#64748b;font-size:11px;margin-left:8px;">(${escapeHtml(activeDatabase)})</span>`;
-    }
-
-    // ✅ STEP 7: Reset tabs — Data tab default
-    document.querySelectorAll('.table-viewer-tab').forEach(t => t.classList.remove('active'));
-    const dataTab = document.querySelector('.table-viewer-tab[onclick*="data"]');
-    if (dataTab) dataTab.classList.add('active');
-
-    // ✅ STEP 8: Render data
-    setTimeout(() => {
-        try {
-            showTableData(tableName);
-        } catch (e) {
-            console.error('showTableData failed:', e);
-            const content = document.getElementById('tableViewerContent');
-            if (content) content.innerHTML = `<div style="color:#ef4444;padding:20px;">Error: ${escapeHtml(e.message)}</div>`;
-        }
-    }, 50);
-
-    // ✅ STEP 9: Log verification
-    setTimeout(() => {
-        const computed = window.getComputedStyle(modal);
-        console.log('🔍 Modal verification:');
-        console.log('  display:', computed.display);
-        console.log('  z-index:', computed.zIndex);
-        console.log('  position:', computed.position);
-        console.log('  rect:', modal.getBoundingClientRect().width + 'x' + modal.getBoundingClientRect().height);
-        console.log('  visible?', computed.display !== 'none' && computed.visibility !== 'hidden');
-    }, 200);
-
-    // ✅ STEP 10: Refresh sidebar to highlight active table
-    refreshSchemaTree();
-
-    console.log('✅ Table viewer opened for:', tableName);
 }
+   
 
 // ✅ Switch table viewer tab
 function switchTableTab(tab, el) {
