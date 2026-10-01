@@ -23,12 +23,24 @@
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/babel.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/estree.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/postcss.js"></script>
+    <!-- ✅ New Features Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@3.0.0/plugins/html.js"></script>
 
 <!-- ✅ RequireJS LAST में load करो (ताकि UMD libraries पहले register हो चुकी हों) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
 
 <style>
+    /* ============ NEW FEATURES CSS ============ */
+.cp-timer-box { position: fixed; top: 70px; right: 20px; background: rgba(15, 23, 42, 0.9); border: 1px solid #3b82f6; padding: 10px 15px; border-radius: 8px; z-index: 1000; display: none; backdrop-filter: blur(5px); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+.cp-timer-box.active { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.cp-time { font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #10b981; font-weight: bold; }
+.cp-controls button { background: transparent; border: 1px solid #64748b; color: #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.cp-controls button:hover { background: #334155; }
+
+body.custom-bg { background-size: cover !important; background-position: center !important; }
+body.custom-bg .workspace, body.custom-bg .navbar, body.custom-bg .coding-controls, body.custom-bg .editor-box, body.custom-bg .terminal-output, body.custom-bg .file-explorer, body.custom-bg .status-bar { background: rgba(15, 23, 42, 0.7) !important; backdrop-filter: blur(10px); border-color: rgba(255,255,255,0.1); }
+body.custom-bg textarea { background: transparent !important; }
 /* ============ GLOBAL ============ */
 * {
     margin: 0;
@@ -437,6 +449,9 @@ select optgroup { background: #0f172a; color: #94a3b8; }
         <button class="icon-btn" onclick="shareCode()" title="Share via URL"><i class="fas fa-share-alt"></i></button>
         <button class="icon-btn" onclick="exportZip()" title="Export ZIP"><i class="fas fa-file-archive"></i></button>
         <button class="icon-btn" onclick="openModal('testsModal')" title="Test Cases"><i class="fas fa-vial"></i></button>
+        <button class="icon-btn" onclick="exportCodeImage()" title="Export Code as Image"><i class="fas fa-camera-retro" style="color: #10b981;"></i></button>
+<button class="icon-btn" onclick="toggleCPTimer()" title="CP Contest Timer"><i class="fas fa-stopwatch" style="color: #f59e0b;"></i></button>
+<button class="icon-btn" onclick="openModal('bgModal')" title="Custom Background"><i class="fas fa-image" style="color: #ec4899;"></i></button>
         <button class="icon-btn" onclick="openAIImageSolver()" title="AI Image Doubt Solver"><i class="fas fa-camera"></i></button>
         <button class="icon-btn" onclick="cloudSave()" title="Save to Cloud"><i class="fas fa-cloud-upload-alt"></i></button>
 <button class="icon-btn" onclick="cloudLoad()" title="Load from Cloud"><i class="fas fa-cloud-download-alt"></i></button>
@@ -536,6 +551,7 @@ select optgroup { background: #0f172a; color: #94a3b8; }
                 <button class="btn-secondary" onclick="formatCode()" title="Format Code (Ctrl+Shift+F)"><i class="fas fa-align-left"></i> <span>Format</span></button>
                 <button class="btn-secondary" onclick="downloadCurrentFile()" title="Save (Ctrl+S)" style="color:#eab308;border-color:#eab308;"><i class="fas fa-download"></i> <span>Save</span></button>
                 <button class="btn-secondary" onclick="saveSnapshot()" title="Save Snapshot"><i class="fas fa-camera"></i> <span>Snap</span></button>
+                <button class="btn-secondary" id="vimToggleBtn" onclick="toggleVimMode()" title="Toggle Vim Mode"><i class="fab fa-viadeo"></i> <span>Vim: OFF</span></button>
             </div>
             <div class="run-group">
                 <button class="terminal-btn" onclick="toggleMobileTerminal()"><i class="fas fa-terminal"></i></button>
@@ -588,6 +604,32 @@ Ready to execute code. Press <span class="text-info">Ctrl+Enter</span> to run.
         <div class="item" onclick="changeFontSize(1)" title="Zoom In"><i class="fas fa-search-plus"></i></div>
         <div class="item" id="statusZoom">100%</div>
         <div class="item" onclick="changeFontSize(-1)" title="Zoom Out"><i class="fas fa-search-minus"></i></div>
+    </div>
+</div>
+    <!-- CP Timer UI -->
+<div class="cp-timer-box" id="cpTimerBox">
+    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Contest Timer</div>
+    <div class="cp-time" id="cpTimeDisplay">00:00:00</div>
+    <div class="cp-controls">
+        <button onclick="startCPTimer()">▶</button>
+        <button onclick="pauseCPTimer()">⏸</button>
+        <button onclick="resetCPTimer()">⏹</button>
+    </div>
+</div>
+
+<!-- Custom Background Modal -->
+<div class="modal-overlay" id="bgModal">
+    <div class="modal">
+        <div class="modal-header"><h3><i class="fas fa-image"></i> Custom Wallpapers</h3><span class="modal-close" onclick="closeModal('bgModal')">&times;</span></div>
+        <div class="modal-body">
+            <p style="font-size:12px; color:#94a3b8; margin-bottom: 10px;">Select a glassmorphism background.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&q=80" style="width:100%; border-radius:5px; cursor:pointer;" onclick="setCustomBg(this.src)">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80" style="width:100%; border-radius:5px; cursor:pointer;" onclick="setCustomBg(this.src)">
+                <img src="https://images.unsplash.com/photo-1534796636912-36528502d20f?w=400&q=80" style="width:100%; border-radius:5px; cursor:pointer;" onclick="setCustomBg(this.src)">
+                <button class="btn-secondary" onclick="removeCustomBg()" style="grid-column: span 2;">Remove Background</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -947,6 +989,7 @@ require(['vs/editor/editor.main'], function() {
         automaticLayout: true,
         fontSize: userSettings.fontSize,
         fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+        fontLigatures: true, /* ✅ Enables fancy arrows =>, !=, === */
         minimap: { enabled: window.innerWidth > 1200 },
         formatOnPaste: true,
         formatOnType: true,
@@ -2157,6 +2200,112 @@ function registerPWA() {
             reg.addEventListener('updatefound', () => console.log('🔄 SW update found'));
         })
         .catch(err => console.warn('⚠️ SW register failed:', err.message));
+}
+    /* ============================================================
+   🔥 NEW PRO FEATURES (Image Export, Vim, Sound, Backgrounds)
+============================================================ */
+
+// 1. Audio Typing Feedback (ASMR)
+const typingSound = new Audio('https://raw.githubusercontent.com/drewthoennes/mechanical-keyboard-sounds/master/sound_files/blue_switch/click.mp3');
+typingSound.volume = 0.2;
+let isAudioFeedbackOn = true; // Make it false if you want it off by default
+
+// Listen to keypress on Monaco
+setTimeout(() => {
+    if(editorInstance) {
+        editorInstance.onKeyDown((e) => {
+            if(isAudioFeedbackOn) {
+                typingSound.currentTime = 0; // reset
+                typingSound.play().catch(()=>{}); // Catch to prevent browser autoplay blocks
+            }
+        });
+    }
+}, 2000);
+
+// 2. Export Code as Image (Carbon.now.sh style)
+async function exportCodeImage() {
+    showToast('Generating high-quality image...', 'info');
+    const editorNode = document.getElementById('codingLeft');
+    try {
+        const canvas = await html2canvas(editorNode, {
+            backgroundColor: document.body.classList.contains('light-theme') ? '#f1f5f9' : '#0f172a',
+            scale: 2 // High resolution
+        });
+        const link = document.createElement('a');
+        link.download = `CodeMaster_Snippet_${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Image exported successfully!', 'success');
+    } catch(err) {
+        showToast('Image export failed!', 'error');
+    }
+}
+
+// 3. Competitive Programming Timer
+let cpTimerInterval;
+let cpSeconds = 0;
+function toggleCPTimer() {
+    const box = document.getElementById('cpTimerBox');
+    box.classList.toggle('active');
+}
+function updateCPTimerUI() {
+    const h = String(Math.floor(cpSeconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((cpSeconds % 3600) / 60)).padStart(2, '0');
+    const s = String(cpSeconds % 60).padStart(2, '0');
+    document.getElementById('cpTimeDisplay').innerText = `${h}:${m}:${s}`;
+}
+function startCPTimer() {
+    clearInterval(cpTimerInterval);
+    cpTimerInterval = setInterval(() => { cpSeconds++; updateCPTimerUI(); }, 1000);
+}
+function pauseCPTimer() { clearInterval(cpTimerInterval); }
+function resetCPTimer() { clearInterval(cpTimerInterval); cpSeconds = 0; updateCPTimerUI(); }
+
+// 4. Custom Glassmorphism Backgrounds
+function setCustomBg(url) {
+    document.body.style.backgroundImage = `url('${url}')`;
+    document.body.classList.add('custom-bg');
+    localStorage.setItem('cm_bg', url);
+    closeModal('bgModal');
+    showToast('Background applied (Glassmorphism Mode)', 'success');
+}
+function removeCustomBg() {
+    document.body.style.backgroundImage = 'none';
+    document.body.classList.remove('custom-bg');
+    localStorage.removeItem('cm_bg');
+    closeModal('bgModal');
+}
+
+// Load saved BG on startup
+const savedBg = localStorage.getItem('cm_bg');
+if(savedBg) setCustomBg(savedBg);
+
+// 5. Vim Mode setup (Using RequireJS dynamically when clicked)
+let vimModeStatus = null;
+function toggleVimMode() {
+    const btn = document.getElementById('vimToggleBtn');
+    if (!vimModeStatus) {
+        showToast('Loading Vim Mode...', 'info');
+        require.config({ paths: { 'monaco-vim': 'https://unpkg.com/monaco-vim/dist/monaco-vim' } });
+        require(['monaco-vim'], function(MonacoVim) {
+            const statusNode = document.createElement('div');
+            statusNode.style.fontSize = '12px';
+            statusNode.style.padding = '0 10px';
+            document.querySelector('.status-bar .left').appendChild(statusNode);
+            vimModeStatus = MonacoVim.initVimMode(editorInstance, statusNode);
+            btn.innerHTML = '<i class="fab fa-viadeo"></i> <span>Vim: ON</span>';
+            btn.style.borderColor = '#10b981';
+            btn.style.color = '#10b981';
+            showToast('Vim Mode Enabled!', 'success');
+        });
+    } else {
+        vimModeStatus.dispose();
+        vimModeStatus = null;
+        btn.innerHTML = '<i class="fab fa-viadeo"></i> <span>Vim: OFF</span>';
+        btn.style.borderColor = '#64748b';
+        btn.style.color = '#94a3b8';
+        showToast('Vim Mode Disabled', 'warning');
+    }
 }
 
 /* ============================================================
