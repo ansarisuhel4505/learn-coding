@@ -69,7 +69,23 @@ body.custom-bg textarea { background: transparent !important; }
 .chat-user { background: #3b82f6; align-self: flex-end; color: white; }
 .chat-input { display: flex; padding: 10px; background: #1e293b; }
 .chat-input input { flex-grow: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; outline: none; }
-
+/* ✅ Mermaid SVG Display Fix */
+#mermaidOutput svg,
+#erOutput svg {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 250px !important;
+    margin: 0 auto !important;
+    background: white !important;
+}
+#mermaidOutput, #erOutput {
+    width: 100% !important;
+    min-height: 300px !important;
+}
+#mermaidOutput > div, #erOutput > div {
+    width: 100% !important;
+}
 .db-table-wrapper { width: 100%; overflow: auto; background: #1e293b; border-radius: 5px; margin-top: 10px; }
 .db-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
 .db-table th { background: #3b82f6; color: white; padding: 6px; }
@@ -2798,11 +2814,7 @@ ${code}`;
         if (match) mermaidCode = match[1];
         else mermaidCode = data.reply.replace(/```[\w]*/g, '').replace(/```/g, '');
 
-        mermaidCode = mermaidCode
-            .replace(/\uFEFF/g, '')
-            .replace(/\u200B/g, '')
-            .replace(/\r/g, '')
-            .trim();
+        mermaidCode = mermaidCode.replace(/\uFEFF/g, '').replace(/\u200B/g, '').replace(/\r/g, '').trim();
 
         if (!/^(graph|flowchart)/i.test(mermaidCode)) {
             mermaidCode = "graph TD\n" + mermaidCode;
@@ -2810,34 +2822,14 @@ ${code}`;
 
         console.log('✅ Final mermaid code:', JSON.stringify(mermaidCode));
 
-        outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering...</div>';
-
-        // ✅ Fresh approach: पहले एक बार mermaid element create करो, फिर render
-        const uniqueId = 'flowchart-' + Date.now();
-        try {
-            const { svg } = await mermaid.render(uniqueId, mermaidCode);
-            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px; min-height:200px;">' + svg + '</div>';
-            showToast('✓ Flowchart generated!', 'success');
-            console.log('✅ Flowchart rendered successfully');
-        } catch (renderErr) {
-            console.error('Mermaid render error:', renderErr);
-            outputDiv.innerHTML =
-                '<div style="color:#ef4444; padding:20px;">' +
-                '<h4>⚠️ Render Error</h4>' +
-                '<p style="font-size:12px; margin:10px 0;">' + escapeHtml(renderErr.message || renderErr) + '</p>' +
-                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
-                escapeHtml(mermaidCode) +
-                '</pre>' +
-                '<button onclick="generateFlowchart()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
-                '</div>';
-        }
+        await renderMermaidDiagram(outputDiv, mermaidCode, 'Flowchart');
 
     } catch (e) {
         console.error(e);
         outputDiv.innerHTML = '<div style="color:#ef4444; padding:20px;">Network Error: ' + e.message + '</div>';
     }
 }
-   async function generateERDiagram() {
+    async function generateERDiagram() {
     const code = editorInstance.getValue();
     const lang = document.getElementById('langSelect').value;
 
@@ -2852,7 +2844,6 @@ ${code}`;
     const outputDiv = document.getElementById('erOutput');
     outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#a855f7;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p style="margin-top:10px;">AI analyzing SQL tables...</p></div>';
 
-    // ✅ AI को JSON माँगो — मermaid नहीं
     const prompt = `Analyze this SQL code and return a JSON object describing tables and relations.
 Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
 
@@ -2888,7 +2879,6 @@ ${code}`;
             return;
         }
 
-        // ✅ JSON parse करो
         let jsonText = data.reply.replace(/```json/gi, '').replace(/```/g, '').trim();
         let schema;
         try {
@@ -2906,15 +2896,12 @@ ${code}`;
             return;
         }
 
-        // ✅ JSON से Mermaid ER code generate करो
         let mermaidCode = 'erDiagram\n';
 
-        // Tables + columns
         if (schema.tables && Array.isArray(schema.tables)) {
             schema.tables.forEach(t => {
                 const tableName = (t.name || '').replace(/[^a-zA-Z0-9_]/g, '');
                 if (!tableName) return;
-
                 mermaidCode += '    ' + tableName + ' {\n';
                 if (Array.isArray(t.columns)) {
                     t.columns.forEach(col => {
@@ -2931,7 +2918,6 @@ ${code}`;
             });
         }
 
-        // Relations
         const cardinalityMap = {
             'one-to-one': '||--||',
             'one-to-many': '||--o{',
@@ -2952,26 +2938,7 @@ ${code}`;
 
         console.log('✅ Generated ER code:', JSON.stringify(mermaidCode));
 
-        outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin"></i> Rendering ER diagram...</div>';
-
-        const uniqueId = 'er-' + Date.now();
-        try {
-            const { svg } = await mermaid.render(uniqueId, mermaidCode);
-            outputDiv.innerHTML = '<div style="padding:20px; text-align:center; background:white; border-radius:8px; overflow:auto; min-height:200px;">' + svg + '</div>';
-            showToast('✓ ER Diagram generated!', 'success');
-            console.log('✅ ER Diagram rendered successfully');
-        } catch (renderErr) {
-            console.error('ER render error:', renderErr);
-            outputDiv.innerHTML =
-                '<div style="color:#ef4444; padding:20px;">' +
-                '<h4>⚠️ Render Error</h4>' +
-                '<p style="font-size:12px; margin:10px 0;">' + escapeHtml(renderErr.message || renderErr) + '</p>' +
-                '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
-                escapeHtml(mermaidCode) +
-                '</pre>' +
-                '<button onclick="generateERDiagram()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
-                '</div>';
-        }
+        await renderMermaidDiagram(outputDiv, mermaidCode, 'ER Diagram');
 
     } catch (e) {
         console.error(e);
@@ -3180,6 +3147,92 @@ async function searchNPM(e) {
         } else {
             showToast('Package not found', 'error');
         }
+    }
+}
+    /* ============================================================
+   🎨 UNIVERSAL MERMAID RENDERER — SVG first, image fallback
+============================================================ */
+async function renderMermaidDiagram(outputDiv, mermaidCode, diagramName) {
+    outputDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#10b981;"><i class="fas fa-spinner fa-spin" style="font-size:22px;"></i><p style="margin-top:10px;">Rendering ' + diagramName + '...</p></div>';
+
+    // ✅ STEP 1: Try SVG render
+    const uniqueId = 'mermaid-' + Date.now();
+    let svgRendered = false;
+
+    try {
+        const result = await mermaid.render(uniqueId, mermaidCode);
+        const svg = result.svg;
+
+        // Create container with fixed size
+        const container = document.createElement('div');
+        container.style.cssText = 'width:100%; min-height:300px; background:white; padding:20px; border-radius:8px; overflow:auto; display:block;';
+
+        // Inject SVG
+        container.innerHTML = svg;
+
+        // Force explicit size on SVG
+        const svgEl = container.querySelector('svg');
+        if (svgEl) {
+            svgEl.style.display = 'block';
+            svgEl.style.margin = '0 auto';
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+            svgEl.style.minHeight = '250px';
+        }
+
+        outputDiv.innerHTML = '';
+        outputDiv.appendChild(container);
+
+        // ✅ Verify SVG has proper dimensions after rendering
+        await new Promise(r => setTimeout(r, 150));
+        if (svgEl) {
+            const rect = svgEl.getBoundingClientRect();
+            console.log('📐 SVG dimensions:', rect.width + 'x' + rect.height);
+            if (rect.width > 20 && rect.height > 20) {
+                svgRendered = true;
+            }
+        }
+
+        if (svgRendered) {
+            showToast('✓ ' + diagramName + ' generated!', 'success');
+            console.log('✅ ' + diagramName + ' SVG rendered successfully');
+            return; // Success - done!
+        }
+
+        console.warn('⚠️ SVG has 0 dimensions, falling back to image');
+
+    } catch (renderErr) {
+        console.error('Mermaid render error:', renderErr);
+        console.warn('⚠️ Falling back to mermaid.ink image');
+    }
+
+    // ✅ STEP 2: Fallback — mermaid.ink image (always works)
+    try {
+        const encoded = btoa(unescape(encodeURIComponent(mermaidCode)));
+        const imgUrl = 'https://mermaid.ink/img/' + encoded + '?bgColor=FFFFFF&type=png';
+
+        outputDiv.innerHTML =
+            '<div style="padding:20px; text-align:center; background:white; border-radius:8px;">' +
+            '<p style="color:#10b981; margin-bottom:10px; font-size:12px;"><i class="fas fa-check-circle"></i> ' + diagramName + ' (image mode)</p>' +
+            '<img src="' + imgUrl + '" ' +
+                'style="max-width:100%; height:auto; min-height:250px; display:block; margin:0 auto;" ' +
+                'alt="' + diagramName + '" ' +
+                'onerror="this.parentElement.innerHTML=\'<div style=&quot;color:#ef4444;padding:20px;&quot;><h4>⚠️ Both SVG and image failed</h4><pre style=&quot;text-align:left;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;overflow:auto;font-size:11px;max-height:300px;&quot;>' + escapeHtml(mermaidCode).replace(/'/g, '&#39;').replace(/"/g, '&quot;') + '</pre></div>\';">' +
+            '</div>';
+
+        console.log('📷 ' + diagramName + ' rendered via mermaid.ink');
+        showToast('✓ ' + diagramName + ' generated (image)', 'success');
+
+    } catch (imgErr) {
+        console.error('Image fallback failed:', imgErr);
+        outputDiv.innerHTML =
+            '<div style="color:#ef4444; padding:20px;">' +
+            '<h4>⚠️ Render Failed</h4>' +
+            '<pre style="text-align:left; background:#1e293b; color:#e2e8f0; padding:12px; border-radius:6px; overflow:auto; font-size:11px; max-height:300px;">' +
+            escapeHtml(mermaidCode) +
+            '</pre>' +
+            '<button onclick="generateFlowchart()" class="btn-primary" style="margin-top:10px;">🔄 Retry</button>' +
+            '</div>';
     }
 }
 /* ============================================================
